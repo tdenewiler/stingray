@@ -1,0 +1,1 @@
+cmd_/home/thomas/stingray/libs/labjack/driver/labjacku3.ko := ld -r -m elf_x86_64  --build-id -o /home/thomas/stingray/libs/labjack/driver/labjacku3.ko /home/thomas/stingray/libs/labjack/driver/labjacku3.o /home/thomas/stingray/libs/labjack/driver/labjacku3.mod.o
