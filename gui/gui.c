@@ -106,7 +106,7 @@ void gui_update_status_text( )
 	         , msg.status.data.depth_derr
 	       );
 
-	printf( "GUI_UPDATE_STATUS_TEXT: %s\n", sbuff );
+	//printf( "GUI_UPDATE_STATUS_TEXT: %s\n", sbuff );
 
 	//printf( "GUI_UPDATE: 1\n" );
 	gtk_label_set_text( GTK_LABEL( label_status ), sbuff );

@@ -70,11 +70,9 @@ int main( int argc, char *argv[] )
 	msg.gain.data.kd_depth  = cf.kd_depth;
 
 	/* Set up communications. */
-
 	if ( cf.enable_net ) {
 		client_fd = net_client_setup( cf.server_IP, cf.api_port );
 	}
-
 	if ( cf.enable_planner ) {
 		planner_fd = net_client_setup( cf.planner_IP, cf.planner_port );
 	}

@@ -308,19 +308,19 @@ int main( int argc, char *argv[] )
 	}
 
 	/* Set up the labjack. */
-	/*
 	if ( cf.enable_labjack ) {
 		lj_fd = init_labjack( );
 	}
 	if ( lj_fd ) {
 		status = query_labjack( );
 	}
-	*/
 
 	/* Connect to the labjack daemon. */
+	/*
 	if ( cf.enable_labjack ) {
 		lj_fd = net_client_setup( cf.labjackd_IP, cf.labjackd_port );
 	}
+	*/
 
 	/* Set up the Pololu servo controller. */
 	if ( cf.enable_pololu ) {
