@@ -64,6 +64,7 @@ typedef struct _CONF_VARS {
 	char        planner_IP[STRING_SIZE];
 	int         enable_planner;
 	short int   planner_port;
+	char		labjackd_IP[STRING_SIZE];
 	short int   labjackd_port;
 	int         max_api_clients;
 	double      kp_yaw;

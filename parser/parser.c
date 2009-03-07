@@ -209,7 +209,16 @@ void parse_line( CONF_VARS *config )
 
 	/* labjackd parameters */
 	else if ( strncmp( tokens[0], "labjackd", STRING_SIZE ) == 0 ) {
-		if ( strncmp( tokens[1], "port", STRING_SIZE ) == 0 ) {
+		if ( strncmp( tokens[1], "ip", STRING_SIZE ) == 0 ) {
+			sscanf( tokens[2], "%d.%d.%d.%d"
+			        , &( ip_octal[0] )
+			        , &( ip_octal[1] )
+			        , &( ip_octal[2] )
+			        , &( ip_octal[3] )
+			      );
+			strncpy( config->labjackd_IP, tokens[2], STRING_SIZE );
+		}
+		else if ( strncmp( tokens[1], "port", STRING_SIZE ) == 0 ) {
 			sscanf( tokens[2], "%hd", &config->labjackd_port );
 		}
 	}

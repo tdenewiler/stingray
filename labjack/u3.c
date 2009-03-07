@@ -91,7 +91,7 @@ HANDLE openUSBConnection( int localID )
 	numDevices = LJUSB_GetDevCount( U3_PRODUCT_ID );
 
 	if ( numDevices == 0 ) {
-		printf( "Open error: No U3 devices could be found\n" );
+		//printf( "Open error: No U3 devices could be found\n" );
 		return NULL;
 	}
 
@@ -148,12 +148,12 @@ HANDLE openUSBConnection( int localID )
 		} //if hDevice != NULL end
 	} //for end
 
-	printf( "Open error: could not find a U3 with a local ID of %d\n", localID );
+	//printf( "Open error: could not find a U3 with a local ID of %d\n", localID );
 
 	return NULL;
 
 locid_error:
-	printf( "Open error: problem when checking local ID\n" );
+	//printf( "Open error: problem when checking local ID\n" );
 
 	return NULL;
 }

@@ -192,7 +192,6 @@ int query_labjack()
 	extendedChecksum( sendBuff, 20 );
 
 	//Sending command to U3
-
 	if ( ( sendChars = LJUSB_BulkWrite( hDevice, U3_PIPE_EP1_OUT, sendBuff, 20 ) ) < 20 ) {
 		if ( sendChars == 0 )
 			printf( "%s: write failed\n", fName );
@@ -293,4 +292,3 @@ int query_labjack()
 
 	return 0;
 }
-
