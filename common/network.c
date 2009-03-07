@@ -185,6 +185,9 @@ int net_server( int fd, void *buf, MSG_DATA *msg, int mode )
 					else if ( mode == MODE_PLANNER ) {
 						messages_send( ii, TARGET_MSGID, msg );
 					}
+					else if ( mode == MODE_LJ ) {
+						messages_send( ii, LJ_MSGID, msg );
+					}
 				}
 			}
 		} /* end FD_ISSET */

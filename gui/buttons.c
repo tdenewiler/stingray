@@ -32,6 +32,26 @@ GtkWidget *button_hold_ang_rate;
 GtkWidget *button_manual;
 GtkWidget *button_autonomous;
 
+/* Vision setting buttons. */
+GtkWidget *button_hpipe_lo;
+GtkWidget *button_hpipe_hi;
+GtkWidget *button_spipe_lo;
+GtkWidget *button_spipe_hi;
+GtkWidget *button_vpipe_lo;
+GtkWidget *button_vpipe_hi;
+GtkWidget *button_hbuoy_lo;
+GtkWidget *button_hbuoy_hi;
+GtkWidget *button_sbuoy_lo;
+GtkWidget *button_sbuoy_hi;
+GtkWidget *button_vbuoy_lo;
+GtkWidget *button_vbuoy_hi;
+GtkWidget *button_hfence_lo;
+GtkWidget *button_hfence_hi;
+GtkWidget *button_sfence_lo;
+GtkWidget *button_sfence_hi;
+GtkWidget *button_vfence_lo;
+GtkWidget *button_vfence_hi;
+
 /* Tasks buttons. */
 GtkWidget *button_gate;
 GtkWidget *button_buoy;
@@ -93,31 +113,24 @@ void buttons_update_values( )
 {
 	/* Activate correct operational mode button based on state data. */
 	switch ( msg.target.data.mode ) {
-
 		case HOLD_YAW:
 			gtk_toggle_button_set_active( ( GtkToggleButton * )button_hold_yaw, TRUE ) ;
 			break;
-
 		case HOLD_ROLL:
 			gtk_toggle_button_set_active( ( GtkToggleButton * )button_hold_roll, TRUE );
 			break;
-
 		case HOLD_PITCH:
 			gtk_toggle_button_set_active( ( GtkToggleButton * )button_hold_pitch, TRUE );
 			break;
-
 		case HOLD_ACCEL:
 			gtk_toggle_button_set_active( ( GtkToggleButton * )button_hold_accel, TRUE );
 			break;
-
 		case HOLD_ANG_RATE:
 			gtk_toggle_button_set_active( ( GtkToggleButton * )button_hold_ang_rate, TRUE );
 			break;
-
 		case MANUAL:
 			gtk_toggle_button_set_active( ( GtkToggleButton * )button_manual, TRUE );
 			break;
-
 		case AUTONOMOUS:
 			gtk_toggle_button_set_active( ( GtkToggleButton * )button_autonomous, TRUE );
 			break;
@@ -583,6 +596,322 @@ int buttons_tasks( GtkWidget *box )
 
 /******************************************************************************
  *
+ * Title:       int buttons_tasks( GtkWidget *box )
+ *
+ * Description: Sets up a vbox for the UUV Vision buttons to be packed into.
+ *
+ * Input:       box: The box to pack the UUV Vision buttons into.
+ *
+ * Output:      TRUE: No error checking implemented.
+ *
+ * Globals:     client_msg
+ *
+ *****************************************************************************/
+
+int buttons_vision( GtkWidget *box )
+{
+	GtkAdjustment *adj;
+	GtkWidget *vbox1;
+	GtkWidget *vbox2;
+	GtkWidget *vbox3;
+	GtkWidget *vbox4;
+	GtkWidget *vbox5;
+	GtkWidget *vbox6;
+	GtkWidget *vbox7;
+	GtkWidget *vbox8;
+	GtkWidget *vbox9;
+	GtkWidget *vbox10;
+	GtkWidget *hbox1;
+	GtkWidget *hbox2;
+	GtkWidget *hbox3;
+	GtkWidget *hbox4;
+	GtkWidget *hbox5;
+	GtkWidget *hbox6;
+	GtkWidget *hbox7;
+	GtkWidget *hbox8;
+	GtkWidget *hbox9;
+	GtkWidget *pipe_frame;
+	GtkWidget *buoy_frame;
+	GtkWidget *fence_frame;
+	GtkWidget *empty_frame;
+
+	/* Create new boxes. */
+	vbox1 = gtk_vbox_new( FALSE, 0 );
+	vbox2 = gtk_vbox_new( TRUE, 0 );
+	vbox3 = gtk_vbox_new( TRUE, 0 );
+	vbox4 = gtk_vbox_new( TRUE, 0 );
+	vbox5 = gtk_vbox_new( TRUE, 0 );
+	vbox6 = gtk_vbox_new( TRUE, 0 );
+	vbox7 = gtk_vbox_new( TRUE, 0 );
+	vbox8 = gtk_vbox_new( TRUE, 0 );
+	vbox9 = gtk_vbox_new( TRUE, 0 );
+	vbox10 = gtk_vbox_new( TRUE, 0 );
+	hbox1 = gtk_hbox_new( FALSE, 0 );
+	hbox2 = gtk_hbox_new( TRUE, 0 );
+	hbox3 = gtk_hbox_new( TRUE, 0 );
+	hbox4 = gtk_hbox_new( TRUE, 0 );
+	hbox5 = gtk_hbox_new( TRUE, 0 );
+	hbox6 = gtk_hbox_new( TRUE, 0 );
+	hbox7 = gtk_hbox_new( TRUE, 0 );
+	hbox8 = gtk_hbox_new( TRUE, 0 );
+	hbox9 = gtk_hbox_new( TRUE, 0 );
+
+	/* Create a frame for the task buttons. */
+	pipe_frame = buttons_make_frame( "Pipe" );
+	buoy_frame = buttons_make_frame( "Buoy" );
+	fence_frame = buttons_make_frame( "Fence" );
+	empty_frame = buttons_make_frame( "Empty" );
+
+	/* Add boxes for buttons. */
+	gtk_container_add( GTK_CONTAINER( hbox1 ), vbox1 );
+	gtk_container_add( GTK_CONTAINER( hbox1 ), vbox2 );
+	gtk_container_add( GTK_CONTAINER( vbox1 ), hbox2 );
+	gtk_container_add( GTK_CONTAINER( vbox1 ), hbox3 );
+	gtk_container_add( GTK_CONTAINER( vbox2 ), hbox4 );
+	gtk_container_add( GTK_CONTAINER( vbox2 ), hbox5 );
+	gtk_container_add( GTK_CONTAINER( hbox2 ), pipe_frame );
+	gtk_container_add( GTK_CONTAINER( hbox3 ), fence_frame );
+	gtk_container_add( GTK_CONTAINER( hbox4 ), buoy_frame );
+	gtk_container_add( GTK_CONTAINER( hbox5 ), empty_frame );
+	gtk_container_add( GTK_CONTAINER( pipe_frame ), hbox6 );
+	gtk_container_add( GTK_CONTAINER( fence_frame ), hbox7 );
+	gtk_container_add( GTK_CONTAINER( buoy_frame ), hbox8 );
+	gtk_container_add( GTK_CONTAINER( empty_frame ), hbox9 );
+	gtk_container_add( GTK_CONTAINER( hbox6 ), vbox3 );
+	gtk_container_add( GTK_CONTAINER( hbox6 ), vbox4 );
+	gtk_container_add( GTK_CONTAINER( hbox7 ), vbox5 );
+	gtk_container_add( GTK_CONTAINER( hbox7 ), vbox6 );
+	gtk_container_add( GTK_CONTAINER( hbox8 ), vbox7 );
+	gtk_container_add( GTK_CONTAINER( hbox8 ), vbox8 );
+	gtk_container_add( GTK_CONTAINER( hbox9 ), vbox9 );
+	gtk_container_add( GTK_CONTAINER( hbox9 ), vbox10 );
+
+	/* Create the spin buttons. */
+	adj = ( GtkAdjustment * )gtk_adjustment_new( 0,
+	        0,
+	        100,
+	        0.1,
+	        10,
+	        0 );
+
+	button_hpipe_lo = buttons_make_spin( "H Low",
+	                      GTK_SIGNAL_FUNC( events_vision ),
+	                      vbox3,
+	                      adj );
+
+	adj = ( GtkAdjustment * )gtk_adjustment_new( 0,
+	        0,
+	        100,
+	        0.1,
+	        10,
+	        0 );
+
+	button_spipe_lo = buttons_make_spin( "S Low",
+	                      GTK_SIGNAL_FUNC( events_vision ),
+	                      vbox3,
+	                      adj );
+
+	adj = ( GtkAdjustment * )gtk_adjustment_new( 0,
+	        0,
+	        100,
+	        0.1,
+	        10,
+	        0 );
+
+	button_vpipe_lo = buttons_make_spin( "V Low",
+	                      GTK_SIGNAL_FUNC( events_vision ),
+	                      vbox3,
+	                      adj );
+
+	adj = ( GtkAdjustment * )gtk_adjustment_new( 0,
+	        0,
+	        100,
+	        0.1,
+	        10,
+	        0 );
+
+	button_hpipe_hi = buttons_make_spin( "H High",
+	                      GTK_SIGNAL_FUNC( events_vision ),
+	                      vbox4,
+	                      adj );
+
+	adj = ( GtkAdjustment * )gtk_adjustment_new( 0,
+	        0,
+	        100,
+	        0.1,
+	        10,
+	        0 );
+
+	button_spipe_hi = buttons_make_spin( "S High",
+	                      GTK_SIGNAL_FUNC( events_vision ),
+	                      vbox4,
+	                      adj );
+
+	adj = ( GtkAdjustment * )gtk_adjustment_new( 0,
+	        0,
+	        100,
+	        0.1,
+	        10,
+	        0 );
+
+	button_vpipe_hi = buttons_make_spin( "V High",
+	                      GTK_SIGNAL_FUNC( events_vision ),
+	                      vbox4,
+	                      adj );
+
+	adj = ( GtkAdjustment * )gtk_adjustment_new( 0,
+	        0,
+	        100,
+	        0.1,
+	        10,
+	        0 );
+
+	button_hbuoy_lo = buttons_make_spin( "H Low",
+	                      GTK_SIGNAL_FUNC( events_vision ),
+	                      vbox7,
+	                      adj );
+
+	adj = ( GtkAdjustment * )gtk_adjustment_new( 0,
+	        0,
+	        100,
+	        0.1,
+	        10,
+	        0 );
+
+	button_sbuoy_lo = buttons_make_spin( "S Low",
+	                      GTK_SIGNAL_FUNC( events_vision ),
+	                      vbox7,
+	                      adj );
+
+	adj = ( GtkAdjustment * )gtk_adjustment_new( 0,
+	        0,
+	        100,
+	        0.1,
+	        10,
+	        0 );
+
+	button_vbuoy_lo = buttons_make_spin( "V Low",
+	                      GTK_SIGNAL_FUNC( events_vision ),
+	                      vbox7,
+	                      adj );
+
+	adj = ( GtkAdjustment * )gtk_adjustment_new( 0,
+	        0,
+	        100,
+	        0.1,
+	        10,
+	        0 );
+
+	button_hbuoy_hi = buttons_make_spin( "H High",
+	                      GTK_SIGNAL_FUNC( events_vision ),
+	                      vbox8,
+	                      adj );
+
+	adj = ( GtkAdjustment * )gtk_adjustment_new( 0,
+	        0,
+	        100,
+	        0.1,
+	        10,
+	        0 );
+
+	button_sbuoy_hi = buttons_make_spin( "S High",
+	                      GTK_SIGNAL_FUNC( events_vision ),
+	                      vbox8,
+	                      adj );
+
+	adj = ( GtkAdjustment * )gtk_adjustment_new( 0,
+	        0,
+	        100,
+	        0.1,
+	        10,
+	        0 );
+
+	button_vbuoy_hi = buttons_make_spin( "V High",
+	                      GTK_SIGNAL_FUNC( events_vision ),
+	                      vbox8,
+	                      adj );
+
+	adj = ( GtkAdjustment * )gtk_adjustment_new( 0,
+	        0,
+	        100,
+	        0.1,
+	        10,
+	        0 );
+
+	button_hfence_lo = buttons_make_spin( "H Low",
+	                      GTK_SIGNAL_FUNC( events_vision ),
+	                      vbox5,
+	                      adj );
+
+	adj = ( GtkAdjustment * )gtk_adjustment_new( 0,
+	        0,
+	        100,
+	        0.1,
+	        10,
+	        0 );
+
+	button_sfence_lo = buttons_make_spin( "S Low",
+	                      GTK_SIGNAL_FUNC( events_vision ),
+	                      vbox5,
+	                      adj );
+
+	adj = ( GtkAdjustment * )gtk_adjustment_new( 0,
+	        0,
+	        100,
+	        0.1,
+	        10,
+	        0 );
+
+	button_vfence_lo = buttons_make_spin( "V Low",
+	                      GTK_SIGNAL_FUNC( events_vision ),
+	                      vbox5,
+	                      adj );
+
+	adj = ( GtkAdjustment * )gtk_adjustment_new( 0,
+	        0,
+	        100,
+	        0.1,
+	        10,
+	        0 );
+
+	button_hfence_hi = buttons_make_spin( "H High",
+	                      GTK_SIGNAL_FUNC( events_vision ),
+	                      vbox6,
+	                      adj );
+
+	adj = ( GtkAdjustment * )gtk_adjustment_new( 0,
+	        0,
+	        100,
+	        0.1,
+	        10,
+	        0 );
+
+	button_sfence_hi = buttons_make_spin( "S High",
+	                      GTK_SIGNAL_FUNC( events_vision ),
+	                      vbox6,
+	                      adj );
+
+	adj = ( GtkAdjustment * )gtk_adjustment_new( 0,
+	        0,
+	        100,
+	        0.1,
+	        10,
+	        0 );
+
+	button_vfence_hi = buttons_make_spin( "V High",
+	                      GTK_SIGNAL_FUNC( events_vision ),
+	                      vbox6,
+	                      adj );
+
+	/* Pack the boxes. */
+	gtk_box_pack_start( GTK_BOX( box ), hbox1, TRUE, FALSE, 0 );
+
+	return TRUE;
+} /* end buttons_vision() */
+
+
+/******************************************************************************
+ *
  * Title:       int buttons_targets( GtkWidget * box)
  *
  * Description: Sets up an vbox for the Targets to be packed into. Also
@@ -755,6 +1084,7 @@ int buttons_options( GtkWidget *box )
 	GtkWidget *button_enable_log;
 	GtkWidget *button_imu_stab;
 	GtkWidget *button_debug_level;
+	GtkWidget *button_dropper;
 	GtkWidget *vbox1;
 	GtkWidget *vbox2;
 	GtkWidget *options_frame;
@@ -809,6 +1139,19 @@ int buttons_options( GtkWidget *box )
 	                                        ( events_debug_level ),
 	                                        vbox2,
 	                                        adj );
+
+	adj = ( GtkAdjustment * )gtk_adjustment_new( msg.client.data.dropper,
+	        0,
+	        253,
+	        1,
+	        0,
+	        0 );
+
+	button_dropper = buttons_make_spin( "Dropper",
+	                                    GTK_SIGNAL_FUNC
+	                                    ( events_dropper ),
+	                                    vbox2,
+	                                    adj );
 
 	/* Add box with buttons to the frame. */
 	gtk_box_pack_start( GTK_BOX( box ), vbox1, TRUE, TRUE, 10 );

@@ -80,6 +80,15 @@ void events_debug_level( GtkWidget *widget,
                          gpointer data
                        );
 
+//! Event associated with the Dropper button.
+//! \param widget A pointer to the button widget.
+//! \param event A pointer to the event that triggered the callback.
+//! \param data A pointer to data that can be manipulated.
+void events_dropper( GtkWidget *widget,
+                         GdkEvent *event,
+                         gpointer data
+                       );
+
 //! Event associated with the Operational Mode button.
 //! \param widget A pointer to the button widget.
 //! \param event A pointer to the event that triggered the callback.
@@ -170,6 +179,15 @@ void events_estop( GtkWidget *widget );
 //! \param event A pointer to the event that triggered the callback.
 //! \param data A pointer to data that can be manipulated.
 void events_tasks( GtkWidget *widget,
+                   GdkEvent *event,
+                   gpointer data
+                 );
+
+//! Called when one of the Vision buttons is clicked.
+//! \param widget A pointer to the button widget.
+//! \param event A pointer to the event that triggered the callback.
+//! \param data A pointer to data that can be manipulated.
+void events_vision( GtkWidget *widget,
                    GdkEvent *event,
                    gpointer data
                  );

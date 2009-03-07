@@ -159,6 +159,12 @@ int buttons_targets( GtkWidget *box );
 //! \return TRUE. No error checking implemented.
 int buttons_tasks( GtkWidget *box );
 
+//! Makes buttons to set the vision for the UUV.
+//! Returns TRUE.
+//! \param box The box to pack the Vision buttons into.
+//! \return TRUE. No error checking implemented.
+int buttons_vision( GtkWidget *box );
+
 //! Makes buttons to control the thrusters, motors, and servos.
 //! Returns TRUE.
 //! \param box The box to pack the Actuators buttons into.

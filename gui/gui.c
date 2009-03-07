@@ -60,14 +60,13 @@ void gui_update_status_text( )
 	char sbuff[2048];
 
 	sprintf( sbuff,
-			 "Sensors:\n"
 	         "Pitch, Roll, Yaw, Depth:\t[ %.3f\t%.3f\t%.3f\t%.3f ]\n"
 	         "Accel X, Y, Z:\t\t\t[ %.3f\t%.3f\t%.3f ]\n"
 	         "Mag X, Y, Z:\t\t\t[ %.3f\t%.3f\t%.3f ]\n"
 	         "Ang Rate X, Y, Z:\t\t[ %.3f\t%.3f\t%.3f ]\n"
 	         "Quaternions:\t\t\t[ %.3f\t%.3f\t%.3f\t%.3f ]\n"
 	         "Labjack:\t\t\t\t[ %.3fV\t%.3fV\t%.3f\t%.3f ]\n"
-	         "PID Errors:\n"
+	         "Errors:\n"
 	         "Pitch:\t\t\t\t[ %.3f\t%.3f\t%.3f ]\n"
 	         "Roll:\t\t\t\t\t[ %.3f\t%.3f\t%.3f ]\n"
 	         "Yaw:\t\t\t\t\t[ %.3f\t%.3f\t%.3f ]\n"
@@ -107,7 +106,11 @@ void gui_update_status_text( )
 	         , msg.status.data.depth_derr
 	       );
 
+	printf( "GUI_UPDATE_STATUS_TEXT: %s\n", sbuff );
+
+	//printf( "GUI_UPDATE: 1\n" );
 	gtk_label_set_text( GTK_LABEL( label_status ), sbuff );
+	//printf( "GUI_UPDATE: 2\n" );
 } /* end gui_update_status_text() */
 
 
@@ -196,7 +199,6 @@ gint gui_timer_200ms( gpointer data )
 	int recv_bytes = 0;
 
 	/* Get network data. */
-
 	if ( client_fd > 0 ) {
 		recv_bytes = net_client( client_fd, net_buf, &msg );
 		net_buf[recv_bytes] = '\0';
@@ -279,14 +281,6 @@ gint gui_timer_100ms( gpointer data )
 
 gint gui_timer_50ms( gpointer data )
 {
-	/*
-	int status = 0;
-	JOY_DATA joy;
-
-	memset( &joy, 0, sizeof(JOY_DATA) );
-
-	status = gui_joystick( &joy );
-	*/
 
 	return TRUE; /* continue timer */
 } /* end gui_timer_50ms() */
@@ -309,10 +303,10 @@ gint gui_timer_50ms( gpointer data )
 
 void gui_set_timers( )
 {
-	timer50ms = gtk_timeout_add( 50, gui_timer_50ms, NULL );
+	//timer50ms = gtk_timeout_add( 50, gui_timer_50ms, NULL );
 	timer100ms = gtk_timeout_add( 100, gui_timer_100ms, NULL );
 	timer200ms = gtk_timeout_add( 200, gui_timer_200ms, NULL );
-	timer500ms = gtk_timeout_add( 500, gui_timer_500ms, NULL );
+	//timer500ms = gtk_timeout_add( 500, gui_timer_500ms, NULL );
 	timer1s = gtk_timeout_add( 1000, gui_timer_1s, NULL );
 } /* end gui_set_timers() */
 
@@ -333,9 +327,10 @@ void gui_set_timers( )
 
 void gui_kill_timers( )
 {
+	//gtk_timeout_remove( timer50ms );
 	gtk_timeout_remove( timer100ms );
 	gtk_timeout_remove( timer200ms );
-	gtk_timeout_remove( timer500ms );
+	//gtk_timeout_remove( timer500ms );
 	gtk_timeout_remove( timer1s );
 
 	timer100ms = 0;
@@ -365,6 +360,7 @@ int gui_pack_boxes( GtkWidget *top_level_window )
 	GtkWidget *vbox2;
 	GtkWidget *vbox3;
 	GtkWidget *vbox4;
+	GtkWidget *vbox5;
 	GtkWidget *vbox6;
 	GtkWidget *hbox1;
 	GtkWidget *hbox2;
@@ -378,6 +374,7 @@ int gui_pack_boxes( GtkWidget *top_level_window )
 	vbox2 = gtk_vbox_new( FALSE, 0 );
 	vbox3 = gtk_vbox_new( FALSE, 0 );
 	vbox4 = gtk_vbox_new( TRUE, 0 );
+	vbox5 = gtk_vbox_new( TRUE, 0 );
 	vbox6 = gtk_vbox_new( TRUE, 0 );
 	hbox1 = gtk_hbox_new( TRUE, 0 );
 	hbox2 = gtk_hbox_new( TRUE, 0 );
@@ -410,6 +407,10 @@ int gui_pack_boxes( GtkWidget *top_level_window )
 	gtk_notebook_append_page( GTK_NOTEBOOK( notebook ), vbox6,
 	                          gtk_label_new( "Tasks" ) );
 
+	/* Append another page to the notebook. */
+	gtk_notebook_append_page( GTK_NOTEBOOK( notebook ), vbox5,
+	                          gtk_label_new( "Vision" ) );
+
 	/* Pack the rest of the boxes into the notebook pages. */
 	gtk_box_pack_start( GTK_BOX( vbox3 ), hbox2, TRUE, TRUE, 0 );
 	gtk_box_pack_start( GTK_BOX( vbox3 ), hbox3, TRUE, TRUE, 0 );
@@ -423,6 +424,7 @@ int gui_pack_boxes( GtkWidget *top_level_window )
 	buttons_options( hbox4 );
 	buttons_gains( vbox4 );
 	buttons_tasks( vbox6 );
+	buttons_vision( vbox5 );
 
 	return TRUE;
 } /* end gui_pack_boxes() */

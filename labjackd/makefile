@@ -4,6 +4,7 @@ INCLUDES	+= -I../common/include
 INCLUDES	+= -I../../libs/microstrain/include
 INCLUDES	+= -I../../libs/pololu/include
 INCLUDES	+= -I../../libs/labjack/include
+INCLUDES	+= -I../../libs/parser/include
 
 # compiler and flags
 CC        	= g++
@@ -13,9 +14,11 @@ CFLAGS    	+= -g
 
 # libraries
 LJLIB		= labjack.a
+PARSELIB	= parser.a
 
 # library directories
 LJDIR		= ../../libs/labjack/lib
+PARSEDIR	= ../../libs/parser/lib
 
 # executables to build
 EXE 		= labjackd
@@ -28,7 +31,8 @@ OBJS += labjackd.o
 all: $(EXE)
 
 $(EXE): $(OBJS)
-	$(CC) $(CFLAGS) $(INCLUDES) $(DEFINES) $^ -o $@ $(LJDIR)/$(LJLIB)
+	$(CC) $(CFLAGS) $(INCLUDES) $(DEFINES) $^ -o $@ $(LJDIR)/$(LJLIB) \
+													$(PARSEDIR)/$(PARSELIB)
 
 %.o: %.cpp
 	$(CC) $(CFLAGS) $(INCLUDES) $(DEFINES) -c $<

@@ -27,16 +27,12 @@
 #define MAX_CLIENTS 10
 #endif /* MAX_CLIENTS */
 
-#ifndef MODE_NAV
-#define MODE_NAV 1
-#endif /* MODE_NAV */
-
-#ifndef MODE_VISION
-#define MODE_VISION 2
-#endif /* MODE_VISION */
-
-#ifndef MODE_PLANNER
-#define MODE_PLANNER 3
+#ifndef NET_MODES
+#define NET_MODES
+#define MODE_NAV		1
+#define MODE_VISION		2
+#define MODE_PLANNER	3
+#define MODE_LJ			4
 #endif /* MODE_PLANNER */
 
 

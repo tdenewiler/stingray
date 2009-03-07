@@ -27,6 +27,26 @@ extern GtkWidget *button_hold_ang_rate;
 extern GtkWidget *button_manual;
 extern GtkWidget *button_autonomous;
 
+/* Vision setting buttons. */
+extern GtkWidget *button_hpipe_lo;
+extern GtkWidget *button_hpipe_hi;
+extern GtkWidget *button_spipe_lo;
+extern GtkWidget *button_spipe_hi;
+extern GtkWidget *button_vpipe_lo;
+extern GtkWidget *button_vpipe_hi;
+extern GtkWidget *button_hbuoy_lo;
+extern GtkWidget *button_hbuoy_hi;
+extern GtkWidget *button_sbuoy_lo;
+extern GtkWidget *button_sbuoy_hi;
+extern GtkWidget *button_vbuoy_lo;
+extern GtkWidget *button_vbuoy_hi;
+extern GtkWidget *button_hfence_lo;
+extern GtkWidget *button_hfence_hi;
+extern GtkWidget *button_sfence_lo;
+extern GtkWidget *button_sfence_hi;
+extern GtkWidget *button_vfence_lo;
+extern GtkWidget *button_vfence_hi;
+
 /* Tasks buttons. */
 extern GtkWidget *button_gate;
 extern GtkWidget *button_buoy;
@@ -97,7 +117,9 @@ void events_estop( GtkWidget *widget )
 	}
 
 	/* Send the stop message. */
-	messages_send( client_fd, STOP_MSGID, &msg );
+	if ( client_fd  > 0 ) {
+		messages_send( client_fd, STOP_MSGID, &msg );
+	}
 } /* end events_estop() */
 
 
@@ -120,9 +142,7 @@ void events_tasks( GtkWidget *widget,
                    gpointer data
                  )
 {
-	if ( cf.debug_level > 5 ) {
-		g_print( "EVENT_TASKS: Tasks button selected.\n" );
-	}
+	//g_print( "EVENT_TASKS: Tasks button selected.\n" );
 
 	/* Check the state of the buttons. */
 	if ( widget == button_square ||
@@ -141,34 +161,121 @@ void events_tasks( GtkWidget *widget,
 			msg.task.data.time_right    = gtk_spin_button_get_value_as_float(
 			                                  GTK_SPIN_BUTTON( button_square_time4 ) );
 
-			if ( planner_fd > 0 ) {
-				messages_send( planner_fd, TASK_MSGID, &msg );
-			}
 		}
 	}
 	else if ( widget == button_buoy ) {
 		msg.task.data.num = TASK_BUOY;
-
-		if ( planner_fd > 0 ) {
-			messages_send( planner_fd, TASK_MSGID, &msg );
-		}
 	}
 	else if ( widget == button_pipe ) {
 		msg.task.data.num = TASK_PIPE;
-
-		if ( planner_fd > 0 ) {
-			messages_send( planner_fd, TASK_MSGID, &msg );
-		}
 	}
 	else if ( widget == button_gate ) {
 		msg.task.data.num = TASK_GATE;
-
-		if ( planner_fd > 0 ) {
-			messages_send( planner_fd, TASK_MSGID, &msg );
-		}
 	}
 
+	if ( planner_fd > 0 ) {
+		messages_send( planner_fd, TASK_MSGID, &msg );
+	}
 } /* end events_tasks() */
+
+
+/******************************************************************************
+ *
+ * Title:       void events_vision( )
+ *
+ * Description: Called when one of the Vision buttons is clicked.
+ *
+ * Input:       None.
+ *
+ * Output:      None.
+ *
+ * Globals:     None.
+ *
+ *****************************************************************************/
+
+void events_vision( GtkWidget *widget,
+                   GdkEvent *event,
+                   gpointer data
+                 )
+{
+	if ( widget == button_hpipe_lo ) {
+		msg.vsetting.data.pipe_hlo = gtk_spin_button_get_value_as_float(
+				GTK_SPIN_BUTTON( widget ) );
+	}
+	else if ( widget == button_spipe_lo ) {
+		msg.vsetting.data.pipe_slo = gtk_spin_button_get_value_as_float(
+				GTK_SPIN_BUTTON( widget ) );
+	}
+	else if ( widget == button_vpipe_lo ) {
+		msg.vsetting.data.pipe_vlo = gtk_spin_button_get_value_as_float(
+				GTK_SPIN_BUTTON( widget ) );
+	}
+	else if ( widget == button_hbuoy_lo ) {
+		msg.vsetting.data.buoy_hlo = gtk_spin_button_get_value_as_float(
+				GTK_SPIN_BUTTON( widget ) );
+	}
+	else if ( widget == button_sbuoy_lo ) {
+		msg.vsetting.data.buoy_slo = gtk_spin_button_get_value_as_float(
+				GTK_SPIN_BUTTON( widget ) );
+	}
+	else if ( widget == button_vbuoy_lo ) {
+		msg.vsetting.data.buoy_vlo = gtk_spin_button_get_value_as_float(
+				GTK_SPIN_BUTTON( widget ) );
+	}
+	else if ( widget == button_hfence_lo ) {
+		msg.vsetting.data.fence_hlo = gtk_spin_button_get_value_as_float(
+				GTK_SPIN_BUTTON( widget ) );
+	}
+	else if ( widget == button_sfence_lo ) {
+		msg.vsetting.data.fence_slo = gtk_spin_button_get_value_as_float(
+				GTK_SPIN_BUTTON( widget ) );
+	}
+	else if ( widget == button_vfence_lo ) {
+		msg.vsetting.data.fence_vlo = gtk_spin_button_get_value_as_float(
+				GTK_SPIN_BUTTON( widget ) );
+	}
+	else if ( widget == button_hpipe_hi ) {
+		msg.vsetting.data.pipe_hlo = gtk_spin_button_get_value_as_float(
+				GTK_SPIN_BUTTON( widget ) );
+	}
+	else if ( widget == button_spipe_hi ) {
+		msg.vsetting.data.pipe_slo = gtk_spin_button_get_value_as_float(
+				GTK_SPIN_BUTTON( widget ) );
+	}
+	else if ( widget == button_vpipe_hi ) {
+		msg.vsetting.data.pipe_vlo = gtk_spin_button_get_value_as_float(
+				GTK_SPIN_BUTTON( widget ) );
+	}
+	else if ( widget == button_hbuoy_hi ) {
+		msg.vsetting.data.buoy_hlo = gtk_spin_button_get_value_as_float(
+				GTK_SPIN_BUTTON( widget ) );
+	}
+	else if ( widget == button_sbuoy_hi ) {
+		msg.vsetting.data.buoy_slo = gtk_spin_button_get_value_as_float(
+				GTK_SPIN_BUTTON( widget ) );
+	}
+	else if ( widget == button_vbuoy_hi ) {
+		msg.vsetting.data.buoy_vlo = gtk_spin_button_get_value_as_float(
+				GTK_SPIN_BUTTON( widget ) );
+	}
+	else if ( widget == button_hfence_hi ) {
+		msg.vsetting.data.fence_hlo = gtk_spin_button_get_value_as_float(
+				GTK_SPIN_BUTTON( widget ) );
+	}
+	else if ( widget == button_sfence_hi ) {
+		msg.vsetting.data.fence_slo = gtk_spin_button_get_value_as_float(
+				GTK_SPIN_BUTTON( widget ) );
+	}
+	else if ( widget == button_vfence_hi ) {
+		msg.vsetting.data.fence_vlo = gtk_spin_button_get_value_as_float(
+				GTK_SPIN_BUTTON( widget ) );
+	}
+
+	if( client_fd > 0 ) {
+		messages_send( client_fd, VSETTING_MSGID, &msg );
+		printf( "EVENTS_VISION: 3\n" );
+	}
+} /* end events_vision() */
 
 
 /******************************************************************************
@@ -487,6 +594,38 @@ void events_debug_level( GtkWidget *widget,
 
 	/* Check the state of the button. */
 	msg.client.data.debug_level = gtk_spin_button_get_value_as_int(
+	                                  ( GtkSpinButton * )widget );
+
+	/* Send the value of the button to the server. */
+	messages_send( client_fd, CLIENT_MSGID, &msg );
+} /* end events_debug_level() */
+
+
+/******************************************************************************
+ *
+ * Title:       void events_cf.dropper( GtkWidget *widget,
+ *                                          GdkEvent *event,
+ *                                          gpointer data )
+ *
+ * Description: Called when dropper value changes.
+ *
+ * Input:       widget: A pointer to the button widget.
+ *              event: A pointer to the event that triggered the callback.
+ *              data: A pointer to data that can be manipulated.
+ *
+ * Output:      None.
+ *
+ * Globals:     None.
+ *
+ *****************************************************************************/
+
+void events_dropper( GtkWidget *widget,
+                     GdkEvent *event,
+                     gpointer data
+                    )
+{
+	/* Check the state of the button. */
+	msg.client.data.dropper = gtk_spin_button_get_value_as_int(
 	                                  ( GtkSpinButton * )widget );
 
 	/* Send the value of the button to the server. */

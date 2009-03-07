@@ -44,7 +44,7 @@
 /* Global file descriptors. Only global so that nav_exit() can close them. */
 int server_fd;
 int pololu_fd;
-int labjack_fd;
+int lj_fd;
 int imu_fd;
 int vision_fd;
 int planner_fd;
@@ -65,9 +65,7 @@ static void ssa_update_telemetry(
 {
 	STATUS s;
 	time_t t;
-
 	struct tm *tmp;
-
 	s = status_InitStatus();
 
 	//**********
@@ -75,7 +73,6 @@ static void ssa_update_telemetry(
 	//**********
 	t = time( NULL );
 	tmp = localtime( &t );
-
 	s.nTime = t;
 	status_SetTimeString( s.sTime, sizeof( s.sTime ), tmp );
 
@@ -85,16 +82,13 @@ static void ssa_update_telemetry(
 	s.nPlatformID = 15;
 	snprintf( s.sPlatformName, sizeof( s.sPlatformName )
 	          , "UCSD Stingray" );
-
 	s.nPlatformType = PLATFORMTYPE_UUV;
 	snprintf( s.sPlatformTypeName, sizeof( s.sPlatformTypeName )
 	          , platformtypenames[s.nPlatformType] );
 
-
 	//**********
 	// engineering telemetry
 	//**********
-
 	if ( msg->stop.data.state == TRUE ) {
 		s.nPlatformMode = MODE_PAUSE;
 	}
@@ -105,11 +99,9 @@ static void ssa_update_telemetry(
 	snprintf( s.sPlatformModeName, sizeof( s.sPlatformModeName ), "%s"
 
 	          , modenames[s.nPlatformMode] );
-
 	s.nCommsLatency = 0;
 
 	//settime(&s);
-
 	s.dHdgDeg = msg->mstrain.data.yaw;
 	s.dPitchDeg = msg->mstrain.data.pitch;
 	s.dRollDeg = msg->mstrain.data.roll;
@@ -168,28 +160,24 @@ void nav_exit( )
 	usleep( 200000 );
 
 	/* Close the open file descriptors. */
-
 	if ( pololu_fd > 0 ) {
 		/* Set all the actuators to safe positions. */
 		pololuInitializeChannels( pololu_fd );
 		usleep( 200000 );
 		close( pololu_fd );
 	}
-
 	if ( imu_fd > 0 ) {
 		close( imu_fd );
 	}
-
-	close_labjack( );
-
+	if ( lj_fd > 0 ) {
+		close( lj_fd );
+	}
 	if ( server_fd > 0 ) {
 		close( server_fd );
 	}
-
 	if ( vision_fd > 0 ) {
 		close( vision_fd );
 	}
-
 	if ( planner_fd > 0 ) {
 		close( planner_fd );
 	}
@@ -228,39 +216,28 @@ int main( int argc, char *argv[] )
 	sigaction( SIGQUIT, &sigint_action, NULL );
 	sigaction( SIGHUP, &sigint_action, NULL );
 
-
 	int status = -1;
 	int recv_bytes = 0;
 	char recv_buf[MAX_MSG_SIZE];
 	char vision_buf[MAX_MSG_SIZE];
 	char planner_buf[MAX_MSG_SIZE];
+	char lj_buf[MAX_MSG_SIZE];
 	CONF_VARS cf;
 	MSG_DATA msg;
 	PID pid;
 	LABJACK_DATA lj;
 
 	struct timeval pitch_time = {0, 0};
-
 	struct timeval roll_time = {0, 0};
-
 	struct timeval yaw_time = {0, 0};
-
 	struct timeval depth_time = {0, 0};
-
 	struct timeval vision_time = {0, 0};
-
 	struct timeval planner_time = {0, 0};
-
 	struct timeval pitch_start = {0, 0};
-
 	struct timeval roll_start = {0, 0};
-
 	struct timeval yaw_start = {0, 0};
-
 	struct timeval depth_start = {0, 0};
-
 	struct timeval vision_start = {0, 0};
-
 	struct timeval planner_start = {0, 0};
 	int time1s = 0;
 	int time1ms = 0;
@@ -275,13 +252,17 @@ int main( int argc, char *argv[] )
 	/* Initialize variables. */
 	server_fd = -1;
 	pololu_fd = -1;
-	labjack_fd = -1;
+	lj_fd = -1;
 	imu_fd = -1;
 	vision_fd = -1;
 
 	memset( &msg, 0, sizeof( MSG_DATA ) );
 	memset( &pid, 0, sizeof( PID ) );
-	memset( &lj, 0, sizeof( LABJACK_DATA ) );
+	//memset( &lj, 0, sizeof( LABJACK_DATA ) );
+	memset( &recv_buf, 0, MAX_MSG_SIZE );
+	memset( &vision_buf, 0, MAX_MSG_SIZE );
+	memset( &planner_buf, 0, MAX_MSG_SIZE );
+	memset( &lj_buf, 0, MAX_MSG_SIZE );
 
 	/* Parse command line arguments. */
 	parse_default_config( &cf );
@@ -307,7 +288,6 @@ int main( int argc, char *argv[] )
 	msg.gain.data.kd_depth  = cf.kd_depth;
 
 	/* Set up communications. */
-
 	if ( cf.enable_net ) {
 		server_fd = net_server_setup( cf.api_port );
 	}
@@ -328,14 +308,18 @@ int main( int argc, char *argv[] )
 	}
 
 	/* Set up the labjack. */
+	/*
 	if ( cf.enable_labjack ) {
-		labjack_fd = init_labjack( );
+		lj_fd = init_labjack( );
+	}
+	if ( lj_fd ) {
+		status = query_labjack( );
+	}
+	*/
 
-		if ( labjack_fd ) {
-			query_labjack( );
-		}
-
-		labjack_fd = 1; /* Fake it until that function returns an fd. */
+	/* Connect to the labjack daemon. */
+	if ( cf.enable_labjack ) {
+		lj_fd = net_client_setup( cf.labjackd_IP, cf.labjackd_port );
 	}
 
 	/* Set up the Pololu servo controller. */
@@ -345,42 +329,35 @@ int main( int argc, char *argv[] )
 
 	/* Initialize timers. */
 	gettimeofday( &pitch_time, NULL );
-
 	gettimeofday( &pitch_start, NULL );
-
 	gettimeofday( &roll_time, NULL );
-
 	gettimeofday( &roll_start, NULL );
-
 	gettimeofday( &yaw_time, NULL );
-
 	gettimeofday( &yaw_start, NULL );
-
 	gettimeofday( &depth_time, NULL );
-
 	gettimeofday( &depth_start, NULL );
-
 	gettimeofday( &vision_time, NULL );
-
 	gettimeofday( &vision_start, NULL );
 
 	printf( "MAIN: Close the kill switch now.\n" );
 
-	if ( ( cf.enable_labjack ) && ( labjack_fd > 0 ) ) {
-		while ( getBatteryVoltage( AIN_0 ) < 10.0 ) {
-			query_labjack( );
-			usleep( 100000 );
+	status = -1;
+	if ( ( cf.enable_labjack ) && ( lj_fd > 0 ) ) {
+		while ( status < 0 ) {
+			recv_bytes = net_client( lj_fd, lj_buf, &msg );
+			lj_buf[recv_bytes] = '\0';
+			if ( recv_bytes > 0 ) {
+				messages_decode( lj_fd, lj_buf, &msg );
+			}
+			status = msg.lj.data.battery1;
 		}
-
 		printf( "MAIN: Kill switch is closed.\n" );
 	}
-
 	printf( "MAIN: Waiting for motors to arm ... " );
 
-	if ( ( cf.enable_labjack ) && ( labjack_fd > 0 ) ) {
+	if ( ( cf.enable_labjack ) && ( lj_fd > 0 ) ) {
 		sleep( 7 );
 	}
-
 	printf( "<OK>\n" );
 
 	/* Main loop. */
@@ -389,12 +366,12 @@ int main( int argc, char *argv[] )
 		/* Get network data. */
 		if ( ( cf.enable_net ) && ( server_fd > 0 ) ) {
 			recv_bytes = net_server( server_fd, recv_buf, &msg, MODE_NAV );
-
 			if ( recv_bytes > 0 ) {
 				recv_buf[recv_bytes] = '\0';
 				messages_decode( server_fd, recv_buf, &msg );
 			}
 		}
+		//printf( "MAIN: dropper %d\n", msg.client.data.dropper );
 
 		/* Check state of emergency stop value. */
 		if ( msg.stop.data.state == TRUE ) {
@@ -404,6 +381,11 @@ int main( int argc, char *argv[] )
 			pololuInitializeChannels( pololu_fd );
 		}
 
+        /* Send dropper servo command. */
+        if ( pololu_fd > 0 ) {
+          status = pololuSetPosition7Bit( pololu_fd, 11, msg.client.data.dropper );
+        }
+
 		/* Get vision data. */
 		if ( ( cf.enable_vision ) && ( vision_fd > 0 ) ) {
 			time1s =    vision_time.tv_sec;
@@ -411,16 +393,23 @@ int main( int argc, char *argv[] )
 			time2s =    vision_start.tv_sec;
 			time2ms =   vision_start.tv_usec;
 			dt = util_calc_dt( &time1s, &time1ms, &time2s, &time2ms );
-
 			if ( dt > cf.period_vision ) {
 				recv_bytes = net_client( vision_fd, vision_buf, &msg );
 				vision_buf[recv_bytes] = '\0';
-
 				if ( recv_bytes > 0 ) {
 					messages_decode( vision_fd, vision_buf, &msg );
 					printf( "MAIN: %d %d\n", msg.vision.data.front_x, msg.vision.data.front_y );
 					gettimeofday( &vision_start, NULL );
 				}
+			}
+		}
+
+		/* Get labjack daemon data. */
+		if ( ( cf.enable_labjack ) && ( lj_fd > 0 ) ) {
+			recv_bytes = net_client( lj_fd, lj_buf, &msg );
+			lj_buf[recv_bytes] = '\0';
+			if ( recv_bytes > 0 ) {
+				messages_decode( lj_fd, lj_buf, &msg );
 			}
 		}
 
@@ -431,11 +420,9 @@ int main( int argc, char *argv[] )
 			time2s =    planner_start.tv_sec;
 			time2ms =   planner_start.tv_usec;
 			dt = util_calc_dt( &time1s, &time1ms, &time2s, &time2ms );
-
 			if ( dt > cf.period_planner ) {
 				recv_bytes = net_client( planner_fd, planner_buf, &msg );
 				planner_buf[recv_bytes] = '\0';
-
 				if ( recv_bytes > 0 ) {
 					messages_decode( planner_fd, vision_buf, &msg );
 					gettimeofday( &planner_start, NULL );
@@ -452,26 +439,25 @@ int main( int argc, char *argv[] )
 			                                    msg.mstrain.data.accel,
 			                                    msg.mstrain.data.ang_rate
 			                                  );
-			printf( "MAIN: %f %f %f\n",
-			        msg.mstrain.data.pitch,
-			        msg.mstrain.data.roll,
-			        msg.mstrain.data.yaw
-			      );
-
+			//printf( "MAIN: %f %f %f\n",
+			        //msg.mstrain.data.pitch,
+			        //msg.mstrain.data.roll,
+			        //msg.mstrain.data.yaw
+			      //);
 		}
-
 		//msg.mstrain.data.pitch++;
-
 		//printf( "MAIN: gain %f\n", msg.gain.data.kp_depth );
 
 		/* Get Labjack data. */
-		if ( ( cf.enable_labjack ) && ( labjack_fd > 0 ) ) {
+		/*
+		if ( ( cf.enable_labjack ) && ( lj_fd > 0 ) ) {
 			query_labjack( );
 			lj.battery1 = getBatteryVoltage( AIN_0 );
 			lj.battery2 = getBatteryVoltage( AIN_1 );
 			lj.pressure = getBatteryVoltage( AIN_2 );
 			lj.water    = getBatteryVoltage( AIN_3 );
 		}
+		*/
 
 		/* Perform PID loops. */
 		if ( msg.stop.data.state == FALSE ) {
@@ -481,77 +467,53 @@ int main( int argc, char *argv[] )
 			time2s =    pitch_start.tv_sec;
 			time2ms =   pitch_start.tv_usec;
 			dt = util_calc_dt( &time1s, &time1ms, &time2s, &time2ms );
-
 			if ( dt > pid.pitch.period ) {
 				if ( ( cf.enable_pololu ) && ( pololu_fd > 0 ) ) {
 					pid_loop( pololu_fd, &pid, &cf, &msg, &lj, dt, PID_PITCH );
 				}
-
 				msg.status.data.pitch_period = dt;
-
 				gettimeofday( &pitch_start, NULL );
 			}
 
 			/* Roll. */
 			time1s =    roll_time.tv_sec;
-
 			time1ms =   roll_time.tv_usec;
-
 			time2s =    roll_start.tv_sec;
-
 			time2ms =   roll_start.tv_usec;
-
 			dt = util_calc_dt( &time1s, &time1ms, &time2s, &time2ms );
-
 			if ( dt > pid.roll.period ) {
 				if ( ( cf.enable_pololu ) && ( pololu_fd > 0 ) ) {
 					pid_loop( pololu_fd, &pid, &cf, &msg, &lj, dt, PID_ROLL );
 				}
-
 				msg.status.data.roll_period = dt;
-
 				gettimeofday( &roll_start, NULL );
 			}
 
 			/* Yaw. */
 			time1s =    yaw_time.tv_sec;
-
 			time1ms =   yaw_time.tv_usec;
-
 			time2s =    yaw_start.tv_sec;
-
 			time2ms =   yaw_start.tv_usec;
-
 			dt = util_calc_dt( &time1s, &time1ms, &time2s, &time2ms );
-
 			if ( dt > pid.yaw.period ) {
 				if ( ( cf.enable_pololu ) && ( pololu_fd > 0 ) ) {
 					pid_loop( pololu_fd, &pid, &cf, &msg, &lj, dt, PID_YAW );
 				}
-
 				msg.status.data.yaw_period = dt;
-
 				gettimeofday( &yaw_start, NULL );
 			}
 
 			/* Depth. */
 			time1s =    depth_time.tv_sec;
-
 			time1ms =   depth_time.tv_usec;
-
 			time2s =    depth_start.tv_sec;
-
 			time2ms =   depth_start.tv_usec;
-
 			dt = util_calc_dt( &time1s, &time1ms, &time2s, &time2ms );
-
 			if ( dt > pid.depth.period ) {
 				if ( ( cf.enable_pololu ) && ( pololu_fd > 0 ) ) {
 					pid_loop( pololu_fd, &pid, &cf, &msg, &lj, dt, PID_DEPTH );
 				}
-
 				msg.status.data.depth_period = dt;
-
 				gettimeofday( &depth_start, NULL );
 			}
 		}
@@ -562,22 +524,15 @@ int main( int argc, char *argv[] )
 		/* Update and send the SSA data. */
 		#ifdef USE_SSA
 		ssa_update_telemetry( &msg );
-
 		usleep( 500000 );
-
 		#endif /* USE_SSA */
 
 		/* Update timers. */
 		gettimeofday( &pitch_time, NULL );
-
 		gettimeofday( &roll_time, NULL );
-
 		gettimeofday( &yaw_time, NULL );
-
 		gettimeofday( &depth_time, NULL );
-
 		gettimeofday( &vision_time, NULL );
-
 		gettimeofday( &planner_time, NULL );
 	}
 

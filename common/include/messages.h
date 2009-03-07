@@ -55,6 +55,8 @@
 #define VISION_MSGID        8
 #define STOP_MSGID          9
 #define TASK_MSGID          10
+#define VSETTING_MSGID		11
+#define LJ_MSGID			12
 //@}
 #endif /* API_MSGID */
 
@@ -159,11 +161,12 @@ typedef struct _STOP_MSG {
     debugging */
 
 typedef struct _CLIENT {
-	int enable_servos;  //!< Enable use of the servos
-	int enable_log;     //!< Enable saving data to a log file
-	int enable_imu;     //!< Enable use of the IMU
-	int imu_stab;       //!< Ask for gyro-stabilized values from the IMU
-	int debug_level;    //!< Changes the vervosity of the UUV debug printing
+    int enable_servos;      //!< Enable use of the servos
+    int enable_log;         //!< Enable saving data to a log file
+    int enable_imu;         //!< Enable use of the IMU
+    int imu_stab;           //!< Ask for gyro-stabilized values from the IMU
+    int debug_level;        //!< Changes the vervosity of the UUV debug printing
+    int dropper;            //!< Position to set the dropper servo to
 } CLIENT;
 
 /*! API message to change specific uuv functionality. */
@@ -318,7 +321,55 @@ typedef struct _TASK_MSG {
 	TASK data;      //!< Tasks struct
 } TASK_MSG;
 
-#endif /* _TASKS_MSG_ */
+#endif /* _TASK_MSG_ */
+
+#ifndef _LJ_MSG_
+#define _LJ_MSG_
+
+typedef struct _LJ_DATA {
+	float battery1;
+	float battery2;
+	float pressure;
+	float water;
+} LJ_DATA;
+
+typedef struct _LJ_MSG {
+	HEADER hdr;
+	LJ_DATA data;
+} LJ_MSG;
+
+#endif /* _LJ_MSG_ */
+
+#ifndef _VSETTING_MSG_
+#define _VSETTING_MSG_
+
+typedef struct _VSETTING {
+    float pipe_hlo; //!< Low value for the pipe hue.
+    float pipe_slo; //!< Low value for the pipe saturation.
+    float pipe_vlo; //!< Low value for the pipe value.
+    float buoy_hlo; //!< Low value for the buoy hue.
+    float buoy_slo; //!< Low value for the buoy saturation.
+    float buoy_vlo; //!< Low value for the buoy value.
+    float fence_hlo; //!< Low value for the fence hue.
+    float fence_slo; //!< Low value for the fence saturation.
+    float fence_vlo; //!< Low value for the fence value.
+    float pipe_hhi; //!< High value for the pipe hue.
+    float pipe_shi; //!< High value for the pipe saturation.
+    float pipe_vhi; //!< High value for the pipe value.
+    float buoy_hhi; //!< High value for the buoy hue.
+    float buoy_shi; //!< High value for the buoy saturation.
+    float buoy_vhi; //!< High value for the buoy value.
+    float fence_hhi; //!< High value for the fence hue.
+    float fence_shi; //!< High value for the fence saturation.
+    float fence_vhi; //!< High value for the fence value.
+} VSETTING;
+
+typedef struct _VSETTING_MSG {
+    HEADER hdr;     //!< Header struct
+    VSETTING data;  //!< Vision settings struct
+} VSETTING_MSG;
+
+#endif /* _VSETTING_MSG_ */
 
 #ifndef _MSG_DATA_
 #define _MSG_DATA_
@@ -334,6 +385,8 @@ typedef struct _MSG_DATA {
 	VISION_MSG vision;
 	TASK_MSG task;
 	STOP_MSG stop;
+	LJ_MSG lj;
+	VSETTING_MSG vsetting;
 } MSG_DATA;
 
 #endif /* _MSG_DATA_ */
