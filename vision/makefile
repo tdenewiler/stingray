@@ -16,13 +16,13 @@ LIBOBJ = $(SRCDIR)/$(LIB).o
 all: $(LIBS)
 
 $(LIBS): $(LIBOBJ)
-	$(AR) $(ARFLAGS) $(LIBDIR)/$@ $(LIBOBJ)
+	$(AR) $(ARFLAGS) $(LINK) $(LIBDIR)/$@ $(LIBOBJ)
 
 %.o: %.cpp
-	$(CC) $(CFLAGS) $(INCLUDES) $(DEFINES) -c $<
+	$(CC) $(CFLAGS) $(INCLUDES) $(LINK) $(DEFINES) -c $<
 
 %.o: %.c
-	$(CC) $(CFLAGS) $(INCLUDES) $(DEFINES) -c $<
+	$(CC) $(CFLAGS) $(INCLUDES) $(LINK) $(DEFINES) -c $<
 
 clean:
 	rm -f *.o $(LIBDIR)/*.a

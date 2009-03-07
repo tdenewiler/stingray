@@ -88,5 +88,12 @@ IplImage *vision_segment_image( float hL,
                                 int boxHeight
                               );
 
+IplImage* getBlobs( IplImage * img,
+		float hueLow,
+		float hueHigh,
+		float satLow,
+		float satHigh,
+		int minSize );
+
 
 #endif /* _VISION_H_ */
