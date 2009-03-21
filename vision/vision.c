@@ -50,34 +50,33 @@ int vision_find_dot(	int *dotx,
 {
 	CvPoint center;
 	IplImage *binImg = NULL;
-	int status = -1;
 
 	/* Initialize to impossible values. */
 	center.x = -1;
 	center.y = -1;
 
+	/* Get a frame. Return if no video. */
 	srcImg = cvQueryFrame( cap );
-	outImg = cvCreateImage( cvSize( srcImg->width, srcImg->height ), IPL_DEPTH_8U, 1 );
-
 	if ( !srcImg ) {
 		return -2;
 	}
+
+	/* Create output image. */
+	outImg = cvCreateImage( cvSize( srcImg->width, srcImg->height ), IPL_DEPTH_8U, 1 );
 
 	/* Flip the source image. */
 	cvFlip( srcImg, srcImg );
 
 	/* Segment the flipped image into a binary image. */
 	binImg = vision_segment_image( 2.0f, 12.0f, 10.0f, 250.00f, 10.0f, 250.0f, amt + 5, srcImg, 0, 0 );
-
 	cvConvertScale( binImg, outImg, 255.0 );
 
 	/* Process the image. */
 	center = vision_find_centroid( outImg, 0 );
-
 	*dotx = center.x;
-
 	*doty = center.y;
 
+	/* Release the binary image. */
 	cvReleaseImage( &binImg );
 
 	return 1;
@@ -119,24 +118,23 @@ int vision_find_pipe(	int *pipex,
 	center.x = -1;
 	center.y = -1;
 
+	/* Get a frame. */
 	srcImg = cvQueryFrame( cap );
+	if ( !srcImg ) {
+		return -2;
+	}
+
+	/* Create output images. */
 	binImg = cvCreateImage( cvSize( srcImg->width, srcImg->height ), IPL_DEPTH_8U, 1 );
 	outImg = cvCreateImage( cvSize( srcImg->width, srcImg->height ), IPL_DEPTH_8U, 1 );
 
-	if ( !srcImg ) {
-		return 0;
-	}
-
 	/* Segment the image into a binary image. */
 	binImg = vision_segment_image( 10.0f, 33.0f, 1.0f, 250.00f, 2.0f, 250.0f, 3, srcImg, 0 , 0 );
-
 	cvConvertScale( binImg, outImg, 255.0 );
 
 	/* Process the image. */
 	*bearing = vision_get_bearing( outImg );
-
 	center = vision_find_centroid( outImg, 0 );
-
 	*pipex = center.y;
 
 	cvReleaseImage( &binImg );
@@ -176,7 +174,6 @@ float vision_get_bearing( IplImage *img )
 	int xrDOTxr = 0;
 	int xlDOTyl = 0;
 	int xrDOTyr = 0;
-
 	float mL;
 	float mR;
 	float bL;
@@ -193,7 +190,6 @@ float vision_get_bearing( IplImage *img )
 	int j = 0;
 
 	/* Initialize edge arrays. */
-
 	for ( i = 0; i < imHeight; i++ ) {
 		leftEdge[i][1]  = 0;
 		leftEdge[i][2]  = 0;
@@ -207,19 +203,15 @@ float vision_get_bearing( IplImage *img )
 		while ( ( cvGet2D( img, i, j ).val[0] < 1 ) && ( j < imWidth - 1 ) ) {
 			j++;
 		}
-
 		/* If we exit before getting to end of row, edge exists. */
 		if ( ( j < imWidth - 1 ) && ( j > 0 ) ) {
 			leftEdge[leftEdgeCount][1] = i;
 			leftEdge[leftEdgeCount][2] = j;
 			leftEdgeCount++;
-
 			/* Continue scanning to find right edge. */
-
 			while ( ( cvGet2D( img, i, j ).val[0] > 0 ) && ( j < imWidth - 1 ) ) {
 				j++;
 			}
-
 			/* Scan didn't get to end of img. */
 			if ( j < imWidth - 2 ) {
 				rightEdge[rightEdgeCount][1] = i;
@@ -227,7 +219,6 @@ float vision_get_bearing( IplImage *img )
 				rightEdgeCount++;
 			}
 		}
-
 		j = 0;
 	}
 
@@ -240,7 +231,6 @@ float vision_get_bearing( IplImage *img )
 	}
 
 	mL = ( float )( leftEdgeCount * xlDOTyl - sumXL * sumYL / leftEdgeCount * xlDOTxl - sumXL * sumXL );
-
 	bL = ( float )sumYL - mL * ( float )sumXL / ( float )leftEdgeCount;
 
 	for ( k = 0; k < rightEdgeCount - 1; k++ ) {
@@ -251,19 +241,15 @@ float vision_get_bearing( IplImage *img )
 	}
 
 	mR = ( float )( rightEdgeCount * xrDOTyr - sumXR * sumYR / rightEdgeCount * xrDOTxr - sumXR * sumXR );
-
 	bR = ( float )sumYR - mR * ( float )sumXR / ( float )rightEdgeCount;
 
 	/* Choose minimum variance estimator. */
-
 	for ( k = 0; k < leftEdgeCount - 1; k++ ) {
 		LError = pow( leftEdge[k][2] - mL * leftEdge[k][1] + bL, 2 );
 	}
-
 	for ( k = 0; k < rightEdgeCount - 1; k++ ) {
 		RError = pow( rightEdge[k][2] - mR * rightEdge[k][1] + bR, 2 );
 	}
-
 	if ( LError < RError ) {
 		m = atan( mL ) * 180.0 / M_PI;
 		b = bL;
@@ -299,21 +285,20 @@ CvPoint vision_find_centroid( IplImage *binImage, int thresh )
 	int height = binImage->height;
 
 	bool detected = FALSE;
-
 	char *data = binImage->imageData;
+	CvPoint centroid;
 
 	/* Totals. */
 	unsigned int rowTotal = 0;
 	unsigned int colTotal = 0;
 	int count = 0;
+
 	/* Final centroid position coordinates. */
 	int x, y;
-
 	unsigned int ii = 0;
 	unsigned int jj = 0;
 
 	/* Find centroid. */
-
 	for ( ii = ( binImage->roi == NULL ? 0 : ( unsigned int )binImage->roi->xOffset );
 	        ii < ( binImage->roi == NULL ? ( unsigned int )width : ( unsigned int )( binImage->roi->xOffset + binImage->roi->width ) );
 	        ii++ ) {
@@ -329,17 +314,15 @@ CvPoint vision_find_centroid( IplImage *binImage, int thresh )
 					colTotal += ii - ( unsigned int )binImage->roi->xOffset;
 					rowTotal += jj - ( unsigned int )binImage->roi->yOffset;
 				}
-
 				count++;
 			}
 		}
 	}
 
 	/* Check if an object is detected. */
-	if ( count > thresh )
+	if ( count > thresh ) {
 		detected = true;
-
-	CvPoint centroid;
+	}
 
 	if ( detected ) {
 		x = ( int )colTotal / count;
@@ -464,7 +447,6 @@ IplImage *vision_segment_image( float hL,
 
 	/* Reset the hsv_seg's channel of interest to all. */
 	cvSetImageCOI( hsv_image, 0 );
-
 	IplImage* masked_image = cvCreateImage( cvSize( width, height ), IPL_DEPTH_8U, 3 );
 
 	/* Convert HSV image to a BGR image stored in masked_image. */
@@ -495,7 +477,6 @@ IplImage *vision_segment_image( float hL,
 
 	/* Perform dilation. */
 	cvErode( bin_image, bin_image, w );
-
 	cvDilate( bin_image, bin_image, wCircle );
 
 	for ( int i = 0; i < closingAmount; i++ ) {
@@ -510,7 +491,6 @@ IplImage *vision_segment_image( float hL,
 	//cvErode( bin_image, bin_image, wBig );
 	//cvDilate( bin_image, bin_image, wBig );
 	cvDilate( bin_image, bin_image, wBig );
-
 	cvDilate( bin_image, bin_image, wCircle );
 
 	//for( int i = 0; i < closingAmount; i++ ) {
@@ -519,29 +499,17 @@ IplImage *vision_segment_image( float hL,
 
 	/* Release data structures. */
 	cvReleaseMat( &hue_mask );
-
 	cvReleaseMat( &sat_mask );
-
 	cvReleaseMat( &val_mask );
-
 	cvReleaseMat( &hsv_mask );
-
 	cvReleaseImage( &hue_com );
-
 	cvReleaseImage( &sat_com );
-
 	cvReleaseImage( &val_com );
-
 	cvReleaseImage( &hsv_image );
-
 	cvReleaseImage( &temp_image );
-
 	cvReleaseImage( &masked_image );
-
 	cvReleaseStructuringElement( &w );
-
 	cvReleaseStructuringElement( &wBig );
-
 	cvReleaseStructuringElement( &wCircle );
 
 	/* Return binary image. */

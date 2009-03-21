@@ -42,8 +42,6 @@ void parse_line( CONF_VARS *config )
 	}
 
 	/* Check here to find out which variables to fill in. */
-	/* Do error checking as well. */
-
 	/* Server parameters */
 	if ( strncmp( tokens[0], "server", STRING_SIZE ) == 0 ) {
 		if ( strncmp( tokens[1], "ip", STRING_SIZE ) == 0 ) {
@@ -359,7 +357,6 @@ void parse_line( CONF_VARS *config )
 			sscanf( tokens[2], "%d", &config->period_planner );
 		}
 	}
-
 	/* end PID parameters */
 
 	/* target values */
@@ -510,7 +507,6 @@ void parse_line( CONF_VARS *config )
 			}
 		}
 	} /* end right actuators */
-
 	/* end actuator parameters */
 
 } /* end parse_line() */
@@ -549,7 +545,6 @@ void parse_config( const char *filename,
 	FILE *cfg_fd;
 
 	cfg_fd = fopen( filename, "r" );
-
 	if ( cfg_fd == NULL ) {
 		//printf( "PARSE_CONFIG: Error opening config file %s\n", filename );
 		return;
@@ -558,7 +553,6 @@ void parse_config( const char *filename,
 	for ( ii = 0; ii < MAX_TOKENS; ii++ ) {
 		memset( &( tokens[ii] ), 0, sizeof( tokens[ii] ) );
 	}
-
 	memset( &( token_buf ), 0, sizeof( token_buf ) );
 
 	if ( fgets( token_buf, STRING_SIZE, cfg_fd ) == NULL ) {
@@ -567,7 +561,6 @@ void parse_config( const char *filename,
 
 	while ( feof( cfg_fd ) == 0 ) {
 		line_number++;
-
 		for ( ii = 0; ii < sizeof( token_buf ); ii++ ) {
 			if ( filling_in_token == FALSE ) {
 				if ( token_buf[ii] == '\n' ) {
@@ -577,14 +570,11 @@ void parse_config( const char *filename,
 					comment = TRUE;
 					/* Prevent whitespace betweeen last token and comment from
 					 * increasing token count. */
-
 					if ( last_value_space == TRUE ) {
 						token_number--;
 						last_value_space = FALSE;
 					}
-
 					parse_line( config );
-
 					jj = 0;
 					break;
 				}
@@ -624,15 +614,12 @@ void parse_config( const char *filename,
 		}
 
 		jj = 0;
-
 		token_number = 0;
 
 		for ( ii = 0; ii < MAX_TOKENS; ii++ ) {
 			memset( &( tokens[ii] ), 0, sizeof( tokens[ii] ) );
 		}
-
 		memset( &( token_buf ), 0, sizeof( token_buf ) );
-
 		if ( fgets( token_buf, STRING_SIZE, cfg_fd ) == NULL ) {
 			/* Do nothing. */
 		}
@@ -717,7 +704,6 @@ int parse_cla( int argc,
 		parse_config( filename, config );
 		//printf( "\n" );
 	}
-
 	/* End of get command line arguments and parse configuration file. */
 
 	return 0;
@@ -845,4 +831,3 @@ void parse_default_config( CONF_VARS *config )
 	config->op_mode = 1;
 	config->enable_log = FALSE;
 } /* end parse_default_config() */
-

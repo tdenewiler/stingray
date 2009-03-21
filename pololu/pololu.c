@@ -129,7 +129,6 @@ int pololuSetParameters( int fd,
 		}
 
 		unsigned char bit6 = 0; // 0 is for off
-
 		if ( channelOn ) {
 			bit6 = 64;  // 32 is for on
 		}
@@ -480,69 +479,41 @@ int pololuInitializeChannels( int fd )
 	int result = 0;
 
 	// if invalid fd return failure
-
 	if ( fd < 0 ) {
 		return POLOLU_FAILURE;
 	}
 
 	// THIS IS OUR DEFAULT PROFILE
 	result += pololuSetParameters( fd, 0, 1, 1, 15 );
-
 	result += pololuSetParameters( fd, 3, 1, 1, 15 );
-
 	result += pololuSetSpeed( fd, 0, 10 );
-
 	result += pololuSetSpeed( fd, 3, 10 );
-
 	result += pololuSetPosition7Bit( fd, 0, 63 );
-
 	result += pololuSetPosition7Bit( fd, 3, 63 );
-
 	result += pololuSetParameters( fd, 7, 1, 1, 15 );
-
 	result += pololuSetParameters( fd, 8, 1, 1, 15 );
-
 	result += pololuSetParameters( fd, 9, 1, 1, 15 );
-
 	result += pololuSetSpeed( fd, 7, 0 );
-
 	result += pololuSetSpeed( fd, 8, 0 );
-
 	result += pololuSetSpeed( fd, 9, 0 );
-
 	result += pololuSetPosition7Bit( fd, 7, 63 );
-
 	result += pololuSetPosition7Bit( fd, 8, 63 );
-
 	result += pololuSetPosition7Bit( fd, 9, 63 );
-
 	result += pololuSetParameters( fd, 1, 1, 1, 15 ) ;
-
 	result += pololuSetNeutral( fd, 1, POLOLU_CH1_NEUTRAL );
-
 	result += pololuSetPosition7Bit( fd, 1, 63 );
-
 	result += pololuSetParameters( fd, 2, 1, 1, 15 );
-
 	result += pololuSetNeutral( fd, 2, POLOLU_CH2_NEUTRAL );
-
 	result += pololuSetPosition7Bit( fd, 2, 63 );
-
 	result += pololuSetParameters( fd, 4, 1, 1, 15 );
-
 	result += pololuSetNeutral( fd, 4, POLOLU_CH4_NEUTRAL );
-
 	result += pololuSetPosition7Bit( fd, 4, 63 );
-
 	result += pololuSetParameters( fd, 5, 1, 1, 15 );
-
 	result += pololuSetNeutral( fd, 5, POLOLU_CH5_NEUTRAL );
-
 	result += pololuSetPosition7Bit( fd, 5, 63 );
 
-
 	// the total number of bytes sent
-	// 5 for each normal command and 6 or each pololuSetNeutral command
+	// 5 for each normal command and 6 for each pololuSetNeutral command
 	if ( result == 139 ) {
 		result = POLOLU_SUCCESS;
 	}
@@ -553,8 +524,6 @@ int pololuInitializeChannels( int fd )
 	// needs a little extra sleep in case this function is followed directly by
 	// close()
 	usleep( POLOLU_SLEEP );
-
-	// usleep( 30000 );
 
 	return result;
 } /* end pololuInitializeChannels() */
@@ -619,16 +588,12 @@ int controlVoiths( int fd,
 
 	// radius1 and radius2 should be between -100 and 100
 	int radius1 = yawTorque + thrust;
-
 	int radius2 = yawTorque - thrust;
 
 	// the commands to send to the servos
 	int leftCmd1 = ( int )( 63.5 + 0.2 * radius1 * cos( angle + leftAngleOffset ) );
-
 	int leftCmd2 = ( int )( 63.5 + 0.2 * radius1 * sin( angle + leftAngleOffset ) );
-
 	int rightCmd1 = ( int )( 63.5 - 0.2 * radius2 * cos( angle + rightAngleOffset ) );
-
 	int rightCmd2 = ( int )( 63.5 - 0.2 * radius2 * sin( angle + rightAngleOffset ) );
 
 	// I think integer arithmatic should work -AM
@@ -639,15 +604,10 @@ int controlVoiths( int fd,
 	int bytes = 0;
 
 	bytes += pololuSetPosition7Bit( fd, 1, leftCmd1 );
-
 	bytes += pololuSetPosition7Bit( fd, 2, leftCmd2 );
-
 	bytes += pololuSetPosition7Bit( fd, 4, rightCmd1 );
-
 	bytes += pololuSetPosition7Bit( fd, 5, rightCmd2 );
-
 	bytes += pololuSetPosition7Bit( fd, 0, scaledVoithThrust );
-
 	bytes += pololuSetPosition7Bit( fd, 3, scaledVoithThrust );
 
 	// check the number of bytes sent and return success or failure
@@ -707,7 +667,6 @@ int controlVertical( int fd,
 	}
 
 	int leftCmd = 0;
-
 	int rightCmd = 0;
 	int tailCmd = 0;
 	float left, right, tail;
@@ -717,55 +676,37 @@ int controlVertical( int fd,
 	right = vertForce - rollTorque;
 
 	// check bounds
-
 	if ( left > 100 ) left = 100;
-
 	if ( left < -100 ) left = -100;
-
 	if ( right > 100 ) right = 100;
-
 	if ( right < -100 ) right = -100;
 
 	usleep( POLOLU_SLEEP );
-
 	tail = pitchTorque;
 
 	// account for dead zone here
 	float dzRadius = 0.1;
-
 	float leftNeutral = 63.5;
-
 	float rightNeutral = 63.5;
-
 	float tailNeutral = 63.5;
 
 	// -0.1-0.1 is our new dead zone
 	if ( left > dzRadius ) leftNeutral = 67.5;
-
 	if ( left < -dzRadius ) leftNeutral = 59.5;
-
 	if ( right > dzRadius ) rightNeutral = 67.5;
-
 	if ( right < -dzRadius ) rightNeutral = 59.5;
-
 	if ( tail > dzRadius ) tailNeutral = 67.5;
-
 	if ( tail < -dzRadius ) tailNeutral = 59.5;
 
 	leftCmd = ( int )( leftNeutral + 0.605 * left );
-
 	rightCmd = ( int )( rightNeutral + 0.605 * right );
-
 	tailCmd = ( int )( tailNeutral + 0.605 * tail );
 
 	// now set all of the positions
 	// there should be 5 bytes sent for each command
 	int bytes = 0;
-
 	bytes += pololuSetPosition7Bit( fd, 7, leftCmd );
-
 	bytes += pololuSetPosition7Bit( fd, 8, rightCmd );
-
 	bytes += pololuSetPosition7Bit( fd, 9, tailCmd );
 
 	// check the number of bytes sent and return success or failure
