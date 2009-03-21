@@ -97,7 +97,6 @@ static void ssa_update_telemetry(
 	}
 
 	snprintf( s.sPlatformModeName, sizeof( s.sPlatformModeName ), "%s"
-
 	          , modenames[s.nPlatformMode] );
 	s.nCommsLatency = 0;
 
@@ -107,7 +106,6 @@ static void ssa_update_telemetry(
 	s.dRollDeg = msg->mstrain.data.roll;
 	s.dBattVolts = msg->status.data.battery2;
 	s.dAltMeters = -msg->target.data.depth;
-
 	telemfile_WriteFileDirect( "ssatelemetry.txt", s );
 	telemfile_WriteTelemServer( "128.2.181.103", "9015", s );
 
@@ -361,7 +359,6 @@ int main( int argc, char *argv[] )
 	printf( "<OK>\n" );
 
 	/* Main loop. */
-
 	while ( 1 ) {
 		/* Get network data. */
 		if ( ( cf.enable_net ) && ( server_fd > 0 ) ) {
@@ -439,25 +436,16 @@ int main( int argc, char *argv[] )
 			                                    msg.mstrain.data.accel,
 			                                    msg.mstrain.data.ang_rate
 			                                  );
-			//printf( "MAIN: %f %f %f\n",
-			        //msg.mstrain.data.pitch,
-			        //msg.mstrain.data.roll,
-			        //msg.mstrain.data.yaw
-			      //);
 		}
-		//msg.mstrain.data.pitch++;
-		//printf( "MAIN: gain %f\n", msg.gain.data.kp_depth );
 
 		/* Get Labjack data. */
-		/*
-		if ( ( cf.enable_labjack ) && ( lj_fd > 0 ) ) {
-			query_labjack( );
-			lj.battery1 = getBatteryVoltage( AIN_0 );
-			lj.battery2 = getBatteryVoltage( AIN_1 );
-			lj.pressure = getBatteryVoltage( AIN_2 );
-			lj.water    = getBatteryVoltage( AIN_3 );
-		}
-		*/
+		//if ( ( cf.enable_labjack ) && ( lj_fd > 0 ) ) {
+			//query_labjack( );
+			//lj.battery1 = getBatteryVoltage( AIN_0 );
+			//lj.battery2 = getBatteryVoltage( AIN_1 );
+			//lj.pressure = getBatteryVoltage( AIN_2 );
+			//lj.water    = getBatteryVoltage( AIN_3 );
+		//}
 
 		/* Perform PID loops. */
 		if ( msg.stop.data.state == FALSE ) {

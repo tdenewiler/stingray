@@ -270,11 +270,6 @@ void events_vision( GtkWidget *widget,
 		msg.vsetting.data.fence_vlo = gtk_spin_button_get_value_as_float(
 				GTK_SPIN_BUTTON( widget ) );
 	}
-
-	if( client_fd > 0 ) {
-		messages_send( client_fd, VSETTING_MSGID, &msg );
-		printf( "EVENTS_VISION: 3\n" );
-	}
 } /* end events_vision() */
 
 

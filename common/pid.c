@@ -108,7 +108,6 @@ void pid_loop( int pololu_fd,
              )
 {
 	/* These next three need to be set from vison, hydrophone, gui, etc. */
-	/* Add in a check that the arctan doesn't blow up when divide by 0. */
 	pid->voith_angle = atan2f( msg->target.data.fy, msg->target.data.fx );
 	pid->voith_speed = msg->target.data.speed;
 	pid->voith_thrust = sqrt( msg->target.data.fx * msg->target.data.fx +
@@ -144,7 +143,6 @@ void pid_loop( int pololu_fd,
 			                    pid->pitch.kd * pid->pitch.derr;
 
 			/* Check bounds. */
-
 			if ( fabsf( pid->pitch_torque ) > PID_PITCH_TORQUE ) {
 				pid->pitch_torque = util_sign_value( pid->pitch_torque ) * PID_PITCH_TORQUE;
 			}
@@ -176,7 +174,6 @@ void pid_loop( int pololu_fd,
 			                   pid->roll.kd * pid->roll.derr;
 
 			/* Check bounds. */
-
 			if ( fabsf( pid->roll_torque ) > PID_ROLL_TORQUE ) {
 				pid->roll_torque = util_sign_value( pid->roll_torque ) * PID_ROLL_TORQUE;
 			}
@@ -189,29 +186,20 @@ void pid_loop( int pololu_fd,
 		case PID_YAW:
 			/* Update the gains. */
 			pid->yaw.kp		= msg->gain.data.kp_yaw;
-
 			pid->yaw.ki		= msg->gain.data.ki_yaw;
-
 			pid->yaw.kd		= msg->gain.data.kd_yaw;
 
 			/* Calculate the errors. */
 			pid->yaw.ref	= msg->target.data.yaw;
-
 			pid->yaw.cval	= msg->mstrain.data.yaw;
-
 			pid->yaw.perr	= pid_subtract_angles( pid->yaw.cval, pid->yaw.ref );
-
 			pid->yaw.ierr	+= pid->yaw.perr * dt / 1000000;
-
 			pid->yaw.ierr	= pid_bound_integral( pid->yaw.ierr, pid->yaw.ki, PID_YAW_INTEGRAL );
-
 			pid->yaw.derr	= msg->mstrain.data.ang_rate[2];
 
 			/* Update status message. */
 			msg->status.data.yaw_perr	= pid->yaw.perr;
-
 			msg->status.data.yaw_ierr	= pid->yaw.ierr;
-
 			msg->status.data.yaw_derr	= pid->yaw.derr;
 
 			/* PID equations. */
@@ -232,29 +220,20 @@ void pid_loop( int pololu_fd,
 		case PID_DEPTH:
 			/* Update the gains. */
 			pid->depth.kp	= msg->gain.data.kp_depth;
-
 			pid->depth.ki	= msg->gain.data.ki_depth;
-
 			pid->depth.kd	= msg->gain.data.kd_depth;
 
 			/* Calculate the errors. */
 			pid->depth.ref	= msg->target.data.depth;
-
 			pid->depth.cval = lj->pressure;
-
 			pid->depth.perr = pid->depth.cval - pid->depth.ref;
-
 			pid->depth.ierr += pid->depth.perr * dt / 1000000;
-
 			pid->depth.ierr = pid_bound_integral( pid->depth.ierr, pid->depth.ki, PID_DEPTH_INTEGRAL );
-
 			pid->depth.derr = 0.0;
 
 			/* Update status message. */
 			msg->status.data.depth_perr	= pid->depth.perr;
-
 			msg->status.data.depth_ierr	= pid->depth.ierr;
-
 			msg->status.data.depth_derr	= pid->depth.derr;
 
 			/* PID equations. */

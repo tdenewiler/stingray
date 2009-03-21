@@ -143,6 +143,7 @@ int main( int argc, char *argv[] )
 	const char *b_win = "Bottom";
 
 	printf( "MAIN: Starting Vision daemon ... " );
+
 	/* Initialize variables. */
 	server_fd = -1;
 	memset( &msg, 0, sizeof( MSG_DATA ) );
@@ -152,14 +153,12 @@ int main( int argc, char *argv[] )
 	parse_cla( argc, argv, &cf, STINGRAY, ( const char * )VISIOND_FILENAME );
 
 	/* Set up communications. */
-
 	if ( cf.enable_net ) {
 		server_fd = net_server_setup( cf.vision_port );
 	}
 
 	/* Open cameras. */
 	f_cam = cvCaptureFromCAM( camera );
-
 	if ( !f_cam ) {
 		cvReleaseCapture( &f_cam );
 		printf( "MAIN: Could not open f_cam.\n" );
@@ -170,9 +169,7 @@ int main( int argc, char *argv[] )
 	}
 
 	camera = 1;
-
 	b_cam = cvCaptureFromCAM( camera );
-
 	if ( !b_cam ) {
 		cvReleaseCapture( &b_cam );
 		printf( "MAIN: Could not open b_cam.\n" );
@@ -182,6 +179,7 @@ int main( int argc, char *argv[] )
 		b_out_img = cvCreateImage( cvSize( b_img->width, b_img->height ), IPL_DEPTH_8U, 1 );
 	}
 
+	/* Create a window if specified in configuration file. */
 	if ( cf.vision_window ) {
 		cvNamedWindow( f_win, CV_WINDOW_AUTOSIZE );
 		cvNamedWindow( b_win, CV_WINDOW_AUTOSIZE );
@@ -190,47 +188,37 @@ int main( int argc, char *argv[] )
 	printf( "<OK>\n" );
 
 	/* Main loop. */
-
 	while ( 1 ) {
 		/* Get vision data. */
 		if ( b_cam ) {
 			status = vision_find_pipe( &pipex, &bearing, b_cam, b_img, b_out_img );
-
 			if ( status == 1 ) {
 				msg.vision.data.bottom_x = pipex;
 				msg.vision.data.bottom_y = bearing;
-
 				if ( cf.vision_window ) {
 					if ( cvWaitKey( 3 ) >= 0 );
-
 					cvShowImage( b_win, b_img );
 				}
 			}
-
 			printf( "MAIN: bottom %d %d\n", dotx, doty );
 		}
 
 		if ( f_cam ) {
 			status = vision_find_dot( &dotx, &doty, amt, f_cam, f_img, f_out_img );
-
 			if ( status == 1 ) {
 				msg.vision.data.front_x = dotx;
 				msg.vision.data.front_y = doty;
-
 				if ( cf.vision_window ) {
 					if ( cvWaitKey( 3 ) >= 0 );
-
 					cvShowImage( f_win, f_img );
 				}
 			}
-
 			printf( "MAIN: front %d %d\n", dotx, doty );
 		}
 
 		/* Get network data. */
 		if ( ( cf.enable_net ) && ( server_fd > 0 ) ) {
 			recv_bytes = net_server( server_fd, recv_buf, &msg, MODE_VISION );
-
 			if ( recv_bytes > 0 ) {
 				recv_buf[recv_bytes] = '\0';
 				messages_decode( server_fd, recv_buf, &msg );

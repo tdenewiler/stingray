@@ -43,7 +43,6 @@ void messages_send( int fd,
                   )
 {
 	switch ( msg_id ) {
-
 		case OPEN_MSGID:
 			msg->open.hdr.msgid = OPEN_MSGID;
 
@@ -110,13 +109,13 @@ void messages_send( int fd,
 			msg->target.hdr.msgid = TARGET_MSGID;
 
 			/* Use network byte order. */
-			msg->target.data.mode       = htonl( msg->target.data.mode );
+			msg->target.data.mode = htonl( msg->target.data.mode );
 
 			/* Actually send message here. */
 			net_send( fd, &msg->target, sizeof( TARGET_MSG ) );
 
 			/* Convert the values back to host byte order. */
-			msg->target.data.mode   = ntohl( msg->target.data.mode );
+			msg->target.data.mode = ntohl( msg->target.data.mode );
 			break;
 
 		case GAIN_MSGID:
@@ -209,7 +208,6 @@ void messages_decode( int fd, char *buf, MSG_DATA *msg )
 {
 	/* Determine what message type was received. */
 	switch ( ( ( HEADER * )buf )->msgid ) {
-
 		case OPEN_MSGID:
 			msg->open.hdr.msgid = ( ( HEADER * )buf )->msgid;
 			break;
@@ -251,7 +249,6 @@ void messages_decode( int fd, char *buf, MSG_DATA *msg )
 			break;
 
 		case GAIN_MSGID:
-
 			if ( ( ( GAIN_MSG * )buf )->data.mode == GAIN_SET ) {
 				msg->gain.data = ( ( GAIN_MSG * )buf )->data;
 			}

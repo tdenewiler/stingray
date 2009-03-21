@@ -66,7 +66,7 @@ void gui_update_status_text( )
 	         "Ang Rate X, Y, Z:\t\t[ %.3f\t%.3f\t%.3f ]\n"
 	         "Quaternions:\t\t\t[ %.3f\t%.3f\t%.3f\t%.3f ]\n"
 	         "Labjack:\t\t\t\t[ %.3fV\t%.3fV\t%.3f\t%.3f ]\n"
-	         "Errors:\n"
+	         "PID Errors:\n"
 	         "Pitch:\t\t\t\t[ %.3f\t%.3f\t%.3f ]\n"
 	         "Roll:\t\t\t\t\t[ %.3f\t%.3f\t%.3f ]\n"
 	         "Yaw:\t\t\t\t\t[ %.3f\t%.3f\t%.3f ]\n"

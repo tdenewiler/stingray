@@ -43,7 +43,6 @@ int util_calc_dt( int *time1s, int *time1ms, int *time2s, int *time2ms )
 
 	time1 = ( *time1s * 1000000 ) + *time1ms;
 	time2 = ( *time2s * 1000000 ) + *time2ms;
-
 	dt = time1 - time2;
 
 	return dt;
@@ -67,7 +66,6 @@ int util_calc_dt( int *time1s, int *time1ms, int *time2s, int *time2ms )
 void util_print_help( int app )
 {
 	switch ( app ) {
-
 		case STINGRAY:
 			printf( "PRINT_HELP: To specify a configuration file use the "
 			        "command\n'./uuv -c <filename>'.\nUse './uuv -h' for more "

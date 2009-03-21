@@ -150,7 +150,6 @@ int net_server( int fd, void *buf, MSG_DATA *msg, int mode )
 
 	/* For each socket with data available read that data and then send UUV
 	 * IMU data to it. */
-
 	for ( ii = 0; ii <= fdmax; ii++ ) {
 		if ( FD_ISSET( ii, &read_fds ) ) { /* Check for data on sockets. */
 			if ( ii == fd ) { /* Check if it is remote connection. */
@@ -160,7 +159,6 @@ int net_server( int fd, void *buf, MSG_DATA *msg, int mode )
 			else {
 				/* Get the data from the socket. */
 				recv_bytes = net_recv( ii, buf );
-
 				if ( recv_bytes == 0 ) { /* Connection lost. Close socket. */
 					net_close( ii );
 					FD_CLR( ii, &master );
@@ -264,7 +262,6 @@ int net_socket( )
 	int fd;
 
 	/* Create a socket for network communications. */
-
 	if ( ( fd = socket( AF_INET,
 	                    SOCK_STREAM,
 	                    0 ) )
@@ -295,7 +292,6 @@ int net_setsockopt( int *fd )
 	int yes = 1;
 
 	/* Allow the socket to be reused for new connections. */
-
 	if ( setsockopt( *fd,
 	                 SOL_SOCKET,
 	                 SO_REUSEADDR,
@@ -468,7 +464,6 @@ int net_accept( int fd_orig )
 	int fd_ret;
 
 	addr_len = sizeof( struct sockaddr_in );
-
 	if ( ( fd_ret = accept( fd_orig,
 	                        ( struct sockaddr * ) & their_addr,
 	                        &addr_len ) )
