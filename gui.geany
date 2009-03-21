@@ -7,12 +7,12 @@ description=
 run_cmd=make
 
 [files]
-current_page=4
+current_page=2
 FILE_NAME_0=25824;0;0;16;1;1;0;/home/thomas/svn/src/gui/buttons.c;
 FILE_NAME_1=1970;0;0;16;1;1;0;/home/thomas/svn/src/gui/client.c;
-FILE_NAME_2=5942;0;0;16;1;1;0;/home/thomas/svn/src/gui/events.c;
-FILE_NAME_3=1759;0;0;16;1;1;0;/home/thomas/svn/src/gui/gui.c;
-FILE_NAME_4=104;13;0;16;1;1;0;/home/thomas/svn/src/gui/../../conf/gui.conf;
+FILE_NAME_2=8215;0;0;16;1;1;0;/home/thomas/svn/src/gui/events.c;
+FILE_NAME_3=1641;0;0;16;1;1;0;/home/thomas/svn/src/gui/gui.c;
+FILE_NAME_4=310;13;0;16;1;1;0;/home/thomas/svn/src/gui/../../conf/gui.conf;
 FILE_NAME_5=4946;0;0;16;1;1;0;/home/thomas/svn/src/gui/../common/messages.c;
 FILE_NAME_6=0;0;0;16;1;1;0;/home/thomas/svn/src/gui/../common/network.c;
 FILE_NAME_7=0;0;0;16;1;1;0;/home/thomas/svn/src/gui/../common/pid.c;

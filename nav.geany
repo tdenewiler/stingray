@@ -8,7 +8,7 @@ run_cmd=make
 
 [files]
 current_page=0
-FILE_NAME_0=8107;0;0;16;1;1;0;/home/thomas/svn/src/nav/nav.c;
+FILE_NAME_0=5214;0;0;16;1;1;0;/home/thomas/svn/src/nav/nav.c;
 FILE_NAME_1=485;13;0;16;1;1;0;/home/thomas/svn/src/nav/../../conf/nav.conf;
 FILE_NAME_2=3;0;0;16;1;1;0;/home/thomas/svn/src/nav/../../libs/labjack/include/labjack.h;
 FILE_NAME_3=1071;0;0;16;1;1;0;/home/thomas/svn/src/nav/../common/include/messages.h;
@@ -27,5 +27,5 @@ FILE_NAME_15=0;0;0;16;1;1;0;/home/thomas/svn/src/nav/../../libs/serial/include/s
 FILE_NAME_16=0;0;0;16;1;1;0;/home/thomas/svn/src/nav/../../libs/microstrain/include/microstrain.h;
 FILE_NAME_17=0;0;0;16;1;1;0;/home/thomas/svn/src/nav/../../libs/pololu/include/pololu.h;
 FILE_NAME_18=239;13;0;16;1;1;0;/home/thomas/svn/conf/ssa.conf;
-FILE_NAME_19=6668;0;0;16;1;1;0;/home/thomas/svn/libs/parser/parser.c;
-FILE_NAME_20=13729;0;0;16;1;1;0;/home/thomas/svn/libs/pololu/pololu.c;
+FILE_NAME_19=25530;0;0;16;1;1;0;/home/thomas/svn/libs/parser/parser.c;
+FILE_NAME_20=20972;0;0;16;1;1;0;/home/thomas/svn/libs/pololu/pololu.c;
