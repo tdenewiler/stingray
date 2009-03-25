@@ -32,6 +32,8 @@ CvCapture *f_cam;
 CvCapture *b_cam;
 IplImage *f_out_img;
 IplImage *b_out_img;
+IplImage *f_bin_img;
+IplImage *b_bin_img;
 
 
 /******************************************************************************
@@ -91,8 +93,9 @@ void visiond_exit( )
 	}
 
 	cvReleaseImage( &f_out_img );
-
 	cvReleaseImage( &b_out_img );
+	cvReleaseImage( &b_bin_img );
+	cvReleaseImage( &f_bin_img );
 
 	printf( "<OK>\n\n" );
 } /* end visiond_exit() */
@@ -133,17 +136,19 @@ int main( int argc, char *argv[] )
 	MSG_DATA msg;
 	int dotx = -1;
 	int doty = -1;
+	int width = -1;
+	int height = -1;
 	int pipex = -1;
-	float bearing = -1;
-	int amt = 1;
-	int camera = 0;
+	double bearing = -1;
+	int amt = 2;
+    int ii = 0;
+	int camera = 1;
 	IplImage *f_img = NULL;
 	IplImage *b_img = NULL;
 	const char *f_win = "Front";
 	const char *b_win = "Bottom";
 
 	printf( "MAIN: Starting Vision daemon ... " );
-
 	/* Initialize variables. */
 	server_fd = -1;
 	memset( &msg, 0, sizeof( MSG_DATA ) );
@@ -151,6 +156,20 @@ int main( int argc, char *argv[] )
 	/* Parse command line arguments. */
 	parse_default_config( &cf );
 	parse_cla( argc, argv, &cf, STINGRAY, ( const char * )VISIOND_FILENAME );
+
+	/* Set HSV message data to configuration values. */
+	msg.vsetting.data.pipe_hsv.hL = cf.pipe_hL;
+	msg.vsetting.data.pipe_hsv.hH = cf.pipe_hH;
+	msg.vsetting.data.pipe_hsv.sL = cf.pipe_sL;
+	msg.vsetting.data.pipe_hsv.sH = cf.pipe_sH;
+	msg.vsetting.data.pipe_hsv.vL = cf.pipe_vL;
+	msg.vsetting.data.pipe_hsv.vH = cf.pipe_vH;
+	msg.vsetting.data.buoy_hsv.hL = cf.buoy_hL;
+	msg.vsetting.data.buoy_hsv.hH = cf.buoy_hH;
+	msg.vsetting.data.buoy_hsv.sL = cf.buoy_sL;
+	msg.vsetting.data.buoy_hsv.sH = cf.buoy_sH;
+	msg.vsetting.data.buoy_hsv.vL = cf.buoy_vL;
+	msg.vsetting.data.buoy_hsv.vH = cf.buoy_vH;
 
 	/* Set up communications. */
 	if ( cf.enable_net ) {
@@ -166,9 +185,10 @@ int main( int argc, char *argv[] )
 	else {
 		f_img = cvQueryFrame( f_cam );
 		f_out_img = cvCreateImage( cvSize( f_img->width, f_img->height ), IPL_DEPTH_8U, 1 );
+		f_bin_img = cvCreateImage( cvSize( f_img->width, f_img->height ), IPL_DEPTH_8U, 1 );
 	}
 
-	camera = 1;
+	camera = 0;
 	b_cam = cvCaptureFromCAM( camera );
 	if ( !b_cam ) {
 		cvReleaseCapture( &b_cam );
@@ -177,9 +197,10 @@ int main( int argc, char *argv[] )
 	else {
 		b_img = cvQueryFrame( b_cam );
 		b_out_img = cvCreateImage( cvSize( b_img->width, b_img->height ), IPL_DEPTH_8U, 1 );
+		b_bin_img = cvCreateImage( cvSize( b_img->width, b_img->height ), IPL_DEPTH_8U, 1 );
+
 	}
 
-	/* Create a window if specified in configuration file. */
 	if ( cf.vision_window ) {
 		cvNamedWindow( f_win, CV_WINDOW_AUTOSIZE );
 		cvNamedWindow( b_win, CV_WINDOW_AUTOSIZE );
@@ -191,28 +212,68 @@ int main( int argc, char *argv[] )
 	while ( 1 ) {
 		/* Get vision data. */
 		if ( b_cam ) {
-			status = vision_find_pipe( &pipex, &bearing, b_cam, b_img, b_out_img );
+			status = vision_find_pipe( &pipex, &bearing, b_cam, b_img,
+				b_out_img, b_bin_img,
+				msg.vsetting.data.pipe_hsv.hL,
+				msg.vsetting.data.pipe_hsv.hH,
+				msg.vsetting.data.pipe_hsv.sL,
+				msg.vsetting.data.pipe_hsv.sH,
+				msg.vsetting.data.pipe_hsv.vL,
+				msg.vsetting.data.pipe_hsv.vH );
 			if ( status == 1 ) {
+				if ( cf.vision_window ) {
+					if ( cvWaitKey( 5 ) >= 0 );
+    					int lineWidth = 75;
+			  			for ( ii = 0; ii < lineWidth; ii++ ) {
+			  				if( bearing != 0 ) {
+				 				cvCircle( b_img, cvPoint(b_img->width/2+((int)(bearing*ii)),(b_img->width/2)+ii), 2, cvScalar(255,255,0), 2 );
+							}
+							else{
+								cvCircle( b_img, cvPoint(b_img->width/2+((int)(bearing*ii)),(b_img->width/2)+ii), 2, cvScalar(0,0,255), 2 );
+							}
+							cvShowImage( b_win, b_img );
+						}
+				}
+				bearing = atan(bearing) * 180 / M_PI;
 				msg.vision.data.bottom_x = pipex;
 				msg.vision.data.bottom_y = bearing;
-				if ( cf.vision_window ) {
-					if ( cvWaitKey( 3 ) >= 0 );
-					cvShowImage( b_win, b_img );
-				}
 			}
-			printf( "MAIN: bottom %d %d\n", dotx, doty );
+			printf( "MAIN: bottom %d %lf\n", pipex, bearing );
 		}
 
 		if ( f_cam ) {
-			status = vision_find_dot( &dotx, &doty, amt, f_cam, f_img, f_out_img );
+			status = vision_find_dot( &dotx, &doty, &width, &height, amt,
+				f_cam, f_img, f_out_img, f_bin_img,
+				msg.vsetting.data.buoy_hsv.hL,
+				msg.vsetting.data.buoy_hsv.hH,
+				msg.vsetting.data.buoy_hsv.sL,
+				msg.vsetting.data.buoy_hsv.sH,
+				msg.vsetting.data.buoy_hsv.vL,
+				msg.vsetting.data.buoy_hsv.vH );
 			if ( status == 1 ) {
 				msg.vision.data.front_x = dotx;
 				msg.vision.data.front_y = doty;
 				if ( cf.vision_window ) {
-					if ( cvWaitKey( 3 ) >= 0 );
+					if ( cvWaitKey( 5 ) >= 0 );
+					cvCircle( f_img, cvPoint(dotx,doty), (int)(sqrt(float(dotx)*(float)doty)), cvScalar(255,0,0), 10 );
 					cvShowImage( f_win, f_img );
 				}
 			}
+			//if ( status == 1 ) {
+				//if ( cf.vision_window ) {
+					//if ( cvWaitKey( 5 ) >= 0 );
+    					//int lineWidth = 75;
+			  			//for ( ii = 0; ii < lineWidth; ii++ ) {
+			  				//if ( bearing != 0 ) {
+				 				//cvCircle( f_img, cvPoint(f_img->width/2+((int)(bearing*ii)),(f_img->width/2)+ii), 2, cvScalar(255,255,0), 2 );
+							//}
+							//else{
+								//cvCircle(f_img, cvPoint( f_img->width/2+((int)(bearing*ii)),(f_img->width/2)+ii), 2, cvScalar(0,0,255), 2 );
+							//}
+							//cvShowImage( f_win, f_img );
+						//}
+				//}
+			//}
 			printf( "MAIN: front %d %d\n", dotx, doty );
 		}
 

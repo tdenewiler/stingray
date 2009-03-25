@@ -84,6 +84,7 @@ extern GtkWidget *button_kd_az;
 extern MSG_DATA msg;
 extern int client_fd;
 extern int planner_fd;
+extern int vision_fd;
 
 /* Configuration file variables. */
 extern CONF_VARS cf;
@@ -199,77 +200,80 @@ void events_vision( GtkWidget *widget,
                  )
 {
 	if ( widget == button_hpipe_lo ) {
-		msg.vsetting.data.pipe_hlo = gtk_spin_button_get_value_as_float(
+		msg.vsetting.data.pipe_hsv.hL = gtk_spin_button_get_value_as_float(
 				GTK_SPIN_BUTTON( widget ) );
 	}
 	else if ( widget == button_spipe_lo ) {
-		msg.vsetting.data.pipe_slo = gtk_spin_button_get_value_as_float(
+		msg.vsetting.data.pipe_hsv.sL = gtk_spin_button_get_value_as_float(
 				GTK_SPIN_BUTTON( widget ) );
 	}
 	else if ( widget == button_vpipe_lo ) {
-		msg.vsetting.data.pipe_vlo = gtk_spin_button_get_value_as_float(
+		msg.vsetting.data.pipe_hsv.vL = gtk_spin_button_get_value_as_float(
 				GTK_SPIN_BUTTON( widget ) );
 	}
 	else if ( widget == button_hbuoy_lo ) {
-		msg.vsetting.data.buoy_hlo = gtk_spin_button_get_value_as_float(
+		msg.vsetting.data.buoy_hsv.hL = gtk_spin_button_get_value_as_float(
 				GTK_SPIN_BUTTON( widget ) );
 	}
 	else if ( widget == button_sbuoy_lo ) {
-		msg.vsetting.data.buoy_slo = gtk_spin_button_get_value_as_float(
+		msg.vsetting.data.buoy_hsv.sL = gtk_spin_button_get_value_as_float(
 				GTK_SPIN_BUTTON( widget ) );
 	}
 	else if ( widget == button_vbuoy_lo ) {
-		msg.vsetting.data.buoy_vlo = gtk_spin_button_get_value_as_float(
+		msg.vsetting.data.buoy_hsv.vL = gtk_spin_button_get_value_as_float(
 				GTK_SPIN_BUTTON( widget ) );
 	}
 	else if ( widget == button_hfence_lo ) {
-		msg.vsetting.data.fence_hlo = gtk_spin_button_get_value_as_float(
+		msg.vsetting.data.fence_hsv.hL = gtk_spin_button_get_value_as_float(
 				GTK_SPIN_BUTTON( widget ) );
 	}
 	else if ( widget == button_sfence_lo ) {
-		msg.vsetting.data.fence_slo = gtk_spin_button_get_value_as_float(
+		msg.vsetting.data.fence_hsv.sL = gtk_spin_button_get_value_as_float(
 				GTK_SPIN_BUTTON( widget ) );
 	}
 	else if ( widget == button_vfence_lo ) {
-		msg.vsetting.data.fence_vlo = gtk_spin_button_get_value_as_float(
+		msg.vsetting.data.fence_hsv.vL = gtk_spin_button_get_value_as_float(
 				GTK_SPIN_BUTTON( widget ) );
 	}
 	else if ( widget == button_hpipe_hi ) {
-		msg.vsetting.data.pipe_hlo = gtk_spin_button_get_value_as_float(
+		msg.vsetting.data.pipe_hsv.hH = gtk_spin_button_get_value_as_float(
 				GTK_SPIN_BUTTON( widget ) );
 	}
 	else if ( widget == button_spipe_hi ) {
-		msg.vsetting.data.pipe_slo = gtk_spin_button_get_value_as_float(
+		msg.vsetting.data.pipe_hsv.sH = gtk_spin_button_get_value_as_float(
 				GTK_SPIN_BUTTON( widget ) );
 	}
 	else if ( widget == button_vpipe_hi ) {
-		msg.vsetting.data.pipe_vlo = gtk_spin_button_get_value_as_float(
+		msg.vsetting.data.pipe_hsv.vH = gtk_spin_button_get_value_as_float(
 				GTK_SPIN_BUTTON( widget ) );
 	}
 	else if ( widget == button_hbuoy_hi ) {
-		msg.vsetting.data.buoy_hlo = gtk_spin_button_get_value_as_float(
+		msg.vsetting.data.buoy_hsv.hH = gtk_spin_button_get_value_as_float(
 				GTK_SPIN_BUTTON( widget ) );
 	}
 	else if ( widget == button_sbuoy_hi ) {
-		msg.vsetting.data.buoy_slo = gtk_spin_button_get_value_as_float(
+		msg.vsetting.data.buoy_hsv.sH = gtk_spin_button_get_value_as_float(
 				GTK_SPIN_BUTTON( widget ) );
 	}
 	else if ( widget == button_vbuoy_hi ) {
-		msg.vsetting.data.buoy_vlo = gtk_spin_button_get_value_as_float(
+		msg.vsetting.data.buoy_hsv.vH = gtk_spin_button_get_value_as_float(
 				GTK_SPIN_BUTTON( widget ) );
 	}
 	else if ( widget == button_hfence_hi ) {
-		msg.vsetting.data.fence_hlo = gtk_spin_button_get_value_as_float(
+		msg.vsetting.data.fence_hsv.hH = gtk_spin_button_get_value_as_float(
 				GTK_SPIN_BUTTON( widget ) );
 	}
 	else if ( widget == button_sfence_hi ) {
-		msg.vsetting.data.fence_slo = gtk_spin_button_get_value_as_float(
+		msg.vsetting.data.fence_hsv.sH = gtk_spin_button_get_value_as_float(
 				GTK_SPIN_BUTTON( widget ) );
 	}
 	else if ( widget == button_vfence_hi ) {
-		msg.vsetting.data.fence_vlo = gtk_spin_button_get_value_as_float(
+		msg.vsetting.data.fence_hsv.vH = gtk_spin_button_get_value_as_float(
 				GTK_SPIN_BUTTON( widget ) );
 	}
+
+	/* Send the state of the buttons to the server. */
+	messages_send( vision_fd, VSETTING_MSGID, &msg );
 } /* end events_vision() */
 
 

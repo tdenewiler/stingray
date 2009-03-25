@@ -687,10 +687,10 @@ int buttons_vision( GtkWidget *box )
 	gtk_container_add( GTK_CONTAINER( hbox9 ), vbox10 );
 
 	/* Create the spin buttons. */
-	adj = ( GtkAdjustment * )gtk_adjustment_new( 0,
+	adj = ( GtkAdjustment * )gtk_adjustment_new( cf.pipe_hL,
 	        0,
-	        100,
-	        0.1,
+	        255,
+	        1,
 	        10,
 	        0 );
 
@@ -699,10 +699,10 @@ int buttons_vision( GtkWidget *box )
 	                      vbox3,
 	                      adj );
 
-	adj = ( GtkAdjustment * )gtk_adjustment_new( 0,
+	adj = ( GtkAdjustment * )gtk_adjustment_new( cf.pipe_sL,
 	        0,
-	        100,
-	        0.1,
+	        255,
+	        1,
 	        10,
 	        0 );
 
@@ -711,10 +711,10 @@ int buttons_vision( GtkWidget *box )
 	                      vbox3,
 	                      adj );
 
-	adj = ( GtkAdjustment * )gtk_adjustment_new( 0,
+	adj = ( GtkAdjustment * )gtk_adjustment_new( cf.pipe_vL,
 	        0,
-	        100,
-	        0.1,
+	        255,
+	        1,
 	        10,
 	        0 );
 
@@ -723,10 +723,10 @@ int buttons_vision( GtkWidget *box )
 	                      vbox3,
 	                      adj );
 
-	adj = ( GtkAdjustment * )gtk_adjustment_new( 0,
+	adj = ( GtkAdjustment * )gtk_adjustment_new( cf.pipe_hH,
 	        0,
-	        100,
-	        0.1,
+	        255,
+	        1,
 	        10,
 	        0 );
 
@@ -735,10 +735,10 @@ int buttons_vision( GtkWidget *box )
 	                      vbox4,
 	                      adj );
 
-	adj = ( GtkAdjustment * )gtk_adjustment_new( 0,
+	adj = ( GtkAdjustment * )gtk_adjustment_new( cf.pipe_sH,
 	        0,
-	        100,
-	        0.1,
+	        255,
+	        1,
 	        10,
 	        0 );
 
@@ -747,10 +747,10 @@ int buttons_vision( GtkWidget *box )
 	                      vbox4,
 	                      adj );
 
-	adj = ( GtkAdjustment * )gtk_adjustment_new( 0,
+	adj = ( GtkAdjustment * )gtk_adjustment_new( cf.pipe_vH,
 	        0,
-	        100,
-	        0.1,
+	        255,
+	        1,
 	        10,
 	        0 );
 
@@ -759,10 +759,10 @@ int buttons_vision( GtkWidget *box )
 	                      vbox4,
 	                      adj );
 
-	adj = ( GtkAdjustment * )gtk_adjustment_new( 0,
+	adj = ( GtkAdjustment * )gtk_adjustment_new( cf.buoy_hL,
 	        0,
-	        100,
-	        0.1,
+	        255,
+	        1,
 	        10,
 	        0 );
 
@@ -771,10 +771,10 @@ int buttons_vision( GtkWidget *box )
 	                      vbox7,
 	                      adj );
 
-	adj = ( GtkAdjustment * )gtk_adjustment_new( 0,
+	adj = ( GtkAdjustment * )gtk_adjustment_new( cf.buoy_sL,
 	        0,
-	        100,
-	        0.1,
+	        255,
+	        1,
 	        10,
 	        0 );
 
@@ -783,10 +783,10 @@ int buttons_vision( GtkWidget *box )
 	                      vbox7,
 	                      adj );
 
-	adj = ( GtkAdjustment * )gtk_adjustment_new( 0,
+	adj = ( GtkAdjustment * )gtk_adjustment_new( cf.buoy_vL,
 	        0,
-	        100,
-	        0.1,
+	        255,
+	        1,
 	        10,
 	        0 );
 
@@ -795,10 +795,10 @@ int buttons_vision( GtkWidget *box )
 	                      vbox7,
 	                      adj );
 
-	adj = ( GtkAdjustment * )gtk_adjustment_new( 0,
+	adj = ( GtkAdjustment * )gtk_adjustment_new( cf.buoy_hH,
 	        0,
-	        100,
-	        0.1,
+	        255,
+	        1,
 	        10,
 	        0 );
 
@@ -807,10 +807,10 @@ int buttons_vision( GtkWidget *box )
 	                      vbox8,
 	                      adj );
 
-	adj = ( GtkAdjustment * )gtk_adjustment_new( 0,
+	adj = ( GtkAdjustment * )gtk_adjustment_new( cf.buoy_sH,
 	        0,
-	        100,
-	        0.1,
+	        255,
+	        1,
 	        10,
 	        0 );
 
@@ -819,10 +819,10 @@ int buttons_vision( GtkWidget *box )
 	                      vbox8,
 	                      adj );
 
-	adj = ( GtkAdjustment * )gtk_adjustment_new( 0,
+	adj = ( GtkAdjustment * )gtk_adjustment_new( cf.buoy_vH,
 	        0,
-	        100,
-	        0.1,
+	        255,
+	        1,
 	        10,
 	        0 );
 
@@ -831,10 +831,10 @@ int buttons_vision( GtkWidget *box )
 	                      vbox8,
 	                      adj );
 
-	adj = ( GtkAdjustment * )gtk_adjustment_new( 0,
+	adj = ( GtkAdjustment * )gtk_adjustment_new( cf.fence_hL,
 	        0,
-	        100,
-	        0.1,
+	        255,
+	        1,
 	        10,
 	        0 );
 
@@ -843,10 +843,10 @@ int buttons_vision( GtkWidget *box )
 	                      vbox5,
 	                      adj );
 
-	adj = ( GtkAdjustment * )gtk_adjustment_new( 0,
+	adj = ( GtkAdjustment * )gtk_adjustment_new( cf.fence_sL,
 	        0,
-	        100,
-	        0.1,
+	        255,
+	        1,
 	        10,
 	        0 );
 
@@ -855,10 +855,10 @@ int buttons_vision( GtkWidget *box )
 	                      vbox5,
 	                      adj );
 
-	adj = ( GtkAdjustment * )gtk_adjustment_new( 0,
+	adj = ( GtkAdjustment * )gtk_adjustment_new( cf.fence_vL,
 	        0,
-	        100,
-	        0.1,
+	        255,
+	        1,
 	        10,
 	        0 );
 
@@ -867,10 +867,10 @@ int buttons_vision( GtkWidget *box )
 	                      vbox5,
 	                      adj );
 
-	adj = ( GtkAdjustment * )gtk_adjustment_new( 0,
+	adj = ( GtkAdjustment * )gtk_adjustment_new( cf.fence_hH,
 	        0,
-	        100,
-	        0.1,
+	        255,
+	        1,
 	        10,
 	        0 );
 
@@ -879,10 +879,10 @@ int buttons_vision( GtkWidget *box )
 	                      vbox6,
 	                      adj );
 
-	adj = ( GtkAdjustment * )gtk_adjustment_new( 0,
+	adj = ( GtkAdjustment * )gtk_adjustment_new( cf.fence_sH,
 	        0,
-	        100,
-	        0.1,
+	        255,
+	        1,
 	        10,
 	        0 );
 
@@ -891,10 +891,10 @@ int buttons_vision( GtkWidget *box )
 	                      vbox6,
 	                      adj );
 
-	adj = ( GtkAdjustment * )gtk_adjustment_new( 0,
+	adj = ( GtkAdjustment * )gtk_adjustment_new( cf.fence_vH,
 	        0,
-	        100,
-	        0.1,
+	        255,
+	        1,
 	        10,
 	        0 );
 

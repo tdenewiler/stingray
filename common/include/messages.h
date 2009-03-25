@@ -343,25 +343,19 @@ typedef struct _LJ_MSG {
 #ifndef _VSETTING_MSG_
 #define _VSETTING_MSG_
 
+typedef struct _HSV_HL {
+	float hL;
+	float hH;
+	float sL;
+	float sH;
+	float vL;
+	float vH;
+} HSV_HL;
+
 typedef struct _VSETTING {
-    float pipe_hlo; //!< Low value for the pipe hue.
-    float pipe_slo; //!< Low value for the pipe saturation.
-    float pipe_vlo; //!< Low value for the pipe value.
-    float buoy_hlo; //!< Low value for the buoy hue.
-    float buoy_slo; //!< Low value for the buoy saturation.
-    float buoy_vlo; //!< Low value for the buoy value.
-    float fence_hlo; //!< Low value for the fence hue.
-    float fence_slo; //!< Low value for the fence saturation.
-    float fence_vlo; //!< Low value for the fence value.
-    float pipe_hhi; //!< High value for the pipe hue.
-    float pipe_shi; //!< High value for the pipe saturation.
-    float pipe_vhi; //!< High value for the pipe value.
-    float buoy_hhi; //!< High value for the buoy hue.
-    float buoy_shi; //!< High value for the buoy saturation.
-    float buoy_vhi; //!< High value for the buoy value.
-    float fence_hhi; //!< High value for the fence hue.
-    float fence_shi; //!< High value for the fence saturation.
-    float fence_vhi; //!< High value for the fence value.
+	HSV_HL pipe_hsv;	//!< HSV limits for pipe.
+	HSV_HL buoy_hsv;	//!< HSV limits for pipe.
+	HSV_HL fence_hsv;	//!< HSV limits for pipe.
 } VSETTING;
 
 typedef struct _VSETTING_MSG {

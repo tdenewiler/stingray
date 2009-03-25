@@ -25,6 +25,7 @@
 
 int client_fd;
 int planner_fd;
+int vision_fd;
 CONF_VARS cf;
 MSG_DATA msg;
 
@@ -76,14 +77,14 @@ int main( int argc, char *argv[] )
 	if ( cf.enable_planner ) {
 		planner_fd = net_client_setup( cf.planner_IP, cf.planner_port );
 	}
+	if ( cf.enable_vision ) {
+		vision_fd = net_client_setup( cf.vision_IP, cf.vision_port );
+	}
 
 	/* Set up the GUI. */
 	gtk_init( &argc, &argv );
-
 	gui_init( );
-
 	gui_set_timers( );
-
 	gtk_main( );
 
 	return 0;
