@@ -48,12 +48,21 @@ CvPoint vision_find_centroid( IplImage *binImage, int thresh );
 //! \param cam A pointer to an open camera.
 //! \param srcImg The unprocessed image.
 //! \param outImg The image to be processed.
-int vision_find_dot(	int *dotx,
+int vision_find_dot( int *dotx,
                      int *doty,
+                     int *width,
+                     int *height,
                      int amt,
                      CvCapture *cam,
                      IplImage *srcImg,
-                     IplImage *outImg
+                     IplImage *outImg,
+                     IplImage *binImg,
+                     float hL,
+                     float hH,
+                     float sL,
+                     float sH,
+                     float vL,
+                     float vH
                    );
 
 //! Finds a pipe object from a camera.
@@ -63,16 +72,23 @@ int vision_find_dot(	int *dotx,
 //! \param srcImg The unprocessed image.
 //! \param outImg The image to be processed.
 int vision_find_pipe( int *pipex,
-                      float *bearing,
+                      double *bearing,
                       CvCapture *cam,
                       IplImage *srcImg,
-                      IplImage *outImg
+                      IplImage *outImg,
+                      IplImage *binImg,
+                      float hL,
+                      float hH,
+                      float sL,
+                      float sH,
+                      float vL,
+                      float vH
                     );
 
 //! Finds the centroid of the pixels in an image.
 //! \param img The binary image to find the bearing of.
 //! \return The angle of the pipe in degrees.
-float vision_get_bearing( IplImage *img );
+double vision_get_bearing( IplImage *img );
 
 //! Returns a black and white thresholded image from a source image and the
 //! hue, saturation, and value thresholds.
@@ -88,12 +104,8 @@ IplImage *vision_segment_image( float hL,
                                 int boxHeight
                               );
 
-IplImage* getBlobs( IplImage * img,
-		float hueLow,
-		float hueHigh,
-		float satLow,
-		float satHigh,
-		int minSize );
-
+//! Returns a black and white thresholded image from a source image and the
+//! hue, saturation, and value thresholds.
+IplImage* segmentImage(float hL, float hH, float sL, float sH, float vL, float vH, int closingAmount, IplImage* img, int boxWidth, int boxHeight);
 
 #endif /* _VISION_H_ */

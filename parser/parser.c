@@ -96,7 +96,6 @@ void parse_line( CONF_VARS *config )
 			sscanf( tokens[2], "%d", &config->window_width );
 		}
 	}
-
 	/* end GUI parameters */
 
 	/* net parameters */
@@ -130,7 +129,6 @@ void parse_line( CONF_VARS *config )
 			sscanf( tokens[2], "%d", &config->vision_window );
 		}
 	}
-
 	/* end net parameters */
 
 	/* enable parameters */
@@ -166,7 +164,6 @@ void parse_line( CONF_VARS *config )
 			sscanf( tokens[2], "%d", &config->enable_planner );
 		}
 	}
-
 	/* end enable parameters */
 
 	/* imu parameters */
@@ -181,7 +178,6 @@ void parse_line( CONF_VARS *config )
 			sscanf( tokens[2], "%d", &config->imu_stab );
 		}
 	}
-
 	/* end imu parameters */
 
 	/* pololu parameters */
@@ -193,7 +189,6 @@ void parse_line( CONF_VARS *config )
 			strncpy( config->pololu_port, tokens[2], STRING_SIZE );
 		}
 	}
-
 	/* end pololu parameters */
 
 	/* operating mode parameters */
@@ -202,7 +197,6 @@ void parse_line( CONF_VARS *config )
 			sscanf( tokens[2], "%d", &config->op_mode );
 		}
 	}
-
 	/* end operating mode parameters */
 
 	/* labjackd parameters */
@@ -220,7 +214,6 @@ void parse_line( CONF_VARS *config )
 			sscanf( tokens[2], "%hd", &config->labjackd_port );
 		}
 	}
-
 	/* end labjackd parameters */
 
 	/* GPS parameters */
@@ -232,7 +225,6 @@ void parse_line( CONF_VARS *config )
 			strncpy( config->gps_port, tokens[2], STRING_SIZE );
 		}
 	}
-
 	/* end GPS parameters */
 
 	/* USB relay board */
@@ -244,7 +236,6 @@ void parse_line( CONF_VARS *config )
 			sscanf( tokens[2], "%d", &config->relay_baud );
 		}
 	}
-
 	/* end USB relay board */
 
 	/* Set the debug level. */
@@ -253,7 +244,6 @@ void parse_line( CONF_VARS *config )
 			sscanf( tokens[2], "%d", &config->debug_level );
 		}
 	}
-
 	/* end debug level */
 
 	/* PID parameters. */
@@ -383,8 +373,69 @@ void parse_line( CONF_VARS *config )
 			sscanf( tokens[2], "%f", &config->target_az );
 		}
 	}
-
 	/* end target values */
+
+	/* Vision HSV values */
+	else if ( strncmp( tokens[0], "pipe", STRING_SIZE ) == 0 ) {
+		if ( strncmp( tokens[1], "hL", STRING_SIZE ) == 0 ) {
+			sscanf( tokens[2], "%f", &config->pipe_hL );
+		}
+		else if( strncmp( tokens[1], "hH", STRING_SIZE ) == 0 ) {
+			sscanf( tokens[2], "%f", &config->pipe_hH );
+		}
+		else if( strncmp( tokens[1], "sL", STRING_SIZE ) == 0 ) {
+			sscanf( tokens[2], "%f", &config->pipe_sL );
+		}
+		else if( strncmp( tokens[1], "sH", STRING_SIZE ) == 0 ) {
+			sscanf( tokens[2], "%f", &config->pipe_sH );
+		}
+		else if( strncmp( tokens[1], "vL", STRING_SIZE ) == 0 ) {
+			sscanf( tokens[2], "%f", &config->pipe_vL );
+		}
+		else if( strncmp( tokens[1], "vH", STRING_SIZE ) == 0 ) {
+			sscanf( tokens[2], "%f", &config->pipe_vH );
+		}
+	}
+	else if ( strncmp( tokens[0], "buoy", STRING_SIZE ) == 0 ) {
+		if ( strncmp( tokens[1], "hL", STRING_SIZE ) == 0 ) {
+			sscanf( tokens[2], "%f", &config->buoy_hL );
+		}
+		else if( strncmp( tokens[1], "hH", STRING_SIZE ) == 0 ) {
+			sscanf( tokens[2], "%f", &config->buoy_hH );
+		}
+		else if( strncmp( tokens[1], "sL", STRING_SIZE ) == 0 ) {
+			sscanf( tokens[2], "%f", &config->buoy_sL );
+		}
+		else if( strncmp( tokens[1], "sH", STRING_SIZE ) == 0 ) {
+			sscanf( tokens[2], "%f", &config->buoy_sH );
+		}
+		else if( strncmp( tokens[1], "vL", STRING_SIZE ) == 0 ) {
+			sscanf( tokens[2], "%f", &config->buoy_vL );
+		}
+		else if( strncmp( tokens[1], "vH", STRING_SIZE ) == 0 ) {
+			sscanf( tokens[2], "%f", &config->buoy_vH );
+		}
+	}
+	else if ( strncmp( tokens[0], "fence", STRING_SIZE ) == 0 ) {
+		if ( strncmp( tokens[1], "hL", STRING_SIZE ) == 0 ) {
+			sscanf( tokens[2], "%f", &config->fence_hL );
+		}
+		else if( strncmp( tokens[1], "hH", STRING_SIZE ) == 0 ) {
+			sscanf( tokens[2], "%f", &config->fence_hH );
+		}
+		else if( strncmp( tokens[1], "sL", STRING_SIZE ) == 0 ) {
+			sscanf( tokens[2], "%f", &config->fence_sL );
+		}
+		else if( strncmp( tokens[1], "sH", STRING_SIZE ) == 0 ) {
+			sscanf( tokens[2], "%f", &config->fence_sH );
+		}
+		else if( strncmp( tokens[1], "vL", STRING_SIZE ) == 0 ) {
+			sscanf( tokens[2], "%f", &config->fence_vL );
+		}
+		else if( strncmp( tokens[1], "vH", STRING_SIZE ) == 0 ) {
+			sscanf( tokens[2], "%f", &config->fence_vH );
+		}
+	}
 
 	/* Actuator parameters */
 	else if ( strncmp( tokens[0], "left", STRING_SIZE ) == 0 ) {
@@ -687,22 +738,11 @@ int parse_cla( int argc,
 		}
 	}
 
-	//printf( "\nPARSE_CLA: Configuration file specified = %s\n", cvalue );
-
-	for ( index = optind; index < argc; index++ ) {
-		//printf( "PARSE_CLA: Non-option argument %s\n", argv[index] );
-	}
-
 	if ( cvalue != NULL ) {
 		parse_config( cvalue, config );
-		//printf( "\n" );
 	}
 	else {
-		//printf( "PARSE_CLA: Using default configuration file %s.\n\n",
-		//        filename);
-		//print_help( );
 		parse_config( filename, config );
-		//printf( "\n" );
 	}
 	/* End of get command line arguments and parse configuration file. */
 
@@ -775,6 +815,25 @@ void parse_default_config( CONF_VARS *config )
 	config->target_ax = 0.0;
 	config->target_ay = 0.0;
 	config->target_az = 0.0;
+
+	config->pipe_hL = 0.0;
+	config->pipe_hH = 0.0;
+	config->pipe_sL = 0.0;
+	config->pipe_sH = 0.0;
+	config->pipe_vL = 0.0;
+	config->pipe_vH = 0.0;
+	config->buoy_hL = 0.0;
+	config->buoy_hH = 0.0;
+	config->buoy_sL = 0.0;
+	config->buoy_sH = 0.0;
+	config->buoy_vL = 0.0;
+	config->buoy_vH = 0.0;
+	config->fence_hL = 0.0;
+	config->fence_hH = 0.0;
+	config->fence_sL = 0.0;
+	config->fence_sH = 0.0;
+	config->fence_vL = 0.0;
+	config->fence_vH = 0.0;
 
 	/* servos */
 	config->enable_pololu = TRUE;
