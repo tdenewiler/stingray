@@ -13,7 +13,6 @@
 #include <cv.h>
 #include <cxcore.h>
 #include <highgui.h>
-#include <iostream>
 
 #include "vision.h"
 
@@ -58,67 +57,60 @@ int vision_find_dot( int *dotx,
                      float vH
                    )
 {
-	//CvPoint2D32f center;
-	//IplImage *binImg = NULL;
-	int status = -1;
-	int ii = 0;
-	int jj = 0;
-	int numPoints = 0;
-	CvBox2D buoy;
+	CvPoint center;
+	//int ii = 0;
+	//int jj = 0;
+	//int numPoints = 0;
+	//CvBox2D buoy;
+	//CvMemStorage *storage = NULL;
+	//CvSeq *contours = 0;
 
 	/* Initialize to impossible values. */
 	*dotx = -1;
 	*doty = -1;
 	*width = -1;
 	*height = -1;
-	//center.x = -1;
-	//center.y = -1;
+	center.x = -1;
+	center.y = -1;
 
 	srcImg = cvQueryFrame( cap );
-	outImg = cvCreateImage( cvSize( srcImg->width, srcImg->height ), IPL_DEPTH_8U, 1 );
-
 	if ( !srcImg ) {
-		return -2;
+		return 0;
 	}
 
 	/* Flip the source image. */
 	cvFlip( srcImg, srcImg );
 
 	/* Segment the flipped image into a binary image. */
-	//binImg = vision_segment_image( 2.0f, 33.0f, 1.0f, 250.00f, 5.0f, 250.0f, amt, srcImg, 0, 0 );
-	//binImg = segmentImage( 1.0f, 33.0f, 1.0f, 250.00f, 5.0f, 250.0f, amt, srcImg, 0, 0 );
-	binImg = segmentImage( hL, hH, sL, sH, vL, vH, amt, srcImg, 0, 0 );
+	vision_segment_image( hL, hH, sL, sH, vL, vH, amt, srcImg, binImg, 0, 0 );
 	cvConvertScale( binImg, outImg, 255.0 );
 
-	CvMemStorage* storage = cvCreateMemStorage(0);
-    CvSeq* dot_seq = cvCreateSeq( CV_32FC2, sizeof(CvSeq), sizeof(CvPoint2D32f), storage );
-    for ( jj = 0; jj < outImg->width - 1; jj++ ) {
-    	for ( ii = 0; ii < outImg->height - 1; ii++ ) {
-    		if ( cvGet2D(outImg,ii,jj).val[0] == 1 ) {
-    			numPoints++;
-    			printf( "dot seq point i, j = %d, %d \n", ii,jj );
-      			cvSeqPush( dot_seq, &cvPoint2D32f(ii,jj) );
-    		}
-		}
-	}
+	/* Find buoy with contours and fit ellipse. */
+    //contours = cvCreateSeq( CV_32FC2, sizeof(CvSeq), sizeof(CvPoint2D32f), storage );
+    //for ( jj = 0; jj < outImg->width - 1; jj++ ) {
+    	//for ( ii = 0; ii < outImg->height - 1; ii++ ) {
+    		//if ( cvGet2D(outImg,ii,jj).val[0] == 1 ) {
+    			//numPoints++;
+    			//printf( "contours point ii, jj = %d, %d \n", ii, jj );
+      			//cvSeqPush( contours, &cvPoint2D32f(ii,jj) );
+    		//}
+		//}
+	//}
+	//if ( numPoints > 6 ) {
+    	//buoy = cvFitEllipse2( contours );
+    	//*dotx = (int)buoy.center.x;
+		//*doty = (int)buoy.center.y;
+		//*width = (int)buoy.size.width;
+		//*height = (int)buoy.size.height;
+	//}
+	//cvClearSeq( contours );
 
 	/* Process the image. */
-	//center = vision_find_centroid( outImg, 0 );
-    //*dotx = center.x;
-	//*doty = center.y;
-	if ( numPoints > 6 ) {
-    	buoy = cvFitEllipse2( dot_seq );
-    	*dotx = (int)buoy.center.x;
-		*doty = (int)buoy.center.y;
-		*width = (int)buoy.size.width;
-		*height = (int)buoy.size.height;
-		status = 1;
-	}
+	center = vision_find_centroid( outImg, 0 );
+    *dotx = center.x;
+	*doty = center.y;
 
-	 cvReleaseImage( &binImg );
-	 cvClearSeq( dot_seq );
-
-	return status;
+	return 1;
 } /* end vision_find_dot() */
 
 
@@ -170,8 +162,7 @@ int vision_find_pipe( int *pipex,
 	outImg = cvCreateImage( cvSize( srcImg->width, srcImg->height ), IPL_DEPTH_8U, 1 );
 
 	/* Segment the image into a binary image. */
-	//binImg = segmentImage( 1.0f, 33.0f, 1.0f, 250.00f, 2.0f, 250.0f, 2, srcImg, 0 , 0 );
-	binImg = segmentImage( hL, hH, sL, sH, vL, vH, 2, srcImg, 0 , 0 );
+	vision_segment_image( hL, hH, sL, sH, vL, vH, 2, srcImg, binImg, 0 , 0 );
 	cvConvertScale( binImg, outImg, 255.0 );
 
 	/* Process the image. */
@@ -465,17 +456,18 @@ CvPoint vision_find_centroid( IplImage *binImage, int thresh )
  *
  *****************************************************************************/
 
-IplImage *vision_segment_image( float hL,
-                                float hH,
-                                float sL,
-                                float sH,
-                                float vL,
-                                float vH,
-                                int closingAmount,
-                                IplImage* img,
-                                int boxWidth,
-                                int boxHeight
-                              )
+int vision_segment_image( float hL,
+                          float hH,
+                          float sL,
+                          float sH,
+                          float vL,
+                          float vH,
+                          int closingAmount,
+                          IplImage* img,
+                          IplImage* bin_img,
+                          int boxWidth,
+                          int boxHeight
+                         )
 {
 	/* Get original image's width and height. */
 	int width = img->width;
@@ -570,49 +562,48 @@ IplImage *vision_segment_image( float hL,
 	cvCvtColor( hsv_image, masked_image, CV_HSV2BGR );
 
 	/* Convert the masked image to grayscale. */
-	IplImage* bin_image = cvCreateImage( cvSize( width, height ), IPL_DEPTH_8U, 1 );
-	cvCvtColor( masked_image, bin_image, CV_BGR2GRAY );
+	cvCvtColor( masked_image, bin_img, CV_BGR2GRAY );
 
 	 /*Do thresholding. */
-	//char *data = bin_image->imageData;
+	//char *data = bin_img->imageData;
 
-	//for ( int i = 0; i < bin_image->width; i++ ) {
-		//for ( int j = 0; j < bin_image->height; j++ ) {
+	//for ( int i = 0; i < bin_img->width; i++ ) {
+		//for ( int j = 0; j < bin_img->height; j++ ) {
 			/* Set outside of desired box to zero. */
 			//if ( ( boxHeight > 0 ) &&
-			        //( ( i < ( bin_image->width - boxWidth ) / 2 ) ||
-			          //( j < ( bin_image->height - boxHeight ) / 2 ) ||
-			          //( i > bin_image->width - ( ( bin_image->width - boxWidth ) / 2 ) ) ||
-			          //( j > bin_image->height - ( ( bin_image->height - boxHeight ) / 2 ) ) ) ) {
-				//data[i + j * bin_image->widthStep] = 0;
+			        //( ( i < ( bin_img->width - boxWidth ) / 2 ) ||
+			          //( j < ( bin_img->height - boxHeight ) / 2 ) ||
+			          //( i > bin_img->width - ( ( bin_img->width - boxWidth ) / 2 ) ) ||
+			          //( j > bin_img->height - ( ( bin_img->height - boxHeight ) / 2 ) ) ) ) {
+				//data[i + j * bin_img->widthStep] = 0;
 			//}
-			//else if ( data[i + j * bin_image->widthStep] != 0 ) {
-				//data[i + j * bin_image->widthStep] = 1;
+			//else if ( data[i + j * bin_img->widthStep] != 0 ) {
+				//data[i + j * bin_img->widthStep] = 1;
 			//}
 		//}
 	//}
 
 	/* Perform dilation. */
-	cvErode( bin_image, bin_image, w );
-	cvDilate( bin_image, bin_image, wCircle );
+	cvErode( bin_img, bin_img, w );
+	cvDilate( bin_img, bin_img, wCircle );
 
 	for ( int i = 0; i < closingAmount; i++ ) {
-		cvDilate( bin_image, bin_image, w );
+		cvDilate( bin_img, bin_img, w );
 	}
 
 	/* Perform erosion. */
 	for ( int i = 0; i < closingAmount; i++ ) {
-		cvErode( bin_image, bin_image, w );
+		cvErode( bin_img, bin_img, w );
 	}
 
-	//cvErode( bin_image, bin_image, wBig );
-	//cvDilate( bin_image, bin_image, wBig );
-	cvDilate( bin_image, bin_image, wBig );
+	//cvErode( bin_img, bin_img, wBig );
+	//cvDilate( bin_img, bin_img, wBig );
+	cvDilate( bin_img, bin_img, wBig );
 
-	cvDilate( bin_image, bin_image, wCircle );
-    //cvErode( bin_image, bin_image, wSmall );
+	cvDilate( bin_img, bin_img, wCircle );
+    //cvErode( bin_img, bin_img, wSmall );
 	//for( int i = 0; i < closingAmount; i++ ) {
-	//  cvErode( bin_image, bin_image, w );
+	//  cvErode( bin_img, bin_img, w );
 	//}
 
 	/* Release data structures. */
@@ -630,174 +621,5 @@ IplImage *vision_segment_image( float hL,
 	cvReleaseStructuringElement( &wBig );
 	cvReleaseStructuringElement( &wCircle );
 
-	/* Return binary image. */
-	return bin_image;
+	return 1;
 } /* end vision_segment_image() */
-
-
-
-/******************************************************************************
- *
- * Title:       IplImage *segmentImage( float hL,
- *                              float hH,
- *                              float sL,
- *                              float sH,
- *                              float vL,
- *                              float vH,
- *                              int closingAmount,
- *                              IplImage* img,
- *                              int boxWidth,
- *                              int boxHeight
- *                              )
- *
- * Description: Returns a black and white thresholded image from a source image
- *              and the hue, saturation, and value thresholds.
- *
- * Input:       binImage: The binary image to find the centroid of.
- *              thresh: The amount of pixels required for centroid to be valid.
- *
- * Output:      binImage: Returns a black and white thresholded image from a
- *              source image and the hue, saturation, and value thresholds.
- *
- * Globals:     None.
- *
- *****************************************************************************/
-
-IplImage* segmentImage(float hL, float hH, float sL, float sH, float vL, float vH, int closingAmount, IplImage* img, int boxWidth, int boxHeight)
-{
-	// get original image's width and height
-	int width = 0, height = 0;
-	width = img->width;
-	height = img->height;
-
-	// create structuring element
-	IplConvKernel *w = cvCreateStructuringElementEx(10, 10, (int)floor((3.0)/2), (int)floor((3.0)/2), CV_SHAPE_RECT);
-	IplConvKernel *wBig = cvCreateStructuringElementEx(20, 20, (int)floor((3.0)/2), (int)floor((3.0)/2), CV_SHAPE_RECT);
-	//IplConvKernel *wSmall = cvCreateStructuringElementEx(3, 3, (int)floor((3.0)/2), (int)floor((3.0)/2), CV_SHAPE_RECT);
-	IplConvKernel *wCircle = cvCreateStructuringElementEx(7, 7, (int)floor((3.0)/2), (int)floor((3.0)/2), CV_SHAPE_ELLIPSE);
-
-	// adjusted thresholding values
-	CvScalar THL = cvScalar(hL);
-	CvScalar THH = cvScalar(hH);
-	CvScalar TSL = cvScalar(sL);
-	CvScalar TSH = cvScalar(sH);
-	CvScalar TVL = cvScalar(vL);
-	CvScalar TVH = cvScalar(vH);
-
-	// convert original image to HSV from BGR
-	IplImage* hsv_image = cvCreateImage(cvSize(width, height), IPL_DEPTH_8U, 3);
-	cvCvtColor(img, hsv_image, CV_BGR2HSV);
-
-	// seperate image into hue, saturation, and value components
-	IplImage* hue_com = cvCreateImage(cvSize(width, height), IPL_DEPTH_8U, 1);
-	IplImage* sat_com = cvCreateImage(cvSize(width, height), IPL_DEPTH_8U, 1);
-	IplImage* val_com = cvCreateImage(cvSize(width, height), IPL_DEPTH_8U, 1);
-	cvSplit(hsv_image, hue_com, sat_com, val_com, 0);
-
-	// mask for hue
-	CvMat* hue_mask = cvCreateMat(height, width, CV_8UC1);
-	cvInRangeS(hue_com, THL, THH, hue_mask);
-
-	// mask for saturation
-	CvMat* sat_mask = cvCreateMat(height, width, CV_8UC1);
-	cvInRangeS(sat_com, TSL, TSH, sat_mask);
-
-	// mask for value
-	CvMat* val_mask = cvCreateMat(height, width, CV_8UC1);
-	cvInRangeS(val_com, TVL, TVH, val_mask);
-
-	// combine all the masks into one matrix via element multiplication
-	CvMat* hsv_mask = cvCreateMat(height, width, CV_8UC1);
-	cvCopy(hue_mask, hsv_mask);
-	cvMul(sat_mask, hsv_mask, hsv_mask);
-	cvMul(val_mask, hsv_mask, hsv_mask);
-
-        // disabled scaling
-	// cvScale(hsv_mask, hsv_mask, 1/255.0);
-
-	IplImage* temp_image = cvCreateImage(cvSize(width, height), IPL_DEPTH_8U, 1);
-	// apply the hsv mask to hue component of image and store in hsv_image channel 1
-	cvSetImageCOI(hsv_image, 1);
-	cvMul(hue_com, hsv_mask, temp_image);
-	cvCopy(temp_image, hsv_image);
-
-	// apply the hsv mask to saturation component of image and store in hsv_image channel 2
-	cvSetImageCOI(hsv_image, 2);
-	cvMul(sat_com, hsv_mask, temp_image);
-	cvCopy(temp_image, hsv_image);
-
-	// apply the hsv mask to value component of image and store in hsv_image channel 3
-	cvSetImageCOI(hsv_image, 3);
-	cvMul(val_com, hsv_mask, temp_image);
-	cvCopy(temp_image, hsv_image);
-
-	// reset the hsv_seg's channel of interest to all
-	cvSetImageCOI(hsv_image, 0);
-
-	IplImage* masked_image = cvCreateImage(cvSize(width, height), IPL_DEPTH_8U, 3);
-
-	// convert HSV image to a BGR image stored in masked_image
-	cvCvtColor(hsv_image, masked_image, CV_HSV2BGR);
-
-
-	// convert the masked image to grayscale
-	IplImage* bin_image = cvCreateImage(cvSize(width, height), IPL_DEPTH_8U, 1);
-	cvCvtColor(masked_image, bin_image, CV_BGR2GRAY);
-
-	// Do thresholding
-	char *data = bin_image->imageData;
-	for (int i = 0; i < bin_image->width; i++)
-		for (int j = 0; j < bin_image->height; j++)
-	{
-		// set outside of desired box to zero
-
-		if (boxHeight > 0 && (i < (bin_image->width - boxWidth) / 2 || j < (bin_image->height - boxHeight) / 2 ||
-			i > bin_image->width - ((bin_image->width - boxWidth) / 2) || j > bin_image->height - ((bin_image->height - boxHeight) / 2)))
-		{
-			data[i + j * bin_image->widthStep] = 0;
-		}
-		else if (data[i + j * bin_image->widthStep] != 0)
-		{
-			data[i + j * bin_image->widthStep] = 1;
-		}
-	}
-
-
-	// perform dilation
-	cvErode(bin_image, bin_image, w);
-	cvDilate(bin_image, bin_image, wCircle);
-
-	for (int i = 0; i < closingAmount; i++) {
-		cvDilate( bin_image, bin_image, w );
-	}
-
-	// perform erosion
-	for (int i = 0; i < closingAmount; i++) {
-		cvErode(bin_image, bin_image, w);
-	}
-	//cvErode(bin_image, bin_image, wBig);
-	//cvDilate(bin_image, bin_image, wBig);
-	cvDilate(bin_image, bin_image, wBig);
-	cvDilate(bin_image, bin_image, wCircle);
-
-	//for (int i = 0; i < closingAmount; i++)
-	//{
-	//	cvErode(bin_image, bin_image, wBig);
-	//}
-
-	// release data structures
-	cvReleaseMat(&hue_mask);
-	cvReleaseMat(&sat_mask);
-	cvReleaseMat(&val_mask);
-	cvReleaseMat(&hsv_mask);
-	cvReleaseImage(&hue_com);
-	cvReleaseImage(&sat_com);
-	cvReleaseImage(&val_com);
-	cvReleaseImage(&hsv_image);
-	cvReleaseImage(&temp_image);
-	cvReleaseImage(&masked_image);
-	cvReleaseStructuringElement(&w);
-
-	// return binary image
-	return bin_image;
-}

@@ -92,20 +92,17 @@ double vision_get_bearing( IplImage *img );
 
 //! Returns a black and white thresholded image from a source image and the
 //! hue, saturation, and value thresholds.
-IplImage *vision_segment_image( float hL,
-                                float hH,
-                                float sL,
-                                float sH,
-                                float vL,
-                                float vH,
-                                int closingAmount,
-                                IplImage* img,
-                                int boxWidth,
-                                int boxHeight
-                              );
-
-//! Returns a black and white thresholded image from a source image and the
-//! hue, saturation, and value thresholds.
-IplImage* segmentImage(float hL, float hH, float sL, float sH, float vL, float vH, int closingAmount, IplImage* img, int boxWidth, int boxHeight);
+int vision_segment_image( float hL,
+                          float hH,
+                          float sL,
+                          float sH,
+                          float vL,
+                          float vH,
+                          int closingAmount,
+                          IplImage* img,
+                          IplImage* bin_img,
+                          int boxWidth,
+                          int boxHeight
+                         );
 
 #endif /* _VISION_H_ */
