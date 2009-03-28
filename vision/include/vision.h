@@ -47,7 +47,6 @@ CvPoint vision_find_centroid( IplImage *binImage, int thresh );
 //! \param amt The amount of erosion/dilation to perform.
 //! \param cam A pointer to an open camera.
 //! \param srcImg The unprocessed image.
-//! \param outImg The image to be processed.
 int vision_find_dot( int *dotx,
                      int *doty,
                      int *width,
@@ -55,7 +54,6 @@ int vision_find_dot( int *dotx,
                      int amt,
                      CvCapture *cam,
                      IplImage *srcImg,
-                     IplImage *outImg,
                      IplImage *binImg,
                      float hL,
                      float hH,
@@ -70,12 +68,10 @@ int vision_find_dot( int *dotx,
 //! \param bearing Pointer to variable for bearing of pipe.
 //! \param cam A pointer to an open camera.
 //! \param srcImg The unprocessed image.
-//! \param outImg The image to be processed.
 int vision_find_pipe( int *pipex,
                       double *bearing,
                       CvCapture *cam,
                       IplImage *srcImg,
-                      IplImage *outImg,
                       IplImage *binImg,
                       float hL,
                       float hH,
@@ -89,20 +85,5 @@ int vision_find_pipe( int *pipex,
 //! \param img The binary image to find the bearing of.
 //! \return The angle of the pipe in degrees.
 double vision_get_bearing( IplImage *img );
-
-//! Returns a black and white thresholded image from a source image and the
-//! hue, saturation, and value thresholds.
-int vision_segment_image( float hL,
-                          float hH,
-                          float sL,
-                          float sH,
-                          float vL,
-                          float vH,
-                          int closingAmount,
-                          IplImage* img,
-                          IplImage* bin_img,
-                          int boxWidth,
-                          int boxHeight
-                         );
 
 #endif /* _VISION_H_ */
