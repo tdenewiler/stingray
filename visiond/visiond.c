@@ -30,8 +30,6 @@
 int server_fd;
 CvCapture *f_cam;
 CvCapture *b_cam;
-IplImage *f_out_img;
-IplImage *b_out_img;
 IplImage *f_bin_img;
 IplImage *b_bin_img;
 
@@ -92,8 +90,6 @@ void visiond_exit( )
 		cvReleaseCapture( &b_cam );
 	}
 
-	cvReleaseImage( &f_out_img );
-	cvReleaseImage( &b_out_img );
 	cvReleaseImage( &b_bin_img );
 	cvReleaseImage( &f_bin_img );
 
@@ -158,7 +154,7 @@ int main( int argc, char *argv[] )
 	parse_default_config( &cf );
 	parse_cla( argc, argv, &cf, STINGRAY, ( const char * )VISIOND_FILENAME );
 
-	/* Set HSV message data to configuration values. */
+	/* Initialize HSV message data to configuration values. */
 	msg.vsetting.data.pipe_hsv.hL = cf.pipe_hL;
 	msg.vsetting.data.pipe_hsv.hH = cf.pipe_hH;
 	msg.vsetting.data.pipe_hsv.sL = cf.pipe_sL;
@@ -185,7 +181,6 @@ int main( int argc, char *argv[] )
 	}
 	else {
 		f_img = cvQueryFrame( f_cam );
-		f_out_img = cvCreateImage( cvSize( f_img->width, f_img->height ), IPL_DEPTH_8U, 1 );
 		f_bin_img = cvCreateImage( cvSize( f_img->width, f_img->height ), IPL_DEPTH_8U, 1 );
 	}
 
@@ -198,9 +193,6 @@ int main( int argc, char *argv[] )
 	}
 	else {
 		b_img = cvQueryFrame( b_cam );
-		b_out_img = cvCreateImage( cvSize( b_img->width, b_img->height ), IPL_DEPTH_8U, 1 );
-		b_bin_img = cvCreateImage( cvSize( b_img->width, b_img->height ), IPL_DEPTH_8U, 1 );
-
 	}
 
 	/* Create windows to display video if set in configuration file. */
@@ -216,7 +208,7 @@ int main( int argc, char *argv[] )
 		/* Process front camera image. */
 		if ( f_cam ) {
 			status = vision_find_dot( &dotx, &doty, &width, &height, amt,
-					f_cam, f_img, f_out_img, f_bin_img,
+					f_cam, f_img, f_bin_img,
 					msg.vsetting.data.buoy_hsv.hL,
 					msg.vsetting.data.buoy_hsv.hH,
 					msg.vsetting.data.buoy_hsv.sL,
@@ -228,18 +220,16 @@ int main( int argc, char *argv[] )
 				msg.vision.data.front_y = doty;
 				if ( cf.vision_window ) {
 					if ( cvWaitKey( 5 ) >= 0 );
-					cvCircle( f_img, cvPoint( dotx, doty ), 10,
-							cvScalar( 255, 0, 0 ), 5, 8 );
+					cvCircle(f_img, cvPoint(dotx,doty), 10, cvScalar(255,0,0), 5, 8);
 					cvShowImage( f_win, f_img );
 				}
 			}
-			printf( "MAIN: front %d %d\n", dotx, doty );
+			//printf( "MAIN: front %d %d\n", dotx, doty );
 		}
 
 		/* Process bottom camera image. */
 		if ( b_cam ) {
-			status = vision_find_pipe( &pipex, &bearing, b_cam, b_img,
-					b_out_img, b_bin_img,
+			status = vision_find_pipe( &pipex, &bearing, b_cam, b_img, b_bin_img,
 					msg.vsetting.data.pipe_hsv.hL,
 					msg.vsetting.data.pipe_hsv.hH,
 					msg.vsetting.data.pipe_hsv.sL,
@@ -269,7 +259,7 @@ int main( int argc, char *argv[] )
 				msg.vision.data.bottom_x = pipex;
 				msg.vision.data.bottom_y = bearing;
 			}
-			printf( "MAIN: bottom %d %lf\n", pipex, bearing );
+			//printf( "MAIN: bottom %d %lf\n", pipex, bearing );
 		}
 
 		/* Get network data. */
