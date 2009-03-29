@@ -1,0 +1,14 @@
+v4lctl -c /dev/video0 setinput "Composite 1"
+v4lctl -c /dev/video1 setinput "Composite 1"
+v4lctl -c /dev/video0 setnorm NTSC
+v4lctl -c /dev/video1 setnorm NTSC
+
+v4lctl -c /dev/video0 color 45
+v4lctl -c /dev/video0 contrast 115
+v4lctl -c /dev/video0 hue 10
+v4lctl -c /dev/video0 bright 125
+
+v4lctl -c /dev/video1 color 45
+v4lctl -c /dev/video1 contrast 115
+v4lctl -c /dev/video1 hue 10
+v4lctl -c /dev/video1 bright 125

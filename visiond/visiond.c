@@ -151,7 +151,7 @@ int main( int argc, char *argv[] )
     CvVideoWriter *f_writer = 0;
     CvVideoWriter *b_writer = 0;
     int is_color = TRUE;
-    int fps = 0;
+    double fps = 0.0;
     struct timeval ctime;
     struct tm ct;
     char write_time[80] = {0};
@@ -288,7 +288,8 @@ int main( int argc, char *argv[] )
             gettimeofday( &ctime, NULL );
             ct = *( localtime ((const time_t*) &ctime.tv_sec) );
             strftime( write_time, sizeof(write_time), "images/f%y%m%d_%H%M%S", &ct);
-            sprintf( write_time + strlen(write_time), ".%03ld.jpg", ctime.tv_usec );
+            snprintf( write_time + strlen(write_time),
+            		strlen(write_time), ".%03ld.jpg", ctime.tv_usec );
             cvSaveImage( write_time, f_img );
             msg.vsetting.data.save_fframe = FALSE;
         }
@@ -297,7 +298,8 @@ int main( int argc, char *argv[] )
             gettimeofday( &ctime, NULL );
             ct = *( localtime ((const time_t*) &ctime.tv_sec) );
             strftime( write_time, sizeof(write_time), "images/b%y%m%d_%H%M%S", &ct);
-            sprintf( write_time + strlen(write_time), ".%03ld.jpg", ctime.tv_usec );
+            snprintf( write_time + strlen(write_time),
+            		strlen(write_time), ".%03ld.jpg", ctime.tv_usec );
             cvSaveImage( write_time, b_img );
             msg.vsetting.data.save_bframe = FALSE;
         }
@@ -306,27 +308,33 @@ int main( int argc, char *argv[] )
             gettimeofday( &ctime, NULL );
             ct = *( localtime ((const time_t*) &ctime.tv_sec) );
             strftime( write_time, sizeof(write_time), "stream/f%y%m%d_%H%M%S", &ct);
-            sprintf( write_time + strlen(write_time), ".%03ld.avi", ctime.tv_usec );
-
-            f_writer = cvCreateVideoWriter( write_time, CV_FOURCC('D', 'I', 'V', 'X'),
+            snprintf( write_time + strlen(write_time),
+            		strlen(write_time), ".%03ld.avi", ctime.tv_usec );
+            fps = cvGetCaptureProperty( f_cam, CV_CAP_PROP_FPS );
+            printf( "MAIN: fps = %lf\n", fps );
+            f_writer = cvCreateVideoWriter( write_time, CV_FOURCC('I', 'Y', 'U', 'V'),
                 fps, cvGetSize( f_img ), is_color );
             saving_fvideo = TRUE;
         }
         else if ( !msg.vsetting.data.save_fvideo && saving_fvideo ) {
             cvReleaseVideoWriter( &f_writer );
+            saving_fvideo = FALSE;
         }
         if ( msg.vsetting.data.save_bvideo && !saving_bvideo && b_cam ) {
             /* Get a timestamp. */
             gettimeofday( &ctime, NULL );
             ct = *( localtime ((const time_t*) &ctime.tv_sec) );
             strftime( write_time, sizeof(write_time), "stream/b%y%m%d_%H%M%S", &ct);
-            sprintf( write_time + strlen(write_time), ".%03ld.avi", ctime.tv_usec );
-            b_writer = cvCreateVideoWriter( "b_out.avi", CV_FOURCC('D', 'I', 'V', 'X'),
+            snprintf( write_time + strlen(write_time),
+            		strlen(write_time), ".%03ld.avi", ctime.tv_usec );
+            fps = cvGetCaptureProperty( b_cam, CV_CAP_PROP_FPS );
+            b_writer = cvCreateVideoWriter( write_time, CV_FOURCC('D', 'I', 'B', ' '),
                 fps, cvGetSize( b_img ), is_color );
             saving_bvideo = TRUE;
         }
         else if ( !msg.vsetting.data.save_bvideo && saving_bvideo ) {
             cvReleaseVideoWriter( &b_writer );
+            saving_bvideo = FALSE;
         }
     }
 
