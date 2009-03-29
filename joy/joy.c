@@ -31,11 +31,10 @@
 
 int joy_setup( )
 {
-	int fd = -1;
+    int fd = -1;
+    fd = open( "/dev/input/js0", O_RDONLY );
 
-	fd = open( "/dev/input/js0", O_RDONLY );
-
-	return fd;
+    return fd;
 } /* end joy_setup() */
 
 
@@ -46,7 +45,7 @@ int joy_setup( )
  * Description: Gets joystick input.
  *
  * Input:       fd: The file descriptor for the joystick.
- * 				joy_data: A pointer to a struct to hold the data.
+ *              joy_data: A pointer to a struct to hold the data.
  *
  * Output:      read_bytes: Number of bytes read from fd.
  *
@@ -56,35 +55,32 @@ int joy_setup( )
 
 int joy_get_data( int fd, JOY_DATA *joy_data )
 {
-	int read_bytes = 0;
-	unsigned char axes = 0;
-	unsigned char buttons = 0;
-	ioctl( fd, JSIOCGAXES, &axes );
-	ioctl( fd, JSIOCGBUTTONS, &buttons );
-	int *axis;
-	int *button;
+    int read_bytes = 0;
+    unsigned char axes = 0;
+    unsigned char buttons = 0;
+    ioctl( fd, JSIOCGAXES, &axes );
+    ioctl( fd, JSIOCGBUTTONS, &buttons );
+    int *axis;
+    int *button;
 
-	struct js_event js;
-	axis = ( int * )calloc( axes, sizeof( int ) );
-	button = ( int * )calloc( buttons, sizeof( int ) );
-	read_bytes = read( fd, &js, sizeof( struct js_event ) );
+    struct js_event js;
+    axis = (int *)calloc( axes, sizeof(int) );
+    button = (int *)calloc( buttons, sizeof(int) );
+    read_bytes = read( fd, &js, sizeof(struct js_event) );
 
-	switch ( js.type & ~JS_EVENT_INIT ) {
+    switch ( js.type & ~JS_EVENT_INIT ) {
+        case JS_EVENT_AXIS:
+            axis[js.number] = js.value;
+            joy_data->joy_axis = js.number;
+            joy_data->axis_value = js.value;
+            break;
 
-		case JS_EVENT_AXIS:
-			axis[js.number] = js.value;
-			joy_data->joy_axis = js.number;
-			joy_data->axis_value = js.value;
+        case JS_EVENT_BUTTON:
+            button[js.number] = js.value;
+            joy_data->joy_button = js.number;
+            joy_data->button_value = js.value;
+            break;
+    }
 
-			break;
-
-		case JS_EVENT_BUTTON:
-			button[js.number] = js.value;
-			joy_data->joy_button = js.number;
-			joy_data->button_value = js.value;
-
-			break;
-	}
-
-	return read_bytes;
+    return read_bytes;
 } /* end joy_input() */
