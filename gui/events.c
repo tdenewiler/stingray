@@ -46,6 +46,10 @@ extern GtkWidget *button_sfence_lo;
 extern GtkWidget *button_sfence_hi;
 extern GtkWidget *button_vfence_lo;
 extern GtkWidget *button_vfence_hi;
+extern GtkWidget *button_save_bframe;
+extern GtkWidget *button_save_fframe;
+extern GtkWidget *button_save_bvideo;
+extern GtkWidget *button_save_fvideo;
 
 /* Tasks buttons. */
 extern GtkWidget *button_gate;
@@ -82,7 +86,7 @@ extern GtkWidget *button_kd_az;
 
 /* Network API messages. */
 extern MSG_DATA msg;
-extern int client_fd;
+extern int nav_fd;
 extern int planner_fd;
 extern int vision_fd;
 
@@ -109,18 +113,18 @@ extern char net_buf[MAX_MSG_SIZE];
 
 void events_estop( GtkWidget *widget )
 {
-	/* Check the state of the button. */
-	if ( gtk_toggle_button_get_active( ( GtkToggleButton * )widget ) ) {
-		msg.stop.data.state = TRUE;
-	}
-	else {
-		msg.stop.data.state = FALSE;
-	}
+    /* Check the state of the button. */
+    if ( gtk_toggle_button_get_active( ( GtkToggleButton * )widget ) ) {
+        msg.stop.data.state = TRUE;
+    }
+    else {
+        msg.stop.data.state = FALSE;
+    }
 
-	/* Send the stop message. */
-	if ( client_fd  > 0 ) {
-		messages_send( client_fd, STOP_MSGID, &msg );
-	}
+    /* Send the stop message. */
+    if ( nav_fd  > 0 ) {
+        messages_send( nav_fd, STOP_MSGID, &msg );
+    }
 } /* end events_estop() */
 
 
@@ -143,40 +147,38 @@ void events_tasks( GtkWidget *widget,
                    gpointer data
                  )
 {
-	//g_print( "EVENT_TASKS: Tasks button selected.\n" );
+    /* Check the state of the buttons. */
+    if ( widget == button_square ||
+            widget == button_square_time1 ||
+            widget == button_square_time2 ||
+            widget == button_square_time3 ||
+            widget == button_square_time4 ) {
+        if ( gtk_toggle_button_get_active( ( GtkToggleButton * )button_square ) ) {
+            msg.task.data.num = TASK_SQUARE;
+            msg.task.data.time_forward  = gtk_spin_button_get_value_as_float(
+                                              GTK_SPIN_BUTTON( button_square_time1 ) );
+            msg.task.data.time_left = gtk_spin_button_get_value_as_float(
+                                          GTK_SPIN_BUTTON( button_square_time2 ) );
+            msg.task.data.time_reverse  = gtk_spin_button_get_value_as_float(
+                                              GTK_SPIN_BUTTON( button_square_time3 ) );
+            msg.task.data.time_right    = gtk_spin_button_get_value_as_float(
+                                              GTK_SPIN_BUTTON( button_square_time4 ) );
 
-	/* Check the state of the buttons. */
-	if ( widget == button_square ||
-	        widget == button_square_time1 ||
-	        widget == button_square_time2 ||
-	        widget == button_square_time3 ||
-	        widget == button_square_time4 ) {
-		if ( gtk_toggle_button_get_active( ( GtkToggleButton * )button_square ) ) {
-			msg.task.data.num = TASK_SQUARE;
-			msg.task.data.time_forward  = gtk_spin_button_get_value_as_float(
-			                                  GTK_SPIN_BUTTON( button_square_time1 ) );
-			msg.task.data.time_left = gtk_spin_button_get_value_as_float(
-			                              GTK_SPIN_BUTTON( button_square_time2 ) );
-			msg.task.data.time_reverse  = gtk_spin_button_get_value_as_float(
-			                                  GTK_SPIN_BUTTON( button_square_time3 ) );
-			msg.task.data.time_right    = gtk_spin_button_get_value_as_float(
-			                                  GTK_SPIN_BUTTON( button_square_time4 ) );
+        }
+    }
+    else if ( widget == button_buoy ) {
+        msg.task.data.num = TASK_BUOY;
+    }
+    else if ( widget == button_pipe ) {
+        msg.task.data.num = TASK_PIPE;
+    }
+    else if ( widget == button_gate ) {
+        msg.task.data.num = TASK_GATE;
+    }
 
-		}
-	}
-	else if ( widget == button_buoy ) {
-		msg.task.data.num = TASK_BUOY;
-	}
-	else if ( widget == button_pipe ) {
-		msg.task.data.num = TASK_PIPE;
-	}
-	else if ( widget == button_gate ) {
-		msg.task.data.num = TASK_GATE;
-	}
-
-	if ( planner_fd > 0 ) {
-		messages_send( planner_fd, TASK_MSGID, &msg );
-	}
+    if ( planner_fd > 0 ) {
+        messages_send( planner_fd, TASK_MSGID, &msg );
+    }
 } /* end events_tasks() */
 
 
@@ -199,81 +201,107 @@ void events_vision( GtkWidget *widget,
                    gpointer data
                  )
 {
-	if ( widget == button_hpipe_lo ) {
-		msg.vsetting.data.pipe_hsv.hL = gtk_spin_button_get_value_as_float(
-				GTK_SPIN_BUTTON( widget ) );
-	}
-	else if ( widget == button_spipe_lo ) {
-		msg.vsetting.data.pipe_hsv.sL = gtk_spin_button_get_value_as_float(
-				GTK_SPIN_BUTTON( widget ) );
-	}
-	else if ( widget == button_vpipe_lo ) {
-		msg.vsetting.data.pipe_hsv.vL = gtk_spin_button_get_value_as_float(
-				GTK_SPIN_BUTTON( widget ) );
-	}
-	else if ( widget == button_hbuoy_lo ) {
-		msg.vsetting.data.buoy_hsv.hL = gtk_spin_button_get_value_as_float(
-				GTK_SPIN_BUTTON( widget ) );
-	}
-	else if ( widget == button_sbuoy_lo ) {
-		msg.vsetting.data.buoy_hsv.sL = gtk_spin_button_get_value_as_float(
-				GTK_SPIN_BUTTON( widget ) );
-	}
-	else if ( widget == button_vbuoy_lo ) {
-		msg.vsetting.data.buoy_hsv.vL = gtk_spin_button_get_value_as_float(
-				GTK_SPIN_BUTTON( widget ) );
-	}
-	else if ( widget == button_hfence_lo ) {
-		msg.vsetting.data.fence_hsv.hL = gtk_spin_button_get_value_as_float(
-				GTK_SPIN_BUTTON( widget ) );
-	}
-	else if ( widget == button_sfence_lo ) {
-		msg.vsetting.data.fence_hsv.sL = gtk_spin_button_get_value_as_float(
-				GTK_SPIN_BUTTON( widget ) );
-	}
-	else if ( widget == button_vfence_lo ) {
-		msg.vsetting.data.fence_hsv.vL = gtk_spin_button_get_value_as_float(
-				GTK_SPIN_BUTTON( widget ) );
-	}
-	else if ( widget == button_hpipe_hi ) {
-		msg.vsetting.data.pipe_hsv.hH = gtk_spin_button_get_value_as_float(
-				GTK_SPIN_BUTTON( widget ) );
-	}
-	else if ( widget == button_spipe_hi ) {
-		msg.vsetting.data.pipe_hsv.sH = gtk_spin_button_get_value_as_float(
-				GTK_SPIN_BUTTON( widget ) );
-	}
-	else if ( widget == button_vpipe_hi ) {
-		msg.vsetting.data.pipe_hsv.vH = gtk_spin_button_get_value_as_float(
-				GTK_SPIN_BUTTON( widget ) );
-	}
-	else if ( widget == button_hbuoy_hi ) {
-		msg.vsetting.data.buoy_hsv.hH = gtk_spin_button_get_value_as_float(
-				GTK_SPIN_BUTTON( widget ) );
-	}
-	else if ( widget == button_sbuoy_hi ) {
-		msg.vsetting.data.buoy_hsv.sH = gtk_spin_button_get_value_as_float(
-				GTK_SPIN_BUTTON( widget ) );
-	}
-	else if ( widget == button_vbuoy_hi ) {
-		msg.vsetting.data.buoy_hsv.vH = gtk_spin_button_get_value_as_float(
-				GTK_SPIN_BUTTON( widget ) );
-	}
-	else if ( widget == button_hfence_hi ) {
-		msg.vsetting.data.fence_hsv.hH = gtk_spin_button_get_value_as_float(
-				GTK_SPIN_BUTTON( widget ) );
-	}
-	else if ( widget == button_sfence_hi ) {
-		msg.vsetting.data.fence_hsv.sH = gtk_spin_button_get_value_as_float(
-				GTK_SPIN_BUTTON( widget ) );
-	}
-	else if ( widget == button_vfence_hi ) {
-		msg.vsetting.data.fence_hsv.vH = gtk_spin_button_get_value_as_float(
-				GTK_SPIN_BUTTON( widget ) );
-	}
+    if ( widget == button_hpipe_lo ) {
+        msg.vsetting.data.pipe_hsv.hL = gtk_spin_button_get_value_as_float(
+                GTK_SPIN_BUTTON( widget ) );
+    }
+    else if ( widget == button_spipe_lo ) {
+        msg.vsetting.data.pipe_hsv.sL = gtk_spin_button_get_value_as_float(
+                GTK_SPIN_BUTTON( widget ) );
+    }
+    else if ( widget == button_vpipe_lo ) {
+        msg.vsetting.data.pipe_hsv.vL = gtk_spin_button_get_value_as_float(
+                GTK_SPIN_BUTTON( widget ) );
+    }
+    else if ( widget == button_hbuoy_lo ) {
+        msg.vsetting.data.buoy_hsv.hL = gtk_spin_button_get_value_as_float(
+                GTK_SPIN_BUTTON( widget ) );
+    }
+    else if ( widget == button_sbuoy_lo ) {
+        msg.vsetting.data.buoy_hsv.sL = gtk_spin_button_get_value_as_float(
+                GTK_SPIN_BUTTON( widget ) );
+    }
+    else if ( widget == button_vbuoy_lo ) {
+        msg.vsetting.data.buoy_hsv.vL = gtk_spin_button_get_value_as_float(
+                GTK_SPIN_BUTTON( widget ) );
+    }
+    else if ( widget == button_hfence_lo ) {
+        msg.vsetting.data.fence_hsv.hL = gtk_spin_button_get_value_as_float(
+                GTK_SPIN_BUTTON( widget ) );
+    }
+    else if ( widget == button_sfence_lo ) {
+        msg.vsetting.data.fence_hsv.sL = gtk_spin_button_get_value_as_float(
+                GTK_SPIN_BUTTON( widget ) );
+    }
+    else if ( widget == button_vfence_lo ) {
+        msg.vsetting.data.fence_hsv.vL = gtk_spin_button_get_value_as_float(
+                GTK_SPIN_BUTTON( widget ) );
+    }
+    else if ( widget == button_hpipe_hi ) {
+        msg.vsetting.data.pipe_hsv.hH = gtk_spin_button_get_value_as_float(
+                GTK_SPIN_BUTTON( widget ) );
+    }
+    else if ( widget == button_spipe_hi ) {
+        msg.vsetting.data.pipe_hsv.sH = gtk_spin_button_get_value_as_float(
+                GTK_SPIN_BUTTON( widget ) );
+    }
+    else if ( widget == button_vpipe_hi ) {
+        msg.vsetting.data.pipe_hsv.vH = gtk_spin_button_get_value_as_float(
+                GTK_SPIN_BUTTON( widget ) );
+    }
+    else if ( widget == button_hbuoy_hi ) {
+        msg.vsetting.data.buoy_hsv.hH = gtk_spin_button_get_value_as_float(
+                GTK_SPIN_BUTTON( widget ) );
+    }
+    else if ( widget == button_sbuoy_hi ) {
+        msg.vsetting.data.buoy_hsv.sH = gtk_spin_button_get_value_as_float(
+                GTK_SPIN_BUTTON( widget ) );
+    }
+    else if ( widget == button_vbuoy_hi ) {
+        msg.vsetting.data.buoy_hsv.vH = gtk_spin_button_get_value_as_float(
+                GTK_SPIN_BUTTON( widget ) );
+    }
+    else if ( widget == button_hfence_hi ) {
+        msg.vsetting.data.fence_hsv.hH = gtk_spin_button_get_value_as_float(
+                GTK_SPIN_BUTTON( widget ) );
+    }
+    else if ( widget == button_sfence_hi ) {
+        msg.vsetting.data.fence_hsv.sH = gtk_spin_button_get_value_as_float(
+                GTK_SPIN_BUTTON( widget ) );
+    }
+    else if ( widget == button_vfence_hi ) {
+        msg.vsetting.data.fence_hsv.vH = gtk_spin_button_get_value_as_float(
+                GTK_SPIN_BUTTON( widget ) );
+    }
+    else if ( widget == button_save_bframe ) {
+        msg.vsetting.data.save_bframe = TRUE;
+    }
+    else if ( widget == button_save_fframe ) {
+        msg.vsetting.data.save_fframe = TRUE;
+    }
+    else if ( widget == button_save_bvideo ) {
+        if ( gtk_toggle_button_get_active((GtkToggleButton *)widget) ) {
+            msg.vsetting.data.save_bvideo = TRUE;
+        }
+        else {
+            msg.vsetting.data.save_bvideo = FALSE;
+        }
+    }
+    else if ( widget == button_save_fvideo ) {
+        if ( gtk_toggle_button_get_active((GtkToggleButton *)widget) ) {
+            msg.vsetting.data.save_fvideo = TRUE;
+        }
+        else {
+            msg.vsetting.data.save_fvideo = FALSE;
+        }
+    }
 
-	/* Send the state of the buttons to the server. */
-	messages_send( vision_fd, VSETTING_MSGID, &msg );
+    /* Send the state of the buttons to the server. */
+    messages_send( vision_fd, VSETTING_MSGID, &msg );
+
+    /* Reset values for save frame buttons. */
+    msg.vsetting.data.save_bframe = FALSE;
+    msg.vsetting.data.save_fframe = FALSE;
 } /* end events_vision() */
 
 
@@ -299,10 +327,9 @@ void events_gain( GtkWidget *widget,
                   GdkEvent *event,
                   gpointer data )
 {
-	if ( cf.debug_level > 5 ) {
-		g_print( "GAIN_EVENT: Gain spin button selected.\n" );
-	}
-
+    if ( cf.debug_level > 5 ) {
+        g_print( "GAIN_EVENT: Gain spin button selected.\n" );
+    }
 } /* end events_gain() */
 
 
@@ -322,37 +349,34 @@ void events_gain( GtkWidget *widget,
 
 void events_gain_get( )
 {
-	int recv_bytes = 0;
+    int recv_bytes = 0;
+    msg.gain.data.mode = GAIN_GET;
 
-	msg.gain.data.mode = GAIN_GET;
-	/* Send the gain message. */
-	messages_send( client_fd, GAIN_MSGID, &msg );
-	msg.gain.data.mode = 0;
+    /* Send the gain message. */
+    messages_send( nav_fd, GAIN_MSGID, &msg );
+    msg.gain.data.mode = 0;
 
-	/* Get network data. */
+    /* Get network data. */
+    if ( nav_fd > 0 ) {
+        recv_bytes = net_client( nav_fd, net_buf, &msg );
+        net_buf[recv_bytes] = '\0';
+    }
+    if ( recv_bytes > 0 ) {
+        messages_decode( nav_fd, net_buf, &msg );
+    }
 
-	if ( client_fd > 0 ) {
-		recv_bytes = net_client( client_fd, net_buf, &msg );
-		net_buf[recv_bytes] = '\0';
-	}
-
-	if ( recv_bytes > 0 ) {
-		messages_decode( client_fd, net_buf, &msg );
-	}
-
-	gtk_spin_button_set_value( ( GtkSpinButton * )button_kp_yaw, msg.gain.data.kp_yaw );
-
-	gtk_spin_button_set_value( ( GtkSpinButton * )button_ki_yaw, msg.gain.data.ki_yaw );
-	gtk_spin_button_set_value( ( GtkSpinButton * )button_kd_yaw, msg.gain.data.kd_yaw );
-	gtk_spin_button_set_value( ( GtkSpinButton * )button_kp_pitch, msg.gain.data.kp_pitch );
-	gtk_spin_button_set_value( ( GtkSpinButton * )button_ki_pitch, msg.gain.data.ki_pitch );
-	gtk_spin_button_set_value( ( GtkSpinButton * )button_kd_pitch, msg.gain.data.kd_pitch );
-	gtk_spin_button_set_value( ( GtkSpinButton * )button_kp_roll, msg.gain.data.kp_roll );
-	gtk_spin_button_set_value( ( GtkSpinButton * )button_ki_roll, msg.gain.data.ki_roll );
-	gtk_spin_button_set_value( ( GtkSpinButton * )button_kd_roll, msg.gain.data.kd_roll );
-	gtk_spin_button_set_value( ( GtkSpinButton * )button_kp_depth, msg.gain.data.kp_depth );
-	gtk_spin_button_set_value( ( GtkSpinButton * )button_ki_depth, msg.gain.data.ki_depth );
-	gtk_spin_button_set_value( ( GtkSpinButton * )button_kd_depth, msg.gain.data.kd_depth );
+    gtk_spin_button_set_value( ( GtkSpinButton * )button_kp_yaw, msg.gain.data.kp_yaw );
+    gtk_spin_button_set_value( ( GtkSpinButton * )button_ki_yaw, msg.gain.data.ki_yaw );
+    gtk_spin_button_set_value( ( GtkSpinButton * )button_kd_yaw, msg.gain.data.kd_yaw );
+    gtk_spin_button_set_value( ( GtkSpinButton * )button_kp_pitch, msg.gain.data.kp_pitch );
+    gtk_spin_button_set_value( ( GtkSpinButton * )button_ki_pitch, msg.gain.data.ki_pitch );
+    gtk_spin_button_set_value( ( GtkSpinButton * )button_kd_pitch, msg.gain.data.kd_pitch );
+    gtk_spin_button_set_value( ( GtkSpinButton * )button_kp_roll, msg.gain.data.kp_roll );
+    gtk_spin_button_set_value( ( GtkSpinButton * )button_ki_roll, msg.gain.data.ki_roll );
+    gtk_spin_button_set_value( ( GtkSpinButton * )button_kd_roll, msg.gain.data.kd_roll );
+    gtk_spin_button_set_value( ( GtkSpinButton * )button_kp_depth, msg.gain.data.kp_depth );
+    gtk_spin_button_set_value( ( GtkSpinButton * )button_ki_depth, msg.gain.data.ki_depth );
+    gtk_spin_button_set_value( ( GtkSpinButton * )button_kd_depth, msg.gain.data.kd_depth );
 } /* end events_gain_get() */
 
 
@@ -372,35 +396,35 @@ void events_gain_get( )
 
 void events_gain_set( )
 {
-	msg.gain.data.kp_yaw    = gtk_spin_button_get_value( ( GtkSpinButton * )
-	                          button_kp_yaw );
-	msg.gain.data.ki_yaw    = gtk_spin_button_get_value( ( GtkSpinButton * )
-	                          button_ki_yaw );
-	msg.gain.data.kd_yaw    = gtk_spin_button_get_value( ( GtkSpinButton * )
-	                          button_kd_yaw );
-	msg.gain.data.kp_pitch  = gtk_spin_button_get_value( ( GtkSpinButton * )
-	                          button_kp_pitch );
-	msg.gain.data.ki_pitch  = gtk_spin_button_get_value( ( GtkSpinButton * )
-	                          button_ki_pitch );
-	msg.gain.data.kd_pitch  = gtk_spin_button_get_value( ( GtkSpinButton * )
-	                          button_kd_pitch );
-	msg.gain.data.kp_roll   = gtk_spin_button_get_value( ( GtkSpinButton * )
-	                          button_kp_roll );
-	msg.gain.data.ki_roll   = gtk_spin_button_get_value( ( GtkSpinButton * )
-	                          button_ki_roll );
-	msg.gain.data.kd_roll   = gtk_spin_button_get_value( ( GtkSpinButton * )
-	                          button_kd_roll );
-	msg.gain.data.kp_depth   = gtk_spin_button_get_value( ( GtkSpinButton * )
-	                           button_kp_depth );
-	msg.gain.data.ki_depth   = gtk_spin_button_get_value( ( GtkSpinButton * )
-	                           button_ki_depth );
-	msg.gain.data.kd_depth   = gtk_spin_button_get_value( ( GtkSpinButton * )
-	                           button_kd_depth );
-	msg.gain.data.mode = GAIN_SET;
+    msg.gain.data.kp_yaw    = gtk_spin_button_get_value( ( GtkSpinButton * )
+                              button_kp_yaw );
+    msg.gain.data.ki_yaw    = gtk_spin_button_get_value( ( GtkSpinButton * )
+                              button_ki_yaw );
+    msg.gain.data.kd_yaw    = gtk_spin_button_get_value( ( GtkSpinButton * )
+                              button_kd_yaw );
+    msg.gain.data.kp_pitch  = gtk_spin_button_get_value( ( GtkSpinButton * )
+                              button_kp_pitch );
+    msg.gain.data.ki_pitch  = gtk_spin_button_get_value( ( GtkSpinButton * )
+                              button_ki_pitch );
+    msg.gain.data.kd_pitch  = gtk_spin_button_get_value( ( GtkSpinButton * )
+                              button_kd_pitch );
+    msg.gain.data.kp_roll   = gtk_spin_button_get_value( ( GtkSpinButton * )
+                              button_kp_roll );
+    msg.gain.data.ki_roll   = gtk_spin_button_get_value( ( GtkSpinButton * )
+                              button_ki_roll );
+    msg.gain.data.kd_roll   = gtk_spin_button_get_value( ( GtkSpinButton * )
+                              button_kd_roll );
+    msg.gain.data.kp_depth   = gtk_spin_button_get_value( ( GtkSpinButton * )
+                               button_kp_depth );
+    msg.gain.data.ki_depth   = gtk_spin_button_get_value( ( GtkSpinButton * )
+                               button_ki_depth );
+    msg.gain.data.kd_depth   = gtk_spin_button_get_value( ( GtkSpinButton * )
+                               button_kd_depth );
+    msg.gain.data.mode = GAIN_SET;
 
-	/* Send the gain message. */
-	messages_send( client_fd, GAIN_MSGID, &msg );
-	msg.gain.data.mode = 0;
+    /* Send the gain message. */
+    messages_send( nav_fd, GAIN_MSGID, &msg );
+    msg.gain.data.mode = 0;
 } /* end events_gain_set() */
 
 
@@ -427,20 +451,20 @@ void events_enable_servos( GtkWidget *widget,
                            gpointer data
                          )
 {
-	if ( cf.debug_level > 5 ) {
-		g_print( "ENABLE_SERVOS_EVENT: Enable servos check button selected.\n" );
-	}
+    if ( cf.debug_level > 5 ) {
+        g_print( "ENABLE_SERVOS_EVENT: Enable servos check button selected.\n" );
+    }
 
-	/* Check the state of the button. */
-	if ( gtk_toggle_button_get_active( ( GtkToggleButton * )widget ) ) {
-		msg.client.data.enable_servos = TRUE;
-	}
-	else {
-		msg.client.data.enable_servos = FALSE;
-	}
+    /* Check the state of the button. */
+    if ( gtk_toggle_button_get_active( (GtkToggleButton *)widget ) ) {
+        msg.client.data.enable_servos = TRUE;
+    }
+    else {
+        msg.client.data.enable_servos = FALSE;
+    }
 
-	/* Send the state of the button to the server. */
-	messages_send( client_fd, CLIENT_MSGID, &msg );
+    /* Send the state of the button to the server. */
+    messages_send( nav_fd, CLIENT_MSGID, &msg );
 } /* end events_enable_servos() */
 
 
@@ -467,20 +491,20 @@ void events_enable_imu( GtkWidget *widget,
                         gpointer data
                       )
 {
-	if ( cf.debug_level > 5 ) {
-		g_print( "ENABLE_IMU_EVENT: Enable IMU check button selected.\n" );
-	}
+    if ( cf.debug_level > 5 ) {
+        g_print( "ENABLE_IMU_EVENT: Enable IMU check button selected.\n" );
+    }
 
-	/* Check the state of the button. */
-	if ( gtk_toggle_button_get_active( ( GtkToggleButton * )widget ) ) {
-		msg.client.data.enable_imu = TRUE;
-	}
-	else {
-		msg.client.data.enable_imu = FALSE;
-	}
+    /* Check the state of the button. */
+    if ( gtk_toggle_button_get_active( ( GtkToggleButton * )widget ) ) {
+        msg.client.data.enable_imu = TRUE;
+    }
+    else {
+        msg.client.data.enable_imu = FALSE;
+    }
 
-	/* Send the state of the button to the server. */
-	messages_send( client_fd, CLIENT_MSGID, &msg );
+    /* Send the state of the button to the server. */
+    messages_send( nav_fd, CLIENT_MSGID, &msg );
 } /* end events_enable_imu() */
 
 
@@ -507,20 +531,20 @@ void events_enable_log( GtkWidget *widget,
                         gpointer data
                       )
 {
-	if ( cf.debug_level > 5 ) {
-		g_print( "ENABLE_LOG_EVENT: Enable log check button selected.\n" );
-	}
+    if ( cf.debug_level > 5 ) {
+        g_print( "ENABLE_LOG_EVENT: Enable log check button selected.\n" );
+    }
 
-	/* Check the state of the button. */
-	if ( gtk_toggle_button_get_active( ( GtkToggleButton * )widget ) ) {
-		msg.client.data.enable_log = TRUE;
-	}
-	else {
-		msg.client.data.enable_log = FALSE;
-	}
+    /* Check the state of the button. */
+    if ( gtk_toggle_button_get_active( ( GtkToggleButton * )widget ) ) {
+        msg.client.data.enable_log = TRUE;
+    }
+    else {
+        msg.client.data.enable_log = FALSE;
+    }
 
-	/* Send the state of the button to the server. */
-	messages_send( client_fd, CLIENT_MSGID, &msg );
+    /* Send the state of the button to the server. */
+    messages_send( nav_fd, CLIENT_MSGID, &msg );
 } /* end events_enable_log() */
 
 
@@ -547,20 +571,20 @@ void events_imu_stab( GtkWidget *widget,
                       gpointer data
                     )
 {
-	if ( cf.debug_level > 5 ) {
-		g_print( "IMU_STAB_EVENT: IMU stabilized check button selected.\n" );
-	}
+    if ( cf.debug_level > 5 ) {
+        g_print( "IMU_STAB_EVENT: IMU stabilized check button selected.\n" );
+    }
 
-	/* Check the state of the button. */
-	if ( gtk_toggle_button_get_active( ( GtkToggleButton * )widget ) ) {
-		msg.client.data.imu_stab = TRUE;
-	}
-	else {
-		msg.client.data.imu_stab = FALSE;
-	}
+    /* Check the state of the button. */
+    if ( gtk_toggle_button_get_active( ( GtkToggleButton * )widget ) ) {
+        msg.client.data.imu_stab = TRUE;
+    }
+    else {
+        msg.client.data.imu_stab = FALSE;
+    }
 
-	/* Send the state of the button to the server. */
-	messages_send( client_fd, CLIENT_MSGID, &msg );
+    /* Send the state of the button to the server. */
+    messages_send( nav_fd, CLIENT_MSGID, &msg );
 } /* end events_imu_stab() */
 
 
@@ -587,16 +611,16 @@ void events_debug_level( GtkWidget *widget,
                          gpointer data
                        )
 {
-	if ( cf.debug_level > 5 ) {
-		g_print( "cf.debug_level_EVENT: Debug level spin button selected.\n" );
-	}
+    if ( cf.debug_level > 5 ) {
+        g_print( "cf.debug_level_EVENT: Debug level spin button selected.\n" );
+    }
 
-	/* Check the state of the button. */
-	msg.client.data.debug_level = gtk_spin_button_get_value_as_int(
-	                                  ( GtkSpinButton * )widget );
+    /* Check the state of the button. */
+    msg.client.data.debug_level = gtk_spin_button_get_value_as_int(
+                                      ( GtkSpinButton * )widget );
 
-	/* Send the value of the button to the server. */
-	messages_send( client_fd, CLIENT_MSGID, &msg );
+    /* Send the value of the button to the server. */
+    messages_send( nav_fd, CLIENT_MSGID, &msg );
 } /* end events_debug_level() */
 
 
@@ -623,12 +647,12 @@ void events_dropper( GtkWidget *widget,
                      gpointer data
                     )
 {
-	/* Check the state of the button. */
-	msg.client.data.dropper = gtk_spin_button_get_value_as_int(
-	                                  ( GtkSpinButton * )widget );
+    /* Check the state of the button. */
+    msg.client.data.dropper = gtk_spin_button_get_value_as_int(
+                                      ( GtkSpinButton * )widget );
 
-	/* Send the value of the button to the server. */
-	messages_send( client_fd, CLIENT_MSGID, &msg );
+    /* Send the value of the button to the server. */
+    messages_send( nav_fd, CLIENT_MSGID, &msg );
 } /* end events_debug_level() */
 
 
@@ -655,51 +679,51 @@ void events_opmode( GtkWidget *widget,
                     gpointer data
                   )
 {
-	if ( cf.debug_level > 5 ) {
-		g_print( "OPMODE_EVENT: Operational mode radio button selected.\n" );
-	}
+    if ( cf.debug_level > 5 ) {
+        g_print( "OPMODE_EVENT: Operational mode radio button selected.\n" );
+    }
 
-	/* Check the state of the button. */
-	if ( gtk_toggle_button_get_active( ( GtkToggleButton * )button_hold_yaw ) ) {
-		msg.target.data.mode = ( int )HOLD_YAW;
-		messages_send( client_fd, TARGET_MSGID, &msg );
-	}
+    /* Check the state of the button. */
+    if ( gtk_toggle_button_get_active( ( GtkToggleButton * )button_hold_yaw ) ) {
+        msg.target.data.mode = ( int )HOLD_YAW;
+        messages_send( nav_fd, TARGET_MSGID, &msg );
+    }
 
-	/* Check the state of the button. */
-	else if ( gtk_toggle_button_get_active( ( GtkToggleButton * )button_hold_roll ) ) {
-		msg.target.data.mode = ( int )HOLD_ROLL;
-		messages_send( client_fd, TARGET_MSGID, &msg );
-	}
+    /* Check the state of the button. */
+    else if ( gtk_toggle_button_get_active( ( GtkToggleButton * )button_hold_roll ) ) {
+        msg.target.data.mode = ( int )HOLD_ROLL;
+        messages_send( nav_fd, TARGET_MSGID, &msg );
+    }
 
-	/* Check the state of the button. */
-	else if ( gtk_toggle_button_get_active( ( GtkToggleButton * )button_hold_pitch ) ) {
-		msg.target.data.mode = ( int )HOLD_PITCH;
-		messages_send( client_fd, TARGET_MSGID, &msg );
-	}
+    /* Check the state of the button. */
+    else if ( gtk_toggle_button_get_active( ( GtkToggleButton * )button_hold_pitch ) ) {
+        msg.target.data.mode = ( int )HOLD_PITCH;
+        messages_send( nav_fd, TARGET_MSGID, &msg );
+    }
 
-	/* Check the state of the button. */
-	else if ( gtk_toggle_button_get_active( ( GtkToggleButton * )button_hold_accel ) ) {
-		msg.target.data.mode = ( int )HOLD_ACCEL;
-		messages_send( client_fd, TARGET_MSGID, &msg );
-	}
+    /* Check the state of the button. */
+    else if ( gtk_toggle_button_get_active( ( GtkToggleButton * )button_hold_accel ) ) {
+        msg.target.data.mode = ( int )HOLD_ACCEL;
+        messages_send( nav_fd, TARGET_MSGID, &msg );
+    }
 
-	/* Check the state of the button. */
-	else if ( gtk_toggle_button_get_active( ( GtkToggleButton * )button_hold_ang_rate ) ) {
-		msg.target.data.mode = ( int )HOLD_ANG_RATE;
-		messages_send( client_fd, TARGET_MSGID, &msg );
-	}
+    /* Check the state of the button. */
+    else if ( gtk_toggle_button_get_active( ( GtkToggleButton * )button_hold_ang_rate ) ) {
+        msg.target.data.mode = ( int )HOLD_ANG_RATE;
+        messages_send( nav_fd, TARGET_MSGID, &msg );
+    }
 
-	/* Check the state of the button. */
-	else if ( gtk_toggle_button_get_active( ( GtkToggleButton * )button_manual ) ) {
-		msg.target.data.mode = ( int )MANUAL;
-		messages_send( client_fd, TARGET_MSGID, &msg );
-	}
+    /* Check the state of the button. */
+    else if ( gtk_toggle_button_get_active( ( GtkToggleButton * )button_manual ) ) {
+        msg.target.data.mode = ( int )MANUAL;
+        messages_send( nav_fd, TARGET_MSGID, &msg );
+    }
 
-	/* Check the state of the button. */
-	else if ( gtk_toggle_button_get_active( ( GtkToggleButton * )button_autonomous ) ) {
-		msg.target.data.mode = ( int )AUTONOMOUS;
-		messages_send( client_fd, TARGET_MSGID, &msg );
-	}
+    /* Check the state of the button. */
+    else if ( gtk_toggle_button_get_active( ( GtkToggleButton * )button_autonomous ) ) {
+        msg.target.data.mode = ( int )AUTONOMOUS;
+        messages_send( nav_fd, TARGET_MSGID, &msg );
+    }
 } /* end events_opmode() */
 
 
@@ -726,16 +750,16 @@ void events_target_yaw( GtkWidget *widget,
                         gpointer data
                       )
 {
-	if ( cf.debug_level > 5 ) {
-		g_print( "TARGET_EVENT: Target yaw value changed.\n" );
-	}
+    if ( cf.debug_level > 5 ) {
+        g_print( "TARGET_EVENT: Target yaw value changed.\n" );
+    }
 
-	/* Set the target values to the spin buttons. */
-	msg.target.data.yaw = gtk_spin_button_get_value_as_float(
-	                          ( GtkSpinButton * )widget );
+    /* Set the target values to the spin buttons. */
+    msg.target.data.yaw = gtk_spin_button_get_value_as_float(
+                              ( GtkSpinButton * )widget );
 
-	/* Send the state of the button to the server. */
-	messages_send( client_fd, TARGET_MSGID, &msg );
+    /* Send the state of the button to the server. */
+    messages_send( nav_fd, TARGET_MSGID, &msg );
 } /* end events_target_yaw() */
 
 
@@ -762,16 +786,16 @@ void events_target_roll( GtkWidget *widget,
                          gpointer data
                        )
 {
-	if ( cf.debug_level > 5 ) {
-		g_print( "TARGET_EVENT: Target roll value changed.\n" );
-	}
+    if ( cf.debug_level > 5 ) {
+        g_print( "TARGET_EVENT: Target roll value changed.\n" );
+    }
 
-	/* Set the target values to the spin buttons. */
-	msg.target.data.roll = gtk_spin_button_get_value_as_float(
-	                           ( GtkSpinButton * )widget );
+    /* Set the target values to the spin buttons. */
+    msg.target.data.roll = gtk_spin_button_get_value_as_float(
+                               ( GtkSpinButton * )widget );
 
-	/* Send the state of the button to the server. */
-	messages_send( client_fd, TARGET_MSGID, &msg );
+    /* Send the state of the button to the server. */
+    messages_send( nav_fd, TARGET_MSGID, &msg );
 } /* end events_target_roll() */
 
 
@@ -798,16 +822,16 @@ void events_target_pitch( GtkWidget *widget,
                           gpointer data
                         )
 {
-	if ( cf.debug_level > 5 ) {
-		g_print( "TARGET_EVENT: Target pitch value changed.\n" );
-	}
+    if ( cf.debug_level > 5 ) {
+        g_print( "TARGET_EVENT: Target pitch value changed.\n" );
+    }
 
-	/* Set the target values to the spin buttons. */
-	msg.target.data.pitch = gtk_spin_button_get_value_as_float(
-	                            ( GtkSpinButton * )widget );
+    /* Set the target values to the spin buttons. */
+    msg.target.data.pitch = gtk_spin_button_get_value_as_float(
+                                ( GtkSpinButton * )widget );
 
-	/* Send the state of the button to the server. */
-	messages_send( client_fd, TARGET_MSGID, &msg );
+    /* Send the state of the button to the server. */
+    messages_send( nav_fd, TARGET_MSGID, &msg );
 } /* end events_target_pitch() */
 
 
@@ -834,16 +858,16 @@ void events_target_depth( GtkWidget *widget,
                           gpointer data
                         )
 {
-	if ( cf.debug_level > 5 ) {
-		g_print( "TARGET_EVENT: Target depth value changed.\n" );
-	}
+    if ( cf.debug_level > 5 ) {
+        g_print( "TARGET_EVENT: Target depth value changed.\n" );
+    }
 
-	/* Set the target values to the spin buttons. */
-	msg.target.data.depth = gtk_spin_button_get_value_as_float(
-	                            ( GtkSpinButton * )widget );
+    /* Set the target values to the spin buttons. */
+    msg.target.data.depth = gtk_spin_button_get_value_as_float(
+                                ( GtkSpinButton * )widget );
 
-	/* Send the state of the button to the server. */
-	messages_send( client_fd, TARGET_MSGID, &msg );
+    /* Send the state of the button to the server. */
+    messages_send( nav_fd, TARGET_MSGID, &msg );
 } /* end events_target_pitch() */
 
 
@@ -870,16 +894,16 @@ void events_target_fx( GtkWidget *widget,
                        gpointer data
                      )
 {
-	if ( cf.debug_level > 5 ) {
-		g_print( "TARGET_EVENT: Target Fx value changed.\n" );
-	}
+    if ( cf.debug_level > 5 ) {
+        g_print( "TARGET_EVENT: Target Fx value changed.\n" );
+    }
 
-	/* Set the target values to the spin buttons. */
-	msg.target.data.fx = gtk_spin_button_get_value_as_float(
-	                         ( GtkSpinButton * )widget );
+    /* Set the target values to the spin buttons. */
+    msg.target.data.fx = gtk_spin_button_get_value_as_float(
+                             ( GtkSpinButton * )widget );
 
-	/* Send the state of the button to the server. */
-	messages_send( client_fd, TARGET_MSGID, &msg );
+    /* Send the state of the button to the server. */
+    messages_send( nav_fd, TARGET_MSGID, &msg );
 } /* end events_target_fx() */
 
 
@@ -906,16 +930,16 @@ void events_target_fy( GtkWidget *widget,
                        gpointer data
                      )
 {
-	if ( cf.debug_level > 5 ) {
-		g_print( "TARGET_EVENT: Target Fy value changed.\n" );
-	}
+    if ( cf.debug_level > 5 ) {
+        g_print( "TARGET_EVENT: Target Fy value changed.\n" );
+    }
 
-	/* Set the target values to the spin buttons. */
-	msg.target.data.fy = gtk_spin_button_get_value_as_float(
-	                         ( GtkSpinButton * )widget );
+    /* Set the target values to the spin buttons. */
+    msg.target.data.fy = gtk_spin_button_get_value_as_float(
+                             ( GtkSpinButton * )widget );
 
-	/* Send the state of the button to the server. */
-	messages_send( client_fd, TARGET_MSGID, &msg );
+    /* Send the state of the button to the server. */
+    messages_send( nav_fd, TARGET_MSGID, &msg );
 } /* end events_target_fy() */
 
 
@@ -942,14 +966,14 @@ void events_target_speed( GtkWidget *widget,
                           gpointer data
                         )
 {
-	if ( cf.debug_level > 5 ) {
-		g_print( "TARGET_EVENT: Target Speed value changed.\n" );
-	}
+    if ( cf.debug_level > 5 ) {
+        g_print( "TARGET_EVENT: Target Speed value changed.\n" );
+    }
 
-	/* Set the target values to the spin buttons. */
-	msg.target.data.speed = gtk_spin_button_get_value_as_float(
-	                            ( GtkSpinButton * )widget );
+    /* Set the target values to the spin buttons. */
+    msg.target.data.speed = gtk_spin_button_get_value_as_float(
+                                ( GtkSpinButton * )widget );
 
-	/* Send the state of the button to the server. */
-	messages_send( client_fd, TARGET_MSGID, &msg );
+    /* Send the state of the button to the server. */
+    messages_send( nav_fd, TARGET_MSGID, &msg );
 } /* end events_target_speed() */

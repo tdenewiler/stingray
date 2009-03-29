@@ -55,8 +55,8 @@
 #define VISION_MSGID        8
 #define STOP_MSGID          9
 #define TASK_MSGID          10
-#define VSETTING_MSGID		11
-#define LJ_MSGID			12
+#define VSETTING_MSGID      11
+#define LJ_MSGID            12
 //@}
 #endif /* API_MSGID */
 
@@ -88,7 +88,7 @@
 /*! Header for API messages. */
 
 typedef struct _HEADER {
-	unsigned char msgid; //!< Message ID for decoding on other end of connection
+    unsigned char msgid; //!< Message ID for decoding on other end of connection
 } HEADER;
 
 #endif /* _HEADER_ */
@@ -99,7 +99,7 @@ typedef struct _HEADER {
 /*! Default message to send to API server. */
 
 typedef struct _OPEN_MSG {
-	HEADER hdr; //!< Header struct
+    HEADER hdr; //!< Header struct
 } OPEN_MSG;
 
 #endif /* _OPEN_MSG_ */
@@ -110,8 +110,8 @@ typedef struct _OPEN_MSG {
 /*! API message with IMU data. */
 
 typedef struct _MSTRAIN_MSG {
-	HEADER hdr;         //!< Header struct
-	MSTRAIN_DATA data;  //!< IMU Data struct
+    HEADER hdr;         //!< Header struct
+    MSTRAIN_DATA data;  //!< IMU Data struct
 } MSTRAIN_MSG;
 
 #endif /* _MSTRAIN_MSG_ */
@@ -122,16 +122,16 @@ typedef struct _MSTRAIN_MSG {
 /*! Manual servo and thruster values. */
 
 typedef struct _SERVO {
-	unsigned char sync;     //!< Sync byte
-	unsigned char servo;    //!< Port that servo is plugged into on SSC
-	unsigned char position; //!< Position to move servo to
+    unsigned char sync;     //!< Sync byte
+    unsigned char servo;    //!< Port that servo is plugged into on SSC
+    unsigned char position; //!< Position to move servo to
 } SERVO;
 
 /*! API message to send servo and thruster values. */
 
 typedef struct _SERVO_MSG {
-	HEADER hdr; //!< Header struct
-	SERVO data; //!< Servo struct
+    HEADER hdr; //!< Header struct
+    SERVO data; //!< Servo struct
 } SERVO_MSG;
 
 #endif /* _SERVO_MSG_ */
@@ -142,14 +142,14 @@ typedef struct _SERVO_MSG {
 /*! Emergency stop message. */
 
 typedef struct _STOP {
-	unsigned char state;    //!< State
+    unsigned char state;    //!< State
 } STOP;
 
 /*! API message to send emergency stop command. */
 
 typedef struct _STOP_MSG {
-	HEADER hdr; //!< Header struct
-	STOP data;  //!< Stop struct
+    HEADER hdr; //!< Header struct
+    STOP data;  //!< Stop struct
 } STOP_MSG;
 
 #endif /* _STOP_MSG_ */
@@ -172,8 +172,8 @@ typedef struct _CLIENT {
 /*! API message to change specific uuv functionality. */
 
 typedef struct _CLIENT_MSG {
-	HEADER hdr;  //!< Header struct
-	CLIENT data;  //!< Client struct
+    HEADER hdr;  //!< Header struct
+    CLIENT data;  //!< Client struct
 } CLIENT_MSG;
 
 #endif /* _CLIENT_MSG_ */
@@ -184,21 +184,21 @@ typedef struct _CLIENT_MSG {
 /*! Operational mode and target pose and motion values. */
 
 typedef struct _TARGET {
-	int mode;       //!< Operational mode
-	float pitch;    //!< Desired pitch angle
-	float roll;     //!< Desired roll angle
-	float yaw;      //!< Desired yaw angle
-	float depth;    //!< Desired depth
-	float fx;       //!< Desired force in x direction
-	float fy;       //!< Desired force in y direction
-	float speed;    //!< Desired speed.
+    int mode;       //!< Operational mode
+    float pitch;    //!< Desired pitch angle
+    float roll;     //!< Desired roll angle
+    float yaw;      //!< Desired yaw angle
+    float depth;    //!< Desired depth
+    float fx;       //!< Desired force in x direction
+    float fy;       //!< Desired force in y direction
+    float speed;    //!< Desired speed.
 } TARGET;
 
 /*! API message to change the uuv operational mode. */
 
 typedef struct _TARGET_MSG {
-	HEADER hdr;     //!< Header struct
-	TARGET data;    //!< Target struct
+    HEADER hdr;     //!< Header struct
+    TARGET data;    //!< Target struct
 } TARGET_MSG;
 
 #endif /* _TARGET_MSG_ */
@@ -209,35 +209,35 @@ typedef struct _TARGET_MSG {
 /*! Gains used by the uuv. Typically used with a PID controller */
 
 typedef struct _GAIN {
-	char mode;          //!< Gains mode. Either GET_GAINS or SET_GAINS
-	double kp_yaw;      //!< Proportional gain for the yaw angle
-	double ki_yaw;      //!< Integrator gain for the yaw angle
-	double kd_yaw;      //!< Derivative gain for the yaw angle
-	double kp_pitch;    //!< Proportional gain for the pitch angle
-	double ki_pitch;    //!< Integrator gain for the pitch angle
-	double kd_pitch;    //!< Derivative gain for the pitch angle
-	double kp_roll;     //!< Proportional gain for the roll angle
-	double ki_roll;     //!< Integrator gain for the roll angle
-	double kd_roll;     //!< Derivative gain for the roll angle
-	double kp_depth;    //!< Proportional gain for depth
-	double ki_depth;    //!< Integrator gain for depth
-	double kd_depth;    //!< Derivative gain for depth
-	double kp_ax;       //!< Proportional gain for acceleration in X
-	double ki_ax;       //!< Integrator gain for acceleration in X
-	double kd_ax;       //!< Derivative gain for acceleration in X
-	double kp_ay;       //!< Proportional gain for acceleration in Y
-	double ki_ay;       //!< Integrator gain for acceleration in Y
-	double kd_ay;       //!< Derivative gain for acceleration in Y
-	double kp_az;       //!< Proportional gain for acceleration in Z
-	double ki_az;       //!< Integrator gain for acceleration in Z
-	double kd_az;       //!< Derivative gain for acceleration in Z
+    char mode;          //!< Gains mode. Either GET_GAINS or SET_GAINS
+    double kp_yaw;      //!< Proportional gain for the yaw angle
+    double ki_yaw;      //!< Integrator gain for the yaw angle
+    double kd_yaw;      //!< Derivative gain for the yaw angle
+    double kp_pitch;    //!< Proportional gain for the pitch angle
+    double ki_pitch;    //!< Integrator gain for the pitch angle
+    double kd_pitch;    //!< Derivative gain for the pitch angle
+    double kp_roll;     //!< Proportional gain for the roll angle
+    double ki_roll;     //!< Integrator gain for the roll angle
+    double kd_roll;     //!< Derivative gain for the roll angle
+    double kp_depth;    //!< Proportional gain for depth
+    double ki_depth;    //!< Integrator gain for depth
+    double kd_depth;    //!< Derivative gain for depth
+    double kp_ax;       //!< Proportional gain for acceleration in X
+    double ki_ax;       //!< Integrator gain for acceleration in X
+    double kd_ax;       //!< Derivative gain for acceleration in X
+    double kp_ay;       //!< Proportional gain for acceleration in Y
+    double ki_ay;       //!< Integrator gain for acceleration in Y
+    double kd_ay;       //!< Derivative gain for acceleration in Y
+    double kp_az;       //!< Proportional gain for acceleration in Z
+    double ki_az;       //!< Integrator gain for acceleration in Z
+    double kd_az;       //!< Derivative gain for acceleration in Z
 } GAIN;
 
 /*! API message to change the gains used by the UUV in PID loops. */
 
 typedef struct _GAIN_MSG {
-	HEADER hdr;  //!< Header struct
-	GAIN data;      //!< Gains struct
+    HEADER hdr;  //!< Header struct
+    GAIN data;      //!< Gains struct
 } GAIN_MSG;
 
 #endif /* _GAIN_MSG_ */
@@ -246,39 +246,39 @@ typedef struct _GAIN_MSG {
 #define _STATUS_MSG_
 
 typedef struct _STATUS {
-	float mag[3];       //!< Magnetometer vector
-	float accel[3];     //!< Acceleration vector
-	float ang_rate[3];  //!< Angular rate vector
-	float quat[4];      //!< Quaternion vector
-	float pitch;        //!< Pitch angle, from Euler angles
-	float roll;         //!< Roll angle, from Euler angles
-	float yaw;          //!< Yaw angle, from Euler angles
-	float depth;        //!< Depth from pressure sensor
-	float pitch_perr;   //!< Pitch P error
-	float pitch_ierr;   //!< Pitch I error
-	float pitch_derr;   //!< Pitch D error
-	int pitch_period;   //!< Pitch dt
-	float roll_perr;    //!< Roll P error
-	float roll_ierr;    //!< Roll I error
-	float roll_derr;    //!< Roll D error
-	int roll_period;    //!< Roll dt
-	float yaw_perr;     //!< Yaw P error
-	float yaw_ierr;     //!< Yaw I error
-	float yaw_derr;     //!< Yaw D error
-	int yaw_period;     //!< Yaw dt
-	float depth_perr;   //!< Depth P error
-	float depth_ierr;   //!< Depth I error
-	float depth_derr;   //!< Depth D error
-	int depth_period;   //!< Depth dt
-	float battery1;     //!< Voltage of battery 1
-	float battery2;     //!< Voltage of battery 2
-	float pressure;     //!< Pressure sensor reading
-	float water;        //!< Water leak sensor reading
+    float mag[3];       //!< Magnetometer vector
+    float accel[3];     //!< Acceleration vector
+    float ang_rate[3];  //!< Angular rate vector
+    float quat[4];      //!< Quaternion vector
+    float pitch;        //!< Pitch angle, from Euler angles
+    float roll;         //!< Roll angle, from Euler angles
+    float yaw;          //!< Yaw angle, from Euler angles
+    float depth;        //!< Depth from pressure sensor
+    float pitch_perr;   //!< Pitch P error
+    float pitch_ierr;   //!< Pitch I error
+    float pitch_derr;   //!< Pitch D error
+    int pitch_period;   //!< Pitch dt
+    float roll_perr;    //!< Roll P error
+    float roll_ierr;    //!< Roll I error
+    float roll_derr;    //!< Roll D error
+    int roll_period;    //!< Roll dt
+    float yaw_perr;     //!< Yaw P error
+    float yaw_ierr;     //!< Yaw I error
+    float yaw_derr;     //!< Yaw D error
+    int yaw_period;     //!< Yaw dt
+    float depth_perr;   //!< Depth P error
+    float depth_ierr;   //!< Depth I error
+    float depth_derr;   //!< Depth D error
+    int depth_period;   //!< Depth dt
+    float battery1;     //!< Voltage of battery 1
+    float battery2;     //!< Voltage of battery 2
+    float pressure;     //!< Pressure sensor reading
+    float water;        //!< Water leak sensor reading
 } STAT;
 
 typedef struct _STATUS_MSG {
-	HEADER  hdr;    //!< Header struct
-	STAT    data;   //!< Status struct
+    HEADER  hdr;    //!< Header struct
+    STAT    data;   //!< Status struct
 } STATUS_MSG;
 
 #endif /* _STATUS_MSG_ */
@@ -287,15 +287,15 @@ typedef struct _STATUS_MSG {
 #define _VISION_MSG_
 
 typedef struct _VISION {
-	int front_x;    //!< The x component of the detected object in front camera.
-	int front_y;    //!< The y component of the detected object in front camera.
-	int bottom_x;   //!< The x component of the detected object in bottom camera.
-	float bottom_y; //!< The y component of the detected object in bottom camera.
+    int front_x;    //!< The x component of the detected object in front camera.
+    int front_y;    //!< The y component of the detected object in front camera.
+    int bottom_x;   //!< The x component of the detected object in bottom camera.
+    float bottom_y; //!< The y component of the detected object in bottom camera.
 } VISION;
 
 typedef struct _VISION_MSG {
-	HEADER hdr;     //!< Header struct
-	VISION data;    //!< Vision struct
+    HEADER hdr;     //!< Header struct
+    VISION data;    //!< Vision struct
 } VISION_MSG;
 
 #endif /* _VISION_MSG_ */
@@ -309,16 +309,16 @@ typedef struct _VISION_MSG {
 #define TASK_SQUARE 4
 
 typedef struct _TASK {
-	char num;           //!< The task to attempt.
-	float time_forward; //!< The time to go forward in the square task.
-	float time_left;    //!< The time to go left in the square task.
-	float time_reverse; //!< The time to go reverse in the square task.
-	float time_right;   //!< The time to go right in the square task.
+    char num;           //!< The task to attempt.
+    float time_forward; //!< The time to go forward in the square task.
+    float time_left;    //!< The time to go left in the square task.
+    float time_reverse; //!< The time to go reverse in the square task.
+    float time_right;   //!< The time to go right in the square task.
 } TASK;
 
 typedef struct _TASK_MSG {
-	HEADER hdr;     //!< Header struct
-	TASK data;      //!< Tasks struct
+    HEADER hdr;     //!< Header struct
+    TASK data;      //!< Tasks struct
 } TASK_MSG;
 
 #endif /* _TASK_MSG_ */
@@ -327,15 +327,15 @@ typedef struct _TASK_MSG {
 #define _LJ_MSG_
 
 typedef struct _LJ_DATA {
-	float battery1;
-	float battery2;
-	float pressure;
-	float water;
+    float battery1;
+    float battery2;
+    float pressure;
+    float water;
 } LJ_DATA;
 
 typedef struct _LJ_MSG {
-	HEADER hdr;
-	LJ_DATA data;
+    HEADER hdr;
+    LJ_DATA data;
 } LJ_MSG;
 
 #endif /* _LJ_MSG_ */
@@ -344,18 +344,22 @@ typedef struct _LJ_MSG {
 #define _VSETTING_MSG_
 
 typedef struct _HSV_HL {
-	float hL;
-	float hH;
-	float sL;
-	float sH;
-	float vL;
-	float vH;
+    float hL;
+    float hH;
+    float sL;
+    float sH;
+    float vL;
+    float vH;
 } HSV_HL;
 
 typedef struct _VSETTING {
-	HSV_HL pipe_hsv;	//!< HSV limits for pipe.
-	HSV_HL buoy_hsv;	//!< HSV limits for pipe.
-	HSV_HL fence_hsv;	//!< HSV limits for pipe.
+    HSV_HL pipe_hsv;            //!< HSV limits for pipe.
+    HSV_HL buoy_hsv;            //!< HSV limits for pipe.
+    HSV_HL fence_hsv;           //!< HSV limits for pipe.
+    int save_bframe;           //!< Save bottom frame.
+    int save_fframe;           //!< Save front frame.
+    int save_bvideo;           //!< Save bottom video.
+    int save_fvideo;           //!< Save front video.
 } VSETTING;
 
 typedef struct _VSETTING_MSG {
@@ -369,18 +373,18 @@ typedef struct _VSETTING_MSG {
 #define _MSG_DATA_
 
 typedef struct _MSG_DATA {
-	OPEN_MSG open;
-	MSTRAIN_MSG mstrain;
-	SERVO_MSG servo;
-	CLIENT_MSG client;
-	TARGET_MSG target;
-	GAIN_MSG gain;
-	STATUS_MSG status;
-	VISION_MSG vision;
-	TASK_MSG task;
-	STOP_MSG stop;
-	LJ_MSG lj;
-	VSETTING_MSG vsetting;
+    OPEN_MSG open;
+    MSTRAIN_MSG mstrain;
+    SERVO_MSG servo;
+    CLIENT_MSG client;
+    TARGET_MSG target;
+    GAIN_MSG gain;
+    STATUS_MSG status;
+    VISION_MSG vision;
+    TASK_MSG task;
+    STOP_MSG stop;
+    LJ_MSG lj;
+    VSETTING_MSG vsetting;
 } MSG_DATA;
 
 #endif /* _MSG_DATA_ */

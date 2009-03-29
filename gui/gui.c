@@ -34,11 +34,15 @@ extern GtkWidget *label_status;
 char net_buf[MAX_MSG_SIZE];
 
 /* Network API messages. */
-extern int client_fd;
+extern int nav_fd;
 extern MSG_DATA msg;
 
 /* Configuration file variables. */
 extern CONF_VARS cf;
+
+/* Joystick file descriptor. */
+extern int joy_fd;
+JOY_DATA joy;
 
 
 /******************************************************************************
@@ -57,60 +61,57 @@ extern CONF_VARS cf;
 
 void gui_update_status_text( )
 {
-	char sbuff[2048];
+    char sbuff[2048];
 
-	sprintf( sbuff,
-	         "Pitch, Roll, Yaw, Depth:\t[ %.3f\t%.3f\t%.3f\t%.3f ]\n"
-	         "Accel X, Y, Z:\t\t\t[ %.3f\t%.3f\t%.3f ]\n"
-	         "Mag X, Y, Z:\t\t\t[ %.3f\t%.3f\t%.3f ]\n"
-	         "Ang Rate X, Y, Z:\t\t[ %.3f\t%.3f\t%.3f ]\n"
-	         "Quaternions:\t\t\t[ %.3f\t%.3f\t%.3f\t%.3f ]\n"
-	         "Labjack:\t\t\t\t[ %.3fV\t%.3fV\t%.3f\t%.3f ]\n"
-	         "PID Errors:\n"
-	         "Pitch:\t\t\t\t[ %.3f\t%.3f\t%.3f ]\n"
-	         "Roll:\t\t\t\t\t[ %.3f\t%.3f\t%.3f ]\n"
-	         "Yaw:\t\t\t\t\t[ %.3f\t%.3f\t%.3f ]\n"
-	         "Depth:\t\t\t\t[ %.3f\t%.3f\t%.3f ]\n"
-	         , msg.status.data.pitch
-	         , msg.status.data.roll
-	         , msg.status.data.yaw
-	         , msg.status.data.depth
-	         , msg.status.data.accel[0]
-	         , msg.status.data.accel[1]
-	         , msg.status.data.accel[2]
-	         , msg.status.data.mag[0]
-	         , msg.status.data.mag[1]
-	         , msg.status.data.mag[2]
-	         , msg.status.data.ang_rate[0]
-	         , msg.status.data.ang_rate[1]
-	         , msg.status.data.ang_rate[2]
-	         , msg.status.data.quat[0]
-	         , msg.status.data.quat[1]
-	         , msg.status.data.quat[2]
-	         , msg.status.data.quat[3]
-	         , msg.status.data.battery1
-	         , msg.status.data.battery2
-	         , msg.status.data.pressure
-	         , msg.status.data.water
-	         , msg.status.data.pitch_perr
-	         , msg.status.data.pitch_ierr
-	         , msg.status.data.pitch_derr
-	         , msg.status.data.roll_perr
-	         , msg.status.data.roll_ierr
-	         , msg.status.data.roll_derr
-	         , msg.status.data.yaw_perr
-	         , msg.status.data.yaw_ierr
-	         , msg.status.data.yaw_derr
-	         , msg.status.data.depth_perr
-	         , msg.status.data.depth_ierr
-	         , msg.status.data.depth_derr
-	       );
+    sprintf( sbuff,
+             "Pitch, Roll, Yaw, Depth:\t[ %.3f\t%.3f\t%.3f\t%.3f ]\n"
+             "Accel X, Y, Z:\t\t\t[ %.3f\t%.3f\t%.3f ]\n"
+             "Mag X, Y, Z:\t\t\t[ %.3f\t%.3f\t%.3f ]\n"
+             "Ang Rate X, Y, Z:\t\t[ %.3f\t%.3f\t%.3f ]\n"
+             "Quaternions:\t\t\t[ %.3f\t%.3f\t%.3f\t%.3f ]\n"
+             "Labjack:\t\t\t\t[ %.3fV\t%.3fV\t%.3f\t%.3f ]\n"
+             "PID Errors:\n"
+             "Pitch:\t\t\t\t[ %.3f\t%.3f\t%.3f ]\n"
+             "Roll:\t\t\t\t\t[ %.3f\t%.3f\t%.3f ]\n"
+             "Yaw:\t\t\t\t\t[ %.3f\t%.3f\t%.3f ]\n"
+             "Depth:\t\t\t\t[ %.3f\t%.3f\t%.3f ]\n"
+             , msg.status.data.pitch
+             , msg.status.data.roll
+             , msg.status.data.yaw
+             , msg.status.data.depth
+             , msg.status.data.accel[0]
+             , msg.status.data.accel[1]
+             , msg.status.data.accel[2]
+             , msg.status.data.mag[0]
+             , msg.status.data.mag[1]
+             , msg.status.data.mag[2]
+             , msg.status.data.ang_rate[0]
+             , msg.status.data.ang_rate[1]
+             , msg.status.data.ang_rate[2]
+             , msg.status.data.quat[0]
+             , msg.status.data.quat[1]
+             , msg.status.data.quat[2]
+             , msg.status.data.quat[3]
+             , msg.status.data.battery1
+             , msg.status.data.battery2
+             , msg.status.data.pressure
+             , msg.status.data.water
+             , msg.status.data.pitch_perr
+             , msg.status.data.pitch_ierr
+             , msg.status.data.pitch_derr
+             , msg.status.data.roll_perr
+             , msg.status.data.roll_ierr
+             , msg.status.data.roll_derr
+             , msg.status.data.yaw_perr
+             , msg.status.data.yaw_ierr
+             , msg.status.data.yaw_derr
+             , msg.status.data.depth_perr
+             , msg.status.data.depth_ierr
+             , msg.status.data.depth_derr
+           );
+    //printf( "GUI_UPDATE_STATUS_TEXT: %s\n", sbuff );
 
-	//printf( "GUI_UPDATE_STATUS_TEXT: %s\n", sbuff );
-
-	//printf( "GUI_UPDATE: 1\n" );
-	gtk_label_set_text( GTK_LABEL( label_status ), sbuff );
-	//printf( "GUI_UPDATE: 2\n" );
+    gtk_label_set_text( GTK_LABEL( label_status ), sbuff );
 } /* end gui_update_status_text() */
 
 
@@ -130,31 +131,29 @@ void gui_update_status_text( )
 
 int gui_joystick( JOY_DATA *joy )
 {
-	/* Joystick data. */
-	int fd = -1;
-	int status = 0;
+    /* Joystick data. */
+    //int joy_fd = -1;
+    int status = 0;
 
-	fd = joy_setup( );
-	printf( "GUI_JOYSTICK: fd = %d\n", fd );
+    //joy_fd = joy_setup( );
 
-	if ( fd > 0 ) {
-		status = joy_get_data( fd, joy );
+    if ( joy_fd > 0 ) {
+        status = joy_get_data( joy_fd, joy );
+        if ( status > 0 ) {
+            printf( "joy_axis = %d  axis_value = %d\n",
+                    joy->joy_axis,
+                    joy->axis_value
+                  );
+            printf( "joy_button = %d  button_value = %d\n",
+                    joy->joy_button,
+                    joy->button_value
+                  );
+        }
+    }
 
-		if ( status > 0 ) {
-			printf( "joy_axis = %d  axis_value = %d\n",
-			        joy->joy_axis,
-			        joy->axis_value
-			      );
-			printf( "joy_button = %d  button_value = %d\n",
-			        joy->joy_button,
-			        joy->button_value
-			      );
-		}
-	}
+    //close( joy_fd );
 
-	close( fd );
-
-	return status;
+    return status;
 } /* end gui_joystick() */
 
 
@@ -175,7 +174,7 @@ int gui_joystick( JOY_DATA *joy )
 gint gui_timer_1s( gpointer data )
 {
 
-	return TRUE; /* continue timer */
+    return TRUE; /* continue timer */
 } /* end gui_timer_1s() */
 
 
@@ -189,29 +188,37 @@ gint gui_timer_1s( gpointer data )
  *
  * Output:      TRUE: No error checking implemented.
  *
- * Globals:     client_fd
+ * Globals:     nav_fd
  *
  *****************************************************************************/
 
 gint gui_timer_200ms( gpointer data )
 {
-	buttons_update_values( );
-	int recv_bytes = 0;
+    buttons_update_values( );
+    int recv_bytes = 0;
 
-	/* Get network data. */
-	if ( client_fd > 0 ) {
-		recv_bytes = net_client( client_fd, net_buf, &msg );
-		net_buf[recv_bytes] = '\0';
-	}
+    /* Get network data. */
+    if ( nav_fd > 0 ) {
+        recv_bytes = net_client( nav_fd, net_buf, &msg );
+        net_buf[recv_bytes] = '\0';
+    }
 
-	if ( recv_bytes > 0 ) {
-		messages_decode( client_fd, net_buf, &msg );
-	}
+    if ( recv_bytes > 0 ) {
+        messages_decode( nav_fd, net_buf, &msg );
+    }
 
-	/* Update GUI status. */
-	gui_update_status_text( );
+    /* Update GUI status. */
+    gui_update_status_text( );
 
-	return TRUE; /* continue timer */
+    /* Get joystick data. */
+    //int status = 0;
+    //JOY_DATA joy;
+
+    //memset( &joy, 0, sizeof(JOY_DATA) );
+
+    //status = gui_joystick( &joy );
+
+    return TRUE; /* continue timer */
 } /* end gui_timer_200ms() */
 
 
@@ -225,14 +232,14 @@ gint gui_timer_200ms( gpointer data )
  *
  * Output:      TRUE: No error checking implemented.
  *
- * Globals:     client_fd
+ * Globals:     nav_fd
  *
  *****************************************************************************/
 
 gint gui_timer_500ms( gpointer data )
 {
 
-	return TRUE; /* continue timer */
+    return TRUE; /* continue timer */
 } /* end gui_timer_500ms() */
 
 
@@ -252,16 +259,15 @@ gint gui_timer_500ms( gpointer data )
 
 gint gui_timer_100ms( gpointer data )
 {
-	/*
-	int status = 0;
-	JOY_DATA joy;
+    /* Get joystick data. */
+    //int status = 0;
+    //JOY_DATA joy;
 
-	memset( &joy, 0, sizeof(JOY_DATA) );
+    //memset( &joy, 0, sizeof(JOY_DATA) );
 
-	status = gui_joystick( &joy );
-	*/
+    //status = gui_joystick( &joy );
 
-	return TRUE; /* continue timer */
+    return TRUE; /* continue timer */
 } /* end gui_timer_100ms() */
 
 
@@ -282,7 +288,7 @@ gint gui_timer_100ms( gpointer data )
 gint gui_timer_50ms( gpointer data )
 {
 
-	return TRUE; /* continue timer */
+    return TRUE; /* continue timer */
 } /* end gui_timer_50ms() */
 
 
@@ -303,11 +309,11 @@ gint gui_timer_50ms( gpointer data )
 
 void gui_set_timers( )
 {
-	//timer50ms = gtk_timeout_add( 50, gui_timer_50ms, NULL );
-	timer100ms = gtk_timeout_add( 100, gui_timer_100ms, NULL );
-	timer200ms = gtk_timeout_add( 200, gui_timer_200ms, NULL );
-	//timer500ms = gtk_timeout_add( 500, gui_timer_500ms, NULL );
-	timer1s = gtk_timeout_add( 1000, gui_timer_1s, NULL );
+    //timer50ms = gtk_timeout_add( 50, gui_timer_50ms, NULL );
+    timer100ms = gtk_timeout_add( 100, gui_timer_100ms, NULL );
+    timer200ms = gtk_timeout_add( 200, gui_timer_200ms, NULL );
+    //timer500ms = gtk_timeout_add( 500, gui_timer_500ms, NULL );
+    //timer1s = gtk_timeout_add( 1000, gui_timer_1s, NULL );
 } /* end gui_set_timers() */
 
 
@@ -327,16 +333,17 @@ void gui_set_timers( )
 
 void gui_kill_timers( )
 {
-	//gtk_timeout_remove( timer50ms );
-	gtk_timeout_remove( timer100ms );
-	gtk_timeout_remove( timer200ms );
-	//gtk_timeout_remove( timer500ms );
-	gtk_timeout_remove( timer1s );
+    //gtk_timeout_remove( timer50ms );
+    gtk_timeout_remove( timer100ms );
+    gtk_timeout_remove( timer200ms );
+    //gtk_timeout_remove( timer500ms );
+    //gtk_timeout_remove( timer1s );
 
-	timer100ms = 0;
-	timer200ms = 0;
-	timer500ms = 0;
-	timer1s = 0;
+    //timer50ms = 0;
+    timer100ms = 0;
+    timer200ms = 0;
+    //timer500ms = 0;
+    //timer1s = 0;
 } /* end gui_kill_timers() */
 
 
@@ -356,77 +363,77 @@ void gui_kill_timers( )
 
 int gui_pack_boxes( GtkWidget *top_level_window )
 {
-	GtkWidget *vbox1;
-	GtkWidget *vbox2;
-	GtkWidget *vbox3;
-	GtkWidget *vbox4;
-	GtkWidget *vbox5;
-	GtkWidget *vbox6;
-	GtkWidget *hbox1;
-	GtkWidget *hbox2;
-	GtkWidget *hbox3;
-	GtkWidget *hbox4;
-	GtkWidget *hbox5;
-	GtkWidget *notebook;
+    GtkWidget *vbox1;
+    GtkWidget *vbox2;
+    GtkWidget *vbox3;
+    GtkWidget *vbox4;
+    GtkWidget *vbox5;
+    GtkWidget *vbox6;
+    GtkWidget *hbox1;
+    GtkWidget *hbox2;
+    GtkWidget *hbox3;
+    GtkWidget *hbox4;
+    GtkWidget *hbox5;
+    GtkWidget *notebook;
 
-	/* Create new boxes. */
-	vbox1 = gtk_vbox_new( FALSE, 0 );
-	vbox2 = gtk_vbox_new( FALSE, 0 );
-	vbox3 = gtk_vbox_new( FALSE, 0 );
-	vbox4 = gtk_vbox_new( TRUE, 0 );
-	vbox5 = gtk_vbox_new( TRUE, 0 );
-	vbox6 = gtk_vbox_new( TRUE, 0 );
-	hbox1 = gtk_hbox_new( TRUE, 0 );
-	hbox2 = gtk_hbox_new( TRUE, 0 );
-	hbox3 = gtk_hbox_new( TRUE, 0 );
-	hbox4 = gtk_hbox_new( TRUE, 0 );
-	hbox5 = gtk_hbox_new( TRUE, 0 );
+    /* Create new boxes. */
+    vbox1 = gtk_vbox_new( FALSE, 0 );
+    vbox2 = gtk_vbox_new( FALSE, 0 );
+    vbox3 = gtk_vbox_new( FALSE, 0 );
+    vbox4 = gtk_vbox_new( TRUE, 0 );
+    vbox5 = gtk_vbox_new( TRUE, 0 );
+    vbox6 = gtk_vbox_new( TRUE, 0 );
+    hbox1 = gtk_hbox_new( TRUE, 0 );
+    hbox2 = gtk_hbox_new( TRUE, 0 );
+    hbox3 = gtk_hbox_new( TRUE, 0 );
+    hbox4 = gtk_hbox_new( TRUE, 0 );
+    hbox5 = gtk_hbox_new( TRUE, 0 );
 
-	/* Add a box to the main window. */
-	gtk_container_add( GTK_CONTAINER( top_level_window ), vbox1 );
+    /* Add a box to the main window. */
+    gtk_container_add( GTK_CONTAINER( top_level_window ), vbox1 );
 
-	/* Add boxes to vbox1. */
-	gtk_container_add( GTK_CONTAINER( vbox1 ), hbox1 );
-	gtk_container_add( GTK_CONTAINER( vbox1 ), hbox5 );
-	gtk_container_add( GTK_CONTAINER( vbox1 ), vbox2 );
+    /* Add boxes to vbox1. */
+    gtk_container_add( GTK_CONTAINER( vbox1 ), hbox1 );
+    gtk_container_add( GTK_CONTAINER( vbox1 ), hbox5 );
+    gtk_container_add( GTK_CONTAINER( vbox1 ), vbox2 );
 
-	/* Create a notebook for tabbed pages. */
-	notebook = gtk_notebook_new( );
+    /* Create a notebook for tabbed pages. */
+    notebook = gtk_notebook_new( );
 
-	/* Add the notebook to the lower box. */
-	gtk_container_add( GTK_CONTAINER( vbox2 ), notebook );
-	gtk_container_add( GTK_CONTAINER( notebook ), vbox3 );
-	gtk_notebook_set_tab_label( GTK_NOTEBOOK( notebook ), vbox3,
-	                            gtk_label_new( "Options" ) );
+    /* Add the notebook to the lower box. */
+    gtk_container_add( GTK_CONTAINER( vbox2 ), notebook );
+    gtk_container_add( GTK_CONTAINER( notebook ), vbox3 );
+    gtk_notebook_set_tab_label( GTK_NOTEBOOK( notebook ), vbox3,
+                                gtk_label_new( "Options" ) );
 
-	/* Append another page to the notebook. */
-	gtk_notebook_append_page( GTK_NOTEBOOK( notebook ), vbox4,
-	                          gtk_label_new( "Gains" ) );
+    /* Append another page to the notebook. */
+    gtk_notebook_append_page( GTK_NOTEBOOK( notebook ), vbox4,
+                              gtk_label_new( "Gains" ) );
 
-	/* Append another page to the notebook. */
-	gtk_notebook_append_page( GTK_NOTEBOOK( notebook ), vbox6,
-	                          gtk_label_new( "Tasks" ) );
+    /* Append another page to the notebook. */
+    gtk_notebook_append_page( GTK_NOTEBOOK( notebook ), vbox6,
+                              gtk_label_new( "Tasks" ) );
 
-	/* Append another page to the notebook. */
-	gtk_notebook_append_page( GTK_NOTEBOOK( notebook ), vbox5,
-	                          gtk_label_new( "Vision" ) );
+    /* Append another page to the notebook. */
+    gtk_notebook_append_page( GTK_NOTEBOOK( notebook ), vbox5,
+                              gtk_label_new( "Vision" ) );
 
-	/* Pack the rest of the boxes into the notebook pages. */
-	gtk_box_pack_start( GTK_BOX( vbox3 ), hbox2, TRUE, TRUE, 0 );
-	gtk_box_pack_start( GTK_BOX( vbox3 ), hbox3, TRUE, TRUE, 0 );
-	gtk_box_pack_start( GTK_BOX( vbox3 ), hbox4, TRUE, TRUE, 0 );
+    /* Pack the rest of the boxes into the notebook pages. */
+    gtk_box_pack_start( GTK_BOX( vbox3 ), hbox2, TRUE, TRUE, 0 );
+    gtk_box_pack_start( GTK_BOX( vbox3 ), hbox3, TRUE, TRUE, 0 );
+    gtk_box_pack_start( GTK_BOX( vbox3 ), hbox4, TRUE, TRUE, 0 );
 
-	/* Make buttons. */
-	buttons_make_status( hbox1 );
-	buttons_make_estop( hbox5 );
-	//buttons_opmode( hbox2 );
-	buttons_targets( hbox3 );
-	buttons_options( hbox4 );
-	buttons_gains( vbox4 );
-	buttons_tasks( vbox6 );
-	buttons_vision( vbox5 );
+    /* Make buttons. */
+    buttons_make_status( hbox1 );
+    buttons_make_estop( hbox5 );
+    //buttons_opmode( hbox2 );
+    buttons_targets( hbox3 );
+    buttons_options( hbox4 );
+    buttons_gains( vbox4 );
+    buttons_tasks( vbox6 );
+    buttons_vision( vbox5 );
 
-	return TRUE;
+    return TRUE;
 } /* end gui_pack_boxes() */
 
 
@@ -450,10 +457,10 @@ int gui_pack_boxes( GtkWidget *top_level_window )
 
 gint gui_destroy( GtkWidget *widget, GdkEvent *event, gpointer data )
 {
-	gui_kill_timers( );
-	gtk_main_quit( );
+    gui_kill_timers( );
+    gtk_main_quit( );
 
-	return FALSE;
+    return FALSE;
 } /* end gui_destroy() */
 
 
@@ -478,7 +485,7 @@ gint gui_destroy( GtkWidget *widget, GdkEvent *event, gpointer data )
 gint gui_delete( GtkWidget *widget, GdkEvent *event, gpointer data )
 {
 
-	return FALSE;
+    return FALSE;
 } /* end gui_delete() */
 
 
@@ -499,19 +506,19 @@ gint gui_delete( GtkWidget *widget, GdkEvent *event, gpointer data )
 
 GtkWidget *gui_create_main_window( )
 {
-	/* Create main window. */
-	GtkWidget *window = gtk_window_new( GTK_WINDOW_TOPLEVEL );
+    /* Create main window. */
+    GtkWidget *window = gtk_window_new( GTK_WINDOW_TOPLEVEL );
 
-	/* Set window properties. */
-	gtk_window_set_title( GTK_WINDOW( window ), "STINGRAY" );
+    /* Set window properties. */
+    gtk_window_set_title( GTK_WINDOW( window ), "STINGRAY" );
 
-	/* Connect the events to the window. */
-	gtk_signal_connect( GTK_OBJECT( window ), "delete_event",
-	                    GTK_SIGNAL_FUNC( gui_delete ), NULL );
-	gtk_signal_connect( GTK_OBJECT( window ), "destroy",
-	                    GTK_SIGNAL_FUNC( gui_destroy ), NULL );
+    /* Connect the events to the window. */
+    gtk_signal_connect( GTK_OBJECT( window ), "delete_event",
+                        GTK_SIGNAL_FUNC( gui_delete ), NULL );
+    gtk_signal_connect( GTK_OBJECT( window ), "destroy",
+                        GTK_SIGNAL_FUNC( gui_destroy ), NULL );
 
-	return window;
+    return window;
 } /* end gui_create_main_window() */
 
 
@@ -532,23 +539,23 @@ GtkWidget *gui_create_main_window( )
 
 void gui_init( )
 {
-	GtkWidget *top_level_window;
+    GtkWidget *top_level_window;
 
-	/* Create the main window for the GUI. */
-	top_level_window = gui_create_main_window( );
+    /* Create the main window for the GUI. */
+    top_level_window = gui_create_main_window( );
 
-	/* Create virtual boxes that buttons and text can be added into. */
-	gui_pack_boxes( top_level_window );
+    /* Create virtual boxes that buttons and text can be added into. */
+    gui_pack_boxes( top_level_window );
 
-	/* Set properties for the main window of the GUI. */
-	gtk_widget_set_usize( top_level_window, cf.window_width, cf.window_height );
+    /* Set properties for the main window of the GUI. */
+    gtk_widget_set_usize( top_level_window, cf.window_width, cf.window_height );
 
-	/* Set an icon for the application. */
-	gtk_window_set_icon_from_file( ( GtkWindow * )top_level_window,
-	                               GUI_ICON,
-	                               NULL
-	                             );
+    /* Set an icon for the application. */
+    gtk_window_set_icon_from_file( ( GtkWindow * )top_level_window,
+                                   GUI_ICON,
+                                   NULL
+                                 );
 
-	/* Show all the widgets that have been created in the main window. */
-	gtk_widget_show_all( top_level_window );
+    /* Show all the widgets that have been created in the main window. */
+    gtk_widget_show_all( top_level_window );
 } /* end gui_init() */

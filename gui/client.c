@@ -23,9 +23,10 @@
 #include "parser.h"
 
 
-int client_fd;
+int nav_fd;
 int planner_fd;
 int vision_fd;
+int joy_fd;
 CONF_VARS cf;
 MSG_DATA msg;
 
@@ -46,64 +47,71 @@ MSG_DATA msg;
 
 int main( int argc, char *argv[] )
 {
-	memset( &msg, 0, sizeof( MSG_DATA ) );
+    memset( &msg, 0, sizeof( MSG_DATA ) );
 
-	/* Parse command line arguments. */
-	parse_default_config( &cf );
-	parse_cla( argc, argv, &cf, GUI, ( const char * )CLIENT_FILENAME );
+    /* Parse command line arguments. */
+    parse_default_config( &cf );
+    parse_cla( argc, argv, &cf, GUI, ( const char * )CLIENT_FILENAME );
 
-	/* Initialize the targets and the gains. */
-	msg.target.data.pitch   = cf.target_pitch;
-	msg.target.data.roll    = cf.target_roll;
-	msg.target.data.yaw     = cf.target_yaw;
-	msg.target.data.depth   = cf.target_depth;
-	msg.gain.data.kp_pitch  = cf.kp_pitch;
-	msg.gain.data.ki_pitch  = cf.ki_pitch;
-	msg.gain.data.kd_pitch  = cf.kd_pitch;
-	msg.gain.data.kp_roll   = cf.kp_roll;
-	msg.gain.data.ki_roll   = cf.ki_roll;
-	msg.gain.data.kd_roll   = cf.kd_roll;
-	msg.gain.data.kp_yaw    = cf.kp_yaw;
-	msg.gain.data.ki_yaw    = cf.ki_yaw;
-	msg.gain.data.kd_yaw    = cf.kd_yaw;
-	msg.gain.data.kp_depth  = cf.kp_depth;
-	msg.gain.data.ki_depth  = cf.ki_depth;
-	msg.gain.data.kd_depth  = cf.kd_depth;
-	msg.vsetting.data.pipe_hsv.hL = cf.pipe_hL;
-	msg.vsetting.data.pipe_hsv.hH = cf.pipe_hH;
-	msg.vsetting.data.pipe_hsv.sL = cf.pipe_sL;
-	msg.vsetting.data.pipe_hsv.sH = cf.pipe_sH;
-	msg.vsetting.data.pipe_hsv.vL = cf.pipe_vL;
-	msg.vsetting.data.pipe_hsv.vH = cf.pipe_vH;
-	msg.vsetting.data.buoy_hsv.hL = cf.buoy_hL;
-	msg.vsetting.data.buoy_hsv.hH = cf.buoy_hH;
-	msg.vsetting.data.buoy_hsv.sL = cf.buoy_sL;
-	msg.vsetting.data.buoy_hsv.sH = cf.buoy_sH;
-	msg.vsetting.data.buoy_hsv.vL = cf.buoy_vL;
-	msg.vsetting.data.buoy_hsv.vH = cf.buoy_vH;
-	msg.vsetting.data.fence_hsv.hL = cf.fence_hL;
-	msg.vsetting.data.fence_hsv.hH = cf.fence_hH;
-	msg.vsetting.data.fence_hsv.sL = cf.fence_sL;
-	msg.vsetting.data.fence_hsv.sH = cf.fence_sH;
-	msg.vsetting.data.fence_hsv.vL = cf.fence_vL;
-	msg.vsetting.data.fence_hsv.vH = cf.fence_vH;
+    /* Initialize the targets and the gains. */
+    msg.target.data.pitch   = cf.target_pitch;
+    msg.target.data.roll    = cf.target_roll;
+    msg.target.data.yaw     = cf.target_yaw;
+    msg.target.data.depth   = cf.target_depth;
+    msg.target.data.fx      = cf.target_fx;
+    msg.target.data.fy      = cf.target_fy;
+    msg.target.data.speed   = cf.target_speed;
+    msg.gain.data.kp_pitch  = cf.kp_pitch;
+    msg.gain.data.ki_pitch  = cf.ki_pitch;
+    msg.gain.data.kd_pitch  = cf.kd_pitch;
+    msg.gain.data.kp_roll   = cf.kp_roll;
+    msg.gain.data.ki_roll   = cf.ki_roll;
+    msg.gain.data.kd_roll   = cf.kd_roll;
+    msg.gain.data.kp_yaw    = cf.kp_yaw;
+    msg.gain.data.ki_yaw    = cf.ki_yaw;
+    msg.gain.data.kd_yaw    = cf.kd_yaw;
+    msg.gain.data.kp_depth  = cf.kp_depth;
+    msg.gain.data.ki_depth  = cf.ki_depth;
+    msg.gain.data.kd_depth  = cf.kd_depth;
+    msg.vsetting.data.pipe_hsv.hL = cf.pipe_hL;
+    msg.vsetting.data.pipe_hsv.hH = cf.pipe_hH;
+    msg.vsetting.data.pipe_hsv.sL = cf.pipe_sL;
+    msg.vsetting.data.pipe_hsv.sH = cf.pipe_sH;
+    msg.vsetting.data.pipe_hsv.vL = cf.pipe_vL;
+    msg.vsetting.data.pipe_hsv.vH = cf.pipe_vH;
+    msg.vsetting.data.buoy_hsv.hL = cf.buoy_hL;
+    msg.vsetting.data.buoy_hsv.hH = cf.buoy_hH;
+    msg.vsetting.data.buoy_hsv.sL = cf.buoy_sL;
+    msg.vsetting.data.buoy_hsv.sH = cf.buoy_sH;
+    msg.vsetting.data.buoy_hsv.vL = cf.buoy_vL;
+    msg.vsetting.data.buoy_hsv.vH = cf.buoy_vH;
+    msg.vsetting.data.fence_hsv.hL = cf.fence_hL;
+    msg.vsetting.data.fence_hsv.hH = cf.fence_hH;
+    msg.vsetting.data.fence_hsv.sL = cf.fence_sL;
+    msg.vsetting.data.fence_hsv.sH = cf.fence_sH;
+    msg.vsetting.data.fence_hsv.vL = cf.fence_vL;
+    msg.vsetting.data.fence_hsv.vH = cf.fence_vH;
 
-	/* Set up communications. */
-	if ( cf.enable_net ) {
-		client_fd = net_client_setup( cf.server_IP, cf.api_port );
-	}
-	if ( cf.enable_planner ) {
-		planner_fd = net_client_setup( cf.planner_IP, cf.planner_port );
-	}
-	if ( cf.enable_vision ) {
-		vision_fd = net_client_setup( cf.vision_IP, cf.vision_port );
-	}
+    /* Set up communications. */
+    if ( cf.enable_net ) {
+        nav_fd = net_client_setup( cf.server_IP, cf.api_port );
+    }
+    if ( cf.enable_planner ) {
+        planner_fd = net_client_setup( cf.planner_IP, cf.planner_port );
+    }
+    if ( cf.enable_vision ) {
+        vision_fd = net_client_setup( cf.vision_IP, cf.vision_port );
+    }
 
-	/* Set up the GUI. */
-	gtk_init( &argc, &argv );
-	gui_init( );
-	gui_set_timers( );
-	gtk_main( );
+    /* Set up joystick. */
+    //joy_fd = -1;
+    //joy_fd = joy_setup( );
 
-	return 0;
+    /* Set up the GUI. */
+    gtk_init( &argc, &argv );
+    gui_init( );
+    gui_set_timers( );
+    gtk_main( );
+
+    return 0;
 } /* end main() */
