@@ -7,7 +7,7 @@ description=
 run_cmd=make
 
 [files]
-current_page=0
+current_page=1
 FILE_NAME_0=5214;0;0;16;1;1;0;/home/thomas/svn/src/nav/nav.c;
 FILE_NAME_1=485;13;0;16;1;1;0;/home/thomas/svn/src/nav/../../conf/nav.conf;
 FILE_NAME_2=3;0;0;16;1;1;0;/home/thomas/svn/src/nav/../../libs/labjack/include/labjack.h;
