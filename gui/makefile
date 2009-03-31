@@ -5,7 +5,6 @@ INCLUDES	+= -I../../libs/parser/include
 INCLUDES	+= -I../../libs/microstrain/include
 INCLUDES	+= -I../../libs/labjack/include
 INCLUDES	+= -I../../libs/pololu/include
-INCLUDES	+= -I../../libs/joy/include
 
 # defines
 DEFINES		= -DUSE_CLIENT
@@ -22,12 +21,9 @@ GTKFLAGS = `pkg-config --cflags gtk+-2.0`
 
 # libraries
 PARSELIB	= parser.a
-JOYLIB		= joy.a
-LJLIB		= labjack.a
 
 # library directories
 PARSEDIR	= ../../libs/parser/lib
-JOYDIR		= ../../libs/joy/lib
 
 # executables to build
 EXE 		= gui
@@ -44,8 +40,7 @@ all: $(EXE)
 
 $(EXE): $(OBJS)
 	$(CC) $(CFLAGS) $(INCLUDES) $(DEFINES) $(LLIBS) $(GTKFLAGS) \
-	$(DEFINES) $^ -o $@ $(STDLIBS) $(PARSEDIR)/$(PARSELIB) \
-	$(JOYDIR)/$(JOYLIB)
+	$(DEFINES) $^ -o $@ $(STDLIBS) $(PARSEDIR)/$(PARSELIB)
 
 %.o: %.cpp
 	$(CC) $(CFLAGS) $(INCLUDES) $(DEFINES) $(LLIBS) $(GTKFLAGS) $(DEFINES) -c $<

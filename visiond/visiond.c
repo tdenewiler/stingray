@@ -192,7 +192,7 @@ int main( int argc, char *argv[] )
     }
     else {
         f_img = cvQueryFrame( f_cam );
-        f_bin_img = cvCreateImage( cvSize( f_img->width, f_img->height ), IPL_DEPTH_8U, 1 );
+        f_bin_img = cvCreateImage( cvGetSize( f_img ), IPL_DEPTH_8U, 1 );
     }
 
     /* Open bottom camera. */
@@ -204,6 +204,7 @@ int main( int argc, char *argv[] )
     }
     else {
         b_img = cvQueryFrame( b_cam );
+        b_bin_img = cvCreateImage( cvGetSize( b_img ), IPL_DEPTH_8U, 1 );
     }
 
     /* Create windows to display video if set in configuration file. */

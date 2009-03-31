@@ -281,7 +281,7 @@ void events_vision( GtkWidget *widget,
     }
     else if ( widget == button_save_bvideo ) {
         if ( gtk_toggle_button_get_active((GtkToggleButton *)widget) ) {
-            msg.vsetting.data.save_bvideo = TRUE;
+            //msg.vsetting.data.save_bvideo = TRUE;
         }
         else {
             msg.vsetting.data.save_bvideo = FALSE;
@@ -289,7 +289,7 @@ void events_vision( GtkWidget *widget,
     }
     else if ( widget == button_save_fvideo ) {
         if ( gtk_toggle_button_get_active((GtkToggleButton *)widget) ) {
-            msg.vsetting.data.save_fvideo = TRUE;
+            //msg.vsetting.data.save_fvideo = TRUE;
         }
         else {
             msg.vsetting.data.save_fvideo = FALSE;

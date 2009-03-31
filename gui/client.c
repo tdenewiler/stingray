@@ -26,7 +26,6 @@
 int nav_fd;
 int planner_fd;
 int vision_fd;
-int joy_fd;
 CONF_VARS cf;
 MSG_DATA msg;
 
@@ -102,10 +101,6 @@ int main( int argc, char *argv[] )
     if ( cf.enable_vision ) {
         vision_fd = net_client_setup( cf.vision_IP, cf.vision_port );
     }
-
-    /* Set up joystick. */
-    //joy_fd = -1;
-    //joy_fd = joy_setup( );
 
     /* Set up the GUI. */
     gtk_init( &argc, &argv );

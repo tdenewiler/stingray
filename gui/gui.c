@@ -17,15 +17,14 @@
 #include "network.h"
 #include "messages.h"
 #include "parser.h"
-#include "joy.h"
 
 
 /* Handlers for timers. */
-guint timer50ms;
-guint timer100ms;
+//guint timer50ms;
+//guint timer100ms;
 guint timer200ms;
-guint timer500ms;
-guint timer1s;
+//guint timer500ms;
+//guint timer1s;
 
 /* Status label. */
 extern GtkWidget *label_status;
@@ -39,10 +38,6 @@ extern MSG_DATA msg;
 
 /* Configuration file variables. */
 extern CONF_VARS cf;
-
-/* Joystick file descriptor. */
-extern int joy_fd;
-JOY_DATA joy;
 
 
 /******************************************************************************
@@ -117,48 +112,6 @@ void gui_update_status_text( )
 
 /******************************************************************************
  *
- * Title:       int gui_joystick( JOY_DATA *joy )
- *
- * Description: Gets joystick data.
- *
- * Input:       joy: Pointer to joystick data.
- *
- * Output:      status: Number of bytes received.
- *
- * Globals:     None.
- *
- *****************************************************************************/
-
-int gui_joystick( JOY_DATA *joy )
-{
-    /* Joystick data. */
-    //int joy_fd = -1;
-    int status = 0;
-
-    //joy_fd = joy_setup( );
-
-    if ( joy_fd > 0 ) {
-        status = joy_get_data( joy_fd, joy );
-        if ( status > 0 ) {
-            printf( "joy_axis = %d  axis_value = %d\n",
-                    joy->joy_axis,
-                    joy->axis_value
-                  );
-            printf( "joy_button = %d  button_value = %d\n",
-                    joy->joy_button,
-                    joy->button_value
-                  );
-        }
-    }
-
-    //close( joy_fd );
-
-    return status;
-} /* end gui_joystick() */
-
-
-/******************************************************************************
- *
  * Title:       gint gui_timer_1s( gpointer data )
  *
  * Description: Creates a callback which is called at a 1 s period.
@@ -208,15 +161,9 @@ gint gui_timer_200ms( gpointer data )
     }
 
     /* Update GUI status. */
-    gui_update_status_text( );
-
-    /* Get joystick data. */
-    //int status = 0;
-    //JOY_DATA joy;
-
-    //memset( &joy, 0, sizeof(JOY_DATA) );
-
-    //status = gui_joystick( &joy );
+    if ( nav_fd > 0 ) {
+	    gui_update_status_text( );
+	}
 
     return TRUE; /* continue timer */
 } /* end gui_timer_200ms() */
@@ -259,13 +206,6 @@ gint gui_timer_500ms( gpointer data )
 
 gint gui_timer_100ms( gpointer data )
 {
-    /* Get joystick data. */
-    //int status = 0;
-    //JOY_DATA joy;
-
-    //memset( &joy, 0, sizeof(JOY_DATA) );
-
-    //status = gui_joystick( &joy );
 
     return TRUE; /* continue timer */
 } /* end gui_timer_100ms() */
@@ -310,7 +250,7 @@ gint gui_timer_50ms( gpointer data )
 void gui_set_timers( )
 {
     //timer50ms = gtk_timeout_add( 50, gui_timer_50ms, NULL );
-    timer100ms = gtk_timeout_add( 100, gui_timer_100ms, NULL );
+    //timer100ms = gtk_timeout_add( 100, gui_timer_100ms, NULL );
     timer200ms = gtk_timeout_add( 200, gui_timer_200ms, NULL );
     //timer500ms = gtk_timeout_add( 500, gui_timer_500ms, NULL );
     //timer1s = gtk_timeout_add( 1000, gui_timer_1s, NULL );
@@ -334,13 +274,13 @@ void gui_set_timers( )
 void gui_kill_timers( )
 {
     //gtk_timeout_remove( timer50ms );
-    gtk_timeout_remove( timer100ms );
+    //gtk_timeout_remove( timer100ms );
     gtk_timeout_remove( timer200ms );
     //gtk_timeout_remove( timer500ms );
     //gtk_timeout_remove( timer1s );
 
     //timer50ms = 0;
-    timer100ms = 0;
+    //timer100ms = 0;
     timer200ms = 0;
     //timer500ms = 0;
     //timer1s = 0;
@@ -552,9 +492,7 @@ void gui_init( )
 
     /* Set an icon for the application. */
     gtk_window_set_icon_from_file( ( GtkWindow * )top_level_window,
-                                   GUI_ICON,
-                                   NULL
-                                 );
+			GUI_ICON, NULL );
 
     /* Show all the widgets that have been created in the main window. */
     gtk_widget_show_all( top_level_window );

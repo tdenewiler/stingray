@@ -6,7 +6,6 @@
 #ifndef _GUI_H_
 #define _GUI_H_
 
-#include "joy.h"
 
 /******************************
 **
@@ -23,7 +22,7 @@
 #endif /* FALSE */
 
 #ifndef GUI_ICON
-#define GUI_ICON "images/hull.png"
+#define GUI_ICON "icons/hull.png"
 #endif /* GUI_ICON */
 
 
@@ -68,11 +67,6 @@ void gui_set_timers( );
 //! Updates the text displayed in the Status window.
 //!
 void gui_update_status_text( );
-
-//! Gets joystick data.
-//! \param joy Pointer to joystick data.
-//! \return Number of bytes received.
-int gui_joystick( JOY_DATA *joy );
 
 //! Sets up a 1 second Gtk timer.
 //! Returns TRUE.
