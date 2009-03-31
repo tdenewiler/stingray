@@ -267,7 +267,6 @@ double vision_get_bearing( IplImage *inputBinImg )
             cvSeqPush(point_seq, &cvPoint2D32f(leftEdge[i][1],leftEdge[i][2]));
         }
         cvFitLine(point_seq,CV_DIST_L2,0,0.01,0.01,left_line);
-        //fprintf(stdout,"Left: v=(%f,%f),vy/vx=%f,(x,y)=(%f,%f),",left_line[0],left_line[1],left_line[1]/left_line[0],left_line[2],left_line[3]);
         mL = left_line[1]/left_line[0];
 
         CvMat* LError = cvCreateMat(1,leftEdgeCount-1,CV_32SC1);
@@ -286,7 +285,6 @@ double vision_get_bearing( IplImage *inputBinImg )
             cvSeqPush(point_seq, &cvPoint2D32f(rightEdge[i][1],rightEdge[i][2]));
         }
         cvFitLine(point_seq,CV_DIST_L2,0,0.01,0.01,right_line);
-        //fprintf(stdout,"v=(%f,%f),vy/vx=%f,(x,y)=(%f,%f),",right_line[0],right_line[1],right_line[1]/right_line[0],right_line[2],right_line[3]);
         mR = right_line[1]/right_line[0];
         CvMat* RError = cvCreateMat(1,rightEdgeCount-1,CV_32SC1);
         for(k = 0;k<rightEdgeCount-1;k++){

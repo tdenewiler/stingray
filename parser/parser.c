@@ -828,6 +828,7 @@ void parse_default_config( CONF_VARS *config )
     config->target_fy = 0.0;
     config->target_speed = 0.0;
 
+	/* hsv values */
     config->pipe_hL = 0.0;
     config->pipe_hH = 0.0;
     config->pipe_sL = 0.0;
@@ -884,8 +885,8 @@ void parse_default_config( CONF_VARS *config )
 
     /* gui */
     config->enable_gui = FALSE;
-    config->window_height = 600;
-    config->window_width = 800;
+    config->window_height = 768;
+    config->window_width = 1024;
 
     /* gps */
     config->enable_gps = FALSE;
