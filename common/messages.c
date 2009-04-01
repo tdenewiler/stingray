@@ -257,7 +257,7 @@ void messages_decode( int fd, char *buf, MSG_DATA *msg )
             msg->target.data = ( ( TARGET_MSG * )buf )->data;
 
             /* Convert from network to host byte order. */
-            msg->target.data.mode       = ntohl( msg->target.data.mode );
+            msg->target.data.mode = ntohl( msg->target.data.mode );
             break;
 
         case GAIN_MSGID:

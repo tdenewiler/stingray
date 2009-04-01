@@ -288,7 +288,7 @@ int main( int argc, char *argv[] )
             /* Get a timestamp. */
             gettimeofday( &ctime, NULL );
             ct = *( localtime ((const time_t*) &ctime.tv_sec) );
-            strftime( write_time, sizeof(write_time), "images/f%y%m%d_%H%M%S", &ct);
+            strftime( write_time, sizeof(write_time), "images/f20%y%m%d_%H%M%S", &ct);
             snprintf( write_time + strlen(write_time),
             		strlen(write_time), ".%03ld.jpg", ctime.tv_usec );
             cvSaveImage( write_time, f_img );
@@ -298,7 +298,7 @@ int main( int argc, char *argv[] )
             /* Get a timestamp. */
             gettimeofday( &ctime, NULL );
             ct = *( localtime ((const time_t*) &ctime.tv_sec) );
-            strftime( write_time, sizeof(write_time), "images/b%y%m%d_%H%M%S", &ct);
+            strftime( write_time, sizeof(write_time), "images/b20%y%m%d_%H%M%S", &ct);
             snprintf( write_time + strlen(write_time),
             		strlen(write_time), ".%03ld.jpg", ctime.tv_usec );
             cvSaveImage( write_time, b_img );
@@ -308,7 +308,7 @@ int main( int argc, char *argv[] )
             /* Get a timestamp. */
             gettimeofday( &ctime, NULL );
             ct = *( localtime ((const time_t*) &ctime.tv_sec) );
-            strftime( write_time, sizeof(write_time), "stream/f%y%m%d_%H%M%S", &ct);
+            strftime( write_time, sizeof(write_time), "stream/f20%y%m%d_%H%M%S", &ct);
             snprintf( write_time + strlen(write_time),
             		strlen(write_time), ".%03ld.avi", ctime.tv_usec );
             fps = cvGetCaptureProperty( f_cam, CV_CAP_PROP_FPS );
@@ -325,7 +325,7 @@ int main( int argc, char *argv[] )
             /* Get a timestamp. */
             gettimeofday( &ctime, NULL );
             ct = *( localtime ((const time_t*) &ctime.tv_sec) );
-            strftime( write_time, sizeof(write_time), "stream/b%y%m%d_%H%M%S", &ct);
+            strftime( write_time, sizeof(write_time), "stream/b20%y%m%d_%H%M%S", &ct);
             snprintf( write_time + strlen(write_time),
             		strlen(write_time), ".%03ld.avi", ctime.tv_usec );
             fps = cvGetCaptureProperty( b_cam, CV_CAP_PROP_FPS );

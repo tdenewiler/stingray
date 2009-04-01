@@ -216,6 +216,7 @@ int main( int argc, char *argv[] )
 
     int status = -1;
     int recv_bytes = 0;
+    int mode = MODE_STATUS;
     char recv_buf[MAX_MSG_SIZE];
     char vision_buf[MAX_MSG_SIZE];
     char planner_buf[MAX_MSG_SIZE];
@@ -342,7 +343,7 @@ int main( int argc, char *argv[] )
     status = -1;
     if ( ( cf.enable_labjack ) && ( lj_fd > 0 ) ) {
         while ( status < 0 ) {
-            recv_bytes = net_client( lj_fd, lj_buf, &msg );
+            recv_bytes = net_client( lj_fd, lj_buf, &msg, mode );
             lj_buf[recv_bytes] = '\0';
             if ( recv_bytes > 0 ) {
                 messages_decode( lj_fd, lj_buf, &msg );
@@ -352,7 +353,6 @@ int main( int argc, char *argv[] )
         printf( "MAIN: Kill switch is closed.\n" );
     }
     printf( "MAIN: Waiting for motors to arm ... " );
-
     if ( ( cf.enable_labjack ) && ( lj_fd > 0 ) ) {
         sleep( 7 );
     }
@@ -368,7 +368,6 @@ int main( int argc, char *argv[] )
                 messages_decode( server_fd, recv_buf, &msg );
             }
         }
-        //printf( "MAIN: dropper %d\n", msg.client.data.dropper );
 
         /* Check state of emergency stop value. */
         if ( msg.stop.data.state == TRUE ) {
@@ -380,8 +379,37 @@ int main( int argc, char *argv[] )
 
         /* Send dropper servo command. */
         if ( pololu_fd > 0 ) {
-          status = pololuSetPosition7Bit( pololu_fd, 11, msg.client.data.dropper );
+        	status = pololuSetPosition7Bit( pololu_fd, 11, msg.client.data.dropper );
         }
+
+		/* Check for assisted teleop commands. */
+		if ( msg.target.data.mode == MANUAL ) {
+			msg.target.data.pitch += msg.target.data.pitchd;
+			msg.target.data.roll += msg.target.data.rolld;
+			msg.target.data.yaw += msg.target.data.yawd;
+			msg.target.data.depth += msg.target.data.depthd;
+			msg.target.data.fx += msg.target.data.fxd;
+			msg.target.data.fy += msg.target.data.fyd;
+			msg.target.data.speed += msg.target.data.speedd;
+
+			/* Reset the target change values back to zero. */
+			msg.target.data.pitchd = 0;
+			msg.target.data.rolld = 0;
+			msg.target.data.yawd = 0;
+			msg.target.data.depthd = 0;
+			msg.target.data.fxd = 0;
+			msg.target.data.fyd = 0;
+			msg.target.data.speedd = 0;
+		}
+		//printf( "MAIN: targets\n%f\n%f\n%f\n%f\n%f\n%f\n%f\n"
+				//, msg.target.data.pitch
+				//, msg.target.data.roll
+				//, msg.target.data.yaw
+				//, msg.target.data.depth
+				//, msg.target.data.fx
+				//, msg.target.data.fy
+				//, msg.target.data.speed
+		//);
 
         /* Get vision data. */
         if ( ( cf.enable_vision ) && ( vision_fd > 0 ) ) {
@@ -391,7 +419,7 @@ int main( int argc, char *argv[] )
             time2ms =   vision_start.tv_usec;
             dt = util_calc_dt( &time1s, &time1ms, &time2s, &time2ms );
             if ( dt > cf.period_vision ) {
-                recv_bytes = net_client( vision_fd, vision_buf, &msg );
+                recv_bytes = net_client( vision_fd, vision_buf, &msg, mode );
                 vision_buf[recv_bytes] = '\0';
                 if ( recv_bytes > 0 ) {
                     messages_decode( vision_fd, vision_buf, &msg );
@@ -403,7 +431,7 @@ int main( int argc, char *argv[] )
 
         /* Get labjack daemon data. */
         if ( ( cf.enable_labjack ) && ( lj_fd > 0 ) ) {
-            recv_bytes = net_client( lj_fd, lj_buf, &msg );
+            recv_bytes = net_client( lj_fd, lj_buf, &msg, mode );
             lj_buf[recv_bytes] = '\0';
             if ( recv_bytes > 0 ) {
                 messages_decode( lj_fd, lj_buf, &msg );
@@ -418,7 +446,7 @@ int main( int argc, char *argv[] )
             time2ms =   planner_start.tv_usec;
             dt = util_calc_dt( &time1s, &time1ms, &time2s, &time2ms );
             if ( dt > cf.period_planner ) {
-                recv_bytes = net_client( planner_fd, planner_buf, &msg );
+                recv_bytes = net_client( planner_fd, planner_buf, &msg, mode );
                 planner_buf[recv_bytes] = '\0';
                 if ( recv_bytes > 0 ) {
                     messages_decode( planner_fd, vision_buf, &msg );

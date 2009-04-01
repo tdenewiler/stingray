@@ -149,10 +149,11 @@ gint gui_timer_200ms( gpointer data )
 {
     buttons_update_values( );
     int recv_bytes = 0;
+    int mode = MODE_STATUS;
 
     /* Get network data. */
     if ( nav_fd > 0 ) {
-        recv_bytes = net_client( nav_fd, net_buf, &msg );
+        recv_bytes = net_client( nav_fd, net_buf, &msg, mode );
         net_buf[recv_bytes] = '\0';
     }
 
@@ -366,7 +367,7 @@ int gui_pack_boxes( GtkWidget *top_level_window )
     /* Make buttons. */
     buttons_make_status( hbox1 );
     buttons_make_estop( hbox5 );
-    //buttons_opmode( hbox2 );
+    buttons_opmode( hbox2 );
     buttons_targets( hbox3 );
     buttons_options( hbox4 );
     buttons_gains( vbox4 );

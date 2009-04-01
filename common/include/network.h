@@ -33,7 +33,9 @@
 #define MODE_VISION		2
 #define MODE_PLANNER	3
 #define MODE_LJ			4
-#endif /* MODE_PLANNER */
+#define MODE_STATUS		5
+#define MODE_JOY		6
+#endif /* NET_MODES */
 
 
 /******************************
@@ -147,8 +149,9 @@ int net_server( int fd, void *buf, MSG_DATA *msg, int mode );
 //! \param fd A file descriptor for the client.
 //! \param buf A pointer to a buffer for network data.
 //! \param msg A pointer to message data.
+//! \param mode Mode for the client to act in.
 //! \return Number of bytes received.
-int net_client( int fd, void *buf, MSG_DATA *msg );
+int net_client( int fd, void *buf, MSG_DATA *msg, int mode );
 
 
 #endif /* _NETWORK_H_ */

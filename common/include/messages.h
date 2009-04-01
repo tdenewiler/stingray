@@ -57,6 +57,7 @@
 #define TASK_MSGID          10
 #define VSETTING_MSGID      11
 #define LJ_MSGID            12
+#define JOY_MSGID			13
 //@}
 #endif /* API_MSGID */
 
@@ -186,12 +187,19 @@ typedef struct _CLIENT_MSG {
 typedef struct _TARGET {
     int mode;       //!< Operational mode
     float pitch;    //!< Desired pitch angle
+    float pitchd;	//!< Pitch angle change from joystick.
     float roll;     //!< Desired roll angle
+    float rolld;	//!< Roll angle change from joystick.
     float yaw;      //!< Desired yaw angle
+    float yawd;		//!< Yaw angle change from joystick.
     float depth;    //!< Desired depth
+    float depthd;	//!< Depth change from joystick.
     float fx;       //!< Desired force in x direction
+    float fxd;		//!< X force change from joystick.
     float fy;       //!< Desired force in y direction
+    float fyd;		//!< Y force change from joystick.
     float speed;    //!< Desired speed.
+    float speedd;	//!< Speed change from joystick.
 } TARGET;
 
 /*! API message to change the uuv operational mode. */

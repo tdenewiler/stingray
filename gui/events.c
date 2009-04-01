@@ -350,6 +350,7 @@ void events_gain( GtkWidget *widget,
 void events_gain_get( )
 {
     int recv_bytes = 0;
+    int mode = MODE_STATUS;
     msg.gain.data.mode = GAIN_GET;
 
     /* Send the gain message. */
@@ -358,7 +359,7 @@ void events_gain_get( )
 
     /* Get network data. */
     if ( nav_fd > 0 ) {
-        recv_bytes = net_client( nav_fd, net_buf, &msg );
+        recv_bytes = net_client( nav_fd, net_buf, &msg, mode );
         net_buf[recv_bytes] = '\0';
     }
     if ( recv_bytes > 0 ) {
@@ -464,7 +465,9 @@ void events_enable_servos( GtkWidget *widget,
     }
 
     /* Send the state of the button to the server. */
-    messages_send( nav_fd, CLIENT_MSGID, &msg );
+    if ( nav_fd > 0 ) {
+	    messages_send( nav_fd, CLIENT_MSGID, &msg );
+	}
 } /* end events_enable_servos() */
 
 
@@ -504,7 +507,9 @@ void events_enable_imu( GtkWidget *widget,
     }
 
     /* Send the state of the button to the server. */
-    messages_send( nav_fd, CLIENT_MSGID, &msg );
+    if ( nav_fd > 0 ) {
+	    messages_send( nav_fd, CLIENT_MSGID, &msg );
+	}
 } /* end events_enable_imu() */
 
 
@@ -544,7 +549,9 @@ void events_enable_log( GtkWidget *widget,
     }
 
     /* Send the state of the button to the server. */
-    messages_send( nav_fd, CLIENT_MSGID, &msg );
+    if ( nav_fd > 0 ) {
+	    messages_send( nav_fd, CLIENT_MSGID, &msg );
+	}
 } /* end events_enable_log() */
 
 
@@ -584,7 +591,9 @@ void events_imu_stab( GtkWidget *widget,
     }
 
     /* Send the state of the button to the server. */
-    messages_send( nav_fd, CLIENT_MSGID, &msg );
+    if ( nav_fd > 0 ) {
+	    messages_send( nav_fd, CLIENT_MSGID, &msg );
+	}
 } /* end events_imu_stab() */
 
 
@@ -620,7 +629,9 @@ void events_debug_level( GtkWidget *widget,
                                       ( GtkSpinButton * )widget );
 
     /* Send the value of the button to the server. */
-    messages_send( nav_fd, CLIENT_MSGID, &msg );
+    if ( nav_fd > 0 ) {
+	    messages_send( nav_fd, CLIENT_MSGID, &msg );
+	}
 } /* end events_debug_level() */
 
 
@@ -652,7 +663,9 @@ void events_dropper( GtkWidget *widget,
                                       ( GtkSpinButton * )widget );
 
     /* Send the value of the button to the server. */
-    messages_send( nav_fd, CLIENT_MSGID, &msg );
+    if ( nav_fd > 0 ) {
+	    messages_send( nav_fd, CLIENT_MSGID, &msg );
+	}
 } /* end events_debug_level() */
 
 
@@ -683,46 +696,54 @@ void events_opmode( GtkWidget *widget,
         g_print( "OPMODE_EVENT: Operational mode radio button selected.\n" );
     }
 
-    /* Check the state of the button. */
+    /* Check the state of the buttons and send message. */
     if ( gtk_toggle_button_get_active( ( GtkToggleButton * )button_hold_yaw ) ) {
-        msg.target.data.mode = ( int )HOLD_YAW;
-        messages_send( nav_fd, TARGET_MSGID, &msg );
+        msg.target.data.mode = (int)HOLD_YAW;
+	    if ( nav_fd > 0 ) {
+	        messages_send( nav_fd, TARGET_MSGID, &msg );
+		}
     }
 
-    /* Check the state of the button. */
     else if ( gtk_toggle_button_get_active( ( GtkToggleButton * )button_hold_roll ) ) {
-        msg.target.data.mode = ( int )HOLD_ROLL;
-        messages_send( nav_fd, TARGET_MSGID, &msg );
+        msg.target.data.mode = (int)HOLD_ROLL;
+	    if ( nav_fd > 0 ) {
+	        messages_send( nav_fd, TARGET_MSGID, &msg );
+		}
     }
 
-    /* Check the state of the button. */
     else if ( gtk_toggle_button_get_active( ( GtkToggleButton * )button_hold_pitch ) ) {
-        msg.target.data.mode = ( int )HOLD_PITCH;
-        messages_send( nav_fd, TARGET_MSGID, &msg );
+        msg.target.data.mode = (int)HOLD_PITCH;
+	    if ( nav_fd > 0 ) {
+	        messages_send( nav_fd, TARGET_MSGID, &msg );
+		}
     }
 
-    /* Check the state of the button. */
     else if ( gtk_toggle_button_get_active( ( GtkToggleButton * )button_hold_accel ) ) {
-        msg.target.data.mode = ( int )HOLD_ACCEL;
-        messages_send( nav_fd, TARGET_MSGID, &msg );
+        msg.target.data.mode = (int)HOLD_ACCEL;
+	    if ( nav_fd > 0 ) {
+	        messages_send( nav_fd, TARGET_MSGID, &msg );
+		}
     }
 
-    /* Check the state of the button. */
     else if ( gtk_toggle_button_get_active( ( GtkToggleButton * )button_hold_ang_rate ) ) {
-        msg.target.data.mode = ( int )HOLD_ANG_RATE;
-        messages_send( nav_fd, TARGET_MSGID, &msg );
+        msg.target.data.mode = (int)HOLD_ANG_RATE;
+	    if ( nav_fd > 0 ) {
+	        messages_send( nav_fd, TARGET_MSGID, &msg );
+		}
     }
 
-    /* Check the state of the button. */
     else if ( gtk_toggle_button_get_active( ( GtkToggleButton * )button_manual ) ) {
-        msg.target.data.mode = ( int )MANUAL;
-        messages_send( nav_fd, TARGET_MSGID, &msg );
+        msg.target.data.mode = (int)MANUAL;
+	    if ( nav_fd > 0 ) {
+	        messages_send( nav_fd, TARGET_MSGID, &msg );
+		}
     }
 
-    /* Check the state of the button. */
     else if ( gtk_toggle_button_get_active( ( GtkToggleButton * )button_autonomous ) ) {
-        msg.target.data.mode = ( int )AUTONOMOUS;
-        messages_send( nav_fd, TARGET_MSGID, &msg );
+        msg.target.data.mode = (int)AUTONOMOUS;
+	    if ( nav_fd > 0 ) {
+	        messages_send( nav_fd, TARGET_MSGID, &msg );
+		}
     }
 } /* end events_opmode() */
 
@@ -758,8 +779,10 @@ void events_target_yaw( GtkWidget *widget,
     msg.target.data.yaw = gtk_spin_button_get_value_as_float(
                               ( GtkSpinButton * )widget );
 
-    /* Send the state of the button to the server. */
-    messages_send( nav_fd, TARGET_MSGID, &msg );
+    /* Send the state of the button to the server if not in MANUAL mode. */
+    if ( msg.target.data.mode != MANUAL ) {
+	    messages_send( nav_fd, TARGET_MSGID, &msg );
+	}
 } /* end events_target_yaw() */
 
 
@@ -794,8 +817,10 @@ void events_target_roll( GtkWidget *widget,
     msg.target.data.roll = gtk_spin_button_get_value_as_float(
                                ( GtkSpinButton * )widget );
 
-    /* Send the state of the button to the server. */
-    messages_send( nav_fd, TARGET_MSGID, &msg );
+    /* Send the state of the button to the server if not in MANUAL mode. */
+    if ( msg.target.data.mode != MANUAL ) {
+	    messages_send( nav_fd, TARGET_MSGID, &msg );
+	}
 } /* end events_target_roll() */
 
 
@@ -830,8 +855,10 @@ void events_target_pitch( GtkWidget *widget,
     msg.target.data.pitch = gtk_spin_button_get_value_as_float(
                                 ( GtkSpinButton * )widget );
 
-    /* Send the state of the button to the server. */
-    messages_send( nav_fd, TARGET_MSGID, &msg );
+    /* Send the state of the button to the server if not in MANUAL mode. */
+    if ( msg.target.data.mode != MANUAL ) {
+	    messages_send( nav_fd, TARGET_MSGID, &msg );
+	}
 } /* end events_target_pitch() */
 
 
@@ -866,8 +893,10 @@ void events_target_depth( GtkWidget *widget,
     msg.target.data.depth = gtk_spin_button_get_value_as_float(
                                 ( GtkSpinButton * )widget );
 
-    /* Send the state of the button to the server. */
-    messages_send( nav_fd, TARGET_MSGID, &msg );
+    /* Send the state of the button to the server if not in MANUAL mode. */
+    if ( msg.target.data.mode != MANUAL ) {
+	    messages_send( nav_fd, TARGET_MSGID, &msg );
+	}
 } /* end events_target_pitch() */
 
 
@@ -902,8 +931,10 @@ void events_target_fx( GtkWidget *widget,
     msg.target.data.fx = gtk_spin_button_get_value_as_float(
                              ( GtkSpinButton * )widget );
 
-    /* Send the state of the button to the server. */
-    messages_send( nav_fd, TARGET_MSGID, &msg );
+    /* Send the state of the button to the server if not in MANUAL mode. */
+    if ( msg.target.data.mode != MANUAL ) {
+	    messages_send( nav_fd, TARGET_MSGID, &msg );
+	}
 } /* end events_target_fx() */
 
 
@@ -938,8 +969,10 @@ void events_target_fy( GtkWidget *widget,
     msg.target.data.fy = gtk_spin_button_get_value_as_float(
                              ( GtkSpinButton * )widget );
 
-    /* Send the state of the button to the server. */
-    messages_send( nav_fd, TARGET_MSGID, &msg );
+    /* Send the state of the button to the server if not in MANUAL mode. */
+    if ( msg.target.data.mode != MANUAL ) {
+	    messages_send( nav_fd, TARGET_MSGID, &msg );
+	}
 } /* end events_target_fy() */
 
 
@@ -974,6 +1007,8 @@ void events_target_speed( GtkWidget *widget,
     msg.target.data.speed = gtk_spin_button_get_value_as_float(
                                 ( GtkSpinButton * )widget );
 
-    /* Send the state of the button to the server. */
-    messages_send( nav_fd, TARGET_MSGID, &msg );
+    /* Send the state of the button to the server if not in MANUAL mode. */
+    if ( msg.target.data.mode != MANUAL ) {
+	    messages_send( nav_fd, TARGET_MSGID, &msg );
+	}
 } /* end events_target_speed() */

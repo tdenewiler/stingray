@@ -197,13 +197,14 @@ int net_server( int fd, void *buf, MSG_DATA *msg, int mode )
 
 /******************************************************************************
  *
- * Title:       int net_client( int fd, void *buf, MSG_DATA *msg )
+ * Title:       int net_client( int fd, void *buf, MSG_DATA *msg, int mode )
  *
  * Description: Sends and receives data on network socket using TCP.
  *
  * Input:       fd: A file descriptor for the client.
  *              buf: A buffer for network data.
  *              msg: A pointer to message data.
+ * 				mode: Mode for the client to act in.
  *
  * Output:      recv_bytes: Number of bytes received.
  *
@@ -211,12 +212,17 @@ int net_server( int fd, void *buf, MSG_DATA *msg, int mode )
  *
  *****************************************************************************/
 
-int net_client( int fd, void *buf, MSG_DATA *msg )
+int net_client( int fd, void *buf, MSG_DATA *msg, int mode )
 {
 	int recv_bytes = 0;
 
 	/* Send and receive data for connected socket. */
-	messages_send( fd, ( int )STATUS_MSGID, msg );
+	if ( mode == MODE_STATUS ) {
+		messages_send( fd, (int)STATUS_MSGID, msg );
+	}
+	else if ( mode == MODE_JOY ) {
+		messages_send( fd, (int)TARGET_MSGID, msg );
+	}
 	recv_bytes = net_recv( fd, buf );
 
 	return recv_bytes;
