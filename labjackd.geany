@@ -8,8 +8,8 @@ run_cmd=make
 
 [files]
 current_page=0
-FILE_NAME_0=3176;0;0;16;1;1;0;/home/thomas/svn/src/labjackd/labjackd.c;
-FILE_NAME_1=798;0;0;16;1;1;0;/home/thomas/svn/src/labjackd/include/labjackd.h;
+FILE_NAME_0=0;0;0;16;1;1;0;/home/thomas/svn/src/labjackd/labjackd.c;
+FILE_NAME_1=0;0;0;16;1;1;0;/home/thomas/svn/src/labjackd/include/labjackd.h;
 FILE_NAME_2=117;13;0;16;1;1;0;/home/thomas/svn/src/labjackd/../../conf/labjackd.conf;
 FILE_NAME_3=452;0;0;16;1;1;0;/home/thomas/svn/libs/labjack/include/labjack.h;
 FILE_NAME_4=0;0;0;16;1;1;0;/home/thomas/svn/libs/parser/include/parser.h;

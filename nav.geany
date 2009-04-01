@@ -7,17 +7,17 @@ description=
 run_cmd=make
 
 [files]
-current_page=1
-FILE_NAME_0=5214;0;0;16;1;1;0;/home/thomas/svn/src/nav/nav.c;
+current_page=0
+FILE_NAME_0=11485;0;0;16;1;1;0;/home/thomas/svn/src/nav/nav.c;
 FILE_NAME_1=485;13;0;16;1;1;0;/home/thomas/svn/src/nav/../../conf/nav.conf;
 FILE_NAME_2=3;0;0;16;1;1;0;/home/thomas/svn/src/nav/../../libs/labjack/include/labjack.h;
-FILE_NAME_3=1071;0;0;16;1;1;0;/home/thomas/svn/src/nav/../common/include/messages.h;
-FILE_NAME_4=5203;0;0;16;1;1;0;/home/thomas/svn/src/nav/../common/network.c;
-FILE_NAME_5=9676;0;0;16;1;1;0;/home/thomas/svn/src/nav/../common/messages.c;
+FILE_NAME_3=4645;0;0;16;1;1;0;/home/thomas/svn/src/nav/../common/include/messages.h;
+FILE_NAME_4=4684;0;0;16;1;1;0;/home/thomas/svn/src/nav/../common/network.c;
+FILE_NAME_5=10401;0;0;16;1;1;0;/home/thomas/svn/src/nav/../common/messages.c;
 FILE_NAME_6=0;0;0;16;1;1;0;/home/thomas/svn/src/nav/../common/pid.c;
 FILE_NAME_7=0;0;0;16;1;1;0;/home/thomas/svn/src/nav/../common/util.c;
 FILE_NAME_8=0;0;0;16;1;1;0;/home/thomas/svn/src/nav/include/nav.h;
-FILE_NAME_9=0;0;0;16;1;1;0;/home/thomas/svn/src/nav/../common/include/network.h;
+FILE_NAME_9=4307;0;0;16;1;1;0;/home/thomas/svn/src/nav/../common/include/network.h;
 FILE_NAME_10=0;0;0;16;1;1;0;/home/thomas/svn/src/nav/../common/include/pid.h;
 FILE_NAME_11=0;0;0;16;1;1;0;/home/thomas/svn/src/nav/../common/include/util.h;
 FILE_NAME_12=0;0;0;16;1;1;0;/home/thomas/svn/src/nav/../../libs/labjack/labjackusb.h;
