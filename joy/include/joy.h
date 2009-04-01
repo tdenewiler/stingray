@@ -74,6 +74,25 @@
  *
  *****************************/
 
+#ifndef JOY_BUTTONS
+#define JOY_BUTTONS
+#define JOY_A0	0
+#define JOY_A1	1
+#define JOY_A2 	2
+#define JOY_A3	3
+#define JOY_A4	4
+#define JOY_A5	5
+#define JOY_B0	0
+#define JOY_B1	1
+#define JOY_B2	2
+#define JOY_B3	3
+#define JOY_B4	4
+#define JOY_B5	5
+#define JOY_B6	6
+#define JOY_B7	7
+#define JOY_B8	8
+#define JOY_B9	9
+#endif /* JOY_BUTTONS */
 
 
 /******************************

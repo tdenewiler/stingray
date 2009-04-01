@@ -88,7 +88,7 @@ void parse_line( CONF_VARS *config )
     } /* end planner parameters */
 
     /* GUI parameters */
-    else if ( strncmp( tokens[0], "window", STRING_SIZE ) == 0 ) {
+    if ( strncmp( tokens[0], "window", STRING_SIZE ) == 0 ) {
         if ( strncmp( tokens[1], "height", STRING_SIZE ) == 0 ) {
             sscanf( tokens[2], "%d", &config->window_height );
         }
@@ -99,7 +99,7 @@ void parse_line( CONF_VARS *config )
     /* end GUI parameters */
 
     /* net parameters */
-    else if ( strncmp( tokens[0], "api", STRING_SIZE ) == 0 ) {
+    if ( strncmp( tokens[0], "api", STRING_SIZE ) == 0 ) {
         if ( strncmp( tokens[1], "clients", STRING_SIZE ) == 0 ) {
             sscanf( tokens[2], "%d", &config->max_api_clients );
         }
