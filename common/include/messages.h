@@ -57,7 +57,7 @@
 #define TASK_MSGID          10
 #define VSETTING_MSGID      11
 #define LJ_MSGID            12
-#define JOY_MSGID			13
+#define TELEOP_MSGID		13
 //@}
 #endif /* API_MSGID */
 
@@ -179,6 +179,26 @@ typedef struct _CLIENT_MSG {
 
 #endif /* _CLIENT_MSG_ */
 
+#ifndef _TELEOP_MSG_
+#define _TELEOP_MSG_
+
+typedef struct _TELEOP {
+	float pitch;
+	float roll;
+	float yaw;
+	float depth;
+	float fx;
+	float fy;
+	float speed;
+} TELEOP;
+
+typedef struct _TELEOP_MSG {
+	HEADER hdr;
+	TELEOP data;
+} TELEOP_MSG;
+
+#endif /* _TELEOP_MSG_ */
+
 #ifndef _TARGET_MSG_
 #define _TARGET_MSG_
 
@@ -187,19 +207,12 @@ typedef struct _CLIENT_MSG {
 typedef struct _TARGET {
     int mode;       //!< Operational mode
     float pitch;    //!< Desired pitch angle
-    float pitchd;	//!< Pitch angle change from joystick.
     float roll;     //!< Desired roll angle
-    float rolld;	//!< Roll angle change from joystick.
     float yaw;      //!< Desired yaw angle
-    float yawd;		//!< Yaw angle change from joystick.
     float depth;    //!< Desired depth
-    float depthd;	//!< Depth change from joystick.
     float fx;       //!< Desired force in x direction
-    float fxd;		//!< X force change from joystick.
     float fy;       //!< Desired force in y direction
-    float fyd;		//!< Y force change from joystick.
     float speed;    //!< Desired speed.
-    float speedd;	//!< Speed change from joystick.
 } TARGET;
 
 /*! API message to change the uuv operational mode. */
@@ -393,6 +406,7 @@ typedef struct _MSG_DATA {
     STOP_MSG stop;
     LJ_MSG lj;
     VSETTING_MSG vsetting;
+    TELEOP_MSG teleop;
 } MSG_DATA;
 
 #endif /* _MSG_DATA_ */

@@ -152,53 +152,53 @@ int main( int argc, char *argv[] )
 		/* Set target change values based on joystick input. */
 		if ( joy.joy_button == JOY_A5 ) {
 			if ( joy.axis_value > 0 ) {
-				msg.target.data.pitchd = 1;
+				msg.teleop.data.pitch = 1;
 			}
 			else if ( joy.axis_value < 0 ) {
-				msg.target.data.pitchd = -1;
+				msg.teleop.data.pitch = -1;
 			}
 		}
 		if ( joy.joy_button == JOY_A4 ) {
 			if ( joy.axis_value > 0 ) {
-				msg.target.data.rolld = 1;
+				msg.teleop.data.roll = 1;
 			}
 			else if ( joy.axis_value < 0 ) {
-				msg.target.data.rolld = -1;
+				msg.teleop.data.roll = -1;
 			}
 		}
 		if ( joy.joy_button == JOY_B0 ) {
-			msg.target.data.yawd = -1;
+			msg.teleop.data.yaw = -1;
 		}
 		else if ( joy.joy_button == JOY_B2 ) {
-			msg.target.data.yawd = 1;
+			msg.teleop.data.yaw = 1;
 		}
 		if ( joy.joy_button == JOY_B1 ) {
-			msg.target.data.depthd = -1;
+			msg.teleop.data.depth = -1;
 		}
 		else if ( joy.joy_button == JOY_B3 ) {
-			msg.target.data.depthd = 1;
+			msg.teleop.data.depth = 1;
 		}
 		if ( joy.joy_button == JOY_A0 ) {
 			if ( joy.axis_value > 0 ) {
-				msg.target.data.fxd = 1;
+				msg.teleop.data.fx = 1;
 			}
 			else if ( joy.axis_value < 0 ) {
-				msg.target.data.fxd = -1;
+				msg.teleop.data.fx = -1;
 			}
 		}
 		if ( joy.joy_button == JOY_A2 ) {
 			if ( joy.axis_value > 0 ) {
-				msg.target.data.fyd = 1;
+				msg.teleop.data.fy = 1;
 			}
 			else if ( joy.axis_value < 0 ) {
-				msg.target.data.fyd = -1;
+				msg.teleop.data.fy = -1;
 			}
 		}
 		if ( joy.joy_button == JOY_B4 ) {
-			msg.target.data.speedd = -1;
+			msg.teleop.data.speed = -1;
 		}
 		else if ( joy.joy_button == JOY_B5 ) {
-			msg.target.data.speedd = 1;
+			msg.teleop.data.speed = 1;
 		}
 		if (joy.joy_button == JOY_B6 ) {
 			if ( joy.button_value == 1 ) {
@@ -209,23 +209,23 @@ int main( int argc, char *argv[] )
 				}
 			}
 		}
-		printf( "MAIN: targets\n%f\n%f\n%f\n%f\n%f\n%f\n%f\n"
-				, msg.target.data.pitchd
-				, msg.target.data.rolld
-				, msg.target.data.yawd
-				, msg.target.data.depthd
-				, msg.target.data.fxd
-				, msg.target.data.fyd
-				, msg.target.data.speedd
+		printf( "MAIN: teleop\n%f\n%f\n%f\n%f\n%f\n%f\n%f\n"
+				, msg.teleop.data.pitch
+				, msg.teleop.data.roll
+				, msg.teleop.data.yaw
+				, msg.teleop.data.depth
+				, msg.teleop.data.fx
+				, msg.teleop.data.fy
+				, msg.teleop.data.speed
 		);
 		/* Reset the target change values back to zero. */
-		msg.target.data.pitchd = 0;
-		msg.target.data.rolld = 0;
-		msg.target.data.yawd = 0;
-		msg.target.data.depthd = 0;
-		msg.target.data.fxd = 0;
-		msg.target.data.fyd = 0;
-		msg.target.data.speedd = 0;
+		msg.teleop.data.pitch = 0;
+		msg.teleop.data.roll = 0;
+		msg.teleop.data.yaw = 0;
+		msg.teleop.data.depth = 0;
+		msg.teleop.data.fx = 0;
+		msg.teleop.data.fy = 0;
+		msg.teleop.data.speed = 0;
 	}
 
 	exit( 0 );

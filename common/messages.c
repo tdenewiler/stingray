@@ -192,6 +192,13 @@ void messages_send( int fd,
             msg->vsetting.data.save_fframe = ntohl( msg->vsetting.data.save_fframe );
             msg->vsetting.data.save_bvideo = ntohl( msg->vsetting.data.save_bvideo );
             msg->vsetting.data.save_fvideo = ntohl( msg->vsetting.data.save_fvideo );
+
+        case TELEOP_MSGID:
+            msg->teleop.hdr.msgid = TELEOP_MSGID;
+
+            /* Actually send message here. */
+            net_send( fd, &msg->teleop, sizeof( TELEOP_MSG ) );
+            break;
     }
 } /* end messages_send() */
 
@@ -298,6 +305,10 @@ void messages_decode( int fd, char *buf, MSG_DATA *msg )
             msg->vsetting.data.save_fframe = ntohl( msg->vsetting.data.save_fframe );
             msg->vsetting.data.save_bvideo = ntohl( msg->vsetting.data.save_bvideo );
             msg->vsetting.data.save_fvideo = ntohl( msg->vsetting.data.save_fvideo );
+            break;
+
+        case TELEOP_MSGID:
+            msg->teleop.data = ( ( TELEOP_MSG * )buf )->data;
             break;
     }
 } /* end messages_decode() */

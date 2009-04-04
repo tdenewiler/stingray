@@ -384,32 +384,39 @@ int main( int argc, char *argv[] )
 
 		/* Check for assisted teleop commands. */
 		if ( msg.target.data.mode == MANUAL ) {
-			msg.target.data.pitch += msg.target.data.pitchd;
-			msg.target.data.roll += msg.target.data.rolld;
-			msg.target.data.yaw += msg.target.data.yawd;
-			msg.target.data.depth += msg.target.data.depthd;
-			msg.target.data.fx += msg.target.data.fxd;
-			msg.target.data.fy += msg.target.data.fyd;
-			msg.target.data.speed += msg.target.data.speedd;
+			msg.target.data.pitch	+= msg.teleop.data.pitch;
+			msg.target.data.roll	+= msg.teleop.data.roll;
+			msg.target.data.yaw		+= msg.teleop.data.yaw;
+			msg.target.data.depth	+= msg.teleop.data.depth;
+			msg.target.data.fx		+= msg.teleop.data.fx;
+			msg.target.data.fy		+= msg.teleop.data.fy;
+			msg.target.data.speed	+= msg.teleop.data.speed;
 
 			/* Reset the target change values back to zero. */
-			msg.target.data.pitchd = 0;
-			msg.target.data.rolld = 0;
-			msg.target.data.yawd = 0;
-			msg.target.data.depthd = 0;
-			msg.target.data.fxd = 0;
-			msg.target.data.fyd = 0;
-			msg.target.data.speedd = 0;
+			msg.teleop.data.pitch = 0;
+			msg.teleop.data.roll = 0;
+			msg.teleop.data.yaw = 0;
+			msg.teleop.data.depth = 0;
+			msg.teleop.data.fx = 0;
+			msg.teleop.data.fy = 0;
+			msg.teleop.data.speed = 0;
 		}
-		//printf( "MAIN: targets\n%f\n%f\n%f\n%f\n%f\n%f\n%f\n"
-				//, msg.target.data.pitch
-				//, msg.target.data.roll
-				//, msg.target.data.yaw
-				//, msg.target.data.depth
-				//, msg.target.data.fx
-				//, msg.target.data.fy
-				//, msg.target.data.speed
-		//);
+		printf( "MAIN: targets\n%f %f\n%f %f\n%f %f\n%f %f\n%f %f\n%f %f\n%f %f\n"
+				, msg.target.data.pitch
+				, msg.teleop.data.pitch
+				, msg.target.data.roll
+				, msg.teleop.data.roll
+				, msg.target.data.yaw
+				, msg.teleop.data.yaw
+				, msg.target.data.depth
+				, msg.teleop.data.depth
+				, msg.target.data.fx
+				, msg.teleop.data.fx
+				, msg.target.data.fy
+				, msg.teleop.data.fy
+				, msg.target.data.speed
+				, msg.teleop.data.speed
+		);
 
         /* Get vision data. */
         if ( ( cf.enable_vision ) && ( vision_fd > 0 ) ) {
