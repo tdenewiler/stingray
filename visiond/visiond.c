@@ -290,7 +290,7 @@ int main( int argc, char *argv[] )
             ct = *( localtime ((const time_t*) &ctime.tv_sec) );
             strftime( write_time, sizeof(write_time), "images/f20%y%m%d_%H%M%S", &ct);
             snprintf( write_time + strlen(write_time),
-            		strlen(write_time), ".%03ld.jpg", ctime.tv_usec );
+                    strlen(write_time), ".%03ld.jpg", ctime.tv_usec );
             cvSaveImage( write_time, f_img );
             msg.vsetting.data.save_fframe = FALSE;
         }
@@ -300,7 +300,7 @@ int main( int argc, char *argv[] )
             ct = *( localtime ((const time_t*) &ctime.tv_sec) );
             strftime( write_time, sizeof(write_time), "images/b20%y%m%d_%H%M%S", &ct);
             snprintf( write_time + strlen(write_time),
-            		strlen(write_time), ".%03ld.jpg", ctime.tv_usec );
+                    strlen(write_time), ".%03ld.jpg", ctime.tv_usec );
             cvSaveImage( write_time, b_img );
             msg.vsetting.data.save_bframe = FALSE;
         }
@@ -310,7 +310,7 @@ int main( int argc, char *argv[] )
             ct = *( localtime ((const time_t*) &ctime.tv_sec) );
             strftime( write_time, sizeof(write_time), "stream/f20%y%m%d_%H%M%S", &ct);
             snprintf( write_time + strlen(write_time),
-            		strlen(write_time), ".%03ld.avi", ctime.tv_usec );
+                    strlen(write_time), ".%03ld.avi", ctime.tv_usec );
             fps = cvGetCaptureProperty( f_cam, CV_CAP_PROP_FPS );
             printf( "MAIN: fps = %lf\n", fps );
             f_writer = cvCreateVideoWriter( write_time, CV_FOURCC('I', 'Y', 'U', 'V'),
@@ -327,7 +327,7 @@ int main( int argc, char *argv[] )
             ct = *( localtime ((const time_t*) &ctime.tv_sec) );
             strftime( write_time, sizeof(write_time), "stream/b20%y%m%d_%H%M%S", &ct);
             snprintf( write_time + strlen(write_time),
-            		strlen(write_time), ".%03ld.avi", ctime.tv_usec );
+                    strlen(write_time), ".%03ld.avi", ctime.tv_usec );
             fps = cvGetCaptureProperty( b_cam, CV_CAP_PROP_FPS );
             b_writer = cvCreateVideoWriter( write_time, CV_FOURCC('D', 'I', 'B', ' '),
                 fps, cvGetSize( b_img ), is_color );

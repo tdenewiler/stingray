@@ -466,8 +466,8 @@ void events_enable_servos( GtkWidget *widget,
 
     /* Send the state of the button to the server. */
     if ( nav_fd > 0 ) {
-	    messages_send( nav_fd, CLIENT_MSGID, &msg );
-	}
+        messages_send( nav_fd, CLIENT_MSGID, &msg );
+    }
 } /* end events_enable_servos() */
 
 
@@ -508,8 +508,8 @@ void events_enable_imu( GtkWidget *widget,
 
     /* Send the state of the button to the server. */
     if ( nav_fd > 0 ) {
-	    messages_send( nav_fd, CLIENT_MSGID, &msg );
-	}
+        messages_send( nav_fd, CLIENT_MSGID, &msg );
+    }
 } /* end events_enable_imu() */
 
 
@@ -550,8 +550,8 @@ void events_enable_log( GtkWidget *widget,
 
     /* Send the state of the button to the server. */
     if ( nav_fd > 0 ) {
-	    messages_send( nav_fd, CLIENT_MSGID, &msg );
-	}
+        messages_send( nav_fd, CLIENT_MSGID, &msg );
+    }
 } /* end events_enable_log() */
 
 
@@ -592,8 +592,8 @@ void events_imu_stab( GtkWidget *widget,
 
     /* Send the state of the button to the server. */
     if ( nav_fd > 0 ) {
-	    messages_send( nav_fd, CLIENT_MSGID, &msg );
-	}
+        messages_send( nav_fd, CLIENT_MSGID, &msg );
+    }
 } /* end events_imu_stab() */
 
 
@@ -630,8 +630,8 @@ void events_debug_level( GtkWidget *widget,
 
     /* Send the value of the button to the server. */
     if ( nav_fd > 0 ) {
-	    messages_send( nav_fd, CLIENT_MSGID, &msg );
-	}
+        messages_send( nav_fd, CLIENT_MSGID, &msg );
+    }
 } /* end events_debug_level() */
 
 
@@ -664,8 +664,8 @@ void events_dropper( GtkWidget *widget,
 
     /* Send the value of the button to the server. */
     if ( nav_fd > 0 ) {
-	    messages_send( nav_fd, CLIENT_MSGID, &msg );
-	}
+        messages_send( nav_fd, CLIENT_MSGID, &msg );
+    }
 } /* end events_debug_level() */
 
 
@@ -699,51 +699,51 @@ void events_opmode( GtkWidget *widget,
     /* Check the state of the buttons and send message. */
     if ( gtk_toggle_button_get_active( ( GtkToggleButton * )button_hold_yaw ) ) {
         msg.target.data.mode = (int)HOLD_YAW;
-	    if ( nav_fd > 0 ) {
-	        messages_send( nav_fd, TARGET_MSGID, &msg );
-		}
+        if ( nav_fd > 0 ) {
+            messages_send( nav_fd, TARGET_MSGID, &msg );
+        }
     }
 
     else if ( gtk_toggle_button_get_active( ( GtkToggleButton * )button_hold_roll ) ) {
         msg.target.data.mode = (int)HOLD_ROLL;
-	    if ( nav_fd > 0 ) {
-	        messages_send( nav_fd, TARGET_MSGID, &msg );
-		}
+        if ( nav_fd > 0 ) {
+            messages_send( nav_fd, TARGET_MSGID, &msg );
+        }
     }
 
     else if ( gtk_toggle_button_get_active( ( GtkToggleButton * )button_hold_pitch ) ) {
         msg.target.data.mode = (int)HOLD_PITCH;
-	    if ( nav_fd > 0 ) {
-	        messages_send( nav_fd, TARGET_MSGID, &msg );
-		}
+        if ( nav_fd > 0 ) {
+            messages_send( nav_fd, TARGET_MSGID, &msg );
+        }
     }
 
     else if ( gtk_toggle_button_get_active( ( GtkToggleButton * )button_hold_accel ) ) {
         msg.target.data.mode = (int)HOLD_ACCEL;
-	    if ( nav_fd > 0 ) {
-	        messages_send( nav_fd, TARGET_MSGID, &msg );
-		}
+        if ( nav_fd > 0 ) {
+            messages_send( nav_fd, TARGET_MSGID, &msg );
+        }
     }
 
     else if ( gtk_toggle_button_get_active( ( GtkToggleButton * )button_hold_ang_rate ) ) {
         msg.target.data.mode = (int)HOLD_ANG_RATE;
-	    if ( nav_fd > 0 ) {
-	        messages_send( nav_fd, TARGET_MSGID, &msg );
-		}
+        if ( nav_fd > 0 ) {
+            messages_send( nav_fd, TARGET_MSGID, &msg );
+        }
     }
 
     else if ( gtk_toggle_button_get_active( ( GtkToggleButton * )button_manual ) ) {
         msg.target.data.mode = (int)MANUAL;
-	    if ( nav_fd > 0 ) {
-	        messages_send( nav_fd, TARGET_MSGID, &msg );
-		}
+        if ( nav_fd > 0 ) {
+            messages_send( nav_fd, TARGET_MSGID, &msg );
+        }
     }
 
     else if ( gtk_toggle_button_get_active( ( GtkToggleButton * )button_autonomous ) ) {
         msg.target.data.mode = (int)AUTONOMOUS;
-	    if ( nav_fd > 0 ) {
-	        messages_send( nav_fd, TARGET_MSGID, &msg );
-		}
+        if ( nav_fd > 0 ) {
+            messages_send( nav_fd, TARGET_MSGID, &msg );
+        }
     }
 } /* end events_opmode() */
 
@@ -781,8 +781,8 @@ void events_target_yaw( GtkWidget *widget,
 
     /* Send the state of the button to the server if not in MANUAL mode. */
     if ( msg.target.data.mode != MANUAL ) {
-	    messages_send( nav_fd, TARGET_MSGID, &msg );
-	}
+        messages_send( nav_fd, TARGET_MSGID, &msg );
+    }
 } /* end events_target_yaw() */
 
 
@@ -819,8 +819,8 @@ void events_target_roll( GtkWidget *widget,
 
     /* Send the state of the button to the server if not in MANUAL mode. */
     if ( msg.target.data.mode != MANUAL ) {
-	    messages_send( nav_fd, TARGET_MSGID, &msg );
-	}
+        messages_send( nav_fd, TARGET_MSGID, &msg );
+    }
 } /* end events_target_roll() */
 
 
@@ -857,8 +857,8 @@ void events_target_pitch( GtkWidget *widget,
 
     /* Send the state of the button to the server if not in MANUAL mode. */
     if ( msg.target.data.mode != MANUAL ) {
-	    messages_send( nav_fd, TARGET_MSGID, &msg );
-	}
+        messages_send( nav_fd, TARGET_MSGID, &msg );
+    }
 } /* end events_target_pitch() */
 
 
@@ -895,8 +895,8 @@ void events_target_depth( GtkWidget *widget,
 
     /* Send the state of the button to the server if not in MANUAL mode. */
     if ( msg.target.data.mode != MANUAL ) {
-	    messages_send( nav_fd, TARGET_MSGID, &msg );
-	}
+        messages_send( nav_fd, TARGET_MSGID, &msg );
+    }
 } /* end events_target_pitch() */
 
 
@@ -933,8 +933,8 @@ void events_target_fx( GtkWidget *widget,
 
     /* Send the state of the button to the server if not in MANUAL mode. */
     if ( msg.target.data.mode != MANUAL ) {
-	    messages_send( nav_fd, TARGET_MSGID, &msg );
-	}
+        messages_send( nav_fd, TARGET_MSGID, &msg );
+    }
 } /* end events_target_fx() */
 
 
@@ -971,8 +971,8 @@ void events_target_fy( GtkWidget *widget,
 
     /* Send the state of the button to the server if not in MANUAL mode. */
     if ( msg.target.data.mode != MANUAL ) {
-	    messages_send( nav_fd, TARGET_MSGID, &msg );
-	}
+        messages_send( nav_fd, TARGET_MSGID, &msg );
+    }
 } /* end events_target_fy() */
 
 
@@ -1009,6 +1009,6 @@ void events_target_speed( GtkWidget *widget,
 
     /* Send the state of the button to the server if not in MANUAL mode. */
     if ( msg.target.data.mode != MANUAL ) {
-	    messages_send( nav_fd, TARGET_MSGID, &msg );
-	}
+        messages_send( nav_fd, TARGET_MSGID, &msg );
+    }
 } /* end events_target_speed() */

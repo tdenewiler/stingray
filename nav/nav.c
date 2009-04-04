@@ -379,44 +379,28 @@ int main( int argc, char *argv[] )
 
         /* Send dropper servo command. */
         if ( pololu_fd > 0 ) {
-        	status = pololuSetPosition7Bit( pololu_fd, 11, msg.client.data.dropper );
+            status = pololuSetPosition7Bit( pololu_fd, 11, msg.client.data.dropper );
         }
 
-		/* Check for assisted teleop commands. */
-		if ( msg.target.data.mode == MANUAL ) {
-			msg.target.data.pitch	+= msg.teleop.data.pitch;
-			msg.target.data.roll	+= msg.teleop.data.roll;
-			msg.target.data.yaw		+= msg.teleop.data.yaw;
-			msg.target.data.depth	+= msg.teleop.data.depth;
-			msg.target.data.fx		+= msg.teleop.data.fx;
-			msg.target.data.fy		+= msg.teleop.data.fy;
-			msg.target.data.speed	+= msg.teleop.data.speed;
+        /* Check for assisted teleop commands. */
+        if ( msg.target.data.mode == MANUAL ) {
+            msg.target.data.pitch   += msg.teleop.data.pitch;
+            msg.target.data.roll    += msg.teleop.data.roll;
+            msg.target.data.yaw     += msg.teleop.data.yaw;
+            msg.target.data.depth   += msg.teleop.data.depth;
+            msg.target.data.fx      += msg.teleop.data.fx;
+            msg.target.data.fy      += msg.teleop.data.fy;
+            msg.target.data.speed   += msg.teleop.data.speed;
 
-			/* Reset the target change values back to zero. */
-			msg.teleop.data.pitch = 0;
-			msg.teleop.data.roll = 0;
-			msg.teleop.data.yaw = 0;
-			msg.teleop.data.depth = 0;
-			msg.teleop.data.fx = 0;
-			msg.teleop.data.fy = 0;
-			msg.teleop.data.speed = 0;
-		}
-		printf( "MAIN: targets\n%f %f\n%f %f\n%f %f\n%f %f\n%f %f\n%f %f\n%f %f\n"
-				, msg.target.data.pitch
-				, msg.teleop.data.pitch
-				, msg.target.data.roll
-				, msg.teleop.data.roll
-				, msg.target.data.yaw
-				, msg.teleop.data.yaw
-				, msg.target.data.depth
-				, msg.teleop.data.depth
-				, msg.target.data.fx
-				, msg.teleop.data.fx
-				, msg.target.data.fy
-				, msg.teleop.data.fy
-				, msg.target.data.speed
-				, msg.teleop.data.speed
-		);
+            /* Reset the target change values back to zero. */
+            msg.teleop.data.pitch = 0;
+            msg.teleop.data.roll = 0;
+            msg.teleop.data.yaw = 0;
+            msg.teleop.data.depth = 0;
+            msg.teleop.data.fx = 0;
+            msg.teleop.data.fy = 0;
+            msg.teleop.data.speed = 0;
+        }
 
         /* Get vision data. */
         if ( ( cf.enable_vision ) && ( vision_fd > 0 ) ) {
