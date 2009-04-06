@@ -81,16 +81,15 @@ int vision_find_dot( int *dotx,
     cvCvtColor( srcImg, hsv_image, CV_RGB2HSV );
     cvInRangeS( hsv_image, cvScalar(hL, sL, vL), cvScalar(hH, sH, vH), binImg );
 
-    /* Perform erosion and dilation. */
+    /* Perform erosion, dilation, and conversion. */
     cvErode( binImg, binImg, w );
     cvDilate( binImg, binImg, w );
-
     cvConvertScale( binImg, outImg, 255.0 );
 
     /* Find the centroid. */
     center = vision_find_centroid( outImg, 5 );
-    *dotx = center.x;
-    *doty = center.y;
+    *dotx = center.x - srcImg->width / 2;
+    *doty = center.y - srcImg->height / 2;
 
     /* Clear variables to free memory. */
     cvReleaseImage( &hsv_image );
@@ -158,10 +157,9 @@ int vision_find_pipe( int *pipex,
     cvCvtColor( srcImg, hsv_image, CV_RGB2HSV );
     cvInRangeS( hsv_image, cvScalar(hL,sL,vL), cvScalar(hH,sH,vH), binImg );
 
-    /* Perform erosion and dilation. */
+    /* Perform erosion, dilation, and conversion. */
     cvErode( binImg, binImg, wE );
     cvDilate( binImg, binImg, wD );
-
     cvConvertScale( binImg, outImg, 255.0 );
 
     /* Process the image. */
@@ -197,125 +195,126 @@ double vision_get_bearing( IplImage *inputBinImg )
     CvScalar Left_STD;
     Right_STD.val[0] = HUGE_VAL;
     Left_STD.val[0] = HUGE_VAL;
-
     int leftEdgeCount = 0;
     int rightEdgeCount = 0;
     int imHeight = inputBinImg->height;
     int imWidth = inputBinImg->width;
-    //minimum num of edge points before we declare a line
     int edgeThreshold = 5;
+    double maxSTD = 75;
+    int k;
+	CvSeq *point_seq;
+    CvMemStorage *storage;
+    CvMat *LError;
+    CvMat *RError;
 
-    //define max standard deviation of the estimate
-    double maxSTD = 75; // need to determine this val experimentally
-    int k; // an index
-
-    //slope (m) and b for left, right and combined estimate
+    /* Slope (m) and b for left, right and combined estimate. */
     double mL = 0.0;
     double mR = 0.0;
     double m = 0.0;
 
-    //edge vectors, first element = x, second = y
+    /* Edge vectors, first element = x, second = y. */
     int leftEdge[imHeight][2];
     int rightEdge[imHeight][2];
-    int i = 0; //image row index
-    int j = 0; //image column index
+    int i = 0;
+    int j = 0;
 
-    //initialize edge arrays, mset may be better
-    for(i = 0;i<imHeight;i++){
-        leftEdge[i][1]=0;
-        leftEdge[i][2]=0;
-        rightEdge[i][1]=0;
-        rightEdge[i][2]=0;
+    /* Initialize edge arrays, mset may be better. */
+    for ( i = 0; i < imHeight; i++ ) {
+        leftEdge[i][1] = 0;
+        leftEdge[i][2] = 0;
+        rightEdge[i][1] = 0;
+        rightEdge[i][2] = 0;
     }
-    for(i = 0;i<imHeight-240;i++){
-        //scan through each line of image and look for first non zero pixel
-        // get the (i,j) pixel value
-        while(cvGet2D(inputBinImg,i,j).val[0]<1 && j<imWidth-1){
+    for ( i = 0; i < imHeight - 240; i++ ) {
+        /* Scan through each line of image and look for first non zero pixel
+         * then get the (i,j) pixel value. */
+        while ( (cvGet2D(inputBinImg, i, j).val[0] < 1) && (j<imWidth - 1) ) {
             j++;
         }
-        //if we exit before getting to end of row, edge exists
-        if(j<imWidth-1 && j>0){
-            leftEdge[leftEdgeCount][1]=i;
-            leftEdge[leftEdgeCount][2]=j;
+        /* If we exit before getting to end of row, edge exists. */
+        if ( (j < imWidth - 1) && (j > 0) ) {
+            leftEdge[leftEdgeCount][1] = i;
+            leftEdge[leftEdgeCount][2] = j;
             leftEdgeCount++;
-            //countinue scanning to find right edge
-            while(cvGet2D(inputBinImg,i,j).val[0]>0 && j<imWidth-1){
+            /* Continue scanning to find right edge. */
+            while ( (cvGet2D(inputBinImg, i, j).val[0] > 0) && (j < imWidth - 1) ) {
                 j++;
             }
-            if(j<imWidth-2){ //scan didnt get to end of image, right edge exists
-                rightEdge[rightEdgeCount][1]=i;
-                rightEdge[rightEdgeCount][2]=j;
+            if ( j < imWidth - 2 ) { /* Scan didn't get to end of image so
+            						  * right edge exists. */
+                rightEdge[rightEdgeCount][1] = i;
+                rightEdge[rightEdgeCount][2] = j;
                 rightEdgeCount++;
             }
         }
         j = 0;
     }
 
-    if(leftEdgeCount<edgeThreshold && rightEdgeCount<edgeThreshold){
+    if ( (leftEdgeCount < edgeThreshold) && (rightEdgeCount < edgeThreshold) ) {
         return 0.0;
     }
 
-    //begin fitline
+    /* Begin fitline. */
     float *left_line = new float[4];
     float *right_line = new float[4];
 
-    CvMemStorage* storage = cvCreateMemStorage(0);
-    CvSeq* point_seq = cvCreateSeq( CV_32FC2, sizeof(CvSeq), sizeof(CvPoint2D32f), storage );
+    storage = cvCreateMemStorage( 0 );
+    point_seq = cvCreateSeq( CV_32FC2, sizeof(CvSeq), sizeof(CvPoint2D32f), storage );
 
-    if(leftEdgeCount>edgeThreshold){
-        for (i=0; i<leftEdgeCount; i++){
-            cvSeqPush(point_seq, &cvPoint2D32f(leftEdge[i][1],leftEdge[i][2]));
+    if ( leftEdgeCount > edgeThreshold ) {
+        for ( i = 0; i < leftEdgeCount; i++ ) {
+            cvSeqPush( point_seq, &cvPoint2D32f(leftEdge[i][1],leftEdge[i][2]) );
         }
-        cvFitLine(point_seq,CV_DIST_L2,0,0.01,0.01,left_line);
-        mL = left_line[1]/left_line[0];
-
-        CvMat* LError = cvCreateMat(1,leftEdgeCount-1,CV_32SC1);
+        cvFitLine( point_seq, CV_DIST_L2, 0, 0.01, 0.01, left_line );
+        mL = left_line[1] / left_line[0];
+        LError = cvCreateMat( 1, leftEdgeCount - 1, CV_32SC1 );
         for ( k = 0; k < leftEdgeCount - 1; k++ ) {
-            //save errors in vector LError
-            cvSetReal2D(LError, 0, k, (double)(leftEdge[k][2])
-                -(double)(mL* (leftEdge[k][1]-left_line[2]) + left_line[3]));
+            /* Save errors in vector LError. */
+            cvSetReal2D( LError, 0, k, (double)(leftEdge[k][2])
+                - (double)(mL * (leftEdge[k][1] - left_line[2]) + left_line[3]) );
         }
-        //calculate standard deviation of error
+        /* Calculate standard deviation of error. */
         cvAvgSdv( LError, NULL, &Left_STD, NULL );
         cvClearSeq( point_seq );
     }
 
-    if(rightEdgeCount>edgeThreshold){
-        for (i=0; i<rightEdgeCount; i++){
-            cvSeqPush(point_seq, &cvPoint2D32f(rightEdge[i][1],rightEdge[i][2]));
+    if ( rightEdgeCount > edgeThreshold ) {
+        for ( i = 0; i < rightEdgeCount; i++ ) {
+            cvSeqPush( point_seq, &cvPoint2D32f(rightEdge[i][1],rightEdge[i][2]) );
         }
-        cvFitLine(point_seq,CV_DIST_L2,0,0.01,0.01,right_line);
-        mR = right_line[1]/right_line[0];
-        CvMat* RError = cvCreateMat(1,rightEdgeCount-1,CV_32SC1);
-        for(k = 0;k<rightEdgeCount-1;k++){
-            cvSetReal2D(RError, 0, k, (double)(rightEdge[k][2])
-                -(double)(mR* (rightEdge[k][1]-right_line[2]) + right_line[3]));
+        cvFitLine( point_seq, CV_DIST_L2, 0, 0.01, 0.01, right_line );
+        mR = right_line[1] / right_line[0];
+        RError = cvCreateMat( 1, rightEdgeCount - 1, CV_32SC1 );
+        for ( k = 0; k < rightEdgeCount - 1; k++ ) {
+            cvSetReal2D( RError, 0, k, (double)(rightEdge[k][2])
+                - (double)(mR* (rightEdge[k][1]-right_line[2]) + right_line[3]) );
         }
-        cvAvgSdv( RError, NULL, &Right_STD,NULL);
-        cvClearSeq(point_seq);
+        cvAvgSdv( RError, NULL, &Right_STD, NULL);
+        cvClearSeq( point_seq );
     }
 
-    //if estimate is really poor, do not update bearing
-    if(Right_STD.val[0] >maxSTD && Left_STD.val[0]>maxSTD){
+    /* If estimate is really poor, do not update bearing. */
+    if ( (Right_STD.val[0] > maxSTD) && (Left_STD.val[0] > maxSTD) ) {
         return m;
     }
 
-    //only a left edge, ignore right
-    if(rightEdgeCount<=edgeThreshold){
+    /* Only a left edge, ignore right. */
+    if ( rightEdgeCount <= edgeThreshold ) {
         m = mL;
     }
-    //only a right edge, ignore left
-    else if(leftEdgeCount<=edgeThreshold){
+    /* Only a right edge, ignore left. */
+    else if ( leftEdgeCount <= edgeThreshold ) {
         m = mR;
     }
-    //both edges exist, scale each estimate by variances
-    else{
-        m = (Right_STD.val[0]*mL+ Left_STD.val[0]*mR)/(Right_STD.val[0]+Left_STD.val[0]);
+    /* Both edges exist, scale each estimate by variances. */
+    else {
+        m = (Right_STD.val[0] * mL + Left_STD.val[0] * mR) /
+        	(Right_STD.val[0] + Left_STD.val[0]);
     }
 
     delete left_line;
     delete right_line;
-    cvReleaseMemStorage(&storage);
+    cvReleaseMemStorage( &storage );
 
     return m;
 } /* end vision_get_bearing() */
@@ -434,7 +433,7 @@ int vision_find_fence( int *fence_center,
     IplConvKernel *wD = cvCreateStructuringElementEx( 3, 3,
             ( int )floor( ( 3.0 ) / 2 ), ( int )floor( ( 3.0 ) / 2 ), CV_SHAPE_RECT );
 
-    srcImg = cvQueryFrame( cap );
+    //srcImg = cvQueryFrame( cap );
     srcImg = cvQueryFrame( cap );
 
     if ( !srcImg ) {
@@ -443,7 +442,7 @@ int vision_find_fence( int *fence_center,
 
     /* Flip the source image if find dot didnt */
   	cvFlip( srcImg, srcImg );
-    int center = srcImg->width/2;
+    int center = srcImg->width / 2;
 
     hsv_image = cvCreateImage( cvGetSize( srcImg ), IPL_DEPTH_8U, 3 );
     outImg = cvCreateImage( cvGetSize( srcImg ), IPL_DEPTH_8U, 1 );
@@ -452,15 +451,13 @@ int vision_find_fence( int *fence_center,
     cvCvtColor( srcImg, hsv_image, CV_RGB2HSV );
     cvInRangeS( hsv_image, cvScalar(hL,sL,vL), cvScalar(hH,sH,vH), binImg );
 
-    /* Perform erosion and dilation. */
+    /* Perform erosion, dilation, and conversion. */
     cvErode( binImg, binImg, wE );
     cvDilate( binImg, binImg, wD );
-
     cvConvertScale( binImg, outImg, 255.0 );
 
     /* Process the image. */
     *y_max = vision_get_fence_bottom( outImg, &center );
-    //printf("ymax = %d\n", *y_max);
     *fence_center = center;
 
     /* Clear variables to free memory. */
@@ -491,53 +488,54 @@ int vision_get_fence_bottom( IplImage *inputBinImg, int *center )
     int imHeight = inputBinImg->height;
     int imWidth = inputBinImg->width;
     int minPipeWidth = 20;
-    //minimum num of edge points before we declare a line
     int edgeThreshold = 2;
     int c= 0;
+    int k=0;
 
-    int k=0; // an index
-
-    //edge vectors, first element = x, second = y
+    /* Edge vectors, first element = x, second = y. */
     int leftEdge[imHeight];
     int rightEdge[imHeight];
-    int i = 0; //image row index
-    int j = 0; //image column index
+    int i = 0; /* rows */
+    int j = 0; /* columns */
 
-    //initialize edge arrays, mset may be better
+    /* Initialize edge arrays, mset may be better. */
     for ( i = 0; i < imHeight; i++ ) {
         leftEdge[i] = 0;
         rightEdge[i] = imWidth;
     }
     for ( i = 0; i < imHeight - 1; i++ ) {
-        //scan through each line of image and look for first non zero pixel
-        // get the (i,j) pixel value
-        while ( (cvGet2D(inputBinImg,i,j).val[0] < 1) && (j < imWidth - 2) ) {
+        /* Scan through each line of image and look for first non zero pixel
+         * then get the (i,j) pixel value. */
+        while ( (cvGet2D(inputBinImg, i, j).val[0] < 1) && (j < imWidth - 2) ) {
             j++;
         }
-        //if we exit before getting to end of row, edge exists
+        /* If we exit before getting to end of row, edge exists. */
         if ( (j < imWidth) && (j > minPipeWidth) ) {
             leftEdge[k] = j;
-            //countinue scanning to find bottom edge
-            while ( (cvGet2D(inputBinImg,i,j).val[0] > 0) && (j < imWidth - 2) ) {
+            /* Countinue scanning to find bottom edge. */
+            while ( (cvGet2D(inputBinImg, i, j).val[0] > 0) && (j < imWidth - 2) ) {
                 j++;
             }
-            if ( j < imWidth - 2) { //scan didnt get to end of image, bottom edge exists
+            if ( j < imWidth - 2) { /* Scan didn't get to end of image, bottom
+            						 * edge exists. */
                 rightEdge[k] = j;
             }
             if ( rightEdge[k] - leftEdge[k] > minPipeWidth ) {
             	y_max = i;
-            	printf( "FNC_BTM: ymax = %d\n", y_max );
+            	//printf( "FNC_BTM: ymax = %d\n", y_max );
 			}
         }
         k++;
         j = 0;
     }
-    //we found a fence
-    if(y_max>edgeThreshold){
-    	for(i = 0;i<k;i++){
-        		c = c + rightEdge[i]-leftEdge[i];
+
+    /* We found a fence. */
+    if ( y_max > edgeThreshold ) {
+    	for ( i = 0; i < k; i++ ) {
+        		c += rightEdge[i] - leftEdge[i];
 		}
 	}
 	*center = c/k;
+
     return y_max;
 } /* end vision_get_fence_bottom() */
