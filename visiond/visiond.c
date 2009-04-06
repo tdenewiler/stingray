@@ -137,6 +137,8 @@ int main( int argc, char *argv[] )
     int width = -1;
     int height = -1;
     int pipex = -1;
+    int fence_center = -1;
+	int y_max = -1;
     double bearing = -1;
     int amt = 2;
     int ii = 0;
@@ -178,6 +180,12 @@ int main( int argc, char *argv[] )
     msg.vsetting.data.buoy_hsv.sH = cf.buoy_sH;
     msg.vsetting.data.buoy_hsv.vL = cf.buoy_vL;
     msg.vsetting.data.buoy_hsv.vH = cf.buoy_vH;
+    msg.vsetting.data.fence_hsv.hL = cf.fence_hL;
+    msg.vsetting.data.fence_hsv.hH = cf.fence_hH;
+    msg.vsetting.data.fence_hsv.sL = cf.fence_sL;
+    msg.vsetting.data.fence_hsv.sH = cf.fence_sH;
+    msg.vsetting.data.fence_hsv.vL = cf.fence_vL;
+    msg.vsetting.data.fence_hsv.vH = cf.fence_vH;
 
     /* Set up communications. */
     if ( cf.enable_net ) {
@@ -193,6 +201,7 @@ int main( int argc, char *argv[] )
     else {
         f_img = cvQueryFrame( f_cam );
         f_bin_img = cvCreateImage( cvGetSize( f_img ), IPL_DEPTH_8U, 1 );
+    	fence_center = f_img->width/2;//if center is not found, assume in image center
     }
 
     /* Open bottom camera. */
@@ -233,9 +242,30 @@ int main( int argc, char *argv[] )
                 if ( cf.vision_window ) {
                     if ( cvWaitKey( 5 ) >= 0 );
                     cvCircle(f_img, cvPoint(dotx,doty), 10, cvScalar(255,0,0), 5, 8);
-                    cvShowImage( f_win, f_img );
+                    //cvShowImage( f_win, f_img );
                 }
             }
+            status = vision_find_fence( &fence_center, &y_max, f_cam, f_img, f_bin_img,
+                    msg.vsetting.data.fence_hsv.hL,
+                    msg.vsetting.data.fence_hsv.hH,
+                    msg.vsetting.data.fence_hsv.sL,
+                    msg.vsetting.data.fence_hsv.sH,
+                    msg.vsetting.data.fence_hsv.vL,
+                    msg.vsetting.data.fence_hsv.vH );
+            if ( status == 1 ) {
+                if ( cf.vision_window ) {
+                    if ( cvWaitKey( 5 ) >= 0 );
+                        cvCircle(f_img, cvPoint(fence_center,f_img->height/2), 10, cvScalar(255,140,0), 5, 8);
+                        for ( ii = 0; ii < lineWidth; ii++ ) {
+                            cvCircle( f_img,
+                                cvPoint( f_img->width/2 +ii,
+                                    y_max),
+                                    2, cvScalar( 0, 255, 0 ), 2 );
+						}
+                   cvShowImage( f_win, f_img );
+				}
+            }
+            //printf("Max Y location = %d \n",y_max);
             //printf( "MAIN: front %d %d\n", dotx, doty );
         }
 
@@ -290,7 +320,7 @@ int main( int argc, char *argv[] )
             ct = *( localtime ((const time_t*) &ctime.tv_sec) );
             strftime( write_time, sizeof(write_time), "images/f20%y%m%d_%H%M%S", &ct);
             snprintf( write_time + strlen(write_time),
-                    strlen(write_time), ".%03ld.jpg", ctime.tv_usec );
+            		strlen(write_time), ".%03ld.jpg", ctime.tv_usec );
             cvSaveImage( write_time, f_img );
             msg.vsetting.data.save_fframe = FALSE;
         }
@@ -300,7 +330,7 @@ int main( int argc, char *argv[] )
             ct = *( localtime ((const time_t*) &ctime.tv_sec) );
             strftime( write_time, sizeof(write_time), "images/b20%y%m%d_%H%M%S", &ct);
             snprintf( write_time + strlen(write_time),
-                    strlen(write_time), ".%03ld.jpg", ctime.tv_usec );
+            		strlen(write_time), ".%03ld.jpg", ctime.tv_usec );
             cvSaveImage( write_time, b_img );
             msg.vsetting.data.save_bframe = FALSE;
         }
@@ -310,7 +340,7 @@ int main( int argc, char *argv[] )
             ct = *( localtime ((const time_t*) &ctime.tv_sec) );
             strftime( write_time, sizeof(write_time), "stream/f20%y%m%d_%H%M%S", &ct);
             snprintf( write_time + strlen(write_time),
-                    strlen(write_time), ".%03ld.avi", ctime.tv_usec );
+            		strlen(write_time), ".%03ld.avi", ctime.tv_usec );
             fps = cvGetCaptureProperty( f_cam, CV_CAP_PROP_FPS );
             printf( "MAIN: fps = %lf\n", fps );
             f_writer = cvCreateVideoWriter( write_time, CV_FOURCC('I', 'Y', 'U', 'V'),
@@ -327,7 +357,7 @@ int main( int argc, char *argv[] )
             ct = *( localtime ((const time_t*) &ctime.tv_sec) );
             strftime( write_time, sizeof(write_time), "stream/b20%y%m%d_%H%M%S", &ct);
             snprintf( write_time + strlen(write_time),
-                    strlen(write_time), ".%03ld.avi", ctime.tv_usec );
+            		strlen(write_time), ".%03ld.avi", ctime.tv_usec );
             fps = cvGetCaptureProperty( b_cam, CV_CAP_PROP_FPS );
             b_writer = cvCreateVideoWriter( write_time, CV_FOURCC('D', 'I', 'B', ' '),
                 fps, cvGetSize( b_img ), is_color );
