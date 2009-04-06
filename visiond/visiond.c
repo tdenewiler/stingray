@@ -201,7 +201,7 @@ int main( int argc, char *argv[] )
     else {
         f_img = cvQueryFrame( f_cam );
         f_bin_img = cvCreateImage( cvGetSize( f_img ), IPL_DEPTH_8U, 1 );
-    	fence_center = f_img->width/2;//if center is not found, assume in image center
+    	fence_center = f_img->width / 2;
     }
 
     /* Open bottom camera. */
@@ -221,7 +221,6 @@ int main( int argc, char *argv[] )
         cvNamedWindow( f_win, CV_WINDOW_AUTOSIZE );
         cvNamedWindow( b_win, CV_WINDOW_AUTOSIZE );
     }
-
     printf( "<OK>\n" );
 
     /* Main loop. */
@@ -241,7 +240,8 @@ int main( int argc, char *argv[] )
                 msg.vision.data.front_y = doty;
                 if ( cf.vision_window ) {
                     if ( cvWaitKey( 5 ) >= 0 );
-                    cvCircle(f_img, cvPoint(dotx,doty), 10, cvScalar(255,0,0), 5, 8);
+                    cvCircle( f_img, cvPoint(dotx, doty),
+                    	10, cvScalar(255, 0, 0), 5, 8 );
                     //cvShowImage( f_win, f_img );
                 }
             }
@@ -255,17 +255,15 @@ int main( int argc, char *argv[] )
             if ( status == 1 ) {
                 if ( cf.vision_window ) {
                     if ( cvWaitKey( 5 ) >= 0 );
-                        cvCircle(f_img, cvPoint(fence_center,f_img->height/2), 10, cvScalar(255,140,0), 5, 8);
+                        cvCircle( f_img, cvPoint(fence_center, f_img->height / 2),
+                        	10, cvScalar(255, 140, 0), 5, 8 );
                         for ( ii = 0; ii < lineWidth; ii++ ) {
-                            cvCircle( f_img,
-                                cvPoint( f_img->width/2 +ii,
-                                    y_max),
-                                    2, cvScalar( 0, 255, 0 ), 2 );
+                            cvCircle( f_img, cvPoint(f_img->width / 2 + ii, y_max),
+                                    2, cvScalar(0, 255, 0), 2 );
 						}
                    cvShowImage( f_win, f_img );
 				}
             }
-            //printf("Max Y location = %d \n",y_max);
             //printf( "MAIN: front %d %d\n", dotx, doty );
         }
 
@@ -286,13 +284,13 @@ int main( int argc, char *argv[] )
                                 cvCircle( b_img,
                                         cvPoint( b_img->width / 2 + ((int)(bearing * ii)),
                                                 (b_img->width / 2) + ii ),
-                                        2, cvScalar( 255, 255, 0 ), 2 );
+                                        2, cvScalar(255, 255, 0), 2 );
                             }
                             else{
                                 cvCircle( b_img,
                                         cvPoint( b_img->width / 2 + ((int)(bearing * ii)),
                                                 (b_img->width / 2) + ii ),
-                                        2, cvScalar( 0, 0, 255 ), 2 );
+                                        2, cvScalar(0, 0, 255), 2 );
                             }
                             cvShowImage( b_win, b_img );
                         }

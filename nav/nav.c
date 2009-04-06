@@ -414,7 +414,10 @@ int main( int argc, char *argv[] )
                 vision_buf[recv_bytes] = '\0';
                 if ( recv_bytes > 0 ) {
                     messages_decode( vision_fd, vision_buf, &msg );
-                    printf( "MAIN: %d %d\n", msg.vision.data.front_x, msg.vision.data.front_y );
+                    msg.target.data.yaw += (float)msg.vision.data.front_x;
+                    msg.target.data.pitch += (float)msg.vision.data.front_y;
+                    msg.target.data.yaw += msg.vision.data.bottom_y;
+                    msg.target.data.fx += (float)msg.vision.data.bottom_x;
                     gettimeofday( &vision_start, NULL );
                 }
             }

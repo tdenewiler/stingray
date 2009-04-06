@@ -76,6 +76,18 @@
 //@}
 #endif /* OPERATING_MODES */
 
+/* Tasks. */
+#ifndef TASKS
+/** @name Tasks that are available for the planner. */
+//@{
+#define TASKS
+#define TASK_BUOY   1
+#define TASK_PIPE   2
+#define TASK_GATE   3
+#define TASK_SQUARE 4
+//@}
+#endif /* TASKS */
+
 
 /******************************
 **
@@ -323,11 +335,6 @@ typedef struct _VISION_MSG {
 
 #ifndef _TASK_MSG_
 #define _TASK_MSG_
-
-#define TASK_BUOY   1
-#define TASK_PIPE   2
-#define TASK_GATE   3
-#define TASK_SQUARE 4
 
 typedef struct _TASK {
     char num;           //!< The task to attempt.
