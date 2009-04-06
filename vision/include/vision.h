@@ -86,4 +86,24 @@ int vision_find_pipe( int *pipex,
 //! \return The angle of the pipe in degrees.
 double vision_get_bearing( IplImage *img );
 
+int vision_get_fence_bottom( IplImage *inputBinImg, int *center );
+
+//! Finds a fence object from a camera.
+//! \param pipex Pointer to variable for x position of pipe.
+//! \param bearing Pointer to variable for bearing of pipe.
+//! \param cam A pointer to an open camera.
+//! \param srcImg The unprocessed image.
+int vision_find_fence( int *pipex,
+                      int *y_max,
+                      CvCapture *cam,
+                      IplImage *srcImg,
+                      IplImage *binImg,
+                      float hL,
+                      float hH,
+                      float sL,
+                      float sH,
+                      float vL,
+                      float vH
+                    );
+
 #endif /* _VISION_H_ */

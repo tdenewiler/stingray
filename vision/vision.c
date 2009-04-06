@@ -391,3 +391,153 @@ CvPoint vision_find_centroid( IplImage *binImage, int thresh )
 
     return centroid;
 } /* end vision_find_centroid() */
+
+
+/******************************************************************************
+ *
+ * Title:       int vision_find_fence(   int *pipex,
+ *                                      float *bearing,
+ *                                      CvCapture *cap,
+ *                                      IplImage *srcImg,
+ *                                      IplImage *outImg
+ *                                   )
+ *
+ * Description: Finds a pipe object from a camera.
+ *
+ * Input:       pipex: Pointer to variable for x position of pipe.
+ *              bearing: Pointer to variable for bearing of pipe.
+ *              cap: A pointer to an open camera.
+ *
+ * Output:      status: 1 on success, 0 on failure.
+ *
+ * Globals:     None.
+ *
+ *****************************************************************************/
+
+int vision_find_fence( int *fence_center,
+                      int *y_max,
+                      CvCapture *cap,
+                      IplImage *srcImg,
+                      IplImage *binImg,
+                      float hL,
+                      float hH,
+                      float sL,
+                      float sH,
+                      float vL,
+                      float vH
+                    )
+{
+    IplImage *hsv_image = NULL;
+    IplImage *outImg = NULL;
+    IplConvKernel *wE = cvCreateStructuringElementEx( 2, 2,
+            ( int )floor( ( 3.0 ) / 2 ), ( int )floor( ( 3.0 ) / 2 ), CV_SHAPE_RECT );
+    IplConvKernel *wD = cvCreateStructuringElementEx( 3, 3,
+            ( int )floor( ( 3.0 ) / 2 ), ( int )floor( ( 3.0 ) / 2 ), CV_SHAPE_RECT );
+
+    srcImg = cvQueryFrame( cap );
+    srcImg = cvQueryFrame( cap );
+
+    if ( !srcImg ) {
+        return 0;
+    }
+
+    /* Flip the source image if find dot didnt */
+  	cvFlip( srcImg, srcImg );
+    int center = srcImg->width/2;
+
+    hsv_image = cvCreateImage( cvGetSize( srcImg ), IPL_DEPTH_8U, 3 );
+    outImg = cvCreateImage( cvGetSize( srcImg ), IPL_DEPTH_8U, 1 );
+
+    /* Segment the image into a binary image. */
+    cvCvtColor( srcImg, hsv_image, CV_RGB2HSV );
+    cvInRangeS( hsv_image, cvScalar(hL,sL,vL), cvScalar(hH,sH,vH), binImg );
+
+    /* Perform erosion and dilation. */
+    cvErode( binImg, binImg, wE );
+    cvDilate( binImg, binImg, wD );
+
+    cvConvertScale( binImg, outImg, 255.0 );
+
+    /* Process the image. */
+    *y_max = vision_get_fence_bottom( outImg, &center );
+    //printf("ymax = %d\n", *y_max);
+    *fence_center = center;
+
+    /* Clear variables to free memory. */
+    cvReleaseImage( &hsv_image );
+    cvReleaseImage( &outImg );
+
+    return 1;
+} /* end vision_find_pipe() */
+
+
+/******************************************************************************
+ *
+ * Title:       float vision_get_fence_bottom( IplImage *inputBinImg )
+ *
+ * Description: Fits edges of pipe to a line and calculates its angle.
+ *
+ * Input:       inputBinImage: The binary image to find the bearing of.
+ *
+ * Output:      bearing: The angle of the pipe in radians.
+ *
+ * Globals:     None.
+ *
+ *****************************************************************************/
+
+int vision_get_fence_bottom( IplImage *inputBinImg, int *center )
+{
+    int y_max = 0;
+    int imHeight = inputBinImg->height;
+    int imWidth = inputBinImg->width;
+    int minPipeWidth = 20;
+    //minimum num of edge points before we declare a line
+    int edgeThreshold = 2;
+    int c= 0;
+
+    int k=0; // an index
+
+    //edge vectors, first element = x, second = y
+    int leftEdge[imHeight];
+    int rightEdge[imHeight];
+    int i = 0; //image row index
+    int j = 0; //image column index
+
+    //initialize edge arrays, mset may be better
+    for ( i = 0; i < imHeight; i++ ) {
+        leftEdge[i] = 0;
+        rightEdge[i] = imWidth;
+    }
+    for ( i = 0; i < imHeight - 1; i++ ) {
+        //scan through each line of image and look for first non zero pixel
+        // get the (i,j) pixel value
+        while ( (cvGet2D(inputBinImg,i,j).val[0] < 1) && (j < imWidth - 2) ) {
+            j++;
+        }
+        //if we exit before getting to end of row, edge exists
+        if ( (j < imWidth) && (j > minPipeWidth) ) {
+            leftEdge[k] = j;
+            //countinue scanning to find bottom edge
+            while ( (cvGet2D(inputBinImg,i,j).val[0] > 0) && (j < imWidth - 2) ) {
+                j++;
+            }
+            if ( j < imWidth - 2) { //scan didnt get to end of image, bottom edge exists
+                rightEdge[k] = j;
+            }
+            if ( rightEdge[k] - leftEdge[k] > minPipeWidth ) {
+            	y_max = i;
+            	printf( "FNC_BTM: ymax = %d\n", y_max );
+			}
+        }
+        k++;
+        j = 0;
+    }
+    //we found a fence
+    if(y_max>edgeThreshold){
+    	for(i = 0;i<k;i++){
+        		c = c + rightEdge[i]-leftEdge[i];
+		}
+	}
+	*center = c/k;
+    return y_max;
+} /* end vision_get_fence_bottom() */
