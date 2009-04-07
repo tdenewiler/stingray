@@ -156,7 +156,6 @@ int main( int argc, char *argv[] )
 	parse_cla( argc, argv, &cf, STINGRAY, ( const char * )PLANNER_FILENAME );
 
 	/* Set up communications. */
-
 	if ( cf.enable_planner ) {
 		server_fd = net_server_setup( cf.planner_port );
 	}
@@ -168,17 +167,11 @@ int main( int argc, char *argv[] )
 
 	/* Initialize timers. */
 	gettimeofday( &vision_time, NULL );
-
 	gettimeofday( &vision_start, NULL );
-
 	gettimeofday( &plan_time, NULL );
-
 	gettimeofday( &plan_start, NULL );
-
 	gettimeofday( &task_time, NULL );
-
 	gettimeofday( &task_start, NULL );
-
 	printf( "<OK>\n" );
 
 	/* Main loop. */
@@ -186,7 +179,6 @@ int main( int argc, char *argv[] )
 		/* Get network data. */
 		if ( ( cf.enable_net ) && ( server_fd > 0 ) ) {
 			recv_bytes = net_server( server_fd, recv_buf, &msg, MODE_PLANNER );
-
 			if ( recv_bytes > 0 ) {
 				recv_buf[recv_bytes] = '\0';
 				messages_decode( server_fd, recv_buf, &msg );
@@ -203,7 +195,7 @@ int main( int argc, char *argv[] )
 			dt = util_calc_dt( &time1s, &time1ms, &time2s, &time2ms );
 
 			if ( dt > cf.period_vision ) {
-				recv_bytes = net_client( vision_fd, vision_buf, &msg );
+				recv_bytes = net_client( vision_fd, vision_buf, &msg, MODE_STATUS );
 				vision_buf[recv_bytes] = '\0';
 
 				if ( recv_bytes > 0 ) {
