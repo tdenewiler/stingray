@@ -414,13 +414,15 @@ int main( int argc, char *argv[] )
                 vision_buf[recv_bytes] = '\0';
                 if ( recv_bytes > 0 ) {
                     messages_decode( vision_fd, vision_buf, &msg );
-                    msg.target.data.yaw += (float)msg.vision.data.front_x;
-                    msg.target.data.pitch += (float)msg.vision.data.front_y;
-                    msg.target.data.yaw += msg.vision.data.bottom_y;
-                    msg.target.data.fx += (float)msg.vision.data.bottom_x;
+                    /* Set target values based on current orientation and pixel error. */
+                    msg.target.data.yaw = msg.mstrain.data.yaw + (float)msg.vision.data.front_x / 10.;
+                    msg.target.data.pitch = msg.mstrain.data.pitch + (float)msg.vision.data.front_y / 10.;
+                    //msg.target.data.yaw = msg.mstrain.data.yaw + (float)msg.vision.data.bottom_y;
+                    //msg.target.data.fx = (float)msg.vision.data.bottom_x;
                     gettimeofday( &vision_start, NULL );
                 }
             }
+            //printf( "MAIN:\n%f\n%f\n\n", msg.target.data.pitch, msg.target.data.yaw );
         }
 
         /* Get labjack daemon data. */

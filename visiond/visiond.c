@@ -236,13 +236,13 @@ int main( int argc, char *argv[] )
                     msg.vsetting.data.buoy_hsv.vL,
                     msg.vsetting.data.buoy_hsv.vH );
             if ( status == 1 ) {
-                msg.vision.data.front_x = dotx;
-                msg.vision.data.front_y = doty;
+                msg.vision.data.front_x = dotx - f_img->width / 2;
+                msg.vision.data.front_y = doty - f_img->height / 2;
                 if ( cf.vision_window ) {
                     if ( cvWaitKey( 5 ) >= 0 );
                     cvCircle( f_img, cvPoint(dotx, doty),
                     	10, cvScalar(255, 0, 0), 5, 8 );
-                    //cvShowImage( f_win, f_img );
+                    cvShowImage( f_win, f_img );
                 }
             }
             status = vision_find_fence( &fence_center, &y_max, f_cam, f_img, f_bin_img,
@@ -264,7 +264,7 @@ int main( int argc, char *argv[] )
                    cvShowImage( f_win, f_img );
 				}
             }
-            //printf( "MAIN: front %d %d\n", dotx, doty );
+            //printf( "MAIN:\n%d %d\n", msg.vision.data.front_x, msg.vision.data.front_y );
         }
 
         /* Process bottom camera image. */
