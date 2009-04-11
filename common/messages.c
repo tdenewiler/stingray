@@ -268,11 +268,7 @@ void messages_decode( int fd, char *buf, MSG_DATA *msg )
             break;
 
         case GAIN_MSGID:
-            if ( ( ( GAIN_MSG * )buf )->data.mode == GAIN_SET ) {
-                msg->gain.data = ( ( GAIN_MSG * )buf )->data;
-            }
-            else if ( ( ( GAIN_MSG * )buf )->data.mode == GAIN_GET ) {
-            }
+			msg->gain.data = ( ( GAIN_MSG * )buf )->data;
 
             break;
 

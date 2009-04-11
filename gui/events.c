@@ -330,6 +330,36 @@ void events_gain( GtkWidget *widget,
     if ( cf.debug_level > 5 ) {
         g_print( "GAIN_EVENT: Gain spin button selected.\n" );
     }
+
+	/* Get the values of the buttons. */
+	msg.gain.data.mode 		= 0;
+    msg.gain.data.kp_yaw    = gtk_spin_button_get_value( ( GtkSpinButton * )
+                              button_kp_yaw );
+    msg.gain.data.ki_yaw    = gtk_spin_button_get_value( ( GtkSpinButton * )
+                              button_ki_yaw );
+    msg.gain.data.kd_yaw    = gtk_spin_button_get_value( ( GtkSpinButton * )
+                              button_kd_yaw );
+    msg.gain.data.kp_pitch  = gtk_spin_button_get_value( ( GtkSpinButton * )
+                              button_kp_pitch );
+    msg.gain.data.ki_pitch  = gtk_spin_button_get_value( ( GtkSpinButton * )
+                              button_ki_pitch );
+    msg.gain.data.kd_pitch  = gtk_spin_button_get_value( ( GtkSpinButton * )
+                              button_kd_pitch );
+    msg.gain.data.kp_roll   = gtk_spin_button_get_value( ( GtkSpinButton * )
+                              button_kp_roll );
+    msg.gain.data.ki_roll   = gtk_spin_button_get_value( ( GtkSpinButton * )
+                              button_ki_roll );
+    msg.gain.data.kd_roll   = gtk_spin_button_get_value( ( GtkSpinButton * )
+                              button_kd_roll );
+    msg.gain.data.kp_depth   = gtk_spin_button_get_value( ( GtkSpinButton * )
+                               button_kp_depth );
+    msg.gain.data.ki_depth   = gtk_spin_button_get_value( ( GtkSpinButton * )
+                               button_ki_depth );
+    msg.gain.data.kd_depth   = gtk_spin_button_get_value( ( GtkSpinButton * )
+                               button_kd_depth );
+
+    /* Send the gain message. */
+    messages_send( nav_fd, GAIN_MSGID, &msg );
 } /* end events_gain() */
 
 

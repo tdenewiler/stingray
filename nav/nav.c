@@ -309,21 +309,21 @@ int main( int argc, char *argv[] )
     /* Set up the labjack. */
     if ( cf.enable_labjack ) {
         lj_fd = init_labjack( );
+        lj_fd = 1;
     }
     if ( lj_fd ) {
         status = query_labjack( );
     }
 
     /* Connect to the labjack daemon. */
-    /*
-    if ( cf.enable_labjack ) {
-        lj_fd = net_client_setup( cf.labjackd_IP, cf.labjackd_port );
-    }
-    */
+    //if ( cf.enable_labjack ) {
+        //lj_fd = net_client_setup( cf.labjackd_IP, cf.labjackd_port );
+    //}
 
     /* Set up the Pololu servo controller. */
     if ( cf.enable_pololu ) {
         pololu_fd = pololuSetup( cf.pololu_port, cf.pololu_baud );
+        pololuInitializeChannels( pololu_fd );
     }
 
     /* Initialize timers. */
@@ -341,17 +341,24 @@ int main( int argc, char *argv[] )
     printf( "MAIN: Close the kill switch now.\n" );
 
     status = -1;
-    if ( ( cf.enable_labjack ) && ( lj_fd > 0 ) ) {
-        while ( status < 0 ) {
-            recv_bytes = net_client( lj_fd, lj_buf, &msg, mode );
-            lj_buf[recv_bytes] = '\0';
-            if ( recv_bytes > 0 ) {
-                messages_decode( lj_fd, lj_buf, &msg );
-            }
-            status = msg.lj.data.battery1;
-        }
-        printf( "MAIN: Kill switch is closed.\n" );
-    }
+    //if ( ( cf.enable_labjack ) && ( lj_fd > 0 ) ) {
+        //while ( status < 0 ) {
+            //recv_bytes = net_client( lj_fd, lj_buf, &msg, mode );
+            //lj_buf[recv_bytes] = '\0';
+            //if ( recv_bytes > 0 ) {
+                //messages_decode( lj_fd, lj_buf, &msg );
+            //}
+            //status = msg.lj.data.battery1;
+        //}
+        //printf( "MAIN: Kill switch is closed.\n" );
+    //}
+    if ( (cf.enable_labjack) && (lj_fd > 0) ) {
+    	while ( getBatteryVoltage(AIN_0) < 10.0 ) {
+    		query_labjack( );
+    		usleep( 100000 );
+		}
+		printf( "MAIN: Kill switch is closed.\n" );
+	}
     printf( "MAIN: Waiting for motors to arm ... " );
     if ( ( cf.enable_labjack ) && ( lj_fd > 0 ) ) {
         sleep( 7 );
@@ -368,6 +375,13 @@ int main( int argc, char *argv[] )
                 messages_decode( server_fd, recv_buf, &msg );
             }
         }
+        printf( "MAIN:\n%lf %lf %lf %lf %lf\n\n"
+        	, msg.gain.data.kp_pitch
+        	, msg.gain.data.ki_pitch
+        	, msg.gain.data.kd_pitch
+        	, msg.gain.data.kp_roll
+        	, msg.gain.data.kp_yaw
+        );
 
         /* Check state of emergency stop value. */
         if ( msg.stop.data.state == TRUE ) {
@@ -400,6 +414,14 @@ int main( int argc, char *argv[] )
             msg.teleop.data.fx = 0;
             msg.teleop.data.fy = 0;
             msg.teleop.data.speed = 0;
+
+            //printf( "%f\n", msg.target.data.pitch );
+            //printf( "%f\n", msg.target.data.roll );
+            //printf( "%f\n", msg.target.data.yaw );
+            //printf( "%f\n", msg.target.data.depth );
+            //printf( "%f\n", msg.target.data.fx );
+            //printf( "%f\n", msg.target.data.fy );
+            //printf( "%f\n", msg.target.data.speed );
         }
 
         /* Get vision data. */
@@ -426,13 +448,20 @@ int main( int argc, char *argv[] )
         }
 
         /* Get labjack daemon data. */
-        if ( ( cf.enable_labjack ) && ( lj_fd > 0 ) ) {
-            recv_bytes = net_client( lj_fd, lj_buf, &msg, mode );
-            lj_buf[recv_bytes] = '\0';
-            if ( recv_bytes > 0 ) {
-                messages_decode( lj_fd, lj_buf, &msg );
-            }
-        }
+        //if ( ( cf.enable_labjack ) && ( lj_fd > 0 ) ) {
+            //recv_bytes = net_client( lj_fd, lj_buf, &msg, mode );
+            //lj_buf[recv_bytes] = '\0';
+            //if ( recv_bytes > 0 ) {
+                //messages_decode( lj_fd, lj_buf, &msg );
+            //}
+        //}
+        if ( (cf.enable_labjack) && (lj_fd > 0) ) {
+        	query_labjack( );
+        	lj.battery1 = getBatteryVoltage( AIN_0 );
+        	lj.battery2 = getBatteryVoltage( AIN_1 );
+        	lj.pressure = getBatteryVoltage( AIN_2 );
+        	lj.water    = getBatteryVoltage( AIN_3 );
+		}
 
         /* Get planner data. */
         if ( ( cf.enable_planner ) && ( planner_fd > 0 ) ) {
@@ -461,6 +490,11 @@ int main( int argc, char *argv[] )
                                                 msg.mstrain.data.ang_rate
                                               );
         }
+        //printf( "MAIN:\n%f %f %f\n\n"
+        	//, msg.mstrain.data.pitch
+        	//, msg.mstrain.data.roll
+        	//, msg.mstrain.data.yaw
+        //);
 
         /* Get Labjack data. */
         //if ( ( cf.enable_labjack ) && ( lj_fd > 0 ) ) {

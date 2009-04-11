@@ -166,16 +166,7 @@ int net_server( int fd, void *buf, MSG_DATA *msg, int mode )
                 else {
                     /* Send data to clients. */
                     if ( mode == MODE_NAV ) {
-                        if ( ( ( HEADER * )buf )->msgid == GAIN_MSGID ) {
-                            if ( ( ( GAIN_MSG * )buf )->data.mode == GAIN_GET ) {
-                                msg->gain.data.mode = GAIN_SET;
-                                messages_send( ii, GAIN_MSGID, msg );
-                                msg->gain.data.mode = 0;
-                            }
-                        }
-                        else {
-                            messages_send( ii, STATUS_MSGID, msg );
-                        }
+						messages_send( ii, STATUS_MSGID, msg );
                     }
                     else if ( mode == MODE_VISION ) {
                         messages_send( ii, VISION_MSGID, msg );

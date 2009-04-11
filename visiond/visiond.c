@@ -245,60 +245,60 @@ int main( int argc, char *argv[] )
                     cvShowImage( f_win, f_img );
                 }
             }
-            status = vision_find_fence( &fence_center, &y_max, f_cam, f_img, f_bin_img,
-                    msg.vsetting.data.fence_hsv.hL,
-                    msg.vsetting.data.fence_hsv.hH,
-                    msg.vsetting.data.fence_hsv.sL,
-                    msg.vsetting.data.fence_hsv.sH,
-                    msg.vsetting.data.fence_hsv.vL,
-                    msg.vsetting.data.fence_hsv.vH );
-            if ( status == 1 ) {
-                if ( cf.vision_window ) {
-                    if ( cvWaitKey( 5 ) >= 0 );
-                        cvCircle( f_img, cvPoint(fence_center, f_img->height / 2),
-                        	10, cvScalar(255, 140, 0), 5, 8 );
-                        for ( ii = 0; ii < lineWidth; ii++ ) {
-                            cvCircle( f_img, cvPoint(f_img->width / 2 + ii, y_max),
-                                    2, cvScalar(0, 255, 0), 2 );
-						}
-                   cvShowImage( f_win, f_img );
-				}
-            }
+            //status = vision_find_fence( &fence_center, &y_max, f_cam, f_img, f_bin_img,
+                    //msg.vsetting.data.fence_hsv.hL,
+                    //msg.vsetting.data.fence_hsv.hH,
+                    //msg.vsetting.data.fence_hsv.sL,
+                    //msg.vsetting.data.fence_hsv.sH,
+                    //msg.vsetting.data.fence_hsv.vL,
+                    //msg.vsetting.data.fence_hsv.vH );
+            //if ( status == 1 ) {
+                //if ( cf.vision_window ) {
+                    //if ( cvWaitKey( 5 ) >= 0 );
+					//cvCircle( f_img, cvPoint(fence_center, f_img->height / 2),
+						//10, cvScalar(0, 0, 255), 5, 8 );
+					//for ( ii = 0; ii < lineWidth; ii++ ) {
+						//cvCircle( f_img, cvPoint(f_img->width / 2 + ii, y_max),
+								//2, cvScalar(0, 255, 0), 2 );
+					//}
+                	////cvShowImage( f_win, f_img );
+				//}
+            //}
             //printf( "MAIN:\n%d %d\n", msg.vision.data.front_x, msg.vision.data.front_y );
         }
 
         /* Process bottom camera image. */
-        if ( b_cam ) {
-            status = vision_find_pipe( &pipex, &bearing, b_cam, b_img, b_bin_img,
-                    msg.vsetting.data.pipe_hsv.hL,
-                    msg.vsetting.data.pipe_hsv.hH,
-                    msg.vsetting.data.pipe_hsv.sL,
-                    msg.vsetting.data.pipe_hsv.sH,
-                    msg.vsetting.data.pipe_hsv.vL,
-                    msg.vsetting.data.pipe_hsv.vH );
-            if ( status == 1 ) {
-                if ( cf.vision_window ) {
-                    if ( cvWaitKey( 5 ) >= 0 );
-                        for ( ii = 0; ii < lineWidth; ii++ ) {
-                            if( bearing != 0 ) {
-                                cvCircle( b_img,
-                                        cvPoint( b_img->width / 2 + ((int)(bearing * ii)),
-                                                (b_img->width / 2) + ii ),
-                                        2, cvScalar(255, 255, 0), 2 );
-                            }
-                            else{
-                                cvCircle( b_img,
-                                        cvPoint( b_img->width / 2 + ((int)(bearing * ii)),
-                                                (b_img->width / 2) + ii ),
-                                        2, cvScalar(0, 0, 255), 2 );
-                            }
-                            cvShowImage( b_win, b_img );
-                        }
-                }
-                bearing = atan(bearing) * 180 / M_PI;
-                msg.vision.data.bottom_x = pipex;
-                msg.vision.data.bottom_y = bearing;
-            }
+        //if ( b_cam ) {
+            //status = vision_find_pipe( &pipex, &bearing, b_cam, b_img, b_bin_img,
+                    //msg.vsetting.data.pipe_hsv.hL,
+                    //msg.vsetting.data.pipe_hsv.hH,
+                    //msg.vsetting.data.pipe_hsv.sL,
+                    //msg.vsetting.data.pipe_hsv.sH,
+                    //msg.vsetting.data.pipe_hsv.vL,
+                    //msg.vsetting.data.pipe_hsv.vH );
+            //if ( status == 1 ) {
+                //if ( cf.vision_window ) {
+                    //if ( cvWaitKey( 5 ) >= 0 );
+                        //for ( ii = 0; ii < lineWidth; ii++ ) {
+                            //if( bearing != 0 ) {
+                                //cvCircle( b_img,
+                                        //cvPoint( b_img->width / 2 + ((int)(bearing * ii)),
+                                                //(b_img->width / 2) + ii ),
+                                        //2, cvScalar(255, 255, 0), 2 );
+                            //}
+                            //else{
+                                //cvCircle( b_img,
+                                        //cvPoint( b_img->width / 2 + ((int)(bearing * ii)),
+                                                //(b_img->width / 2) + ii ),
+                                        //2, cvScalar(0, 0, 255), 2 );
+                            //}
+                            //cvShowImage( b_win, b_img );
+                        //}
+                //}
+                //bearing = atan(bearing) * 180 / M_PI;
+                //msg.vision.data.bottom_x = pipex;
+                //msg.vision.data.bottom_y = bearing;
+            //}
             //printf( "MAIN: bottom %d %lf\n", pipex, bearing );
         }
 
