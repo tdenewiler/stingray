@@ -612,17 +612,17 @@ int controlVoiths( int fd,
 
 	// check the number of bytes sent and return success or failure
 	if ( bytes == 30 ) {
-		fprintf( stderr, "DEBUG controlVoiths SUCCESS, L1 = %d, L2 = %d, R1 = %d, R2 = %d, voithThrust = %d\n"
-		         , leftCmd1
-		         , leftCmd2
-		         , rightCmd1
-		         , rightCmd2
-		         , voithThrust
-		       );
+		//fprintf( stderr, "DEBUG controlVoiths SUCCESS, L1 = %d, L2 = %d, R1 = %d, R2 = %d, voithThrust = %d\n"
+		         //, leftCmd1
+		         //, leftCmd2
+		         //, rightCmd1
+		         //, rightCmd2
+		         //, voithThrust
+		       //);
 		return POLOLU_SUCCESS;
 	}
 	else {
-		fprintf( stderr, "DEBUG controlVoiths ERROR, %d bytes sent.\n", bytes );
+		//fprintf( stderr, "DEBUG controlVoiths ERROR, %d bytes sent.\n", bytes );
 		return POLOLU_FAILURE;
 	}
 } /* end controlVoiths() */
@@ -711,15 +711,15 @@ int controlVertical( int fd,
 
 	// check the number of bytes sent and return success or failure
 	if ( bytes == 15 ) {
-		fprintf( stderr, "DEBUG: controlVertical SUCCESS, L = %d, R = %d, T = %d\n",
-		         leftCmd,
-		         rightCmd,
-		         tailCmd
-		       );
+		//fprintf( stderr, "DEBUG: controlVertical SUCCESS, L = %d, R = %d, T = %d\n",
+		         //leftCmd,
+		         //rightCmd,
+		         //tailCmd
+		       //);
 		return POLOLU_SUCCESS;
 	}
 	else {
-		fprintf( stderr, "DEBUG: controlVertical ERROR, bytes = %d\n", bytes );
+		//fprintf( stderr, "DEBUG: controlVertical ERROR, bytes = %d\n", bytes );
 		return POLOLU_FAILURE;
 	}
 } /* end controlVertical() */

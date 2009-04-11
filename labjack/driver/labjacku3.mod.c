@@ -15,40 +15,40 @@ __attribute__((section(".gnu.linkonce.this_module"))) = {
 };
 
 static const struct modversion_info ____versions[]
-__used
+__attribute_used__
 __attribute__((section("__versions"))) = {
-	{ 0xfeafcaca, "struct_module" },
+	{ 0x91dff6c7, "struct_module" },
 	{ 0xa5423cc4, "param_get_int" },
 	{ 0xcb32da10, "param_set_int" },
-	{ 0xf4e94f59, "usb_unlink_urb" },
-	{ 0x97b72e45, "usb_deregister_dev" },
-	{ 0x48e7cc93, "usb_register_driver" },
-	{ 0xe456bd3a, "complete" },
-	{ 0xfb17e60c, "usb_free_urb" },
-	{ 0xd5f7e9d0, "usb_buffer_free" },
+	{ 0xf780bb1, "usb_register_dev" },
+	{ 0x1f9c3035, "usb_buffer_alloc" },
+	{ 0x6a43e6dd, "usb_alloc_urb" },
+	{ 0x12da5bb2, "__kmalloc" },
+	{ 0xee9a9f93, "kmem_cache_alloc" },
+	{ 0x564edcb, "kmalloc_caches" },
+	{ 0x91330550, "usb_unlink_urb" },
+	{ 0x7061fa77, "usb_free_urb" },
+	{ 0x66071ae0, "usb_buffer_free" },
 	{ 0x37a0cba, "kfree" },
-	{ 0xec5bfc35, "usb_register_dev" },
-	{ 0x32b3d069, "usb_buffer_alloc" },
-	{ 0x3013e115, "usb_alloc_urb" },
-	{ 0x5a34a45c, "__kmalloc" },
-	{ 0x2dc628d, "kmem_cache_alloc" },
-	{ 0x7e34800a, "kmalloc_caches" },
-	{ 0xbe499d81, "copy_to_user" },
-	{ 0xe9074abe, "usb_bulk_msg" },
-	{ 0x1cefe352, "wait_for_completion" },
-	{ 0x827a0a5d, "usb_submit_urb" },
-	{ 0x64cd5d16, "init_waitqueue_head" },
-	{ 0x945bc6a7, "copy_from_user" },
-	{ 0xea147363, "printk" },
-	{ 0x3f1899f1, "up" },
-	{ 0x9363c74b, "usb_find_interface" },
-	{ 0x748caf40, "down" },
-	{ 0x3f8b90d2, "usb_deregister" },
-	{ 0xb4390f9a, "mcount" },
+	{ 0x892335e2, "usb_deregister_dev" },
+	{ 0x7e43c47, "wait_for_completion" },
+	{ 0xd358731, "usb_submit_urb" },
+	{ 0xffd3c7, "init_waitqueue_head" },
+	{ 0xd6c963c, "copy_from_user" },
+	{ 0x2f287f0d, "copy_to_user" },
+	{ 0xbb055ee3, "usb_bulk_msg" },
+	{ 0x60a4461c, "__up_wakeup" },
+	{ 0x932b5c92, "usb_find_interface" },
+	{ 0x96b27088, "__down_failed" },
+	{ 0xda4008e6, "cond_resched" },
+	{ 0xb98b7751, "usb_register_driver" },
+	{ 0xadb7a023, "complete" },
+	{ 0x1b7d4074, "printk" },
+	{ 0xf2db50ca, "usb_deregister" },
 };
 
 static const char __module_depends[]
-__used
+__attribute_used__
 __attribute__((section(".modinfo"))) =
 "depends=usbcore";
 

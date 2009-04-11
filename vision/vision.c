@@ -88,8 +88,10 @@ int vision_find_dot( int *dotx,
 
     /* Find the centroid. */
     center = vision_find_centroid( outImg, 5 );
-    *dotx = center.x - srcImg->width / 2;
-    *doty = center.y - srcImg->height / 2;
+    //*dotx = center.x - srcImg->width / 2;
+    //*doty = center.y - srcImg->height / 2;
+    *dotx = center.x;
+    *doty = center.y;
 
     /* Clear variables to free memory. */
     cvReleaseImage( &hsv_image );
