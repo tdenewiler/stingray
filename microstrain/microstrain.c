@@ -567,11 +567,9 @@ int mstrain_euler_vectors( int fd,
 
 	if ( status > 0 ) {
 		status = serial_bytes_available( fd );
-
 		if ( status < response_length ) {
 			usleep( SERIAL_EXTRA_DELAY_LENGTH );
 		}
-
 		status = recv_serial( fd, response, response_length );
 	}
 
@@ -580,9 +578,19 @@ int mstrain_euler_vectors( int fd,
 	}
 
 	*roll  = convert2short( &response[1] ) * euler_convert_factor;
-
 	*pitch = convert2short( &response[3] ) * euler_convert_factor;
 	*yaw   = convert2short( &response[5] ) * euler_convert_factor;
+
+	/* Convert the Euler angles from (-180,180] to (0,360]. */
+	if ( *roll < 0 ) {
+		*roll += 360;
+	}
+	if ( *pitch < 0 ) {
+		*pitch += 360;
+	}
+	if ( *yaw < 0 ) {
+		*yaw += 360;
+	}
 
 	for ( ii = 0; ii < 3; ii++ ) {
 		accel[ii]    = ( float )convert2short( &response[7 + ii * 2] )

@@ -564,20 +564,30 @@ int controlVoiths( int fd,
 
 	// check bounds on all inputs
 	// if bounds don't check then we return -1
+	//if ( ( fd < 0 ) ||
+	        //( voithThrust < 0 ) ||
+	        //( voithThrust > 100 ) ||
+	        //( thrustAngle <= -M_PI ) ||
+	        //( thrustAngle >= M_PI ) ||
+	        //( thrust < -100 ) ||
+	        //( thrust > 100 ) ||
+	        //( yawTorque < -100 ) ||
+	        //( yawTorque > 100 ) ) {
+		//return POLOLU_FAILURE;
+	//}
 	if ( ( fd < 0 ) ||
 	        ( voithThrust < 0 ) ||
 	        ( voithThrust > 100 ) ||
-	        ( thrustAngle < 0 ) ||
-	        ( thrustAngle > 360 ) ||
 	        ( thrust < -100 ) ||
 	        ( thrust > 100 ) ||
 	        ( yawTorque < -100 ) ||
 	        ( yawTorque > 100 ) ) {
 		return POLOLU_FAILURE;
 	}
+	float angle = 0;
 
 	// unchanging
-	float angle = thrustAngle * ( M_PI / 180 );
+	angle = thrustAngle; // * ( M_PI / 180 );
 
 	// angle offsets are between 0 and 360
 	// 250 original
