@@ -107,11 +107,19 @@ void pid_loop( int pololu_fd,
                int mode
              )
 {
+	float epsilon = 0.0001;
+
 	/* These next three need to be set from vison, hydrophone, gui, etc. */
 	pid->voith_angle = atan2f( msg->target.data.fy, msg->target.data.fx );
 	pid->voith_speed = msg->target.data.speed;
 	pid->voith_thrust = sqrt( msg->target.data.fx * msg->target.data.fx +
 	                          msg->target.data.fy * msg->target.data.fy );
+
+	printf( "PID_LOOP: %f %d %d\n"
+		, pid->voith_angle
+		, pid->voith_speed
+		, pid->voith_thrust
+	);
 
 	int r1 = -1;
 	int r2 = -1;
@@ -275,26 +283,26 @@ void pid_loop( int pololu_fd,
 
 float pid_subtract_angles( float ang1, float ang2 )
 {
-	float error = 0.0;
+	float e = 0.0;
 
-	if ( ang2 >= 0 ) {
-		if ( ang2 - 180.0 < ang1 ) {
-			error = ang1 - ang2;
+	if ( ang1 < ang2 ) {
+		if ( (ang2 - ang1) < 180 ) {
+			e = ang1 - ang2;
 		}
 		else {
-			error = ang1 - ang2 + 360.0;
+			e = 360 - ang2 + ang1;
 		}
 	}
 	else {
-		if ( ang1 < ang2 + 180.0 ) {
-			error = ( ang2 - ang1 ) * -1.0;
+		if ( (ang1 - ang2) < 180 ) {
+			e = ang1 - ang2;
 		}
 		else {
-			error = ( 360.0 + ang2 - ang1 ) * 1.0;
+			e = -360 + ang1 -ang2;
 		}
 	}
 
-	return error;
+	return e;
 } /* end pid_subtract_angles() */
 
 

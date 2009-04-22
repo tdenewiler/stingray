@@ -375,13 +375,6 @@ int main( int argc, char *argv[] )
                 messages_decode( server_fd, recv_buf, &msg );
             }
         }
-        printf( "MAIN:\n%lf %lf %lf %lf %lf\n\n"
-        	, msg.gain.data.kp_pitch
-        	, msg.gain.data.ki_pitch
-        	, msg.gain.data.kd_pitch
-        	, msg.gain.data.kp_roll
-        	, msg.gain.data.kp_yaw
-        );
 
         /* Check state of emergency stop value. */
         if ( msg.stop.data.state == TRUE ) {
@@ -437,8 +430,8 @@ int main( int argc, char *argv[] )
                 if ( recv_bytes > 0 ) {
                     messages_decode( vision_fd, vision_buf, &msg );
                     /* Set target values based on current orientation and pixel error. */
-                    msg.target.data.yaw = msg.mstrain.data.yaw + (float)msg.vision.data.front_x / 10.;
-                    msg.target.data.pitch = msg.mstrain.data.pitch + (float)msg.vision.data.front_y / 10.;
+                    //msg.target.data.yaw = msg.mstrain.data.yaw + (float)msg.vision.data.front_x / 10.;
+                    //msg.target.data.pitch = msg.mstrain.data.pitch + (float)msg.vision.data.front_y / 10.;
                     //msg.target.data.yaw = msg.mstrain.data.yaw + (float)msg.vision.data.bottom_y;
                     //msg.target.data.fx = (float)msg.vision.data.bottom_x;
                     gettimeofday( &vision_start, NULL );

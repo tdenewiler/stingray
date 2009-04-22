@@ -973,8 +973,8 @@ int buttons_targets( GtkWidget *box )
 
     /* Create the spin buttons. */
     adj = ( GtkAdjustment * )gtk_adjustment_new( cf.target_pitch,
-            -180,
-            180,
+            0,
+            360,
             0.1,
             10,
             0 );
@@ -984,11 +984,11 @@ int buttons_targets( GtkWidget *box )
                           hbox,
                           adj );
 
-    //gtk_spin_button_set_wrap( (GtkSpinButton *)button_target_pitch, TRUE );
+    gtk_spin_button_set_wrap( (GtkSpinButton *)button_target_pitch, TRUE );
 
     adj = ( GtkAdjustment * )gtk_adjustment_new( cf.target_roll,
-            -180,
-            180,
+            0,
+            360,
             0.1,
             10,
             0 );
@@ -1001,8 +1001,8 @@ int buttons_targets( GtkWidget *box )
     gtk_spin_button_set_wrap( ( GtkSpinButton * )button_target_roll, TRUE );
 
     adj = ( GtkAdjustment * )gtk_adjustment_new( cf.target_yaw,
-            -180,
-            180,
+            0,
+            360,
             0.1,
             10,
             0 );
@@ -1029,7 +1029,7 @@ int buttons_targets( GtkWidget *box )
     gtk_spin_button_set_wrap( ( GtkSpinButton * )button_target_depth, TRUE );
 
     adj = ( GtkAdjustment * )gtk_adjustment_new( msg.target.data.fx,
-            0,
+            -100,
             100,
             1,
             10,
@@ -1041,7 +1041,7 @@ int buttons_targets( GtkWidget *box )
                                           adj );
 
     adj = ( GtkAdjustment * )gtk_adjustment_new( msg.target.data.fy,
-            0,
+            -100,
             100,
             1,
             10,
