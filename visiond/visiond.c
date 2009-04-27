@@ -236,8 +236,8 @@ int main( int argc, char *argv[] )
                     msg.vsetting.data.buoy_hsv.vL,
                     msg.vsetting.data.buoy_hsv.vH );
             if ( status == 1 ) {
-                msg.vision.data.front_x = dotx - f_img->width / 2;
-                msg.vision.data.front_y = doty - f_img->height / 2;
+                msg.vision.data.front_x = -1 * (dotx - f_img->width / 2);
+                msg.vision.data.front_y = -1 * (doty - f_img->height / 2);
                 if ( cf.vision_window ) {
                     if ( cvWaitKey( 5 ) >= 0 );
                     cvCircle( f_img, cvPoint(dotx, doty),

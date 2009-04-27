@@ -363,6 +363,11 @@ int main( int argc, char *argv[] )
     if ( ( cf.enable_labjack ) && ( lj_fd > 0 ) ) {
         sleep( 7 );
     }
+    /* Initialize the pololu again. */
+    if ( cf.enable_pololu ) {
+        pololuInitializeChannels( pololu_fd );
+    }
+
     printf( "<OK>\n" );
 
     /* Main loop. */
@@ -430,10 +435,10 @@ int main( int argc, char *argv[] )
                 if ( recv_bytes > 0 ) {
                     messages_decode( vision_fd, vision_buf, &msg );
                     /* Set target values based on current orientation and pixel error. */
-                    //msg.target.data.yaw = msg.mstrain.data.yaw + (float)msg.vision.data.front_x / 10.;
+                    msg.target.data.yaw = msg.mstrain.data.yaw + (float)msg.vision.data.front_x / 10.;
                     //msg.target.data.pitch = msg.mstrain.data.pitch + (float)msg.vision.data.front_y / 10.;
-                    //msg.target.data.yaw = msg.mstrain.data.yaw + (float)msg.vision.data.bottom_y;
-                    //msg.target.data.fx = (float)msg.vision.data.bottom_x;
+                    //msg.target.data.yaw = msg.mstrain.data.yaw + (float)msg.vision.data.bottom_y / 10;
+                    //msg.target.data.fx = (float)msg.vision.data.bottom_x / 10;
                     gettimeofday( &vision_start, NULL );
                 }
             }

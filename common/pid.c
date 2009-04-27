@@ -107,25 +107,16 @@ void pid_loop( int pololu_fd,
                int mode
              )
 {
-	float epsilon = 0.0001;
-
 	/* These next three need to be set from vison, hydrophone, gui, etc. */
 	pid->voith_angle = atan2f( msg->target.data.fy, msg->target.data.fx );
 	pid->voith_speed = msg->target.data.speed;
 	pid->voith_thrust = sqrt( msg->target.data.fx * msg->target.data.fx +
 	                          msg->target.data.fy * msg->target.data.fy );
 
-	printf( "PID_LOOP: %f %d %d\n"
-		, pid->voith_angle
-		, pid->voith_speed
-		, pid->voith_thrust
-	);
-
 	int r1 = -1;
 	int r2 = -1;
 
 	switch ( mode ) {
-
 		case PID_PITCH:
 			/* Update the gains. */
 			pid->pitch.kp	= msg->gain.data.kp_pitch;
@@ -285,6 +276,9 @@ float pid_subtract_angles( float ang1, float ang2 )
 {
 	float e = 0.0;
 
+	if (ang1 == ang2 ) {
+		return e;
+	}
 	if ( ang1 < ang2 ) {
 		if ( (ang2 - ang1) < 180 ) {
 			e = ang1 - ang2;
