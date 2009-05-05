@@ -349,15 +349,15 @@ int gui_pack_boxes( GtkWidget *top_level_window )
 
     /* Append another page to the notebook. */
     gtk_notebook_append_page( GTK_NOTEBOOK( notebook ), vbox4,
-                              gtk_label_new( "Gains" ) );
+                              gtk_label_new( "Navigation" ) );
 
     /* Append another page to the notebook. */
     gtk_notebook_append_page( GTK_NOTEBOOK( notebook ), vbox6,
-                              gtk_label_new( "Tasks" ) );
+                              gtk_label_new( "Planner" ) );
 
     /* Append another page to the notebook. */
     gtk_notebook_append_page( GTK_NOTEBOOK( notebook ), vbox5,
-                              gtk_label_new( "Vision" ) );
+                              gtk_label_new( "Vision" ) );                   
 
     /* Pack the rest of the boxes into the notebook pages. */
     gtk_box_pack_start( GTK_BOX( vbox3 ), hbox2, TRUE, TRUE, 0 );
@@ -368,7 +368,7 @@ int gui_pack_boxes( GtkWidget *top_level_window )
     buttons_make_status( hbox1 );
     buttons_make_estop( hbox5 );
     buttons_opmode( hbox2 );
-    buttons_targets( hbox3 );
+    buttons_targets( vbox4 );
     buttons_options( hbox4 );
     buttons_gains( vbox4 );
     buttons_tasks( vbox6 );

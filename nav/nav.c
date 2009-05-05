@@ -337,10 +337,12 @@ int main( int argc, char *argv[] )
     gettimeofday( &depth_start, NULL );
     gettimeofday( &vision_time, NULL );
     gettimeofday( &vision_start, NULL );
+    gettimeofday( &planner_time, NULL );
+    gettimeofday( &planner_start, NULL );
 
     printf( "MAIN: Close the kill switch now.\n" );
 
-    status = -1;
+    //status = -1;
     //if ( ( cf.enable_labjack ) && ( lj_fd > 0 ) ) {
         //while ( status < 0 ) {
             //recv_bytes = net_client( lj_fd, lj_buf, &msg, mode );
@@ -352,6 +354,7 @@ int main( int argc, char *argv[] )
         //}
         //printf( "MAIN: Kill switch is closed.\n" );
     //}
+    
     if ( (cf.enable_labjack) && (lj_fd > 0) ) {
     	while ( getBatteryVoltage(AIN_0) < 10.0 ) {
     		query_labjack( );
@@ -359,7 +362,7 @@ int main( int argc, char *argv[] )
 		}
 		printf( "MAIN: Kill switch is closed.\n" );
 	}
-    printf( "MAIN: Waiting for motors to arm ... " );
+    printf( "MAIN: Waiting for motors to arm ...\n" );
     if ( ( cf.enable_labjack ) && ( lj_fd > 0 ) ) {
         sleep( 7 );
     }
@@ -369,6 +372,9 @@ int main( int argc, char *argv[] )
     }
 
     printf( "<OK>\n" );
+    
+    printf( "PRE MAIN: Target Data: pitch=%f roll=%f yaw=%f\n",
+                    		msg.target.data.pitch, msg.target.data.roll, msg.target.data.yaw );
 
     /* Main loop. */
     while ( 1 ) {
@@ -434,11 +440,18 @@ int main( int argc, char *argv[] )
                 vision_buf[recv_bytes] = '\0';
                 if ( recv_bytes > 0 ) {
                     messages_decode( vision_fd, vision_buf, &msg );
+                    
+                    //printf( "MAIN: Vision Front Data: x=%d y=%d\n", 
+                    //	msg.vision.data.front_x, msg.vision.data.front_y );
+                    
                     /* Set target values based on current orientation and pixel error. */
-                    msg.target.data.yaw = msg.mstrain.data.yaw + (float)msg.vision.data.front_x / 10.;
+                    //msg.target.data.yaw = msg.mstrain.data.yaw + (float)msg.vision.data.front_x / 10.;
                     //msg.target.data.pitch = msg.mstrain.data.pitch + (float)msg.vision.data.front_y / 10.;
                     //msg.target.data.yaw = msg.mstrain.data.yaw + (float)msg.vision.data.bottom_y / 10;
                     //msg.target.data.fx = (float)msg.vision.data.bottom_x / 10;
+                    //printf( "MAIN: Target Data: pitch=%f yaw=%f fx=%f\n",
+                    //	msg.target.data.pitch, msg.target.data.yaw, msg.target.data.fx );
+                    	
                     gettimeofday( &vision_start, NULL );
                 }
             }
@@ -468,11 +481,13 @@ int main( int argc, char *argv[] )
             time2s =    planner_start.tv_sec;
             time2ms =   planner_start.tv_usec;
             dt = util_calc_dt( &time1s, &time1ms, &time2s, &time2ms );
+
             if ( dt > cf.period_planner ) {
                 recv_bytes = net_client( planner_fd, planner_buf, &msg, mode );
                 planner_buf[recv_bytes] = '\0';
                 if ( recv_bytes > 0 ) {
-                    messages_decode( planner_fd, vision_buf, &msg );
+                    messages_decode( planner_fd, planner_buf, &msg );
+                    
                     gettimeofday( &planner_start, NULL );
                 }
             }

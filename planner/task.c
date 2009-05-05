@@ -82,8 +82,9 @@ void task_run( MSG_DATA *msg, int dt )
 
 void task_buoy( MSG_DATA *msg, int dt )
 {
-	msg->target.data.yaw    = msg->vision.data.front_x;
-	msg->target.data.pitch  = msg->vision.data.front_y;
+	/* Set target values based on current orientation and pixel error. */
+	msg->target.data.yaw = msg->mstrain.data.yaw + (float)msg->vision.data.front_x / 10.;
+	
 } /* end task_buoy() */
 
 

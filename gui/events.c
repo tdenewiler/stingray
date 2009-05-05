@@ -175,7 +175,7 @@ void events_tasks( GtkWidget *widget,
     else if ( widget == button_gate ) {
         msg.task.data.num = TASK_GATE;
     }
-
+	
     if ( planner_fd > 0 ) {
         messages_send( planner_fd, TASK_MSGID, &msg );
     }

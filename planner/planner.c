@@ -140,6 +140,8 @@ int main( int argc, char *argv[] )
 	int time2s = 0;
 	int time2ms = 0;
 	int dt = 0;
+	
+	int old_task = 0;
 
 	printf( "MAIN: Starting Planner ... \n" );
 
@@ -154,6 +156,12 @@ int main( int argc, char *argv[] )
 	/* Parse command line arguments. */
 	parse_default_config( &cf );
 	parse_cla( argc, argv, &cf, STINGRAY, ( const char * )PLANNER_FILENAME );
+	
+	/* Set up the default values for the target. */
+	msg.target.data.pitch   = cf.target_pitch;
+    msg.target.data.roll    = cf.target_roll;
+    msg.target.data.yaw     = cf.target_yaw;
+    msg.target.data.depth   = cf.target_depth;
 
 	/* Set up communications. */
 	if ( cf.enable_planner ) {
@@ -182,7 +190,6 @@ int main( int argc, char *argv[] )
 			if ( recv_bytes > 0 ) {
 				recv_buf[recv_bytes] = '\0';
 				messages_decode( server_fd, recv_buf, &msg );
-				printf( "MAIN: task = %d\n", msg.task.data.num );
 			}
 		}
 
@@ -200,10 +207,16 @@ int main( int argc, char *argv[] )
 
 				if ( recv_bytes > 0 ) {
 					messages_decode( vision_fd, vision_buf, &msg );
-					printf( "MAIN: vision = %d %d\n", msg.vision.data.front_x,
-					        msg.vision.data.front_y );
-					gettimeofday( &vision_start, NULL );
+                    
+                    gettimeofday( &vision_start, NULL );
 				}
+			}
+			
+			/* If there is a new task then send to vision. */
+			if ( old_task != msg.task.data.num )
+			{
+				messages_send( vision_fd, TASK_MSGID, &msg );
+				old_task = msg.task.data.num;
 			}
 		}
 

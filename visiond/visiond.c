@@ -158,7 +158,7 @@ int main( int argc, char *argv[] )
     struct tm ct;
     char write_time[80] = {0};
 
-    printf( "MAIN: Starting Vision daemon ... " );
+    printf( "MAIN: Starting Vision daemon ...\n" );
     /* Initialize variables. */
     server_fd = -1;
     memset( &msg, 0, sizeof( MSG_DATA ) );
@@ -193,6 +193,8 @@ int main( int argc, char *argv[] )
     }
 
     /* Open front camera. */
+    /* Need to have a config about what cameras if any to open */
+    /* Commenting this out because my default camera does not work
     f_cam = cvCaptureFromCAM( camera );
     if ( !f_cam ) {
         cvReleaseCapture( &f_cam );
@@ -202,7 +204,7 @@ int main( int argc, char *argv[] )
         f_img = cvQueryFrame( f_cam );
         f_bin_img = cvCreateImage( cvGetSize( f_img ), IPL_DEPTH_8U, 1 );
     	fence_center = f_img->width / 2;
-    }
+    }*/
 
     /* Open bottom camera. */
     camera = 1;
@@ -222,85 +224,126 @@ int main( int argc, char *argv[] )
         cvNamedWindow( b_win, CV_WINDOW_AUTOSIZE );
     }
     printf( "<OK>\n" );
-
+    
     /* Main loop. */
-    while ( 1 ) {
-        /* Process front camera image. */
-        if ( f_cam ) {
-            status = vision_find_dot( &dotx, &doty, &width, &height, amt,
-                    f_cam, f_img, f_bin_img,
-                    msg.vsetting.data.buoy_hsv.hL,
-                    msg.vsetting.data.buoy_hsv.hH,
-                    msg.vsetting.data.buoy_hsv.sL,
-                    msg.vsetting.data.buoy_hsv.sH,
-                    msg.vsetting.data.buoy_hsv.vL,
-                    msg.vsetting.data.buoy_hsv.vH );
+    int loop_counter = 0;
+    while ( 1 ) {    		
+
+    	if ( loop_counter == 1000 )
+    	{
+    		loop_counter = 0;
+		}
+		else
+		{
+			loop_counter++;
+		}
+    	
+    	/* Do vision processing based on task */
+    	if ( msg.task.data.num == TASK_NONE )
+    	{
+    		/* Do nothing and give cleared values. */
+    		msg.vision.data.front_x = 0;
+    		msg.vision.data.front_y = 0;
+    		msg.vision.data.bottom_x = 0;
+    		msg.vision.data.bottom_y = 0.0;
+		}
+        else if ( msg.task.data.num == TASK_BUOY && f_cam )
+		{
+			/* Look for the buoy. */
+			status = vision_find_dot( &dotx, &doty, &width, &height, amt,
+					f_cam, f_img, f_bin_img,
+					msg.vsetting.data.buoy_hsv.hL,
+					msg.vsetting.data.buoy_hsv.hH,
+					msg.vsetting.data.buoy_hsv.sL,
+					msg.vsetting.data.buoy_hsv.sH,
+					msg.vsetting.data.buoy_hsv.vL,
+					msg.vsetting.data.buoy_hsv.vH );
+					
+			if ( status == 1 ) {
+				msg.vision.data.front_x = -1 * (dotx - f_img->width / 2);
+				msg.vision.data.front_y = -1 * (doty - f_img->height / 2);
+				if ( cf.vision_window ) {
+					if ( cvWaitKey( 5 ) >= 0 );
+					cvCircle( f_img, cvPoint(dotx, doty),
+						10, cvScalar(255, 0, 0), 5, 8 );
+					cvShowImage( f_win, f_img );
+				}
+			}
+		}
+		else if ( msg.task.data.num == TASK_PIPE && b_cam )
+		{
+			/* Look for the pipe */
+			status = vision_find_pipe( &pipex, &bearing, b_cam, b_img, b_bin_img,
+                    msg.vsetting.data.pipe_hsv.hL,
+                    msg.vsetting.data.pipe_hsv.hH,
+                    msg.vsetting.data.pipe_hsv.sL,
+                    msg.vsetting.data.pipe_hsv.sH,
+                    msg.vsetting.data.pipe_hsv.vL,
+                    msg.vsetting.data.pipe_hsv.vH );
+                    
             if ( status == 1 ) {
-                msg.vision.data.front_x = -1 * (dotx - f_img->width / 2);
-                msg.vision.data.front_y = -1 * (doty - f_img->height / 2);
                 if ( cf.vision_window ) {
                     if ( cvWaitKey( 5 ) >= 0 );
-                    cvCircle( f_img, cvPoint(dotx, doty),
-                    	10, cvScalar(255, 0, 0), 5, 8 );
-                    cvShowImage( f_win, f_img );
+                        for ( ii = 0; ii < lineWidth; ii++ ) {
+                            if( bearing != 0 ) {
+                                cvCircle( b_img,
+                                        cvPoint( b_img->width / 2 + ((int)(bearing * ii)),
+                                                (b_img->width / 2) + ii ),
+                                        2, cvScalar(255, 255, 0), 2 );
+                            }
+                            else{
+                                cvCircle( b_img,
+                                        cvPoint( b_img->width / 2 + ((int)(bearing * ii)),
+                                                (b_img->width / 2) + ii ),
+                                        2, cvScalar(0, 0, 255), 2 );
+                            }
+                            cvShowImage( b_win, b_img );
+                        }
                 }
+                bearing = atan(bearing) * 180 / M_PI;
+                msg.vision.data.bottom_x = pipex;
+                msg.vision.data.bottom_y = bearing;
             }
-            //status = vision_find_fence( &fence_center, &y_max, f_cam, f_img, f_bin_img,
-                    //msg.vsetting.data.fence_hsv.hL,
-                    //msg.vsetting.data.fence_hsv.hH,
-                    //msg.vsetting.data.fence_hsv.sL,
-                    //msg.vsetting.data.fence_hsv.sH,
-                    //msg.vsetting.data.fence_hsv.vL,
-                    //msg.vsetting.data.fence_hsv.vH );
-            //if ( status == 1 ) {
-                //if ( cf.vision_window ) {
-                    //if ( cvWaitKey( 5 ) >= 0 );
-					//cvCircle( f_img, cvPoint(fence_center, f_img->height / 2),
-						//10, cvScalar(0, 0, 255), 5, 8 );
-					//for ( ii = 0; ii < lineWidth; ii++ ) {
-						//cvCircle( f_img, cvPoint(f_img->width / 2 + ii, y_max),
-								//2, cvScalar(0, 255, 0), 2 );
-					//}
-                	////cvShowImage( f_win, f_img );
-				//}
-            //}
-            //printf( "MAIN:\n%d %d\n", msg.vision.data.front_x, msg.vision.data.front_y );
+		}
+		else if ( msg.task.data.num == TASK_FENCE && f_cam )
+		{
+			/* Look for the fence. */
+            status = vision_find_fence( &fence_center, &y_max, f_cam, f_img, f_bin_img,
+                    msg.vsetting.data.fence_hsv.hL,
+                    msg.vsetting.data.fence_hsv.hH,
+                    msg.vsetting.data.fence_hsv.sL,
+                    msg.vsetting.data.fence_hsv.sH,
+                    msg.vsetting.data.fence_hsv.vL,
+                    msg.vsetting.data.fence_hsv.vH );
+                    
+            if ( status == 1 ) {
+                if ( cf.vision_window ) {
+                    if ( cvWaitKey( 5 ) >= 0 );
+					cvCircle( f_img, cvPoint(fence_center, f_img->height / 2),
+						10, cvScalar(0, 0, 255), 5, 8 );
+					for ( ii = 0; ii < lineWidth; ii++ ) {
+						cvCircle( f_img, cvPoint(f_img->width / 2 + ii, y_max),
+								2, cvScalar(0, 255, 0), 2 );
+					}
+                	cvShowImage( f_win, f_img );
+				}
+            }
         }
-
-        /* Process bottom camera image. */
-        //if ( b_cam ) {
-            //status = vision_find_pipe( &pipex, &bearing, b_cam, b_img, b_bin_img,
-                    //msg.vsetting.data.pipe_hsv.hL,
-                    //msg.vsetting.data.pipe_hsv.hH,
-                    //msg.vsetting.data.pipe_hsv.sL,
-                    //msg.vsetting.data.pipe_hsv.sH,
-                    //msg.vsetting.data.pipe_hsv.vL,
-                    //msg.vsetting.data.pipe_hsv.vH );
-            //if ( status == 1 ) {
-                //if ( cf.vision_window ) {
-                    //if ( cvWaitKey( 5 ) >= 0 );
-                        //for ( ii = 0; ii < lineWidth; ii++ ) {
-                            //if( bearing != 0 ) {
-                                //cvCircle( b_img,
-                                        //cvPoint( b_img->width / 2 + ((int)(bearing * ii)),
-                                                //(b_img->width / 2) + ii ),
-                                        //2, cvScalar(255, 255, 0), 2 );
-                            //}
-                            //else{
-                                //cvCircle( b_img,
-                                        //cvPoint( b_img->width / 2 + ((int)(bearing * ii)),
-                                                //(b_img->width / 2) + ii ),
-                                        //2, cvScalar(0, 0, 255), 2 );
-                            //}
-                            //cvShowImage( b_win, b_img );
-                        //}
-                //}
-                //bearing = atan(bearing) * 180 / M_PI;
-                //msg.vision.data.bottom_x = pipex;
-                //msg.vision.data.bottom_y = bearing;
-            //}
-            //printf( "MAIN: bottom %d %lf\n", pipex, bearing );
-        }
+        else if ( msg.task.data.num == TASK_GATE && f_cam )
+        {
+        	/* Look for the gate */
+        	
+		}
+		else
+		{
+			/* No mode or no valid cameras - Simulate. */
+			if ( loop_counter % 100 == 0 )
+			{
+				msg.vision.data.front_x = loop_counter;
+				msg.vision.data.front_y = loop_counter;
+			}
+		}
+		
 
         /* Get network data. */
         if ( ( cf.enable_net ) && ( server_fd > 0 ) ) {
