@@ -194,7 +194,7 @@ int main( int argc, char *argv[] )
 
     /* Open front camera. */
     /* Need to have a config about what cameras if any to open */
-    /* Commenting this out because my default camera does not work
+    /* Commenting this out because my default camera does not work */
     f_cam = cvCaptureFromCAM( camera );
     if ( !f_cam ) {
         cvReleaseCapture( &f_cam );
@@ -204,7 +204,7 @@ int main( int argc, char *argv[] )
         f_img = cvQueryFrame( f_cam );
         f_bin_img = cvCreateImage( cvGetSize( f_img ), IPL_DEPTH_8U, 1 );
     	fence_center = f_img->width / 2;
-    }*/
+    }
 
     /* Open bottom camera. */
     camera = 1;
@@ -384,7 +384,7 @@ int main( int argc, char *argv[] )
             		strlen(write_time), ".%03ld.avi", ctime.tv_usec );
             fps = cvGetCaptureProperty( f_cam, CV_CAP_PROP_FPS );
             printf( "MAIN: fps = %lf\n", fps );
-            f_writer = cvCreateVideoWriter( write_time, CV_FOURCC('I', 'Y', 'U', 'V'),
+            f_writer = cvCreateVideoWriter( write_time, CV_FOURCC('M', 'J', 'P', 'G'),
                 fps, cvGetSize( f_img ), is_color );
             saving_fvideo = TRUE;
         }
@@ -400,7 +400,7 @@ int main( int argc, char *argv[] )
             snprintf( write_time + strlen(write_time),
             		strlen(write_time), ".%03ld.avi", ctime.tv_usec );
             fps = cvGetCaptureProperty( b_cam, CV_CAP_PROP_FPS );
-            b_writer = cvCreateVideoWriter( write_time, CV_FOURCC('D', 'I', 'B', ' '),
+            b_writer = cvCreateVideoWriter( write_time, CV_FOURCC('M', 'J', 'P', 'G'),
                 fps, cvGetSize( b_img ), is_color );
             saving_bvideo = TRUE;
         }
