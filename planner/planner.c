@@ -125,15 +125,10 @@ int main( int argc, char *argv[] )
 	LABJACK_DATA lj;
 
 	struct timeval vision_time = {0, 0};
-
 	struct timeval vision_start = {0, 0};
-
 	struct timeval plan_time = {0, 0};
-
 	struct timeval plan_start = {0, 0};
-
 	struct timeval task_time = {0, 0};
-
 	struct timeval task_start = {0, 0};
 	int time1s = 0;
 	int time1ms = 0;
@@ -166,11 +161,23 @@ int main( int argc, char *argv[] )
 	/* Set up communications. */
 	if ( cf.enable_planner ) {
 		server_fd = net_server_setup( cf.planner_port );
+		if ( server_fd > 0 ) {
+			printf( "MAIN: Server setup OK.\n" );
+		}
+		else {
+			printf( "MAIN: WARNING!!! Server setup failed.\n" );
+		}
 	}
 
 	/* Set up the vision network client. */
 	if ( cf.enable_vision ) {
 		vision_fd = net_client_setup( cf.vision_IP, cf.vision_port );
+		if ( vision_fd > 0 ) {
+			printf( "MAIN: Vision client setup OK.\n" );
+		}
+		else {
+			printf( "MAIN: WARNING!!! Vision client setup failed.\n" );
+		}
 	}
 
 	/* Initialize timers. */
@@ -222,13 +229,9 @@ int main( int argc, char *argv[] )
 
 		/* Update the task dt. */
 		time1s =    task_time.tv_sec;
-
 		time1ms =   task_time.tv_usec;
-
 		time2s =    task_start.tv_sec;
-
 		time2ms =   task_start.tv_usec;
-
 		dt = util_calc_dt( &time1s, &time1ms, &time2s, &time2ms );
 
 		/* Run the current task. */
@@ -236,9 +239,7 @@ int main( int argc, char *argv[] )
 
 		/* Update timers. */
 		gettimeofday( &vision_time, NULL );
-
 		gettimeofday( &plan_time, NULL );
-
 		gettimeofday( &task_time, NULL );
 	}
 

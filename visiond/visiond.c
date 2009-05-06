@@ -190,6 +190,12 @@ int main( int argc, char *argv[] )
     /* Set up communications. */
     if ( cf.enable_net ) {
         server_fd = net_server_setup( cf.vision_port );
+		if ( server_fd > 0 ) {
+			printf( "MAIN: Server setup OK.\n" );
+		}
+		else {
+			printf( "MAIN: WARNING!!! Server setup failed.\n" );
+		}
     }
 
     /* Open front camera. */
@@ -204,6 +210,7 @@ int main( int argc, char *argv[] )
         f_img = cvQueryFrame( f_cam );
         f_bin_img = cvCreateImage( cvGetSize( f_img ), IPL_DEPTH_8U, 1 );
     	fence_center = f_img->width / 2;
+		printf( "MAIN: Front camera opened OK.\n" );
     }
 
     /* Open bottom camera. */
@@ -216,6 +223,7 @@ int main( int argc, char *argv[] )
     else {
         b_img = cvQueryFrame( b_cam );
         b_bin_img = cvCreateImage( cvGetSize( b_img ), IPL_DEPTH_8U, 1 );
+		printf( "MAIN: Bottom camera opened OK.\n" );
     }
 
     /* Create windows to display video if set in configuration file. */
@@ -223,32 +231,27 @@ int main( int argc, char *argv[] )
         cvNamedWindow( f_win, CV_WINDOW_AUTOSIZE );
         cvNamedWindow( b_win, CV_WINDOW_AUTOSIZE );
     }
-    printf( "<OK>\n" );
+    printf( "MAIN: Vision server running now.\n" );
     
     /* Main loop. */
     int loop_counter = 0;
     while ( 1 ) {    		
-
-    	if ( loop_counter == 1000 )
-    	{
+    	if ( loop_counter == 1000 ) {
     		loop_counter = 0;
 		}
-		else
-		{
+		else {
 			loop_counter++;
 		}
     	
     	/* Do vision processing based on task */
-    	if ( msg.task.data.num == TASK_NONE )
-    	{
+    	if ( msg.task.data.num == TASK_NONE ) {
     		/* Do nothing and give cleared values. */
     		msg.vision.data.front_x = 0;
     		msg.vision.data.front_y = 0;
     		msg.vision.data.bottom_x = 0;
     		msg.vision.data.bottom_y = 0.0;
 		}
-        else if ( msg.task.data.num == TASK_BUOY && f_cam )
-		{
+        else if ( msg.task.data.num == TASK_BUOY && f_cam ) {
 			/* Look for the buoy. */
 			status = vision_find_dot( &dotx, &doty, &width, &height, amt,
 					f_cam, f_img, f_bin_img,
@@ -270,8 +273,7 @@ int main( int argc, char *argv[] )
 				}
 			}
 		}
-		else if ( msg.task.data.num == TASK_PIPE && b_cam )
-		{
+		else if ( msg.task.data.num == TASK_PIPE && b_cam ) {
 			/* Look for the pipe */
 			status = vision_find_pipe( &pipex, &bearing, b_cam, b_img, b_bin_img,
                     msg.vsetting.data.pipe_hsv.hL,
@@ -288,14 +290,14 @@ int main( int argc, char *argv[] )
                             if( bearing != 0 ) {
                                 cvCircle( b_img,
                                         cvPoint( b_img->width / 2 + ((int)(bearing * ii)),
-                                                (b_img->width / 2) + ii ),
-                                        2, cvScalar(255, 255, 0), 2 );
+											(b_img->width / 2) + ii ),
+											2, cvScalar(255, 255, 0), 2 );
                             }
-                            else{
+                            else {
                                 cvCircle( b_img,
                                         cvPoint( b_img->width / 2 + ((int)(bearing * ii)),
-                                                (b_img->width / 2) + ii ),
-                                        2, cvScalar(0, 0, 255), 2 );
+                                            (b_img->width / 2) + ii ),
+											2, cvScalar(0, 0, 255), 2 );
                             }
                             cvShowImage( b_win, b_img );
                         }
@@ -305,8 +307,7 @@ int main( int argc, char *argv[] )
                 msg.vision.data.bottom_y = bearing;
             }
 		}
-		else if ( msg.task.data.num == TASK_FENCE && f_cam )
-		{
+		else if ( msg.task.data.num == TASK_FENCE && f_cam ) {
 			/* Look for the fence. */
             status = vision_find_fence( &fence_center, &y_max, f_cam, f_img, f_bin_img,
                     msg.vsetting.data.fence_hsv.hL,
@@ -329,16 +330,13 @@ int main( int argc, char *argv[] )
 				}
             }
         }
-        else if ( msg.task.data.num == TASK_GATE && f_cam )
-        {
+        else if ( msg.task.data.num == TASK_GATE && f_cam ) {
         	/* Look for the gate */
         	
 		}
-		else
-		{
+		else {
 			/* No mode or no valid cameras - Simulate. */
-			if ( loop_counter % 100 == 0 )
-			{
+			if ( loop_counter % 100 == 0 ) {
 				msg.vision.data.front_x = loop_counter;
 				msg.vision.data.front_y = loop_counter;
 			}
@@ -356,7 +354,7 @@ int main( int argc, char *argv[] )
 
         /* Check state of save frames and video messages. */
         if ( msg.vsetting.data.save_fframe && f_cam ) {
-            /* Get a timestamp. */
+            /* Get a timestamp and use for filename. */
             gettimeofday( &ctime, NULL );
             ct = *( localtime ((const time_t*) &ctime.tv_sec) );
             strftime( write_time, sizeof(write_time), "images/f20%y%m%d_%H%M%S", &ct);
@@ -366,7 +364,7 @@ int main( int argc, char *argv[] )
             msg.vsetting.data.save_fframe = FALSE;
         }
         if ( msg.vsetting.data.save_bframe && b_cam ) {
-            /* Get a timestamp. */
+            /* Get a timestamp and use for filename. */
             gettimeofday( &ctime, NULL );
             ct = *( localtime ((const time_t*) &ctime.tv_sec) );
             strftime( write_time, sizeof(write_time), "images/b20%y%m%d_%H%M%S", &ct);
@@ -376,7 +374,7 @@ int main( int argc, char *argv[] )
             msg.vsetting.data.save_bframe = FALSE;
         }
         if ( msg.vsetting.data.save_fvideo && !saving_fvideo && f_cam ) {
-            /* Get a timestamp. */
+            /* Get a timestamp and use for filename. */
             gettimeofday( &ctime, NULL );
             ct = *( localtime ((const time_t*) &ctime.tv_sec) );
             strftime( write_time, sizeof(write_time), "stream/f20%y%m%d_%H%M%S", &ct);
@@ -393,7 +391,7 @@ int main( int argc, char *argv[] )
             saving_fvideo = FALSE;
         }
         if ( msg.vsetting.data.save_bvideo && !saving_bvideo && b_cam ) {
-            /* Get a timestamp. */
+            /* Get a timestamp and use for filename. */
             gettimeofday( &ctime, NULL );
             ct = *( localtime ((const time_t*) &ctime.tv_sec) );
             strftime( write_time, sizeof(write_time), "stream/b20%y%m%d_%H%M%S", &ct);

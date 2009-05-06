@@ -289,21 +289,45 @@ int main( int argc, char *argv[] )
     /* Set up communications. */
     if ( cf.enable_net ) {
         server_fd = net_server_setup( cf.api_port );
+		if ( server_fd > 0 ) {
+			printf( "MAIN: Nav server setup properly.\n" );
+		}
+		else {
+			printf( "MAIN: WARNING!!! Nav server setup failed.\n" );
+		}
     }
 
     /* Set up the vision network client. */
     if ( cf.enable_vision ) {
         vision_fd = net_client_setup( cf.vision_IP, cf.vision_port );
+		if ( vision_fd > 0 ) {
+			printf( "MAIN: Vision client setup properly.\n" );
+		}
+		else {
+			printf( "MAIN: WARNING!!! Vision client setup failed.\n" );
+		}
     }
 
     /* Set up the planner network client. */
     if ( cf.enable_planner ) {
         planner_fd = net_client_setup( cf.planner_IP, cf.planner_port );
+		if ( planner_fd > 0 ) {
+			printf( "MAIN: Planner client setup properly.\n" );
+		}
+		else {
+			printf( "MAIN: WARNING!!! Planner client setup failed.\n" );
+		}
     }
 
     /* Set up the Microstrain IMU. */
     if ( cf.enable_imu ) {
         imu_fd = mstrain_setup( cf.imu_port , cf.imu_baud );
+		if ( imu_fd > 0 ) {
+			printf( "MAIN: IMU setup properly.\n" );
+		}
+		else {
+			printf( "MAIN: WARNING!!! IMU setup failed.\n" );
+		}
     }
 
     /* Set up the labjack. */
@@ -316,13 +340,27 @@ int main( int argc, char *argv[] )
     }
 
     /* Connect to the labjack daemon. */
-    //if ( cf.enable_labjack ) {
-        //lj_fd = net_client_setup( cf.labjackd_IP, cf.labjackd_port );
-    //}
-
+	/*
+    if ( cf.enable_labjack ) {
+        lj_fd = net_client_setup( cf.labjackd_IP, cf.labjackd_port );
+		if ( lj_fd > 0 ) {
+			printf( "MAIN: Labjack client setup properly.\n" );
+		}
+		else {
+			printf( "MAIN: WARNING!!! Labjack client setup failed.\n" );
+		}
+    }
+	*/
+	
     /* Set up the Pololu servo controller. */
     if ( cf.enable_pololu ) {
         pololu_fd = pololuSetup( cf.pololu_port, cf.pololu_baud );
+		if ( pololu_fd > 0 ) {
+			printf( "MAIN: Pololu setup properly.\n" );
+		}
+		else {
+			printf( "MAIN: WARNING!!! Pololu setup failed.\n" );
+		}
         pololuInitializeChannels( pololu_fd );
     }
 
@@ -342,6 +380,8 @@ int main( int argc, char *argv[] )
 
     printf( "MAIN: Close the kill switch now.\n" );
 
+	/* Check that the kill switch is closed via the labjack. Use either
+	 * the direct connection or the network connection. */
     //status = -1;
     //if ( ( cf.enable_labjack ) && ( lj_fd > 0 ) ) {
         //while ( status < 0 ) {
@@ -372,11 +412,11 @@ int main( int argc, char *argv[] )
     if ( cf.enable_pololu ) {
         pololuInitializeChannels( pololu_fd );
     }
-
     printf( "<OK>\n" );
     
     printf( "PRE MAIN: Target Data: pitch=%f roll=%f yaw=%f\n",
                     		msg.target.data.pitch, msg.target.data.roll, msg.target.data.yaw );
+	printf( "MAIN: Nav is running.\n" );
 
     /* Main loop. */
     while ( 1 ) {
@@ -420,14 +460,6 @@ int main( int argc, char *argv[] )
             msg.teleop.data.fx = 0;
             msg.teleop.data.fy = 0;
             msg.teleop.data.speed = 0;
-
-            //printf( "%f\n", msg.target.data.pitch );
-            //printf( "%f\n", msg.target.data.roll );
-            //printf( "%f\n", msg.target.data.yaw );
-            //printf( "%f\n", msg.target.data.depth );
-            //printf( "%f\n", msg.target.data.fx );
-            //printf( "%f\n", msg.target.data.fy );
-            //printf( "%f\n", msg.target.data.speed );
         }
 
         /* Get vision data. */
@@ -442,26 +474,17 @@ int main( int argc, char *argv[] )
                 vision_buf[recv_bytes] = '\0';
                 if ( recv_bytes > 0 ) {
                     messages_decode( vision_fd, vision_buf, &msg );
-                    
-                    //printf( "MAIN: Vision Front Data: x=%d y=%d\n", 
-                    //	msg.vision.data.front_x, msg.vision.data.front_y );
-                    
                     /* Set target values based on current orientation and pixel error. */
                     msg.target.data.yaw = msg.mstrain.data.yaw + (float)msg.vision.data.front_x / 10.;
                     //msg.target.data.pitch = msg.mstrain.data.pitch + (float)msg.vision.data.front_y / 10.;
                     //msg.target.data.yaw = msg.mstrain.data.yaw + (float)msg.vision.data.bottom_y / 10;
                     //msg.target.data.fx = (float)msg.vision.data.bottom_x / 10;
-                    //printf( "MAIN: Target Data: pitch=%f yaw=%f fx=%f\n",
-                    //	msg.target.data.pitch, msg.target.data.yaw, msg.target.data.fx );
-                    	
                     gettimeofday( &vision_start, NULL );
                 }
             }
-            //printf( "MAIN:\n%f\n%f\n\n", msg.target.data.pitch, msg.target.data.yaw );
-			//printf( "MAIN:\n%d\n%d\n\n", msg.vision.data.front_x, msg.vision.data.front_y );
         }
 
-        /* Get labjack daemon data. */
+        /* Get labjack data. Use either direct or network connection. */
         //if ( ( cf.enable_labjack ) && ( lj_fd > 0 ) ) {
             //recv_bytes = net_client( lj_fd, lj_buf, &msg, mode );
             //lj_buf[recv_bytes] = '\0';
@@ -504,20 +527,6 @@ int main( int argc, char *argv[] )
                                                 msg.mstrain.data.ang_rate
                                               );
         }
-        //printf( "MAIN:\n%f %f %f\n\n"
-        	//, msg.mstrain.data.pitch
-        	//, msg.mstrain.data.roll
-        	//, msg.mstrain.data.yaw
-        //);
-
-        /* Get Labjack data. */
-        //if ( ( cf.enable_labjack ) && ( lj_fd > 0 ) ) {
-            //query_labjack( );
-            //lj.battery1 = getBatteryVoltage( AIN_0 );
-            //lj.battery2 = getBatteryVoltage( AIN_1 );
-            //lj.pressure = getBatteryVoltage( AIN_2 );
-            //lj.water    = getBatteryVoltage( AIN_3 );
-        //}
 
         /* Perform PID loops. */
         if ( msg.stop.data.state == FALSE ) {
