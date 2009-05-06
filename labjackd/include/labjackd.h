@@ -41,6 +41,8 @@
 
 #ifndef BATT_LIMITS
 #define BATT_LIMITS
+#define BATT1_THRESH	3
+#define BATT1_MIN		10
 #define BATT2_THRESH	3
 #define BATT2_MIN		14
 #endif /* BATT_LIMITS */

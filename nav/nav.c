@@ -354,8 +354,10 @@ int main( int argc, char *argv[] )
         //}
         //printf( "MAIN: Kill switch is closed.\n" );
     //}
-    
-    if ( (cf.enable_labjack) && (lj_fd > 0) ) {
+	if ( getBatteryVoltage(AIN_0) == 0 ) {
+		lj_fd = 0;
+	}
+    else if ( (cf.enable_labjack) && (lj_fd > 0) ) {
     	while ( getBatteryVoltage(AIN_0) < 10.0 ) {
     		query_labjack( );
     		usleep( 100000 );
@@ -445,7 +447,7 @@ int main( int argc, char *argv[] )
                     //	msg.vision.data.front_x, msg.vision.data.front_y );
                     
                     /* Set target values based on current orientation and pixel error. */
-                    //msg.target.data.yaw = msg.mstrain.data.yaw + (float)msg.vision.data.front_x / 10.;
+                    msg.target.data.yaw = msg.mstrain.data.yaw + (float)msg.vision.data.front_x / 10.;
                     //msg.target.data.pitch = msg.mstrain.data.pitch + (float)msg.vision.data.front_y / 10.;
                     //msg.target.data.yaw = msg.mstrain.data.yaw + (float)msg.vision.data.bottom_y / 10;
                     //msg.target.data.fx = (float)msg.vision.data.bottom_x / 10;
@@ -456,6 +458,7 @@ int main( int argc, char *argv[] )
                 }
             }
             //printf( "MAIN:\n%f\n%f\n\n", msg.target.data.pitch, msg.target.data.yaw );
+			//printf( "MAIN:\n%d\n%d\n\n", msg.vision.data.front_x, msg.vision.data.front_y );
         }
 
         /* Get labjack daemon data. */
@@ -481,13 +484,11 @@ int main( int argc, char *argv[] )
             time2s =    planner_start.tv_sec;
             time2ms =   planner_start.tv_usec;
             dt = util_calc_dt( &time1s, &time1ms, &time2s, &time2ms );
-
             if ( dt > cf.period_planner ) {
                 recv_bytes = net_client( planner_fd, planner_buf, &msg, mode );
                 planner_buf[recv_bytes] = '\0';
                 if ( recv_bytes > 0 ) {
                     messages_decode( planner_fd, planner_buf, &msg );
-                    
                     gettimeofday( &planner_start, NULL );
                 }
             }

@@ -162,8 +162,11 @@ int main( int argc, char *argv[] )
 
 		/* Check battery voltage. Make sure it is connected. If too low then
 		 * have the computer shut down so that the battery is not damaged. */
+		if ( (lj.battery1 > BATT1_THRESH) && (lj.battery1 < BATT1_MIN) ) {
+			system( "shutdown -h now" );
+		}
 		if ( (lj.battery2 > BATT2_THRESH) && (lj.battery2 < BATT2_MIN) ) {
-			/* Call 'shutdown -h now' here. */
+			system( "shutdown -h now" );
 		}
 	}
 
