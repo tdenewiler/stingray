@@ -49,8 +49,7 @@ static struct hostent *hent;
 
 int net_server_setup( short port )
 {
-    int fd;
-    fd = -1;
+    int fd = -1;
 
     /* Zero out the file descriptor sets. Used to keep track of fd's available to
      *read data from. */
@@ -95,8 +94,7 @@ int net_server_setup( short port )
 
 int net_client_setup( char *address, short port )
 {
-    int fd;
-    fd = -1;
+    int fd = -1;
 
     /* Make each system call. Error checking is done within the following
      * functions. */
@@ -209,12 +207,16 @@ int net_client( int fd, void *buf, MSG_DATA *msg, int mode )
 
     /* Send and receive data for connected socket. */
     if ( mode == MODE_STATUS ) {
+		printf( "NET_CLIENT: 1\n" );
         messages_send( fd, (int)STATUS_MSGID, msg );
+		printf( "NET_CLIENT: 2\n" );
     }
     else if ( mode == MODE_JOY ) {
         messages_send( fd, (int)TELEOP_MSGID, msg );
     }
+	printf( "NET_CLIENT: 3\n" );
     recv_bytes = net_recv( fd, buf );
+	printf( "NET_CLIENT: 4\n" );
 
     return recv_bytes;
 } /* end net_client() */
@@ -643,16 +645,19 @@ int net_recv( int fd, void *buf )
 {
     int recv_bytes;
 
+	printf( "NET_RECV: 1\n" );
     if ( ( recv_bytes = recv( fd,
                               buf,
                               MAX_MSG_SIZE,
                               0 ) )
             == -1 ) {
+		printf( "NET_RECV: 2. recv_bytes = %d\n", recv_bytes );
         if ( errno != EWOULDBLOCK ) {
             perror( "recv" );
             return 0;
         }
     }
+	printf( "NET_RECV: 3\n" );
 
     return recv_bytes;
 } /* end net_recv() */

@@ -23,7 +23,6 @@
 #include "parser.h"
 
 
-int nav_fd;
 int planner_fd;
 int vision_fd;
 CONF_VARS cf;
@@ -94,15 +93,6 @@ int main( int argc, char *argv[] )
     msg.vsetting.data.fence_hsv.vH = cf.fence_vH;
 
     /* Set up communications. */
-    if ( cf.enable_net ) {
-        nav_fd = net_client_setup( cf.server_IP, cf.api_port );
-		if ( nav_fd > 0 ) {
-			printf( "MAIN: Nav client setup OK.\n" );
-		}
-		else {
-			printf( "MAIN: WARNING!!! Nav client setup failed.\n" );
-		}
-    }
     if ( cf.enable_planner ) {
         planner_fd = net_client_setup( cf.planner_IP, cf.planner_port );
 		if ( planner_fd > 0 ) {
@@ -121,7 +111,6 @@ int main( int argc, char *argv[] )
 			printf( "MAIN: WARNING!!! Vision client setup failed.\n" );
 		}
     }
-
 
     /* Set up the GUI. */
     gtk_init( &argc, &argv );

@@ -30,10 +30,10 @@ guint timer200ms;
 extern GtkWidget *label_status;
 
 /* A buffer to store network data. */
-char net_buf[MAX_MSG_SIZE];
+char planner_buf[MAX_MSG_SIZE];
 
 /* Network API messages. */
-extern int nav_fd;
+extern int planner_fd;
 extern MSG_DATA msg;
 
 /* Configuration file variables. */
@@ -141,7 +141,7 @@ gint gui_timer_1s( gpointer data )
  *
  * Output:      TRUE: No error checking implemented.
  *
- * Globals:     nav_fd
+ * Globals:     planner_fd
  *
  *****************************************************************************/
 
@@ -149,19 +149,23 @@ gint gui_timer_200ms( gpointer data )
 {
     buttons_update_values( );
     int recv_bytes = 0;
-    int mode = MODE_STATUS;
-
+	
     /* Get network data. */
-    if ( nav_fd > 0 ) {
-        recv_bytes = net_client( nav_fd, net_buf, &msg, mode );
-        net_buf[recv_bytes] = '\0';
+	printf( "GUI_200: 1.\n" );
+    if ( planner_fd > 0 ) {
+		printf( "GUI_200: 2. planner_fd = %d\n", planner_fd );
+        recv_bytes = net_client( planner_fd, planner_buf, &msg, MODE_STATUS );
+		printf( "GUI_200: 3.\n" );
+        planner_buf[recv_bytes] = '\0';
 		if ( recv_bytes > 0 ) {
-        	messages_decode( nav_fd, net_buf, &msg );
+			printf( "GUI_200: Got %d bytes.\n", recv_bytes );
+        	messages_decode( planner_fd, planner_buf, &msg );
+			printf( "GUI_200: 4.\n" );
     	}
     }
 
     /* Update GUI status. */
-    if ( nav_fd > 0 ) {
+    if ( planner_fd > 0 ) {
 	    gui_update_status_text( );
 	}
 
