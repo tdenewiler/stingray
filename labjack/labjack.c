@@ -29,12 +29,14 @@ int init_labjack()
 		return 0;
 
 	// how is the labjack pre-configured?
-	if ( getCalibrationInfo( hDevice, &caliInfo ) < 0 )
+	if ( getCalibrationInfo( hDevice, &caliInfo ) < 0 ) {
 		return 0;
+	}
 
 	// configure the labjack
-	if ( config_labjack() != 0 )
+	if ( config_labjack() != 0 ) {
 		return 0;
+	}
 
 	// labjack was successfully initialized
 	return 1;
@@ -80,7 +82,6 @@ int config_labjack()
 	extendedChecksum( sendBuff, 12 );
 
 	//Sending command to U3
-
 	if ( ( sendChars = LJUSB_BulkWrite( hDevice, U3_PIPE_EP1_OUT, sendBuff, 12 ) ) < 12 ) {
 		if ( sendChars == 0 )
 			printf( "%s: write failed\n", fName );
@@ -106,32 +107,26 @@ int config_labjack()
 		printf( "%s: read buffer has bad checksum16(MSB)\n", fName );
 		return -1;
 	}
-
 	if ( ( uint8 )( checksumTotal & 0xff ) != recBuff[4] ) {
 		printf( "%s: read buffer has bad checksum16(LBS)\n", fName );
 		return -1;
 	}
-
 	if ( extendedChecksum8( recBuff ) != recBuff[0] ) {
 		printf( "%s: read buffer has bad checksum8\n", fName );
 		return -1;
 	}
-
 	if ( recBuff[1] != ( uint8 )( 0xF8 ) || recBuff[2] != ( uint8 )( 0x03 ) || recBuff[3] != ( uint8 )( 0x0B ) ) {
 		printf( "%s: read buffer has wrong command bytes\n", fName );
 		return -1;
 	}
-
 	if ( recBuff[6] != 0 ) {
 		printf( "%s: read buffer received errorcode %d\n", fName, recBuff[6] );
 		return -1;
 	}
-
 	if ( recBuff[8] != timerCounterConfig ) {
 		printf( "%s: TimerCounterConfig did not get set correctly\n", fName );
 		return -1;
 	}
-
 	if ( recBuff[10] != fioAnalog && recBuff[10] != ( fioAnalog | ( 0x0F ) ) ) {
 		printf( "%s: FIOAnalog(%d) did not set correctly\n", fName, recBuff[10] );
 		return -1;
@@ -290,5 +285,5 @@ int query_labjack()
 	binaryToCalibratedAnalogVoltage_hw130( &caliInfo, 3, 32, recBuff[15] + recBuff[16]*256, &voltage );
 	ain3 = voltage;
 
-	return 0;
+	return 1;
 }
