@@ -46,6 +46,8 @@ MSG_DATA msg;
 
 int main( int argc, char *argv[] )
 {
+	printf( "MAIN: Starting GUI ...\n" );
+	
     memset( &msg, 0, sizeof( MSG_DATA ) );
 
     /* Parse command line arguments. */
@@ -94,18 +96,41 @@ int main( int argc, char *argv[] )
     /* Set up communications. */
     if ( cf.enable_net ) {
         nav_fd = net_client_setup( cf.server_IP, cf.api_port );
+		if ( nav_fd > 0 ) {
+			printf( "MAIN: Nav client setup OK.\n" );
+		}
+		else {
+			printf( "MAIN: WARNING!!! Nav client setup failed.\n" );
+		}
     }
     if ( cf.enable_planner ) {
         planner_fd = net_client_setup( cf.planner_IP, cf.planner_port );
+		if ( planner_fd > 0 ) {
+			printf( "MAIN: Planner client setup OK.\n" );
+		}
+		else {
+			printf( "MAIN: WARNING!!! Planner client setup failed.\n" );
+		}
     }
     if ( cf.enable_vision ) {
         vision_fd = net_client_setup( cf.vision_IP, cf.vision_port );
+		if ( vision_fd > 0 ) {
+			printf( "MAIN: Vision client setup OK.\n" );
+		}
+		else {
+			printf( "MAIN: WARNING!!! Vision client setup failed.\n" );
+		}
     }
+
 
     /* Set up the GUI. */
     gtk_init( &argc, &argv );
+	printf( "MAIN: Gtk initialized OK.\n" );
     gui_init( );
+	printf( "MAIN: GUI initialized OK.\n" );
     gui_set_timers( );
+	printf( "MAIN: Timers setup OK.\n" );
+	printf( "MAIN: GUI running now.\n" );
     gtk_main( );
 
     return 0;

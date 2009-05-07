@@ -128,7 +128,13 @@ int main( int argc, char *argv[] )
     parse_cla( argc, argv, &cf, STINGRAY, ( const char * )JOYDRIVE_FILENAME );
 
     /* Set up communications. */
-    //nav_fd = net_client_setup( cf.server_IP, cf.api_port );
+    nav_fd = net_client_setup( cf.server_IP, cf.api_port );
+    if ( nav_fd > 0 ) {
+    	printf( "MAIN: Nav client setup OK.\n" );
+    }
+    else {
+    	printf( "MAIN: WARNING!!! Nav client setup failed.\n" );
+    }
 
     /* Set up the joystick. */
     joy_fd = joy_setup( );

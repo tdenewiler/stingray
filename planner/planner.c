@@ -187,7 +187,7 @@ int main( int argc, char *argv[] )
 	gettimeofday( &plan_start, NULL );
 	gettimeofday( &task_time, NULL );
 	gettimeofday( &task_start, NULL );
-	printf( "<OK>\n" );
+	printf( "MAIN: Planner running now.\n" );
 
 	/* Main loop. */
 	while ( 1 ) {

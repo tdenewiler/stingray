@@ -360,9 +360,9 @@ int gui_pack_boxes( GtkWidget *top_level_window )
                               gtk_label_new( "Vision" ) );                   
 
     /* Pack the rest of the boxes into the notebook pages. */
-    gtk_box_pack_start( GTK_BOX( vbox3 ), hbox2, TRUE, TRUE, 0 );
-    gtk_box_pack_start( GTK_BOX( vbox3 ), hbox3, TRUE, TRUE, 0 );
-    gtk_box_pack_start( GTK_BOX( vbox3 ), hbox4, TRUE, TRUE, 0 );
+    gtk_box_pack_start( GTK_BOX( vbox3 ), hbox2, TRUE, FALSE, 0 );
+    gtk_box_pack_start( GTK_BOX( vbox3 ), hbox3, TRUE, FALSE, 0 );
+    gtk_box_pack_start( GTK_BOX( vbox3 ), hbox4, TRUE, FALSE, 0 );
 
     /* Make buttons. */
     buttons_make_status( hbox1 );

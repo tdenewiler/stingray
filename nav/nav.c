@@ -245,7 +245,7 @@ int main( int argc, char *argv[] )
     int dt = 0;
 
     printf( "MAIN: Starting Navigation ... \n" );
-    printf( "MAIN: Open kill switch and then press key.\n" );
+    printf( "MAIN: Open kill switch and then press ENTER key.\n" );
     getchar( );
 
     /* Initialize variables. */
@@ -290,7 +290,7 @@ int main( int argc, char *argv[] )
     if ( cf.enable_net ) {
         server_fd = net_server_setup( cf.api_port );
 		if ( server_fd > 0 ) {
-			printf( "MAIN: Nav server setup properly.\n" );
+			printf( "MAIN: Nav server setup OK.\n" );
 		}
 		else {
 			printf( "MAIN: WARNING!!! Nav server setup failed.\n" );
@@ -301,7 +301,7 @@ int main( int argc, char *argv[] )
     if ( cf.enable_vision ) {
         vision_fd = net_client_setup( cf.vision_IP, cf.vision_port );
 		if ( vision_fd > 0 ) {
-			printf( "MAIN: Vision client setup properly.\n" );
+			printf( "MAIN: Vision client setup OK.\n" );
 		}
 		else {
 			printf( "MAIN: WARNING!!! Vision client setup failed.\n" );
@@ -312,7 +312,7 @@ int main( int argc, char *argv[] )
     if ( cf.enable_planner ) {
         planner_fd = net_client_setup( cf.planner_IP, cf.planner_port );
 		if ( planner_fd > 0 ) {
-			printf( "MAIN: Planner client setup properly.\n" );
+			printf( "MAIN: Planner client setup OK.\n" );
 		}
 		else {
 			printf( "MAIN: WARNING!!! Planner client setup failed.\n" );
@@ -323,7 +323,7 @@ int main( int argc, char *argv[] )
     if ( cf.enable_imu ) {
         imu_fd = mstrain_setup( cf.imu_port , cf.imu_baud );
 		if ( imu_fd > 0 ) {
-			printf( "MAIN: IMU setup properly.\n" );
+			printf( "MAIN: IMU setup OK.\n" );
 		}
 		else {
 			printf( "MAIN: WARNING!!! IMU setup failed.\n" );
@@ -331,6 +331,7 @@ int main( int argc, char *argv[] )
     }
 
     /* Set up the labjack. */
+	/*
     if ( cf.enable_labjack ) {
         lj_fd = init_labjack( );
         lj_fd = 1;
@@ -338,25 +339,24 @@ int main( int argc, char *argv[] )
     if ( lj_fd ) {
         status = query_labjack( );
     }
+	*/
 
     /* Connect to the labjack daemon. */
-	/*
     if ( cf.enable_labjack ) {
         lj_fd = net_client_setup( cf.labjackd_IP, cf.labjackd_port );
 		if ( lj_fd > 0 ) {
-			printf( "MAIN: Labjack client setup properly.\n" );
+			printf( "MAIN: Labjack client setup OK.\n" );
 		}
 		else {
 			printf( "MAIN: WARNING!!! Labjack client setup failed.\n" );
 		}
     }
-	*/
 	
     /* Set up the Pololu servo controller. */
     if ( cf.enable_pololu ) {
         pololu_fd = pololuSetup( cf.pololu_port, cf.pololu_baud );
 		if ( pololu_fd > 0 ) {
-			printf( "MAIN: Pololu setup properly.\n" );
+			printf( "MAIN: Pololu setup OK.\n" );
 		}
 		else {
 			printf( "MAIN: WARNING!!! Pololu setup failed.\n" );
@@ -382,18 +382,19 @@ int main( int argc, char *argv[] )
 
 	/* Check that the kill switch is closed via the labjack. Use either
 	 * the direct connection or the network connection. */
-    //status = -1;
-    //if ( ( cf.enable_labjack ) && ( lj_fd > 0 ) ) {
-        //while ( status < 0 ) {
-            //recv_bytes = net_client( lj_fd, lj_buf, &msg, mode );
-            //lj_buf[recv_bytes] = '\0';
-            //if ( recv_bytes > 0 ) {
-                //messages_decode( lj_fd, lj_buf, &msg );
-            //}
-            //status = msg.lj.data.battery1;
-        //}
-        //printf( "MAIN: Kill switch is closed.\n" );
-    //}
+    status = -1;
+    if ( (cf.enable_labjack) && (lj_fd > 0) ) {
+        while ( status < 0 ) {
+            recv_bytes = net_client( lj_fd, lj_buf, &msg, mode );
+            lj_buf[recv_bytes] = '\0';
+            if ( recv_bytes > 0 ) {
+                messages_decode( lj_fd, lj_buf, &msg );
+            }
+            status = msg.lj.data.battery1;
+        }
+        printf( "MAIN: Kill switch is closed.\n" );
+    }
+	/*
 	if ( getBatteryVoltage(AIN_0) == 0 ) {
 		lj_fd = 0;
 	}
@@ -404,7 +405,8 @@ int main( int argc, char *argv[] )
 		}
 		printf( "MAIN: Kill switch is closed.\n" );
 	}
-    printf( "MAIN: Waiting for motors to arm ...\n" );
+	*/
+    printf( "MAIN: Waiting for motors to arm ... " );
     if ( ( cf.enable_labjack ) && ( lj_fd > 0 ) ) {
         sleep( 7 );
     }
@@ -414,9 +416,9 @@ int main( int argc, char *argv[] )
     }
     printf( "<OK>\n" );
     
-    printf( "PRE MAIN: Target Data: pitch=%f roll=%f yaw=%f\n",
+    printf( "MAIN: Target Data: pitch=%f roll=%f yaw=%f\n",
                     		msg.target.data.pitch, msg.target.data.roll, msg.target.data.yaw );
-	printf( "MAIN: Nav is running.\n" );
+	printf( "MAIN: Nav running now.\n" );
 
     /* Main loop. */
     while ( 1 ) {
@@ -485,13 +487,14 @@ int main( int argc, char *argv[] )
         }
 
         /* Get labjack data. Use either direct or network connection. */
-        //if ( ( cf.enable_labjack ) && ( lj_fd > 0 ) ) {
-            //recv_bytes = net_client( lj_fd, lj_buf, &msg, mode );
-            //lj_buf[recv_bytes] = '\0';
-            //if ( recv_bytes > 0 ) {
-                //messages_decode( lj_fd, lj_buf, &msg );
-            //}
-        //}
+        if ( ( cf.enable_labjack ) && ( lj_fd > 0 ) ) {
+            recv_bytes = net_client( lj_fd, lj_buf, &msg, mode );
+            lj_buf[recv_bytes] = '\0';
+            if ( recv_bytes > 0 ) {
+                messages_decode( lj_fd, lj_buf, &msg );
+            }
+        }
+		/*
         if ( (cf.enable_labjack) && (lj_fd > 0) ) {
         	query_labjack( );
         	lj.battery1 = getBatteryVoltage( AIN_0 );
@@ -499,6 +502,7 @@ int main( int argc, char *argv[] )
         	lj.pressure = getBatteryVoltage( AIN_2 );
         	lj.water    = getBatteryVoltage( AIN_3 );
 		}
+		*/
 
         /* Get planner data. */
         if ( ( cf.enable_planner ) && ( planner_fd > 0 ) ) {

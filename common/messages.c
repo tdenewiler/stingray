@@ -299,7 +299,7 @@ void messages_decode( int fd, char *buf, MSG_DATA *msg )
             break;
 
         case TASK_MSGID:
-        	printf( "Decoding Task Message: task=%d\n", ( ( TASK_MSG * )buf )->data.num );
+        	printf( "MSGS_DECODE: task=%d\n", ( ( TASK_MSG * )buf )->data.num );
             msg->task.data = ( ( TASK_MSG * )buf )->data;
             break;
 
