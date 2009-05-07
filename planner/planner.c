@@ -32,6 +32,8 @@
 /* Global file descriptors. Only global so that planner_exit() can close them. */
 int server_fd;
 int vision_fd;
+int lj_fd;
+int nav_fd;
 
 
 /******************************************************************************
@@ -84,6 +86,14 @@ void planner_exit( )
 	if ( vision_fd > 0 ) {
 		close( vision_fd );
 	}
+	
+	if ( lj_fd > 0 ) {
+		close( lj_fd );
+	}
+	
+	if ( nav_fd > 0 ) {
+		close( nav_fd );
+	}
 
 	printf( "<OK>\n\n" );
 } /* end planner_exit() */
@@ -119,6 +129,8 @@ int main( int argc, char *argv[] )
 	int recv_bytes = 0;
 	char recv_buf[MAX_MSG_SIZE];
 	char vision_buf[MAX_MSG_SIZE];
+	char lj_buf[MAX_MSG_SIZE];
+	char nav_buf[MAX_MSG_SIZE];
 	CONF_VARS cf;
 	MSG_DATA msg;
 	PID pid;
@@ -143,6 +155,8 @@ int main( int argc, char *argv[] )
 	/* Initialize variables. */
 	server_fd = -1;
 	vision_fd = -1;
+	lj_fd = -1;
+	nav_fd = -1;
 
 	memset( &msg, 0, sizeof( MSG_DATA ) );
 	memset( &pid, 0, sizeof( PID ) );
@@ -179,6 +193,28 @@ int main( int argc, char *argv[] )
 			printf( "MAIN: WARNING!!! Vision client setup failed.\n" );
 		}
 	}
+	
+	/* Connect to the labjack daemon. */
+    if ( cf.enable_labjack ) {
+        lj_fd = net_client_setup( cf.labjackd_IP, cf.labjackd_port );
+		if ( lj_fd > 0 ) {
+			printf( "MAIN: Labjack client setup OK.\n" );
+		}
+		else {
+			printf( "MAIN: WARNING!!! Labjack client setup failed.\n" );
+		}
+    }
+    
+    /* Set up the nav network client. */
+	if ( cf.enable_net ) {
+        nav_fd = net_client_setup( cf.server_IP, cf.api_port );
+		if ( nav_fd > 0 ) {
+			printf( "MAIN: Nav client setup OK.\n" );
+		}
+		else {
+			printf( "MAIN: WARNING!!! Nav client setup failed.\n" );
+		}
+    }
 
 	/* Initialize timers. */
 	gettimeofday( &vision_time, NULL );
@@ -193,7 +229,7 @@ int main( int argc, char *argv[] )
 	while ( 1 ) {
 		/* Get network data. */
 		if ( ( cf.enable_net ) && ( server_fd > 0 ) ) {
-			recv_bytes = net_server( server_fd, recv_buf, &msg, MODE_PLANNER );
+			recv_bytes = net_server( server_fd, recv_buf, &msg, MODE_STATUS );
 			if ( recv_bytes > 0 ) {
 				recv_buf[recv_bytes] = '\0';
 				messages_decode( server_fd, recv_buf, &msg );
@@ -224,6 +260,28 @@ int main( int argc, char *argv[] )
 			{
 				messages_send( vision_fd, TASK_MSGID, &msg );
 				old_task = msg.task.data.num;
+			}
+		}
+		
+		/* Get labjack data. Use either direct or network connection. */
+        if ( ( cf.enable_labjack ) && ( lj_fd > 0 ) ) {
+            recv_bytes = net_client( lj_fd, lj_buf, &msg, MODE_PLANNER );
+            lj_buf[recv_bytes] = '\0';
+            if ( recv_bytes > 0 ) {
+                messages_decode( lj_fd, lj_buf, &msg );
+            }
+            
+            msg.target.data.curr_batt1 = msg.lj.data.battery1;
+            msg.target.data.curr_depth = msg.lj.data.pressure;
+        }
+        
+        /* Get network data. */
+		if ( nav_fd > 0 ) {
+			recv_bytes = net_client( nav_fd, nav_buf, &msg, MODE_PLANNER );
+			nav_buf[recv_bytes] = '\0';
+		
+			if ( recv_bytes > 0 ) {
+				messages_decode( nav_fd, nav_buf, &msg );
 			}
 		}
 

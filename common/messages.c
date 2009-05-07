@@ -326,12 +326,11 @@ void messages_decode( int fd, char *buf, MSG_DATA *msg )
 
 /******************************************************************************
  *
- * Title:       void messages_update( MSG_DATA *msg, LABJACK_DATA *lj )
+ * Title:       void messages_update( MSG_DATA *msg )
  *
  * Description: Updates the status variables.
  *
  * Input:       msg: A pointer to message data.
- *              lj: A pointer to labjack data.
  *
  * Output:      None.
  *
@@ -339,7 +338,7 @@ void messages_decode( int fd, char *buf, MSG_DATA *msg )
  *
  *****************************************************************************/
 
-void messages_update( MSG_DATA *msg, LABJACK_DATA *lj )
+void messages_update( MSG_DATA *msg )
 {
     msg->status.data.mag[0] = msg->mstrain.data.mag[0];
     msg->status.data.mag[1] = msg->mstrain.data.mag[1];
@@ -357,9 +356,4 @@ void messages_update( MSG_DATA *msg, LABJACK_DATA *lj )
     msg->status.data.pitch = msg->mstrain.data.pitch;
     msg->status.data.roll = msg->mstrain.data.roll;
     msg->status.data.yaw = msg->mstrain.data.yaw;
-    msg->status.data.depth = lj->pressure;
-    msg->status.data.battery1 = lj->battery1;
-    msg->status.data.battery2 = lj->battery2;
-    msg->status.data.pressure = lj->pressure;
-    msg->status.data.water = lj->water;
 } /* end messages_update() */

@@ -155,10 +155,9 @@ gint gui_timer_200ms( gpointer data )
     if ( nav_fd > 0 ) {
         recv_bytes = net_client( nav_fd, net_buf, &msg, mode );
         net_buf[recv_bytes] = '\0';
-    }
-
-    if ( recv_bytes > 0 ) {
-        messages_decode( nav_fd, net_buf, &msg );
+		if ( recv_bytes > 0 ) {
+        	messages_decode( nav_fd, net_buf, &msg );
+    	}
     }
 
     /* Update GUI status. */

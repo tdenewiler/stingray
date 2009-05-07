@@ -227,6 +227,8 @@ typedef struct _TARGET {
     float fx;       //!< Desired force in x direction
     float fy;       //!< Desired force in y direction
     float speed;    //!< Desired speed.
+    float curr_depth;	//!< Current depth from labjack.
+    float curr_batt1;	//!< Current motor battery from labjack.
 } TARGET;
 
 /*! API message to change the uuv operational mode. */
@@ -441,8 +443,7 @@ void messages_decode( int fd, char *buf, MSG_DATA *msg );
 
 //! Updates status data with current data.
 //! \param msg Pointer to message data.
-//! \param lj Labjack data.
-void messages_update( MSG_DATA *msg, LABJACK_DATA *lj );
+void messages_update( MSG_DATA *msg );
 
 
 #endif /* _MESSAGES_H_ */

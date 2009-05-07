@@ -78,7 +78,6 @@ int pid_init( PID *pid, CONF_VARS *cf )
  * 								PID *pid,
  * 								CONF_VARS *cf,
  * 								MSG_DATA *msg,
- * 								LABJACK_DATA *lj,
  * 								int mode
  * 								)
  *
@@ -88,7 +87,6 @@ int pid_init( PID *pid, CONF_VARS *cf )
  * 				pid: PID struct.
  * 				cf: Pointer to configuration variables.
  * 				msg: Pointer to message data.
- * 				lj: Pointer to labjack data.
  * 				dt: Time difference from last loop run.
  * 				mode: Which PID loop to run.
  *
@@ -102,7 +100,6 @@ void pid_loop( int pololu_fd,
                PID *pid,
                CONF_VARS *cf,
                MSG_DATA *msg,
-               LABJACK_DATA *lj,
                int dt,
                int mode
              )
@@ -224,7 +221,7 @@ void pid_loop( int pololu_fd,
 
 			/* Calculate the errors. */
 			pid->depth.ref	= msg->target.data.depth;
-			pid->depth.cval = lj->pressure;
+			pid->depth.cval = msg->target.data.curr_depth;
 			pid->depth.perr = pid->depth.cval - pid->depth.ref;
 			pid->depth.ierr += pid->depth.perr * dt / 1000000;
 			pid->depth.ierr = pid_bound_integral( pid->depth.ierr, pid->depth.ki, PID_DEPTH_INTEGRAL );
