@@ -321,7 +321,7 @@ int gui_pack_boxes( GtkWidget *top_level_window )
     vbox1 = gtk_vbox_new( FALSE, 0 );
     vbox2 = gtk_vbox_new( FALSE, 0 );
     vbox3 = gtk_vbox_new( FALSE, 0 );
-    vbox4 = gtk_vbox_new( TRUE, 0 );
+    vbox4 = gtk_vbox_new( FALSE, 0 );
     vbox5 = gtk_vbox_new( TRUE, 0 );
     vbox6 = gtk_vbox_new( TRUE, 0 );
     hbox1 = gtk_hbox_new( TRUE, 0 );
@@ -493,7 +493,7 @@ void gui_init( )
 
     /* Set an icon for the application. */
     gtk_window_set_icon_from_file( ( GtkWindow * )top_level_window,
-			GUI_ICON, NULL );
+		GUI_ICON, NULL );
 
     /* Show all the widgets that have been created in the main window. */
     gtk_widget_show_all( top_level_window );

@@ -189,7 +189,7 @@ GtkWidget *buttons_make_radio( const char *name, GtkSignalFunc callback, GtkWidg
     GtkWidget *radio_button;
 
     radio_button = gtk_radio_button_new_with_label_from_widget(
-                       GTK_RADIO_BUTTON( group ), name );
+		GTK_RADIO_BUTTON( group ), name );
     gtk_signal_connect( GTK_OBJECT( radio_button ), "released", callback, NULL );
 
     return radio_button;
@@ -302,7 +302,7 @@ GtkWidget *buttons_make_spin( const char *name,
     gtk_spin_button_set_wrap( GTK_SPIN_BUTTON( spin_button ), FALSE );
     gtk_spin_button_set_snap_to_ticks( GTK_SPIN_BUTTON( spin_button ), TRUE );
     gtk_spin_button_set_update_policy( GTK_SPIN_BUTTON( spin_button ),
-                                       GTK_UPDATE_IF_VALID );
+		GTK_UPDATE_IF_VALID );
 
     /* Pack spin button into box inside frame. */
     gtk_box_pack_start( GTK_BOX( vbox ), spin_button, FALSE, TRUE, 0 );
@@ -356,7 +356,7 @@ int buttons_make_estop( GtkWidget *box )
 
     /* Create the check button and make it red. */
     button_estop = buttons_make_check( "E-Stop",
-            GTK_SIGNAL_FUNC( events_estop ) );
+		GTK_SIGNAL_FUNC( events_estop ) );
     gtk_widget_modify_bg( button_estop, GTK_STATE_NORMAL, &red );
     gtk_widget_modify_bg( button_estop, GTK_STATE_ACTIVE, &red );
     gtk_widget_modify_bg( button_estop, GTK_STATE_PRELIGHT, &red );
@@ -423,19 +423,19 @@ int buttons_opmode( GtkWidget *box )
 
     /* Create the radio buttons. */
     button_hold_yaw = buttons_make_radio( "Yaw",
-            GTK_SIGNAL_FUNC( events_opmode ), opmode_group );
+		GTK_SIGNAL_FUNC( events_opmode ), opmode_group );
     button_hold_roll = buttons_make_radio( "Roll",
-        GTK_SIGNAL_FUNC( events_opmode ), opmode_group );
+		GTK_SIGNAL_FUNC( events_opmode ), opmode_group );
     button_hold_pitch = buttons_make_radio( "Pitch",
-            GTK_SIGNAL_FUNC( events_opmode ), opmode_group );
+        GTK_SIGNAL_FUNC( events_opmode ), opmode_group );
     button_hold_accel = buttons_make_radio( "Acceleration",
-            GTK_SIGNAL_FUNC( events_opmode ), opmode_group );
+        GTK_SIGNAL_FUNC( events_opmode ), opmode_group );
     button_hold_ang_rate = buttons_make_radio( "Angular Rate",
-            GTK_SIGNAL_FUNC( events_opmode ), opmode_group );
+        GTK_SIGNAL_FUNC( events_opmode ), opmode_group );
     button_manual = buttons_make_radio( "Manual",
-            GTK_SIGNAL_FUNC( events_opmode ), opmode_group );
+        GTK_SIGNAL_FUNC( events_opmode ), opmode_group );
     button_autonomous = buttons_make_radio( "Autonomous",
-            GTK_SIGNAL_FUNC( events_opmode ), opmode_group );
+        GTK_SIGNAL_FUNC( events_opmode ), opmode_group );
 
     /* Pack the boxes. */
     gtk_box_pack_start( GTK_BOX( hbox ), button_hold_yaw, FALSE, TRUE, 0 );
@@ -525,66 +525,34 @@ int buttons_tasks( GtkWidget *box )
 
     /* Create radio buttons. */
     button_buoy = buttons_make_radio( "Buoy",
-                                      GTK_SIGNAL_FUNC( events_tasks ),
-                                      tasks_group );
+        GTK_SIGNAL_FUNC( events_tasks ), tasks_group );
     button_gate = buttons_make_radio( "Gate",
-                                      GTK_SIGNAL_FUNC( events_tasks ),
-                                      tasks_group );
+        GTK_SIGNAL_FUNC( events_tasks ), tasks_group );
     button_pipe = buttons_make_radio( "Pipe",
-                                      GTK_SIGNAL_FUNC( events_tasks ),
-                                      tasks_group );
+        GTK_SIGNAL_FUNC( events_tasks ), tasks_group );
     button_square = buttons_make_radio( "Square",
-                                        GTK_SIGNAL_FUNC( events_tasks ),
-                                        tasks_group );
+		GTK_SIGNAL_FUNC( events_tasks ), tasks_group );
 
     /* Create the spin buttons. */
-    adj = ( GtkAdjustment * )gtk_adjustment_new( 0,
-            0,
-            100,
-            0.1,
-            10,
-            0 );
+    adj = ( GtkAdjustment * )gtk_adjustment_new( 0, 0, 100, 0.1, 10, 0 );
 
     button_square_time1 = buttons_make_spin( "Forward Time [s]",
-                          GTK_SIGNAL_FUNC( events_tasks ),
-                          vbox5,
-                          adj );
+		GTK_SIGNAL_FUNC( events_tasks ), vbox5, adj );
 
-    adj = ( GtkAdjustment * )gtk_adjustment_new( 0,
-            0,
-            100,
-            0.1,
-            10,
-            0 );
+    adj = ( GtkAdjustment * )gtk_adjustment_new( 0, 0, 100, 0.1, 10, 0 );
 
     button_square_time2 = buttons_make_spin( "Left Time [s]",
-                          GTK_SIGNAL_FUNC( events_tasks ),
-                          vbox5,
-                          adj );
+		GTK_SIGNAL_FUNC( events_tasks ), vbox5, adj );
 
-    adj = ( GtkAdjustment * )gtk_adjustment_new( 0,
-            0,
-            100,
-            0.1,
-            10,
-            0 );
+    adj = ( GtkAdjustment * )gtk_adjustment_new( 0, 0, 100, 0.1, 10, 0 );
 
     button_square_time3 = buttons_make_spin( "Reverse Time [s]",
-                          GTK_SIGNAL_FUNC( events_tasks ),
-                          vbox5,
-                          adj );
+		GTK_SIGNAL_FUNC( events_tasks ), vbox5, adj );
 
-    adj = ( GtkAdjustment * )gtk_adjustment_new( 0,
-            0,
-            100,
-            0.1,
-            10,
-            0 );
+    adj = ( GtkAdjustment * )gtk_adjustment_new( 0, 0, 100, 0.1, 10, 0 );
 
     button_square_time4 = buttons_make_spin( "Right Time [s]",
-                          GTK_SIGNAL_FUNC( events_tasks ),
-                          vbox5,
-                          adj );
+		GTK_SIGNAL_FUNC( events_tasks ), vbox5, adj );
 
     /* Pack the radio buttons into boxes. */
     gtk_box_pack_start( GTK_BOX( hbox5 ), button_buoy, FALSE, TRUE, 0 );
@@ -707,15 +675,15 @@ int buttons_vision( GtkWidget *box )
     button_save_bframe = gtk_button_new_with_label( "Bottom Frame" );
     button_save_fframe = gtk_button_new_with_label( "Front Frame" );
     button_save_bvideo = buttons_make_check( "Bottom Video",
-            GTK_SIGNAL_FUNC(events_vision) );
+		GTK_SIGNAL_FUNC(events_vision) );
     button_save_fvideo = buttons_make_check( "Front Video",
-            GTK_SIGNAL_FUNC(events_vision) );
+		GTK_SIGNAL_FUNC(events_vision) );
 
     /* Connect the normal buttons to callbacks. */
     g_signal_connect( button_save_bframe,
-            "clicked", G_CALLBACK( events_vision ), NULL );
+		"clicked", G_CALLBACK( events_vision ), NULL );
     g_signal_connect( button_save_fframe,
-            "clicked", G_CALLBACK( events_vision ), NULL );
+		"clicked", G_CALLBACK( events_vision ), NULL );
 
     /* Put normal and check buttons into box. */
     gtk_container_add( GTK_CONTAINER( hbox10 ), button_save_bframe );
@@ -724,203 +692,77 @@ int buttons_vision( GtkWidget *box )
     gtk_container_add( GTK_CONTAINER( hbox13 ), button_save_fvideo );
 
     /* Create the spin buttons. */
-    adj = ( GtkAdjustment * )gtk_adjustment_new( cf.pipe_hL,
-            0,
-            255,
-            1,
-            10,
-            0 );
+    adj = ( GtkAdjustment * )gtk_adjustment_new( cf.pipe_hL, 0, 255, 1, 10, 0 );
     button_hpipe_lo = buttons_make_spin( "H Low",
-                          GTK_SIGNAL_FUNC( events_vision ),
-                          vbox3,
-                          adj );
+		GTK_SIGNAL_FUNC( events_vision ), vbox3, adj );
 
-    adj = ( GtkAdjustment * )gtk_adjustment_new( cf.pipe_sL,
-            0,
-            255,
-            1,
-            10,
-            0 );
+    adj = ( GtkAdjustment * )gtk_adjustment_new( cf.pipe_sL, 0, 255, 1, 10, 0 );
     button_spipe_lo = buttons_make_spin( "S Low",
-                          GTK_SIGNAL_FUNC( events_vision ),
-                          vbox3,
-                          adj );
+		GTK_SIGNAL_FUNC( events_vision ), vbox3, adj );
 
-    adj = ( GtkAdjustment * )gtk_adjustment_new( cf.pipe_vL,
-            0,
-            255,
-            1,
-            10,
-            0 );
+    adj = ( GtkAdjustment * )gtk_adjustment_new( cf.pipe_vL, 0, 255, 1, 10, 0 );
     button_vpipe_lo = buttons_make_spin( "V Low",
-                          GTK_SIGNAL_FUNC( events_vision ),
-                          vbox3,
-                          adj );
+		GTK_SIGNAL_FUNC( events_vision ), vbox3, adj );
 
-    adj = ( GtkAdjustment * )gtk_adjustment_new( cf.pipe_hH,
-            0,
-            255,
-            1,
-            10,
-            0 );
+    adj = ( GtkAdjustment * )gtk_adjustment_new( cf.pipe_hH, 0, 255, 1, 10, 0 );
     button_hpipe_hi = buttons_make_spin( "H High",
-                          GTK_SIGNAL_FUNC( events_vision ),
-                          vbox4,
-                          adj );
+		GTK_SIGNAL_FUNC( events_vision ), vbox4, adj );
 
-    adj = ( GtkAdjustment * )gtk_adjustment_new( cf.pipe_sH,
-            0,
-            255,
-            1,
-            10,
-            0 );
+    adj = ( GtkAdjustment * )gtk_adjustment_new( cf.pipe_sH, 0, 255, 1, 10, 0 );
     button_spipe_hi = buttons_make_spin( "S High",
-                          GTK_SIGNAL_FUNC( events_vision ),
-                          vbox4,
-                          adj );
+		GTK_SIGNAL_FUNC( events_vision ), vbox4, adj );
 
-    adj = ( GtkAdjustment * )gtk_adjustment_new( cf.pipe_vH,
-            0,
-            255,
-            1,
-            10,
-            0 );
+    adj = ( GtkAdjustment * )gtk_adjustment_new( cf.pipe_vH, 0, 255, 1, 10, 0 );
     button_vpipe_hi = buttons_make_spin( "V High",
-                          GTK_SIGNAL_FUNC( events_vision ),
-                          vbox4,
-                          adj );
+		GTK_SIGNAL_FUNC( events_vision ), vbox4, adj );
 
-    adj = ( GtkAdjustment * )gtk_adjustment_new( cf.buoy_hL,
-            0,
-            255,
-            1,
-            10,
-            0 );
+    adj = ( GtkAdjustment * )gtk_adjustment_new( cf.buoy_hL, 0, 255, 1, 10, 0 );
     button_hbuoy_lo = buttons_make_spin( "H Low",
-                          GTK_SIGNAL_FUNC( events_vision ),
-                          vbox7,
-                          adj );
+		GTK_SIGNAL_FUNC( events_vision ), vbox7, adj );
 
-    adj = ( GtkAdjustment * )gtk_adjustment_new( cf.buoy_sL,
-            0,
-            255,
-            1,
-            10,
-            0 );
+    adj = ( GtkAdjustment * )gtk_adjustment_new( cf.buoy_sL, 0, 255, 1, 10, 0 );
     button_sbuoy_lo = buttons_make_spin( "S Low",
-                          GTK_SIGNAL_FUNC( events_vision ),
-                          vbox7,
-                          adj );
+		GTK_SIGNAL_FUNC( events_vision ), vbox7, adj );
 
-    adj = ( GtkAdjustment * )gtk_adjustment_new( cf.buoy_vL,
-            0,
-            255,
-            1,
-            10,
-            0 );
+    adj = ( GtkAdjustment * )gtk_adjustment_new( cf.buoy_vL, 0, 255, 1, 10, 0 );
     button_vbuoy_lo = buttons_make_spin( "V Low",
-                          GTK_SIGNAL_FUNC( events_vision ),
-                          vbox7,
-                          adj );
+		GTK_SIGNAL_FUNC( events_vision ), vbox7, adj );
 
-    adj = ( GtkAdjustment * )gtk_adjustment_new( cf.buoy_hH,
-            0,
-            255,
-            1,
-            10,
-            0 );
+    adj = ( GtkAdjustment * )gtk_adjustment_new( cf.buoy_hH, 0, 255, 1, 10, 0 );
     button_hbuoy_hi = buttons_make_spin( "H High",
-                          GTK_SIGNAL_FUNC( events_vision ),
-                          vbox8,
-                          adj );
+		GTK_SIGNAL_FUNC( events_vision ), vbox8, adj );
 
-    adj = ( GtkAdjustment * )gtk_adjustment_new( cf.buoy_sH,
-            0,
-            255,
-            1,
-            10,
-            0 );
+    adj = ( GtkAdjustment * )gtk_adjustment_new( cf.buoy_sH, 0, 255, 1, 10, 0 );
     button_sbuoy_hi = buttons_make_spin( "S High",
-                          GTK_SIGNAL_FUNC( events_vision ),
-                          vbox8,
-                          adj );
+		GTK_SIGNAL_FUNC( events_vision ), vbox8, adj );
 
-    adj = ( GtkAdjustment * )gtk_adjustment_new( cf.buoy_vH,
-            0,
-            255,
-            1,
-            10,
-            0 );
+    adj = ( GtkAdjustment * )gtk_adjustment_new( cf.buoy_vH, 0, 255, 1, 10, 0 );
     button_vbuoy_hi = buttons_make_spin( "V High",
-                          GTK_SIGNAL_FUNC( events_vision ),
-                          vbox8,
-                          adj );
+		GTK_SIGNAL_FUNC( events_vision ), vbox8, adj );
 
-    adj = ( GtkAdjustment * )gtk_adjustment_new( cf.fence_hL,
-            0,
-            255,
-            1,
-            10,
-            0 );
+    adj = ( GtkAdjustment * )gtk_adjustment_new( cf.fence_hL, 0, 255, 1, 10, 0 );
     button_hfence_lo = buttons_make_spin( "H Low",
-                          GTK_SIGNAL_FUNC( events_vision ),
-                          vbox5,
-                          adj );
+		GTK_SIGNAL_FUNC( events_vision ), vbox5, adj );
 
-    adj = ( GtkAdjustment * )gtk_adjustment_new( cf.fence_sL,
-            0,
-            255,
-            1,
-            10,
-            0 );
+    adj = ( GtkAdjustment * )gtk_adjustment_new( cf.fence_sL, 0, 255, 1, 10, 0 );
     button_sfence_lo = buttons_make_spin( "S Low",
-                          GTK_SIGNAL_FUNC( events_vision ),
-                          vbox5,
-                          adj );
+		GTK_SIGNAL_FUNC( events_vision ), vbox5, adj );
 
-    adj = ( GtkAdjustment * )gtk_adjustment_new( cf.fence_vL,
-            0,
-            255,
-            1,
-            10,
-            0 );
+    adj = ( GtkAdjustment * )gtk_adjustment_new( cf.fence_vL, 0, 255, 1, 10, 0 );
     button_vfence_lo = buttons_make_spin( "V Low",
-                          GTK_SIGNAL_FUNC( events_vision ),
-                          vbox5,
-                          adj );
+		GTK_SIGNAL_FUNC( events_vision ), vbox5, adj );
 
-    adj = ( GtkAdjustment * )gtk_adjustment_new( cf.fence_hH,
-            0,
-            255,
-            1,
-            10,
-            0 );
+    adj = ( GtkAdjustment * )gtk_adjustment_new( cf.fence_hH, 0, 255, 1, 10, 0 );
     button_hfence_hi = buttons_make_spin( "H High",
-                          GTK_SIGNAL_FUNC( events_vision ),
-                          vbox6,
-                          adj );
+		GTK_SIGNAL_FUNC( events_vision ), vbox6, adj );
 
-    adj = ( GtkAdjustment * )gtk_adjustment_new( cf.fence_sH,
-            0,
-            255,
-            1,
-            10,
-            0 );
+    adj = ( GtkAdjustment * )gtk_adjustment_new( cf.fence_sH, 0, 255, 1, 10, 0 );
     button_sfence_hi = buttons_make_spin( "S High",
-                          GTK_SIGNAL_FUNC( events_vision ),
-                          vbox6,
-                          adj );
+		GTK_SIGNAL_FUNC( events_vision ), vbox6, adj );
 
-    adj = ( GtkAdjustment * )gtk_adjustment_new( cf.fence_vH,
-            0,
-            255,
-            1,
-            10,
-            0 );
+    adj = ( GtkAdjustment * )gtk_adjustment_new( cf.fence_vH, 0, 255, 1, 10, 0 );
     button_vfence_hi = buttons_make_spin( "V High",
-                          GTK_SIGNAL_FUNC( events_vision ),
-                          vbox6,
-                          adj );
+		GTK_SIGNAL_FUNC( events_vision ), vbox6, adj );
 
     /* Pack the boxes. */
     gtk_box_pack_start( GTK_BOX( box ), hbox1, TRUE, FALSE, 0 );
@@ -972,97 +814,37 @@ int buttons_targets( GtkWidget *box )
     gtk_container_add( GTK_CONTAINER( targets_frame ), hbox );
 
     /* Create the spin buttons. */
-    adj = ( GtkAdjustment * )gtk_adjustment_new( cf.target_pitch,
-            0,
-            360,
-            0.1,
-            10,
-            0 );
-
+    adj = ( GtkAdjustment * )gtk_adjustment_new( cf.target_pitch, 0, 360, 0.1, 10, 0 );
     button_target_pitch = buttons_make_spin( "Pitch",
-                          GTK_SIGNAL_FUNC( events_target_pitch ),
-                          hbox,
-                          adj );
-
+		GTK_SIGNAL_FUNC( events_target_pitch ), hbox, adj );
     gtk_spin_button_set_wrap( (GtkSpinButton *)button_target_pitch, TRUE );
 
-    adj = ( GtkAdjustment * )gtk_adjustment_new( cf.target_roll,
-            0,
-            360,
-            0.1,
-            10,
-            0 );
-
+    adj = ( GtkAdjustment * )gtk_adjustment_new( cf.target_roll, 0, 360, 0.1, 10, 0 );
     button_target_roll = buttons_make_spin( "Roll",
-                                            GTK_SIGNAL_FUNC( events_target_roll ),
-                                            hbox,
-                                            adj );
-
+		GTK_SIGNAL_FUNC( events_target_roll ), hbox, adj );
     gtk_spin_button_set_wrap( ( GtkSpinButton * )button_target_roll, TRUE );
 
-    adj = ( GtkAdjustment * )gtk_adjustment_new( cf.target_yaw,
-            0,
-            360,
-            0.1,
-            10,
-            0 );
-
+    adj = ( GtkAdjustment * )gtk_adjustment_new( cf.target_yaw, 0, 360, 0.1, 10, 0 );
     button_target_yaw = buttons_make_spin( "Yaw",
-                                           GTK_SIGNAL_FUNC( events_target_yaw ),
-                                           hbox,
-                                           adj );
-
+		GTK_SIGNAL_FUNC( events_target_yaw ), hbox, adj );
     gtk_spin_button_set_wrap( ( GtkSpinButton * )button_target_yaw, TRUE );
 
-    adj = ( GtkAdjustment * )gtk_adjustment_new( cf.target_depth,
-            -100,
-            100,
-            0.001,
-            10,
-            0 );
-
+    adj = ( GtkAdjustment * )gtk_adjustment_new( cf.target_depth, -100, 100, 0.001, 10, 0 );
     button_target_depth = buttons_make_spin( "Depth",
-                          GTK_SIGNAL_FUNC( events_target_depth ),
-                          hbox,
-                          adj );
-
+		GTK_SIGNAL_FUNC( events_target_depth ), hbox, adj );
     gtk_spin_button_set_wrap( ( GtkSpinButton * )button_target_depth, TRUE );
 
-    adj = ( GtkAdjustment * )gtk_adjustment_new( msg.target.data.fx,
-            -100,
-            100,
-            1,
-            10,
-            0 );
-
+    adj = ( GtkAdjustment * )gtk_adjustment_new( msg.target.data.fx, -100, 100, 1, 10, 0 );
     button_target_fx = buttons_make_spin( "Fx",
-                                          GTK_SIGNAL_FUNC( events_target_fx ),
-                                          hbox,
-                                          adj );
+		GTK_SIGNAL_FUNC( events_target_fx ), hbox, adj );
 
-    adj = ( GtkAdjustment * )gtk_adjustment_new( msg.target.data.fy,
-            -100,
-            100,
-            1,
-            10,
-            0 );
-
+    adj = ( GtkAdjustment * )gtk_adjustment_new( msg.target.data.fy, -100, 100, 1, 10, 0 );
     button_target_fy = buttons_make_spin( "Fy",
-                                          GTK_SIGNAL_FUNC( events_target_fy ),
-                                          hbox,
-                                          adj );
+		GTK_SIGNAL_FUNC( events_target_fy ), hbox, adj );
 
-    adj = ( GtkAdjustment * )gtk_adjustment_new( msg.target.data.speed,
-            0,
-            100,
-            1,
-            10,
-            0 );
-
+    adj = ( GtkAdjustment * )gtk_adjustment_new( msg.target.data.speed, 0, 100, 1, 10, 0 );
     button_target_speed = buttons_make_spin( "Speed",
-                          GTK_SIGNAL_FUNC( events_target_speed ),
-                          hbox,
-                          adj );
+		GTK_SIGNAL_FUNC( events_target_speed ), hbox, adj );
 
     /* Pack the boxes. */
     gtk_box_pack_start( GTK_BOX( box ), vbox, TRUE, FALSE, 0 );
@@ -1120,13 +902,13 @@ int buttons_options( GtkWidget *box )
 
     /* Create the check buttons. */
     button_enable_servos = buttons_make_check( "Enable servos",
-                           GTK_SIGNAL_FUNC( events_enable_servos ) );
+		GTK_SIGNAL_FUNC( events_enable_servos ) );
     button_enable_imu = buttons_make_check( "Enable IMU",
-                                            GTK_SIGNAL_FUNC( events_enable_imu ) );
+		GTK_SIGNAL_FUNC( events_enable_imu ) );
     button_enable_log = buttons_make_check( "Enable log",
-                                            GTK_SIGNAL_FUNC( events_enable_log ) );
+		GTK_SIGNAL_FUNC( events_enable_log ) );
     button_imu_stab = buttons_make_check( "IMU Stabilization",
-                                          GTK_SIGNAL_FUNC( events_imu_stab ) );
+		GTK_SIGNAL_FUNC( events_imu_stab ) );
 
     /* Pack the boxes. */
     gtk_box_pack_start( GTK_BOX( vbox2 ), button_enable_servos, TRUE, TRUE, 0 );
@@ -1136,30 +918,14 @@ int buttons_options( GtkWidget *box )
 
     /* Create the spin button. */
     adj = ( GtkAdjustment * )gtk_adjustment_new( msg.client.data.debug_level,
-            0,
-            20,
-            1,
-            0,
-            0 );
-
+		0, 20, 1, 0, 0 );
     button_debug_level = buttons_make_spin( "Debug Level",
-                                            GTK_SIGNAL_FUNC
-                                            ( events_debug_level ),
-                                            vbox2,
-                                            adj );
+		GTK_SIGNAL_FUNC( events_debug_level ), vbox2, adj );
 
     adj = ( GtkAdjustment * )gtk_adjustment_new( msg.client.data.dropper,
-            0,
-            253,
-            1,
-            0,
-            0 );
-
+		0, 253, 1, 0, 0 );
     button_dropper = buttons_make_spin( "Dropper",
-                                        GTK_SIGNAL_FUNC
-                                        ( events_dropper ),
-                                        vbox2,
-                                        adj );
+		GTK_SIGNAL_FUNC ( events_dropper ), vbox2, adj );
 
     /* Add box with buttons to the frame. */
     gtk_box_pack_start( GTK_BOX( box ), vbox1, TRUE, TRUE, 10 );
@@ -1206,7 +972,7 @@ int buttons_make_status( GtkWidget *box )
 
     /* Create the label. */
     label_status = gtk_label_new_with_mnemonic( "Current Status:\n"
-                   "NOT CONNECTED.\n\n" );
+		"NOT CONNECTED.\n\n" );
 
     /* Pack label into box. */
     gtk_box_pack_start( GTK_BOX( vbox ), label_status, FALSE, TRUE, 0 );
@@ -1236,9 +1002,6 @@ int buttons_gains( GtkWidget *box )
     GtkWidget *pitch_frame;
     GtkWidget *roll_frame;
     GtkWidget *depth_frame;
-    GtkWidget *ax_frame;
-    GtkWidget *ay_frame;
-    GtkWidget *az_frame;
     GtkWidget *getset_frame;
     GtkAdjustment *adj;
     GtkWidget *hbox;
@@ -1248,9 +1011,6 @@ int buttons_gains( GtkWidget *box )
     GtkWidget *vbox4;
     GtkWidget *vbox5;
     GtkWidget *vbox6;
-    GtkWidget *vbox7;
-    GtkWidget *vbox8;
-    GtkWidget *vbox9;
     GtkWidget *vbox10;
     GtkWidget *vbox11;
     GtkWidget *vbox12;
@@ -1260,52 +1020,40 @@ int buttons_gains( GtkWidget *box )
     GtkWidget *vbox16;
 
     /* Create new boxes. */
-    hbox = gtk_hbox_new( FALSE, 0 );
-    vbox1 = gtk_vbox_new( TRUE, 0 );
-    vbox2 = gtk_vbox_new( TRUE, 0 );
-    vbox3 = gtk_vbox_new( TRUE, 0 );
-    vbox4 = gtk_vbox_new( TRUE, 0 );
-    vbox5 = gtk_vbox_new( TRUE, 0 );
-    vbox6 = gtk_vbox_new( TRUE, 0 );
-    vbox7 = gtk_vbox_new( TRUE, 0 );
-    vbox8 = gtk_vbox_new( TRUE, 0 );
-    vbox9 = gtk_vbox_new( TRUE, 0 );
+    hbox   = gtk_hbox_new( FALSE, 0 );
+    vbox1  = gtk_vbox_new( FALSE, 0 );
+    vbox2  = gtk_vbox_new( FALSE, 0 );
+    vbox3  = gtk_vbox_new( FALSE, 0 );
+    vbox4  = gtk_vbox_new( TRUE, 0 );
+    vbox5  = gtk_vbox_new( TRUE, 0 );
+    vbox6  = gtk_vbox_new( TRUE, 0 );
     vbox10 = gtk_vbox_new( TRUE, 0 );
     vbox11 = gtk_vbox_new( TRUE, 0 );
     vbox12 = gtk_vbox_new( TRUE, 0 );
-    vbox13 = gtk_vbox_new( TRUE, 0 );
+    vbox13 = gtk_vbox_new( FALSE, 0 );
     vbox14 = gtk_vbox_new( TRUE, 0 );
-    vbox15 = gtk_vbox_new( TRUE, 0 );
+    vbox15 = gtk_vbox_new( FALSE, 0 );
     vbox16 = gtk_vbox_new( TRUE, 0 );
 
     /* Create frames. */
-    yaw_frame = buttons_make_frame( "Yaw" );
-    pitch_frame = buttons_make_frame( "Pitch" );
-    roll_frame = buttons_make_frame( "Roll" );
-    depth_frame = buttons_make_frame( "Depth" );
-    ax_frame = buttons_make_frame( "Accel X" );
-    ay_frame = buttons_make_frame( "Accel Y" );
-    az_frame = buttons_make_frame( "Accel Z" );
+    yaw_frame    = buttons_make_frame( "Yaw" );
+    pitch_frame  = buttons_make_frame( "Pitch" );
+    roll_frame   = buttons_make_frame( "Roll" );
+    depth_frame  = buttons_make_frame( "Depth" );
     getset_frame = buttons_make_frame( "Get/Set" );
 
     /* Add the frames to boxes. */
-    gtk_container_add( GTK_CONTAINER( vbox1 ), yaw_frame );
-    gtk_container_add( GTK_CONTAINER( vbox2 ), pitch_frame );
-    gtk_container_add( GTK_CONTAINER( vbox3 ), roll_frame );
+    gtk_container_add( GTK_CONTAINER( vbox1 ),  yaw_frame );
+    gtk_container_add( GTK_CONTAINER( vbox2 ),  pitch_frame );
+    gtk_container_add( GTK_CONTAINER( vbox3 ),  roll_frame );
     gtk_container_add( GTK_CONTAINER( vbox13 ), depth_frame );
-    gtk_container_add( GTK_CONTAINER( vbox7 ), ax_frame );
-    gtk_container_add( GTK_CONTAINER( vbox8 ), ay_frame );
-    gtk_container_add( GTK_CONTAINER( vbox9 ), az_frame );
     gtk_container_add( GTK_CONTAINER( vbox15 ), getset_frame );
 
     /* Add boxes to the frames. */
-    gtk_container_add( GTK_CONTAINER( yaw_frame ), vbox4 );
-    gtk_container_add( GTK_CONTAINER( pitch_frame ), vbox5 );
-    gtk_container_add( GTK_CONTAINER( roll_frame ), vbox6 );
-    gtk_container_add( GTK_CONTAINER( depth_frame ), vbox14 );
-    gtk_container_add( GTK_CONTAINER( ax_frame ), vbox10 );
-    gtk_container_add( GTK_CONTAINER( ay_frame ), vbox11 );
-    gtk_container_add( GTK_CONTAINER( az_frame ), vbox12 );
+    gtk_container_add( GTK_CONTAINER( yaw_frame ),    vbox4 );
+    gtk_container_add( GTK_CONTAINER( pitch_frame ),  vbox5 );
+    gtk_container_add( GTK_CONTAINER( roll_frame ),   vbox6 );
+    gtk_container_add( GTK_CONTAINER( depth_frame ),  vbox14 );
     gtk_container_add( GTK_CONTAINER( getset_frame ), vbox16 );
 
     /* Create normal buttons. */
@@ -1324,256 +1072,64 @@ int buttons_gains( GtkWidget *box )
 
     /* Create the spin buttons. */
     adj = ( GtkAdjustment * )gtk_adjustment_new( msg.gain.data.kp_yaw,
-            -10000.0,
-            10000.0,
-            BUTTON_GAIN_INCR,
-            1.0,
-            0 );
-
+		-10000.0, 10000.0, BUTTON_GAIN_INCR, 1.0, 0 );
     button_kp_yaw = buttons_make_spin( "Kp",
-                                       GTK_SIGNAL_FUNC( events_gain ),
-                                       vbox4,
-                                       adj );
+		GTK_SIGNAL_FUNC( events_gain ), vbox4, adj );
 
     adj = ( GtkAdjustment * )gtk_adjustment_new( msg.gain.data.ki_yaw,
-            -10000.0,
-            10000.0,
-            BUTTON_GAIN_INCR,
-            1.0,
-            0 );
-
+		-10000.0, 10000.0, BUTTON_GAIN_INCR, 1.0, 0 );
     button_ki_yaw = buttons_make_spin( "Ki",
-                                       GTK_SIGNAL_FUNC( events_gain ),
-                                       vbox4,
-                                       adj );
+		GTK_SIGNAL_FUNC( events_gain ), vbox4, adj );
 
     adj = ( GtkAdjustment * )gtk_adjustment_new( msg.gain.data.kd_yaw,
-            -10000.0,
-            10000.0,
-            BUTTON_GAIN_INCR,
-            1.0,
-            0 );
-
+		-10000.0, 10000.0, BUTTON_GAIN_INCR, 1.0, 0 );
     button_kd_yaw = buttons_make_spin( "Kd",
-                                       GTK_SIGNAL_FUNC( events_gain ),
-                                       vbox4,
-                                       adj );
+		GTK_SIGNAL_FUNC( events_gain ), vbox4, adj );
 
     adj = ( GtkAdjustment * )gtk_adjustment_new( msg.gain.data.kp_pitch,
-            -10000.0,
-            10000.0,
-            BUTTON_GAIN_INCR,
-            1.0,
-            0 );
-
+		-10000.0, 10000.0, BUTTON_GAIN_INCR, 1.0, 0 );
     button_kp_pitch = buttons_make_spin( "Kp",
-                                         GTK_SIGNAL_FUNC( events_gain ),
-                                         vbox5,
-                                         adj );
+		GTK_SIGNAL_FUNC( events_gain ), vbox5, adj );
 
     adj = ( GtkAdjustment * )gtk_adjustment_new( msg.gain.data.ki_pitch,
-            -10000.0,
-            10000.0,
-            BUTTON_GAIN_INCR,
-            1.0,
-            0 );
-
+		-10000.0, 10000.0, BUTTON_GAIN_INCR, 1.0, 0 );
     button_ki_pitch = buttons_make_spin( "Ki",
-                                         GTK_SIGNAL_FUNC( events_gain ),
-                                         vbox5,
-                                         adj );
+		GTK_SIGNAL_FUNC( events_gain ), vbox5, adj );
 
     adj = ( GtkAdjustment * )gtk_adjustment_new( msg.gain.data.kd_pitch,
-            -10000.0,
-            10000.0,
-            BUTTON_GAIN_INCR,
-            1.0,
-            0 );
-
+		-10000.0, 10000.0, BUTTON_GAIN_INCR, 1.0, 0 );
     button_kd_pitch = buttons_make_spin( "Kd",
-                                         GTK_SIGNAL_FUNC( events_gain ),
-                                         vbox5,
-                                         adj );
+		GTK_SIGNAL_FUNC( events_gain ), vbox5, adj );
 
     adj = ( GtkAdjustment * )gtk_adjustment_new( msg.gain.data.kp_roll,
-            -10000.0,
-            10000.0,
-            BUTTON_GAIN_INCR,
-            1.0,
-            0 );
-
+		-10000.0, 10000.0, BUTTON_GAIN_INCR, 1.0, 0 );
     button_kp_roll = buttons_make_spin( "Kp",
-                                        GTK_SIGNAL_FUNC( events_gain ),
-                                        vbox6,
-                                        adj );
+		GTK_SIGNAL_FUNC( events_gain ), vbox6, adj );
 
     adj = ( GtkAdjustment * )gtk_adjustment_new( msg.gain.data.ki_roll,
-            -10000.0,
-            10000.0,
-            BUTTON_GAIN_INCR,
-            1.0,
-            0 );
-
+		-10000.0, 10000.0, BUTTON_GAIN_INCR, 1.0, 0 );
     button_ki_roll = buttons_make_spin( "Ki",
-                                        GTK_SIGNAL_FUNC( events_gain ),
-                                        vbox6,
-                                        adj );
+		GTK_SIGNAL_FUNC( events_gain ), vbox6, adj );
 
     adj = ( GtkAdjustment * )gtk_adjustment_new( msg.gain.data.kd_roll,
-            -10000.0,
-            10000.0,
-            BUTTON_GAIN_INCR,
-            1.0,
-            0 );
-
+		-10000.0, 10000.0, BUTTON_GAIN_INCR, 1.0, 0 );
     button_kd_roll = buttons_make_spin( "Kd",
-                                        GTK_SIGNAL_FUNC( events_gain ),
-                                        vbox6,
-                                        adj );
+		GTK_SIGNAL_FUNC( events_gain ), vbox6, adj );
 
     adj = ( GtkAdjustment * )gtk_adjustment_new( msg.gain.data.kp_depth,
-            -10000.0,
-            10000.0,
-            BUTTON_GAIN_INCR,
-            1.0,
-            0 );
-
+		-10000.0, 10000.0, BUTTON_GAIN_INCR, 1.0, 0 );
     button_kp_depth = buttons_make_spin( "Kp",
-                                         GTK_SIGNAL_FUNC( events_gain ),
-                                         vbox14,
-                                         adj );
+		GTK_SIGNAL_FUNC( events_gain ), vbox14, adj );
 
     adj = ( GtkAdjustment * )gtk_adjustment_new( msg.gain.data.ki_depth,
-            -10000.0,
-            10000.0,
-            BUTTON_GAIN_INCR,
-            1.0,
-            0 );
-
+		-10000.0, 10000.0, BUTTON_GAIN_INCR, 1.0, 0 );
     button_ki_depth = buttons_make_spin( "Ki",
-                                         GTK_SIGNAL_FUNC( events_gain ),
-                                         vbox14,
-                                         adj );
+       GTK_SIGNAL_FUNC( events_gain ), vbox14, adj );
 
     adj = ( GtkAdjustment * )gtk_adjustment_new( msg.gain.data.kd_depth,
-            -10000.0,
-            10000.0,
-            BUTTON_GAIN_INCR,
-            1.0,
-            0 );
-
+	   -10000.0, 10000.0, BUTTON_GAIN_INCR, 1.0, 0 );
     button_kd_depth = buttons_make_spin( "Kd",
-                                         GTK_SIGNAL_FUNC( events_gain ),
-                                         vbox14,
-                                         adj );
-
-    adj = ( GtkAdjustment * )gtk_adjustment_new( msg.gain.data.kp_ax,
-            -10000.0,
-            10000.0,
-            BUTTON_GAIN_INCR,
-            1.0,
-            0 );
-
-    button_kp_ax = buttons_make_spin( "Kp",
-                                      GTK_SIGNAL_FUNC( events_gain ),
-                                      vbox10,
-                                      adj );
-
-    adj = ( GtkAdjustment * )gtk_adjustment_new( msg.gain.data.ki_ax,
-            -10000.0,
-            10000.0,
-            BUTTON_GAIN_INCR,
-            1.0,
-            0 );
-
-    button_ki_ax = buttons_make_spin( "Ki",
-                                      GTK_SIGNAL_FUNC( events_gain ),
-                                      vbox10,
-                                      adj );
-
-    adj = ( GtkAdjustment * )gtk_adjustment_new( msg.gain.data.kd_ax,
-            -10000.0,
-            10000.0,
-            BUTTON_GAIN_INCR,
-            1.0,
-            0 );
-
-    button_kd_ax = buttons_make_spin( "Kd",
-                                      GTK_SIGNAL_FUNC( events_gain ),
-                                      vbox10,
-                                      adj );
-
-    adj = ( GtkAdjustment * )gtk_adjustment_new( msg.gain.data.kp_ay,
-            -10000.0,
-            10000.0,
-            BUTTON_GAIN_INCR,
-            1.0,
-            0 );
-
-    button_kp_ay = buttons_make_spin( "Kp",
-                                      GTK_SIGNAL_FUNC( events_gain ),
-                                      vbox11,
-                                      adj );
-
-    adj = ( GtkAdjustment * )gtk_adjustment_new( msg.gain.data.ki_ay,
-            -10000.0,
-            10000.0,
-            BUTTON_GAIN_INCR,
-            1.0,
-            0 );
-
-    button_ki_ay = buttons_make_spin( "Ki",
-                                      GTK_SIGNAL_FUNC( events_gain ),
-                                      vbox11,
-                                      adj );
-
-    adj = ( GtkAdjustment * )gtk_adjustment_new( msg.gain.data.kd_ay,
-            -10000.0,
-            10000.0,
-            BUTTON_GAIN_INCR,
-            1.0,
-            0 );
-
-    button_kd_ay = buttons_make_spin( "Kd",
-                                      GTK_SIGNAL_FUNC( events_gain ),
-                                      vbox11,
-                                      adj );
-
-    adj = ( GtkAdjustment * )gtk_adjustment_new( msg.gain.data.kp_az,
-            -10000.0,
-            10000.0,
-            BUTTON_GAIN_INCR,
-            1.0,
-            0 );
-
-    button_kp_az = buttons_make_spin( "Kp",
-                                      GTK_SIGNAL_FUNC( events_gain ),
-                                      vbox12,
-                                      adj );
-
-    adj = ( GtkAdjustment * )gtk_adjustment_new( msg.gain.data.ki_az,
-            -10000.0,
-            10000.0,
-            BUTTON_GAIN_INCR,
-            1.0,
-            0 );
-
-    button_ki_az = buttons_make_spin( "Ki",
-                                      GTK_SIGNAL_FUNC( events_gain ),
-                                      vbox12,
-                                      adj );
-
-    adj = ( GtkAdjustment * )gtk_adjustment_new( msg.gain.data.kd_az,
-            -10000.0,
-            10000.0,
-            BUTTON_GAIN_INCR,
-            1.0,
-            0 );
-
-    button_kd_az = buttons_make_spin( "Kd",
-                                      GTK_SIGNAL_FUNC( events_gain ),
-                                      vbox12,
-                                      adj );
+	   GTK_SIGNAL_FUNC( events_gain ), vbox14, adj );
 
     /* Pack the boxes. */
     gtk_box_pack_start( GTK_BOX( box ), hbox, FALSE, TRUE, 0 );
@@ -1581,9 +1137,6 @@ int buttons_gains( GtkWidget *box )
     gtk_box_pack_start( GTK_BOX( hbox ), vbox3, FALSE, TRUE, 0 );
     gtk_box_pack_start( GTK_BOX( hbox ), vbox1, FALSE, TRUE, 0 );
     gtk_box_pack_start( GTK_BOX( hbox ), vbox13, FALSE, TRUE, 0 );
-    //gtk_box_pack_start( GTK_BOX(hbox), vbox7, FALSE, TRUE, 0 );
-    //gtk_box_pack_start( GTK_BOX(hbox), vbox8, FALSE, TRUE, 0 );
-    //gtk_box_pack_start( GTK_BOX(hbox), vbox9, FALSE, TRUE, 0 );
     gtk_box_pack_start( GTK_BOX( hbox ), vbox15, FALSE, TRUE, 0 );
 
     return TRUE;
