@@ -232,17 +232,17 @@ int main( int argc, char *argv[] )
         cvNamedWindow( b_win, CV_WINDOW_AUTOSIZE );
     }
     printf( "MAIN: Vision server running now.\n" );
-    
+
     /* Main loop. */
     int loop_counter = 0;
-    while ( 1 ) {    		
+    while ( 1 ) {
     	if ( loop_counter == 1000 ) {
     		loop_counter = 0;
 		}
 		else {
 			loop_counter++;
 		}
-    	
+
     	/* Do vision processing based on task */
     	if ( msg.task.data.num == TASK_NONE ) {
     		/* Do nothing and give cleared values. */
@@ -261,7 +261,7 @@ int main( int argc, char *argv[] )
 					msg.vsetting.data.buoy_hsv.sH,
 					msg.vsetting.data.buoy_hsv.vL,
 					msg.vsetting.data.buoy_hsv.vH );
-					
+
 			if ( status == 1 ) {
 				msg.vision.data.front_x = -1 * (dotx - f_img->width / 2);
 				msg.vision.data.front_y = -1 * (doty - f_img->height / 2);
@@ -282,7 +282,7 @@ int main( int argc, char *argv[] )
                     msg.vsetting.data.pipe_hsv.sH,
                     msg.vsetting.data.pipe_hsv.vL,
                     msg.vsetting.data.pipe_hsv.vH );
-                    
+
             if ( status == 1 ) {
                 if ( cf.vision_window ) {
                     if ( cvWaitKey( 5 ) >= 0 );
@@ -316,7 +316,7 @@ int main( int argc, char *argv[] )
                     msg.vsetting.data.fence_hsv.sH,
                     msg.vsetting.data.fence_hsv.vL,
                     msg.vsetting.data.fence_hsv.vH );
-                    
+
             if ( status == 1 ) {
                 if ( cf.vision_window ) {
                     if ( cvWaitKey( 5 ) >= 0 );
@@ -332,7 +332,7 @@ int main( int argc, char *argv[] )
         }
         else if ( msg.task.data.num == TASK_GATE && f_cam ) {
         	/* Look for the gate */
-        	
+
 		}
 		else {
 			/* No mode or no valid cameras - Simulate. */
@@ -341,7 +341,7 @@ int main( int argc, char *argv[] )
 				msg.vision.data.front_y = loop_counter;
 			}
 		}
-		
+
 
         /* Get network data. */
         if ( ( cf.enable_net ) && ( server_fd > 0 ) ) {

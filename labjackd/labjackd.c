@@ -138,8 +138,10 @@ int main( int argc, char *argv[] )
 
 	/* Set up the labjack. */
 	labjack_fd = init_labjack( );
+	printf( "MAIN: labjack_fd = %d\n", labjack_fd );
 	if ( labjack_fd ) {
 		status = query_labjack( );
+		printf( "MAIN: status = %d\n", status );
 	}
 
 	printf( "MAIN: Labjack server running now.\n" );
@@ -173,10 +175,10 @@ int main( int argc, char *argv[] )
 		/* Check battery voltage. Make sure it is connected. If too low then
 		 * have the computer shut down so that the battery is not damaged. */
 		if ( (lj.battery1 > BATT1_THRESH) && (lj.battery1 < BATT1_MIN) ) {
-			status = system( "shutdown -h now \"Motor battery has low voltage.\"" );
+			status = system( "shutdown -h now \"Labjackd: Motor battery has low voltage.\"" );
 		}
 		if ( (lj.battery2 > BATT2_THRESH) && (lj.battery2 < BATT2_MIN) ) {
-			status = system( "shutdown -h now \"Computer battery has low voltage.\"" );
+			status = system( "shutdown -h now \"Labjackd: Computer battery has low voltage.\"" );
 		}
 	}
 
