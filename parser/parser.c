@@ -28,8 +28,6 @@ static char tokens[MAX_TOKENS][STRING_SIZE];
  *
  * Output:      None.
  *
- * Globals:     None.
- *
  *****************************************************************************/
 
 void parse_line( CONF_VARS *config )
@@ -473,8 +471,6 @@ void parse_line( CONF_VARS *config )
  *
  * Output:      None.
  *
- * Globals:     None.
- *
  *****************************************************************************/
 
 void parse_config( const char *filename,
@@ -596,8 +592,6 @@ void parse_config( const char *filename,
  * Output:      0 on success.
  *              -1 when help is invoked.
  *
- * Globals:     None.
- *
  *****************************************************************************/
 
 int parse_cla( int argc,
@@ -622,13 +616,13 @@ int parse_cla( int argc,
                 break;
 
             case 'h':
-                ///print_help( );
-                ///print_config_help( );
+                //print_help( );
+                //print_config_help( );
                 return -1;
 
             default:
-                ///print_help( );
-                ///print_config_help( );
+                //print_help( );
+                //print_config_help( );
                 return -1;
         }
     }
@@ -656,8 +650,6 @@ int parse_cla( int argc,
  * Input:       config: An array of initialization variables.
  *
  * Output:      None.
- *
- * Globals:     None.
  *
  *****************************************************************************/
 

@@ -32,8 +32,6 @@
  *
  * Output:      fd: A file descriptor for the IMU.
  *
- * Globals:     None.
- *
  *****************************************************************************/
 
 int mstrain_setup( char *portname,
@@ -63,29 +61,25 @@ int mstrain_setup( char *portname,
  *
  * Output:      1 on success, 0 on failure.
  *
- * Globals:     None.
- *
  *****************************************************************************/
 
 int mstrain_serial_number( int fd,
                            int *serial_number
                          )
 {
-	int response_length = ( int )IMU_LENGTH_F1;
-	int status;
+	int response_length = (int)IMU_LENGTH_F1;
+	int status = 0;
 	char response[response_length];
-	char cmd = ( char )IMU_SERIAL_NUMBER;
+	char cmd = (char)IMU_SERIAL_NUMBER;
 
 	/* Send request to and receive data from IMU. */
-	status = send_serial( fd, &cmd, sizeof( cmd ) );
+	status = send_serial( fd, &cmd, sizeof(cmd) );
 
 	if ( status > 0 ) {
 		status = serial_bytes_available( fd );
-
 		if ( status < response_length ) {
 			usleep( SERIAL_EXTRA_DELAY_LENGTH );
 		}
-
 		status = recv_serial( fd, response, response_length );
 	}
 
@@ -112,29 +106,25 @@ int mstrain_serial_number( int fd,
  *
  * Output:      1 on success, 0 on failure.
  *
- * Globals:     None.
- *
  *****************************************************************************/
 
 int mstrain_temperature( int fd,
                          float *temp
                        )
 {
-	int response_length = ( int )IMU_LENGTH_07;
-	int status;
+	int response_length = (int)IMU_LENGTH_07;
+	int status = 0;
 	char response[response_length];
-	char cmd = ( char )IMU_TEMPERATURE;
+	char cmd = (char)IMU_TEMPERATURE;
 
 	/* Send request to and receive data from IMU. */
-	status = send_serial( fd, &cmd, sizeof( cmd ) );
+	status = send_serial( fd, &cmd, sizeof(cmd) );
 
 	if ( status > 0 ) {
 		status = serial_bytes_available( fd );
-
 		if ( status < response_length ) {
 			usleep( SERIAL_EXTRA_DELAY_LENGTH );
 		}
-
 		status = recv_serial( fd, response, response_length );
 	}
 
@@ -144,7 +134,7 @@ int mstrain_temperature( int fd,
 
 	*temp = convert2int( &response[1] );
 
-	/* This conversion if from the 3DM-GX1 manual. */
+	/* This conversion is from the 3DM-GX1 manual. */
 	*temp = ( ( ( *temp * 5.0 / 65536.0 ) - 0.5 ) * 100.0 );
 
 	return 1;
@@ -166,8 +156,6 @@ int mstrain_temperature( int fd,
  *
  * Output:      1 on success, 0 on failure.
  *
- * Globals:     None.
- *
  *****************************************************************************/
 
 int mstrain_orientation( int fd,
@@ -175,16 +163,16 @@ int mstrain_orientation( int fd,
                          float *orient[3][3]
                        )
 {
-	char cmd;
-	int response_length;
+	char cmd = 0;
+	int response_length = 0;
 
 	if ( gyro_stab ) {
 		cmd = IMU_GYRO_STAB_ORIENT_MATRIX;
-		response_length = ( int )IMU_LENGTH_0B;
+		response_length = (int)IMU_LENGTH_0B;
 	}
 	else {
 		cmd = IMU_INST_ORIENT_MATRIX;
-		response_length = ( int )IMU_LENGTH_0A;
+		response_length = (int)IMU_LENGTH_0A;
 	}
 
 	int status;
@@ -197,15 +185,13 @@ int mstrain_orientation( int fd,
 	float orient_convert_factor = 8192.0;
 
 	/* Send request to and receive data from IMU. */
-	status = send_serial( fd, &cmd, sizeof( cmd ) );
+	status = send_serial( fd, &cmd, sizeof(cmd) );
 
 	if ( status > 0 ) {
 		status = serial_bytes_available( fd );
-
 		if ( status < response_length ) {
 			usleep( SERIAL_EXTRA_DELAY_LENGTH );
 		}
-
 		status = recv_serial( fd, response, response_length );
 	}
 
@@ -215,7 +201,7 @@ int mstrain_orientation( int fd,
 
 	for ( ii = 0; ii < 3; ii++ ) {
 		for ( jj = 0; jj < 3; jj++ ) {
-			*orient[jj][ii] = ( float )convert2short( &response[1 + ii * 2] )
+			*orient[jj][ii] = (float)convert2short( &response[1 + ii * 2] )
 			                  / orient_convert_factor;
 		}
 	}
@@ -243,8 +229,6 @@ int mstrain_orientation( int fd,
  *
  * Output:      1 on success, 0 on failure.
  *
- * Globals:     None.
- *
  *****************************************************************************/
 
 int mstrain_vectors( int fd,
@@ -254,21 +238,20 @@ int mstrain_vectors( int fd,
                      float *ang_rate
                    )
 {
-	char cmd;
-	int response_length;
+	char cmd = 0;
+	int response_length = 0;
 
 	if ( gyro_stab ) {
 		cmd = IMU_GYRO_STAB_VECTORS;
-		response_length = ( int )IMU_LENGTH_02;
+		response_length = (int)IMU_LENGTH_02;
 	}
 	else {
 		cmd = IMU_INST_VECTORS;
-		response_length = ( int )IMU_LENGTH_03;
+		response_length = (int)IMU_LENGTH_03;
 	}
 
-	int status;
-
-	int ii;
+	int status = 0;
+	int ii = 0;
 	char response[response_length];
 
 	/* Conversion factors are from the 3DM-GX1 manual. */
@@ -277,15 +260,13 @@ int mstrain_vectors( int fd,
 	float ang_rate_convert_factor = 3855.058823529; //32768000.0 / 8500.0;
 
 	/* Send request to and receive data from IMU. */
-	status = send_serial( fd, &cmd, sizeof( cmd ) );
+	status = send_serial( fd, &cmd, sizeof(cmd) );
 
 	if ( status > 0 ) {
 		status = serial_bytes_available( fd );
-
 		if ( status < response_length ) {
 			usleep( SERIAL_EXTRA_DELAY_LENGTH );
 		}
-
 		status = recv_serial( fd, response, response_length );
 	}
 
@@ -294,11 +275,11 @@ int mstrain_vectors( int fd,
 	}
 
 	for ( ii = 0; ii < 3; ii++ ) {
-		mag[ii] = ( float )convert2short( &response[1 + ii * 2] ) /
+		mag[ii] = (float)convert2short( &response[1 + ii * 2] ) /
 		          mag_convert_factor;
-		accel[ii] = ( float )convert2short( &response[7 + ii * 2] ) /
+		accel[ii] = (float)convert2short( &response[7 + ii * 2] ) /
 		            accel_convert_factor;
-		ang_rate[ii] = ( float )convert2short( &response[13 + ii * 2] ) /
+		ang_rate[ii] = (float)convert2short( &response[13 + ii * 2] ) /
 		               ang_rate_convert_factor;
 	}
 
@@ -323,8 +304,6 @@ int mstrain_vectors( int fd,
  *
  * Output:      1 on success, 0 on failure.
  *
- * Globals:     None.
- *
  *****************************************************************************/
 
 int mstrain_euler_angles( int fd,
@@ -333,23 +312,21 @@ int mstrain_euler_angles( int fd,
                           float *yaw
                         )
 {
-	int response_length = ( int )IMU_LENGTH_0E;
-	int status;
+	int response_length = (int)IMU_LENGTH_0E;
+	int status = 0;
 	char response[response_length];
-	char cmd = ( char )IMU_GYRO_STAB_EULER_ANGLES;
+	char cmd = (char)IMU_GYRO_STAB_EULER_ANGLES;
 	/* Conversion factor from the 3DM-GX1 manual. */
 	float euler_convert_factor = 360.0 / 65536.0;
 
 	/* Send request to and receive data from IMU. */
-	status = send_serial( fd, &cmd, sizeof( cmd ) );
+	status = send_serial( fd, &cmd, sizeof(cmd) );
 
 	if ( status > 0 ) {
 		status = serial_bytes_available( fd );
-
 		if ( status < response_length ) {
 			usleep( SERIAL_EXTRA_DELAY_LENGTH );
 		}
-
 		status = recv_serial( fd, response, response_length );
 	}
 
@@ -358,7 +335,6 @@ int mstrain_euler_angles( int fd,
 	}
 
 	*roll  = convert2short( &response[1] ) * euler_convert_factor;
-
 	*pitch = convert2short( &response[3] ) * euler_convert_factor;
 	*yaw   = convert2short( &response[5] ) * euler_convert_factor;
 
@@ -382,8 +358,6 @@ int mstrain_euler_angles( int fd,
  *
  * Output:      1 on success, 0 on failure.
  *
- * Globals:     None.
- *
  *****************************************************************************/
 
 int mstrain_quaternions( int fd,
@@ -391,34 +365,31 @@ int mstrain_quaternions( int fd,
                          float *quat[4]
                        )
 {
-	int status;
-	int ii;
-	int response_length;
-	char cmd;
+	int status = 0;
+	int ii = 0;
+	int response_length = 0;
+	char cmd = 0;
 	/* Conversion factor from the 3DM-GX1 manual. */
 	float convert_factor = 8192.0;
 
 	if ( gyro_stab ) {
 		cmd = IMU_GYRO_STAB_QUAT;
-		response_length = ( int )IMU_LENGTH_05;
+		response_length = (int)IMU_LENGTH_05;
 	}
 	else {
 		cmd = IMU_INST_QUAT;
-		response_length = ( int )IMU_LENGTH_04;
+		response_length = (int)IMU_LENGTH_04;
 	}
 
 	char response[response_length];
 
 	/* Send request to and receive data from IMU. */
-	status = send_serial( fd, &cmd, sizeof( cmd ) );
-
+	status = send_serial( fd, &cmd, sizeof(cmd) );
 	if ( status > 0 ) {
 		status = serial_bytes_available( fd );
-
 		if ( status < response_length ) {
 			usleep( SERIAL_EXTRA_DELAY_LENGTH );
 		}
-
 		status = recv_serial( fd, response, response_length );
 	}
 
@@ -427,7 +398,7 @@ int mstrain_quaternions( int fd,
 	}
 
 	for ( ii = 0; ii < 4; ii++ ) {
-		*quat[ii] = ( float )convert2short( &response[1 + ii * 2] )
+		*quat[ii] = (float)convert2short( &response[1 + ii * 2] )
 		            / convert_factor;
 	}
 
@@ -455,8 +426,6 @@ int mstrain_quaternions( int fd,
  *
  * Output:      1 on success, 0 on failure.
  *
- * Globals:     None.
- *
  *****************************************************************************/
 
 int mstrain_quaternions_vectors( int fd,
@@ -466,11 +435,11 @@ int mstrain_quaternions_vectors( int fd,
                                  float *ang_rate[3]
                                )
 {
-	int response_length = ( int )IMU_LENGTH_0C;
-	int status;
-	int ii;
+	int response_length = (int)IMU_LENGTH_0C;
+	int status = 0;
+	int ii = 0;
 	char response[response_length];
-	char cmd;
+	char cmd = 0;
 
 	/* Conversion factors are from the 3DM-GX1 manual. */
 	float mag_convert_factor = 32768000.0 / 2000.0;
@@ -481,15 +450,13 @@ int mstrain_quaternions_vectors( int fd,
 	cmd = IMU_GYRO_STAB_QUAT_VECTORS;
 
 	/* Send request to and receive data from IMU. */
-	status = send_serial( fd, &cmd, sizeof( cmd ) );
+	status = send_serial( fd, &cmd, sizeof(cmd) );
 
 	if ( status > 0 ) {
 		status = serial_bytes_available( fd );
-
 		if ( status < response_length ) {
 			usleep( SERIAL_EXTRA_DELAY_LENGTH );
 		}
-
 		status = recv_serial( fd, response, response_length );
 	}
 
@@ -498,16 +465,16 @@ int mstrain_quaternions_vectors( int fd,
 	}
 
 	for ( ii = 0; ii < 4; ii++ ) {
-		*quat[ii] = ( float )convert2short( &response[1 + ii * 2] )
+		*quat[ii] = (float)convert2short( &response[1 + ii * 2] )
 		            / stab_convert_factor;
 	}
 
 	for ( ii = 0; ii < 3; ii++ ) {
-		*mag[ii]      = ( float )convert2short( &response[9 + ii * 2] )
+		*mag[ii]      = (float)convert2short( &response[9 + ii * 2] )
 		                / mag_convert_factor;
-		*accel[ii]    = ( float )convert2short( &response[15 + ii * 2] )
+		*accel[ii]    = (float)convert2short( &response[15 + ii * 2] )
 		                / accel_convert_factor;
-		*ang_rate[ii] = ( float )convert2short( &response[21 + ii * 2] )
+		*ang_rate[ii] = (float)convert2short( &response[21 + ii * 2] )
 		                / ang_rate_convert_factor;
 	}
 
@@ -537,8 +504,6 @@ int mstrain_quaternions_vectors( int fd,
  *
  * Output:      1 on success, 0 on failure.
  *
- * Globals:     None.
- *
  *****************************************************************************/
 
 int mstrain_euler_vectors( int fd,
@@ -549,11 +514,11 @@ int mstrain_euler_vectors( int fd,
                            float *ang_rate
                          )
 {
-	int response_length = ( int )IMU_LENGTH_31;
-	int status;
-	int ii;
+	int response_length = (int)IMU_LENGTH_31;
+	int status = 0;
+	int ii = 0;
 	char response[response_length];
-	char cmd;
+	char cmd = 0;
 
 	/* Conversion factors are from the 3DM-GX1 manual. */
 	float accel_convert_factor = 3276800.0 / 7000.0;
@@ -563,7 +528,7 @@ int mstrain_euler_vectors( int fd,
 	cmd = IMU_GYRO_STAB_EULER_VECTORS;
 
 	/* Send request to and receive data from IMU. */
-	status = send_serial( fd, &cmd, sizeof( cmd ) );
+	status = send_serial( fd, &cmd, sizeof(cmd) );
 
 	if ( status > 0 ) {
 		status = serial_bytes_available( fd );
@@ -593,9 +558,9 @@ int mstrain_euler_vectors( int fd,
 	}
 
 	for ( ii = 0; ii < 3; ii++ ) {
-		accel[ii]    = ( float )convert2short( &response[7 + ii * 2] )
+		accel[ii]    = (float)convert2short( &response[7 + ii * 2] )
 		               / accel_convert_factor;
-		ang_rate[ii] = ( float )convert2short( &response[13 + ii * 2] )
+		ang_rate[ii] = (float)convert2short( &response[13 + ii * 2] )
 		               / ang_rate_convert_factor;
 	}
 
@@ -612,8 +577,6 @@ int mstrain_euler_vectors( int fd,
  * Input:       buffer: Pointer to first byte.
  *
  * Output:      retval: Resulting integer.
- *
- * Globals:     None.
  *
  *****************************************************************************/
 
@@ -634,8 +597,6 @@ int convert2int( char *buffer )
  * Input:       buffer: Pointer to first bytes.
  *
  * Output:      retval: Resulting short integer.
- *
- * Globals:     None.
  *
  *****************************************************************************/
 

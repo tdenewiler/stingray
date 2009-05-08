@@ -31,8 +31,6 @@
  *
  * Output:      fd: A file descriptor for the Pololu.  Returns -1 for failure.
  *
- * Globals:     None.
- *
  *****************************************************************************/
 
 int pololuSetup( char *portname,
@@ -86,8 +84,6 @@ int pololuSetup( char *portname,
  *
  * Output:      Returns the number of bytes sent.
  *
- * Globals:     None.
- *
  *****************************************************************************/
 
 int pololuSetParameters( int fd,
@@ -102,15 +98,15 @@ int pololuSetParameters( int fd,
 	// check ranges
 	int result = 0;
 
-	if ( ( fd >= 0 ) &&
-	        ( channel >= 0 ) &&
-	        ( channel <= 15 ) &&
-	        ( range >= 0 )
-	        && ( range <= 15 ) ) {
+	if ( (fd >= 0) &&
+	        (channel >= 0) &&
+	        (channel <= 15) &&
+	        (range >= 0)
+	        && (range <= 15) ) {
 
 		// demote the ints to chars
-		unsigned char c = ( unsigned char )channel;
-		unsigned char r = ( unsigned char )range;
+		unsigned char c = (unsigned char)channel;
+		unsigned char r = (unsigned char)range;
 
 		// set parameters
 		unsigned char msg[5];
@@ -134,7 +130,7 @@ int pololuSetParameters( int fd,
 		}
 
 		/* This should do it. */
-		msg[4] = ( ( r & 15 ) | ( bit5 & 32 ) | ( bit6 & 64 ) ) & 127;
+		msg[4] = ( (r & 15) | (bit5 & 32) | (bit6 & 64) ) & 127;
 
 		// send the message
 		// printf( "sp: %x %x %x %x %x \n",msg[0],msg[1],msg[2],msg[3],msg[4] );
@@ -162,8 +158,6 @@ int pololuSetParameters( int fd,
  *
  * Output:      Returns the number of bytes sent.
  *
- * Globals:     None.
- *
  *****************************************************************************/
 
 int pololuSetSpeed( int fd,
@@ -178,15 +172,15 @@ int pololuSetSpeed( int fd,
 	int result = 0;
 	// check ranges
 
-	if ( ( fd >= 0 ) &&
-	        ( channel >= 0 ) &&
-	        ( channel <= 15 ) &&
-	        ( speed >= 0 ) &&
-	        ( speed <= 127 ) ) {
+	if ( (fd >= 0) &&
+	        (channel >= 0) &&
+	        (channel <= 15) &&
+	        (speed >= 0) &&
+	        (speed <= 127) ) {
 
 		// demote the ints to chars
-		unsigned char c = ( unsigned char )channel;
-		unsigned char s = ( unsigned char )speed;
+		unsigned char c = (unsigned char)channel;
+		unsigned char s = (unsigned char)speed;
 
 		unsigned char msg[5];
 		msg[0] = POLOLU_START_BYTE; // start byte
@@ -223,8 +217,6 @@ int pololuSetSpeed( int fd,
  *
  * Output:      Returns the number of bytes sent.
  *
- * Globals:     None.
- *
  *****************************************************************************/
 
 int pololuSetPosition7Bit( int fd,
@@ -238,16 +230,16 @@ int pololuSetPosition7Bit( int fd,
 	// check ranges
 	int result = 0;
 
-	if ( ( fd >= 0 ) &&
-	        ( channel >= 0 ) &&
-	        ( channel <= 15 ) &&
-	        ( position >= 0 ) &&
-	        ( position <= 127 ) ) {
+	if ( (fd >= 0) &&
+	        (channel >= 0) &&
+	        (channel <= 15) &&
+	        (position >= 0) &&
+	        (position <= 127) ) {
 
 		// set position7bit
 		// demote the ints to chars
-		unsigned char c = ( unsigned char )channel;
-		unsigned char p = ( unsigned char )position;
+		unsigned char c = (unsigned char)channel;
+		unsigned char p = (unsigned char)position;
 
 		unsigned char msg[5];
 		msg[0] = POLOLU_START_BYTE; // start byte
@@ -283,8 +275,6 @@ int pololuSetPosition7Bit( int fd,
  *
  * Output:      Returns the number of bytes sent.
  *
- * Globals:     None.
- *
  *****************************************************************************/
 
 int pololuSetPosition8Bit( int fd,
@@ -298,16 +288,16 @@ int pololuSetPosition8Bit( int fd,
 	// check ranges
 	int result = 0;
 
-	if ( ( fd >= 0 ) &&
-	        ( channel >= 0 ) &&
-	        ( channel <= 15 ) &&
-	        ( position >= 0 ) &&
-	        ( position <= 255 ) ) {
+	if ( (fd >= 0) &&
+	        (channel >= 0) &&
+	        (channel <= 15) &&
+	        (position >= 0) &&
+	        (position <= 255) ) {
 
 		// set position8bit
 		// demote the ints to chars
-		unsigned char c = ( unsigned char )channel;
-		unsigned char p = ( unsigned char )position;
+		unsigned char c = (unsigned char)channel;
+		unsigned char p = (unsigned char)position;
 		//printf( "sp8: p=%x\n",p );
 		unsigned char msg[6];
 		msg[0] = POLOLU_START_BYTE; // start byte
@@ -352,8 +342,6 @@ int pololuSetPosition8Bit( int fd,
  *
  * Output:      Returns the number of bytes sent.
  *
- * Globals:     None.
- *
  *****************************************************************************/
 int pololuSetPositionAbsolute( int fd,
                                int channel,
@@ -366,16 +354,16 @@ int pololuSetPositionAbsolute( int fd,
 	// check ranges
 	int result = 0;
 
-	if ( ( fd >= 0 ) &&
-	        ( channel >= 0 ) &&
-	        ( channel <= 15 ) &&
-	        ( position >= 500 ) &&
-	        ( position <= 5500 ) ) {
+	if ( (fd >= 0) &&
+	        (channel >= 0) &&
+	        (channel <= 15) &&
+	        (position >= 500) &&
+	        (position <= 5500) ) {
 
 		// set positionAbsolute
 		// demote the ints to chars
-		unsigned char c = ( unsigned char )channel;
-		unsigned int p = ( unsigned int )position;
+		unsigned char c = (unsigned char)channel;
+		unsigned int p = (unsigned int)position;
 		unsigned char msg[6];
 		//printf( "spA: %x\n",p );
 		msg[0] = POLOLU_START_BYTE; // start byte
@@ -415,8 +403,6 @@ int pololuSetPositionAbsolute( int fd,
  *
  * Output:      Returns the number of bytes sent.
  *
- * Globals:     None.
- *
  *****************************************************************************/
 int pololuSetNeutral( int fd,
                       int channel,
@@ -430,15 +416,15 @@ int pololuSetNeutral( int fd,
 	// check ranges
 	int result = 0;
 
-	if ( ( fd >= 0 ) &&
-	        ( channel >= 0 ) &&
-	        ( channel <= 15 ) &&
-	        ( position >= 500 ) &&
-	        ( position <= 5500 ) ) {
+	if ( (fd >= 0) &&
+	        (channel >= 0) &&
+	        (channel <= 15) &&
+	        (position >= 500) &&
+	        (position <= 5500) ) {
 
 		// demote the ints to chars
-		unsigned char c = ( unsigned char )channel;
-		unsigned int p = ( unsigned int )position;
+		unsigned char c = (unsigned char)channel;
+		unsigned int p = (unsigned int)position;
 		unsigned char msg[6];
 		//printf("spA: %x\n",p);
 		msg[0] = POLOLU_START_BYTE; // start byte
@@ -469,8 +455,6 @@ int pololuSetNeutral( int fd,
  * Input:       fd file descriptor of Pololu device.
  *
  * Output:      Retuns 1 for success and -1 for failure.
- *
- * Globals:     None.
  *
  *****************************************************************************/
 
@@ -547,8 +531,6 @@ int pololuInitializeChannels( int fd )
  *
  * Output:      1 for success and -1 for failure
  *
- * Globals:     None.
- *
  *****************************************************************************/
 int controlVoiths( int fd,
                    int voithThrust,
@@ -564,24 +546,13 @@ int controlVoiths( int fd,
 
 	// check bounds on all inputs
 	// if bounds don't check then we return -1
-	//if ( ( fd < 0 ) ||
-	        //( voithThrust < 0 ) ||
-	        //( voithThrust > 100 ) ||
-	        //( thrustAngle <= -M_PI ) ||
-	        //( thrustAngle >= M_PI ) ||
-	        //( thrust < -100 ) ||
-	        //( thrust > 100 ) ||
-	        //( yawTorque < -100 ) ||
-	        //( yawTorque > 100 ) ) {
-		//return POLOLU_FAILURE;
-	//}
-	if ( ( fd < 0 ) ||
-	        ( voithThrust < 0 ) ||
-	        ( voithThrust > 100 ) ||
-	        ( thrust < -100 ) ||
-	        ( thrust > 100 ) ||
-	        ( yawTorque < -100 ) ||
-	        ( yawTorque > 100 ) ) {
+	if ( (fd < 0) ||
+	        (voithThrust < 0) ||
+	        (voithThrust > 100) ||
+	        (thrust < -100) ||
+	        (thrust > 100) ||
+	        (yawTorque < -100) ||
+	        (yawTorque > 100) ) {
 		return POLOLU_FAILURE;
 	}
 	float angle = 0;
@@ -601,10 +572,10 @@ int controlVoiths( int fd,
 	int radius2 = yawTorque - thrust;
 
 	// the commands to send to the servos
-	int leftCmd1 = ( int )( 63.5 + 0.2 * radius1 * cos( angle + leftAngleOffset ) );
-	int leftCmd2 = ( int )( 63.5 + 0.2 * radius1 * sin( angle + leftAngleOffset ) );
-	int rightCmd1 = ( int )( 63.5 - 0.2 * radius2 * cos( angle + rightAngleOffset ) );
-	int rightCmd2 = ( int )( 63.5 - 0.2 * radius2 * sin( angle + rightAngleOffset ) );
+	int leftCmd1 = (int)( 63.5 + 0.2 * radius1 * cos(angle + leftAngleOffset) );
+	int leftCmd2 = (int)( 63.5 + 0.2 * radius1 * sin(angle + leftAngleOffset) );
+	int rightCmd1 = (int)( 63.5 - 0.2 * radius2 * cos(angle + rightAngleOffset) );
+	int rightCmd2 = (int)( 63.5 - 0.2 * radius2 * sin(angle + rightAngleOffset) );
 
 	// I think integer arithmatic should work -AM
 	int scaledVoithThrust = ( voithThrust * 64 ) / 100 + 63;
@@ -653,8 +624,6 @@ int controlVoiths( int fd,
  *
  * Output:
  *
- * Globals:     None.
- *
  *****************************************************************************/
 
 int controlVertical( int fd,
@@ -666,13 +635,13 @@ int controlVertical( int fd,
 	// between -100 to 100 and will be scaled to 0-128
 	// check bounds on all inputs
 	// if bounds don't check then we return -1
-	if ( ( fd < 0 ) ||
-	        ( vertForce < -100 ) ||
-	        ( vertForce > 100 ) ||
-	        ( rollTorque < -100 ) ||
-	        ( rollTorque > 100 ) ||
-	        ( pitchTorque < -100 ) ||
-	        ( pitchTorque > 100 ) ) {
+	if ( (fd < 0) ||
+	        (vertForce < -100) ||
+	        (vertForce > 100) ||
+	        (rollTorque < -100) ||
+	        (rollTorque > 100) ||
+	        (pitchTorque < -100) ||
+	        (pitchTorque > 100) ) {
 		return POLOLU_FAILURE;
 	}
 
@@ -708,9 +677,9 @@ int controlVertical( int fd,
 	if ( tail > dzRadius ) tailNeutral = 67.5;
 	if ( tail < -dzRadius ) tailNeutral = 59.5;
 
-	leftCmd = ( int )( leftNeutral + 0.605 * left );
-	rightCmd = ( int )( rightNeutral + 0.605 * right );
-	tailCmd = ( int )( tailNeutral + 0.605 * tail );
+	leftCmd = (int)( leftNeutral + 0.605 * left );
+	rightCmd = (int)( rightNeutral + 0.605 * right );
+	tailCmd = (int)( tailNeutral + 0.605 * tail );
 
 	// now set all of the positions
 	// there should be 5 bytes sent for each command

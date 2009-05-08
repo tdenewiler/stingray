@@ -36,8 +36,6 @@
  *
  * Output:      status: 1 on success, 0 on failure.
  *
- * Globals:     None.
- *
  *****************************************************************************/
 
 int vision_find_dot( int *dotx,
@@ -60,7 +58,7 @@ int vision_find_dot( int *dotx,
     IplImage *hsv_image = NULL;
     IplImage *outImg = NULL;
     IplConvKernel *w = cvCreateStructuringElementEx( 2, 2,
-            ( int )floor( ( 3.0 ) / 2 ), ( int )floor( ( 3.0 ) / 2 ), CV_SHAPE_RECT );
+            (int)floor( ( 3.0 ) / 2 ), (int)floor( ( 3.0 ) / 2 ), CV_SHAPE_RECT );
 
     /* Initialize to impossible values. */
     center.x = -1;
@@ -118,8 +116,6 @@ int vision_find_dot( int *dotx,
  *
  * Output:      status: 1 on success, 0 on failure.
  *
- * Globals:     None.
- *
  *****************************************************************************/
 
 int vision_find_pipe( int *pipex,
@@ -139,9 +135,9 @@ int vision_find_pipe( int *pipex,
     IplImage *hsv_image = NULL;
     IplImage *outImg = NULL;
     IplConvKernel *wE = cvCreateStructuringElementEx( 2, 2,
-            ( int )floor( ( 3.0 ) / 2 ), ( int )floor( ( 3.0 ) / 2 ), CV_SHAPE_RECT );
+            (int)floor( ( 3.0 ) / 2 ), (int)floor( ( 3.0 ) / 2 ), CV_SHAPE_RECT );
     IplConvKernel *wD = cvCreateStructuringElementEx( 3, 3,
-            ( int )floor( ( 3.0 ) / 2 ), ( int )floor( ( 3.0 ) / 2 ), CV_SHAPE_RECT );
+            (int)floor( ( 3.0 ) / 2 ), (int)floor( ( 3.0 ) / 2 ), CV_SHAPE_RECT );
 
     /* Initialize to impossible values. */
     center.x = -1;
@@ -186,8 +182,6 @@ int vision_find_pipe( int *pipex,
  * Input:       inputBinImage: The binary image to find the bearing of.
  *
  * Output:      bearing: The angle of the pipe in radians.
- *
- * Globals:     None.
  *
  *****************************************************************************/
 
@@ -333,8 +327,6 @@ double vision_get_bearing( IplImage *inputBinImg )
  *
  * Output:      centroid: The x and y coordinates of the centroid.
  *
- * Globals:     None.
- *
  *****************************************************************************/
 
 CvPoint vision_find_centroid( IplImage *binImage, int thresh )
@@ -382,8 +374,8 @@ CvPoint vision_find_centroid( IplImage *binImage, int thresh )
         detected = true;
 
     if ( detected ) {
-        centroid.x = ( int )colTotal / count;
-        centroid.y = ( int )rowTotal / count;
+        centroid.x = (int)colTotal / count;
+        centroid.y = (int)rowTotal / count;
     }
     else {
         centroid.x = -1;
@@ -411,8 +403,6 @@ CvPoint vision_find_centroid( IplImage *binImage, int thresh )
  *
  * Output:      status: 1 on success, 0 on failure.
  *
- * Globals:     None.
- *
  *****************************************************************************/
 
 int vision_find_fence( int *fence_center,
@@ -431,9 +421,9 @@ int vision_find_fence( int *fence_center,
     IplImage *hsv_image = NULL;
     IplImage *outImg = NULL;
     IplConvKernel *wE = cvCreateStructuringElementEx( 2, 2,
-            ( int )floor( ( 3.0 ) / 2 ), ( int )floor( ( 3.0 ) / 2 ), CV_SHAPE_RECT );
+            (int)floor( ( 3.0 ) / 2 ), (int)floor( ( 3.0 ) / 2 ), CV_SHAPE_RECT );
     IplConvKernel *wD = cvCreateStructuringElementEx( 3, 3,
-            ( int )floor( ( 3.0 ) / 2 ), ( int )floor( ( 3.0 ) / 2 ), CV_SHAPE_RECT );
+            (int)floor( ( 3.0 ) / 2 ), (int)floor( ( 3.0 ) / 2 ), CV_SHAPE_RECT );
 
     //srcImg = cvQueryFrame( cap );
     srcImg = cvQueryFrame( cap );
@@ -479,8 +469,6 @@ int vision_find_fence( int *fence_center,
  * Input:       inputBinImage: The binary image to find the bearing of.
  *
  * Output:      bearing: The angle of the pipe in radians.
- *
- * Globals:     None.
  *
  *****************************************************************************/
 

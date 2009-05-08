@@ -32,8 +32,6 @@
  *                      return -1.  If serial port is not available then -2 is
  *                      returned.
  *
- * Globals:     None.
- *
  *****************************************************************************/
 
 int recv_serial( int fd,
@@ -55,19 +53,17 @@ int recv_serial( int fd,
 
 	port_count = select( SERIAL_MAX_PORTS, &serial_fds, NULL, NULL, &timeout );
 
-	if ( ( port_count == 0 ) || ( !FD_ISSET( fd, &serial_fds ) ) ) {
+	if ( (port_count == 0) || (!FD_ISSET(fd, &serial_fds)) ) {
 		status = -2;
 	}
 
 	status = read( fd, response, length );
 
-#ifdef SERIAL_DEBUG
-
+	#ifdef SERIAL_DEBUG
 	if ( status == -1 ) {
 		perror( "read" );
 	}
-
-#endif /* SERIAL_DEBUG */
+	#endif /* SERIAL_DEBUG */
 
 	return status;
 } /* end recv_serial() */
@@ -87,8 +83,6 @@ int recv_serial( int fd,
  * Output:      status: Number of bytes written to serial port if successful,
  *                      else write system call error code.
  *
- * Globals:     None.
- *
  *****************************************************************************/
 
 int send_serial( int fd,
@@ -96,19 +90,15 @@ int send_serial( int fd,
                  int length
                )
 {
-	int status;
-
+	int status = 0;
 	status = write( fd, command, length );
-
 	tcdrain( fd );
 
-#ifdef SERIAL_DEBUG
-
+	#ifdef SERIAL_DEBUG
 	if ( status < 0 ) {
 		perror( "write" );
 	}
-
-#endif /* SERIAL_DEBUG */
+	#endif /* SERIAL_DEBUG */
 
 	return status;
 } /* end send_serial() */
@@ -127,24 +117,20 @@ int send_serial( int fd,
  * Output:      fd: The new file descriptor when successful. Open error returns
  *                  -1. Baud rate error returns -2.
  *
- * Globals:     None.
- *
  *****************************************************************************/
 
 int setup_serial( char *port_name,
                   int baud
                 )
 {
-	int fd;
-
+	int fd = -1;
 	struct termios options;
-
 	fd = open( port_name, O_RDWR | O_NOCTTY | O_NONBLOCK );
 
 	if ( fd < 0 ) {
-#ifdef SERIAL_DEBUG
+		#ifdef SERIAL_DEBUG
 		perror( "open" );
-#endif /* SERIAL_DEBUG */
+		#endif /* SERIAL_DEBUG */
 		return fd;
 	}
 
@@ -164,55 +150,54 @@ int setup_serial( char *port_name,
 		options.c_lflag = 0;
 
 		switch ( baud ) {
+		case 1200:
+			cfsetispeed( &options, B1200 );
+			cfsetospeed( &options, B1200 );
+			break;
 
-			case 1200:
-				cfsetispeed( &options, B1200 );
-				cfsetospeed( &options, B1200 );
-				break;
+		case 2400:
+			cfsetispeed( &options, B2400 );
+			cfsetospeed( &options, B2400 );
+			break;
 
-			case 2400:
-				cfsetispeed( &options, B2400 );
-				cfsetospeed( &options, B2400 );
-				break;
+		case 4800:
+			cfsetispeed( &options, B4800 );
+			cfsetospeed( &options, B4800 );
+			break;
 
-			case 4800:
-				cfsetispeed( &options, B4800 );
-				cfsetospeed( &options, B4800 );
-				break;
+		case 9600:
+			cfsetispeed( &options, B9600 );
+			cfsetospeed( &options, B9600 );
+			break;
 
-			case 9600:
-				cfsetispeed( &options, B9600 );
-				cfsetospeed( &options, B9600 );
-				break;
+		case 19200:
+			cfsetispeed( &options, B19200 );
+			cfsetospeed( &options, B19200 );
+			break;
 
-			case 19200:
-				cfsetispeed( &options, B19200 );
-				cfsetospeed( &options, B19200 );
-				break;
+		case 38400:
+			cfsetispeed( &options, B38400 );
+			cfsetospeed( &options, B38400 );
+			break;
 
-			case 38400:
-				cfsetispeed( &options, B38400 );
-				cfsetospeed( &options, B38400 );
-				break;
+		case 57600:
+			cfsetispeed( &options, B57600 );
+			cfsetospeed( &options, B57600 );
+			break;
 
-			case 57600:
-				cfsetispeed( &options, B57600 );
-				cfsetospeed( &options, B57600 );
-				break;
+		case 115200:
+			cfsetispeed( &options, B115200 );
+			cfsetospeed( &options, B115200 );
+			break;
 
-			case 115200:
-				cfsetispeed( &options, B115200 );
-				cfsetospeed( &options, B115200 );
-				break;
+		case 230400:
+			cfsetispeed( &options, B230400 );
+			cfsetospeed( &options, B230400 );
+			break;
 
-			case 230400:
-				cfsetispeed( &options, B230400 );
-				cfsetospeed( &options, B230400 );
-				break;
-
-			default: /* Bad baud rate passed. */
-				close( fd );
-				return -2;
+		default: /* Bad baud rate passed. */
+			close( fd );
+			return -2;
 		}
 
 		tcsetattr( fd, TCSANOW, &options );
@@ -234,8 +219,6 @@ int setup_serial( char *port_name,
  *
  * Output:     	bytes_available: Bytes available on the serial stack.
  *
- * Globals:		None.
- *
  *****************************************************************************/
 
 int serial_bytes_available( int fd )
@@ -244,13 +227,11 @@ int serial_bytes_available( int fd )
 	int status = 0;
 
 	status = ioctl( fd, FIONREAD, &bytes_available );
-#ifdef SERIAL_DEBUG
-
+	#ifdef SERIAL_DEBUG
 	if ( status == -1 ) {
 		perror( "ioctl" );
 	}
-
-#endif /* SERIAL_DEBUG */
+	#endif /* SERIAL_DEBUG */
 
 	return bytes_available;
 } /* end serial_bytes_available() */
