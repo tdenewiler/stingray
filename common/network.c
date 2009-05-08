@@ -175,6 +175,9 @@ int net_server( int fd, void *buf, MSG_DATA *msg, int mode )
                     else if ( mode == MODE_LJ ) {
                         messages_send( ii, LJ_MSGID, msg );
                     }
+                    else if ( mode == MODE_STATUS ) {
+                    	messages_send( ii, STATUS_MSGID, msg );
+					}
                 }
             }
         } /* end FD_ISSET */
@@ -207,16 +210,15 @@ int net_client( int fd, void *buf, MSG_DATA *msg, int mode )
 
     /* Send and receive data for connected socket. */
     if ( mode == MODE_STATUS ) {
-		printf( "NET_CLIENT: 1\n" );
         messages_send( fd, (int)STATUS_MSGID, msg );
-		printf( "NET_CLIENT: 2\n" );
     }
     else if ( mode == MODE_JOY ) {
         messages_send( fd, (int)TELEOP_MSGID, msg );
     }
-	printf( "NET_CLIENT: 3\n" );
+    else if ( mode == MODE_PLANNER ) {
+    	messages_send( fd, (int)TARGET_MSGID, msg );
+	}
     recv_bytes = net_recv( fd, buf );
-	printf( "NET_CLIENT: 4\n" );
 
     return recv_bytes;
 } /* end net_client() */
@@ -645,19 +647,16 @@ int net_recv( int fd, void *buf )
 {
     int recv_bytes;
 
-	printf( "NET_RECV: 1\n" );
     if ( ( recv_bytes = recv( fd,
                               buf,
                               MAX_MSG_SIZE,
                               0 ) )
             == -1 ) {
-		printf( "NET_RECV: 2. recv_bytes = %d\n", recv_bytes );
         if ( errno != EWOULDBLOCK ) {
             perror( "recv" );
             return 0;
         }
     }
-	printf( "NET_RECV: 3\n" );
 
     return recv_bytes;
 } /* end net_recv() */

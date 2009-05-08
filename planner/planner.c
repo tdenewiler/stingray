@@ -82,15 +82,12 @@ void planner_exit( )
 	if ( server_fd > 0 ) {
 		close( server_fd );
 	}
-
 	if ( vision_fd > 0 ) {
 		close( vision_fd );
 	}
-	
 	if ( lj_fd > 0 ) {
 		close( lj_fd );
 	}
-	
 	if ( nav_fd > 0 ) {
 		close( nav_fd );
 	}
@@ -147,7 +144,7 @@ int main( int argc, char *argv[] )
 	int time2s = 0;
 	int time2ms = 0;
 	int dt = 0;
-	
+
 	int old_task = 0;
 
 	printf( "MAIN: Starting Planner ... \n" );
@@ -165,7 +162,7 @@ int main( int argc, char *argv[] )
 	/* Parse command line arguments. */
 	parse_default_config( &cf );
 	parse_cla( argc, argv, &cf, STINGRAY, ( const char * )PLANNER_FILENAME );
-	
+
 	/* Set up the default values for the target. */
 	msg.target.data.pitch   = cf.target_pitch;
     msg.target.data.roll    = cf.target_roll;
@@ -193,7 +190,7 @@ int main( int argc, char *argv[] )
 			printf( "MAIN: WARNING!!! Vision client setup failed.\n" );
 		}
 	}
-	
+
 	/* Connect to the labjack daemon. */
     if ( cf.enable_labjack ) {
         lj_fd = net_client_setup( cf.labjackd_IP, cf.labjackd_port );
@@ -204,7 +201,7 @@ int main( int argc, char *argv[] )
 			printf( "MAIN: WARNING!!! Labjack client setup failed.\n" );
 		}
     }
-    
+
     /* Set up the nav network client. */
 	if ( cf.enable_net ) {
         nav_fd = net_client_setup( cf.server_IP, cf.api_port );
@@ -247,39 +244,40 @@ int main( int argc, char *argv[] )
 			if ( dt > cf.period_vision ) {
 				recv_bytes = net_client( vision_fd, vision_buf, &msg, MODE_STATUS );
 				vision_buf[recv_bytes] = '\0';
-
 				if ( recv_bytes > 0 ) {
 					messages_decode( vision_fd, vision_buf, &msg );
-                    
+
                     gettimeofday( &vision_start, NULL );
 				}
 			}
-			
+
 			/* If there is a new task then send to vision. */
-			if ( old_task != msg.task.data.num )
-			{
+			if ( old_task != msg.task.data.num ) {
 				messages_send( vision_fd, TASK_MSGID, &msg );
 				old_task = msg.task.data.num;
 			}
 		}
-		
+
 		/* Get labjack data. Use either direct or network connection. */
         if ( ( cf.enable_labjack ) && ( lj_fd > 0 ) ) {
-            recv_bytes = net_client( lj_fd, lj_buf, &msg, MODE_PLANNER );
+            recv_bytes = net_client( lj_fd, lj_buf, &msg, MODE_STATUS );
             lj_buf[recv_bytes] = '\0';
             if ( recv_bytes > 0 ) {
                 messages_decode( lj_fd, lj_buf, &msg );
             }
-            
+
             msg.target.data.curr_batt1 = msg.lj.data.battery1;
             msg.target.data.curr_depth = msg.lj.data.pressure;
+            msg.status.data.battery1   = msg.lj.data.battery1;
+            msg.status.data.battery2   = msg.lj.data.battery2;
+            msg.status.data.pressure   = msg.lj.data.pressure;
+            msg.status.data.water      = msg.lj.data.water;
         }
-        
-        /* Get network data. */
+
+        /* Get nav data. */
 		if ( nav_fd > 0 ) {
 			recv_bytes = net_client( nav_fd, nav_buf, &msg, MODE_PLANNER );
 			nav_buf[recv_bytes] = '\0';
-		
 			if ( recv_bytes > 0 ) {
 				messages_decode( nav_fd, nav_buf, &msg );
 			}

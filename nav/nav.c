@@ -281,7 +281,7 @@ int main( int argc, char *argv[] )
 			printf( "MAIN: WARNING!!! IMU setup failed.\n" );
 		}
     }
-	
+
     /* Set up the Pololu servo controller. */
     if ( cf.enable_pololu ) {
         pololu_fd = pololuSetup( cf.pololu_port, cf.pololu_baud );
@@ -308,13 +308,10 @@ int main( int argc, char *argv[] )
 
 	/* Check that the kill switch is closed via the labjack. Use either
 	 * the direct connection or the network connection. */
-    status = -1;
-    
-    /* Sleeping to wait for planner to start. */
-    sleep( 3 );
+
     printf( "MAIN: Checking for labjack data from planner.\n" );
     if ( (cf.enable_labjack) && (server_fd > 0) ) {
-        while ( status < 0 ) {
+        while ( status == 0 ) {
             recv_bytes = net_server( server_fd, recv_buf, &msg, mode );
             recv_buf[recv_bytes] = '\0';
             if ( recv_bytes > 0 ) {
@@ -323,7 +320,7 @@ int main( int argc, char *argv[] )
             status = msg.target.data.curr_batt1;
         }
         printf( "MAIN: Kill switch is closed.\n" );
-        sleep( 7 );
+        sleep( 3 );
     }
 
     /* Initialize the pololu again. */
