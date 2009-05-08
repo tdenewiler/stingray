@@ -127,8 +127,8 @@ int main( int argc, char *argv[] )
 	parse_default_config( &cf );
 	parse_cla( argc, argv, &cf, STINGRAY, ( const char * )LABJACKD_FILENAME );
 
-	/* Set up communications. */
-	labjackd_fd = net_server_setup( cf.labjackd_port );
+	/* Set up server. */
+	labjackd_fd = net_server_setup( cf.server_port );
 	if ( labjackd_fd > 0 ) {
 		printf( "MAIN: Server setup OK.\n" );
 	}
@@ -166,6 +166,13 @@ int main( int argc, char *argv[] )
 				lj.pressure = getBatteryVoltage( AIN_2 );
 				lj.water    = getBatteryVoltage( AIN_3 );
 			}
+		}
+		else {
+			/* Only here for testing. Remove for actual operation. */
+			msg.lj.data.battery1 += 0.1; // = lj.battery1;
+			msg.lj.data.battery2 += 0.2; // = lj.battery2;
+			msg.lj.data.pressure += 0.3; // = lj.pressure;
+			msg.lj.data.water += 0.4; // = lj.water;
 		}
 
 		/* Check battery voltage. Make sure it is connected. If too low then

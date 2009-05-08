@@ -45,6 +45,7 @@
 int server_fd;
 int pololu_fd;
 int imu_fd;
+int lj_fd;
 
 
 #ifdef USE_SSA
@@ -167,6 +168,9 @@ void nav_exit( )
     if ( server_fd > 0 ) {
         close( server_fd );
     }
+	if ( lj_fd > 0 ) {
+		close( lj_fd );
+	}
 
     printf( "<OK>\n\n" );
 } /* end nav_exit() */
@@ -203,9 +207,11 @@ int main( int argc, char *argv[] )
     sigaction( SIGHUP, &sigint_action, NULL );
 
     int status = -1;
+	int pololu_initialized = FALSE;
     int recv_bytes = 0;
     int mode = MODE_STATUS;
     char recv_buf[MAX_MSG_SIZE];
+	char lj_buf[MAX_MSG_SIZE];
     CONF_VARS cf;
     MSG_DATA msg;
     PID pid;
@@ -232,6 +238,7 @@ int main( int argc, char *argv[] )
     server_fd = -1;
     pololu_fd = -1;
     imu_fd = -1;
+	lj_fd = 0;
 
     memset( &msg, 0, sizeof( MSG_DATA ) );
     memset( &pid, 0, sizeof( PID ) );
@@ -260,9 +267,9 @@ int main( int argc, char *argv[] )
     msg.gain.data.ki_depth  = cf.ki_depth;
     msg.gain.data.kd_depth  = cf.kd_depth;
 
-    /* Set up communications. */
-    if ( cf.enable_net ) {
-        server_fd = net_server_setup( cf.api_port );
+    /* Set up server. */
+    if ( cf.enable_server ) {
+        server_fd = net_server_setup( cf.server_port );
 		if ( server_fd > 0 ) {
 			printf( "MAIN: Nav server setup OK.\n" );
 		}
@@ -294,6 +301,17 @@ int main( int argc, char *argv[] )
         pololuInitializeChannels( pololu_fd );
     }
 
+	/* Connect to the labjack daemon. */
+    if ( cf.enable_labjack ) {
+        lj_fd = net_client_setup( cf.labjackd_IP, cf.labjackd_port );
+		if ( lj_fd > 0 ) {
+			printf( "MAIN: Labjack client setup OK.\n" );
+		}
+		else {
+			printf( "MAIN: WARNING!!! Labjack client setup failed.\n" );
+		}
+    }
+
     /* Initialize timers. */
     gettimeofday( &pitch_time, NULL );
     gettimeofday( &pitch_start, NULL );
@@ -308,7 +326,6 @@ int main( int argc, char *argv[] )
 
 	/* Check that the kill switch is closed via the labjack. Use either
 	 * the direct connection or the network connection. */
-
     printf( "MAIN: Checking for labjack data from planner.\n" );
     if ( (cf.enable_labjack) && (server_fd > 0) ) {
         while ( status == 0 ) {
@@ -333,7 +350,7 @@ int main( int argc, char *argv[] )
     /* Main loop. */
     while ( 1 ) {
         /* Get network data. */
-        if ( ( cf.enable_net ) && ( server_fd > 0 ) ) {
+        if ( ( cf.enable_server ) && ( server_fd > 0 ) ) {
             recv_bytes = net_server( server_fd, recv_buf, &msg, MODE_NAV );
             if ( recv_bytes > 0 ) {
                 recv_buf[recv_bytes] = '\0';

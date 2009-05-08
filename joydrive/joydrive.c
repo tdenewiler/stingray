@@ -127,8 +127,8 @@ int main( int argc, char *argv[] )
     parse_default_config( &cf );
     parse_cla( argc, argv, &cf, STINGRAY, ( const char * )JOYDRIVE_FILENAME );
 
-    /* Set up communications. */
-    nav_fd = net_client_setup( cf.server_IP, cf.api_port );
+    /* Set up nav client. */
+    nav_fd = net_client_setup( cf.nav_IP, cf.nav_port );
     if ( nav_fd > 0 ) {
     	printf( "MAIN: Nav client setup OK.\n" );
     }

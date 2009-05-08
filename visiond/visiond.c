@@ -78,7 +78,6 @@ void visiond_exit( )
     usleep( 200000 );
 
     /* Close the open file descriptors. */
-
     if ( server_fd > 0 ) {
         close( server_fd );
     }
@@ -187,9 +186,9 @@ int main( int argc, char *argv[] )
     msg.vsetting.data.fence_hsv.vL = cf.fence_vL;
     msg.vsetting.data.fence_hsv.vH = cf.fence_vH;
 
-    /* Set up communications. */
-    if ( cf.enable_net ) {
-        server_fd = net_server_setup( cf.vision_port );
+    /* Set up server. */
+    if ( cf.enable_server ) {
+        server_fd = net_server_setup( cf.server_port );
 		if ( server_fd > 0 ) {
 			printf( "MAIN: Server setup OK.\n" );
 		}
@@ -344,7 +343,7 @@ int main( int argc, char *argv[] )
 
 
         /* Get network data. */
-        if ( ( cf.enable_net ) && ( server_fd > 0 ) ) {
+        if ( ( cf.enable_server ) && ( server_fd > 0 ) ) {
             recv_bytes = net_server( server_fd, recv_buf, &msg, MODE_VISION );
             if ( recv_bytes > 0 ) {
                 recv_buf[recv_bytes] = '\0';

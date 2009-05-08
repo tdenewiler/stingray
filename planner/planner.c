@@ -170,8 +170,8 @@ int main( int argc, char *argv[] )
     msg.target.data.depth   = cf.target_depth;
 
 	/* Set up communications. */
-	if ( cf.enable_planner ) {
-		server_fd = net_server_setup( cf.planner_port );
+	if ( cf.enable_server ) {
+		server_fd = net_server_setup( cf.server_port );
 		if ( server_fd > 0 ) {
 			printf( "MAIN: Server setup OK.\n" );
 		}
@@ -203,8 +203,8 @@ int main( int argc, char *argv[] )
     }
 
     /* Set up the nav network client. */
-	if ( cf.enable_net ) {
-        nav_fd = net_client_setup( cf.server_IP, cf.api_port );
+	if ( cf.enable_nav ) {
+        nav_fd = net_client_setup( cf.nav_IP, cf.nav_port );
 		if ( nav_fd > 0 ) {
 			printf( "MAIN: Nav client setup OK.\n" );
 		}
@@ -225,7 +225,7 @@ int main( int argc, char *argv[] )
 	/* Main loop. */
 	while ( 1 ) {
 		/* Get network data. */
-		if ( ( cf.enable_net ) && ( server_fd > 0 ) ) {
+		if ( ( cf.enable_server ) && ( server_fd > 0 ) ) {
 			recv_bytes = net_server( server_fd, recv_buf, &msg, MODE_STATUS );
 			if ( recv_bytes > 0 ) {
 				recv_buf[recv_bytes] = '\0';
@@ -268,7 +268,7 @@ int main( int argc, char *argv[] )
 		}
 
 		/* Get labjack data. Call this after nav data. */
-        if ( ( cf.enable_labjack ) && ( lj_fd > 0 ) ) {
+        if ( (cf.enable_labjack) && (lj_fd > 0) ) {
             recv_bytes = net_client( lj_fd, lj_buf, &msg, MODE_STATUS );
             lj_buf[recv_bytes] = '\0';
             if ( recv_bytes > 0 ) {
