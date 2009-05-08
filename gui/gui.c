@@ -78,10 +78,10 @@ void gui_update_status_text( )
              , msg.status.data.ang_rate[0]
              , msg.status.data.ang_rate[1]
              , msg.status.data.ang_rate[2]
-             , msg.status.data.battery1
-             , msg.status.data.battery2
-             , msg.status.data.pressure
-             , msg.status.data.water
+             , msg.lj.data.battery1
+             , msg.lj.data.battery2
+             , msg.lj.data.pressure
+             , msg.lj.data.water
              , msg.status.data.pitch_perr
              , msg.status.data.pitch_ierr
              , msg.status.data.pitch_derr
@@ -143,7 +143,7 @@ gint gui_timer_200ms( gpointer data )
 	
     /* Get network data. */
     if ( planner_fd > 0 ) {
-        recv_bytes = net_client( planner_fd, planner_buf, &msg, MODE_STATUS );
+        recv_bytes = net_client( planner_fd, planner_buf, &msg, MODE_OPEN );
         planner_buf[recv_bytes] = '\0';
 		if ( recv_bytes > 0 ) {
         	messages_decode( planner_fd, planner_buf, &msg );

@@ -221,7 +221,7 @@ void pid_loop( int pololu_fd,
 
 			/* Calculate the errors. */
 			pid->depth.ref	= msg->target.data.depth;
-			pid->depth.cval = msg->target.data.curr_depth;
+			pid->depth.cval = msg->lj.data.pressure;
 			pid->depth.perr = pid->depth.cval - pid->depth.ref;
 			pid->depth.ierr += pid->depth.perr * dt / 1000000;
 			pid->depth.ierr = pid_bound_integral( pid->depth.ierr, pid->depth.ki, PID_DEPTH_INTEGRAL );

@@ -226,7 +226,7 @@ int main( int argc, char *argv[] )
 	while ( 1 ) {
 		/* Get network data. */
 		if ( ( cf.enable_server ) && ( server_fd > 0 ) ) {
-			recv_bytes = net_server( server_fd, recv_buf, &msg, MODE_STATUS );
+			recv_bytes = net_server( server_fd, recv_buf, &msg, MODE_PLANNER );
 			if ( recv_bytes > 0 ) {
 				recv_buf[recv_bytes] = '\0';
 				messages_decode( server_fd, recv_buf, &msg );
@@ -242,7 +242,7 @@ int main( int argc, char *argv[] )
 			dt = util_calc_dt( &time1s, &time1ms, &time2s, &time2ms );
 
 			if ( dt > cf.period_vision ) {
-				recv_bytes = net_client( vision_fd, vision_buf, &msg, MODE_STATUS );
+				recv_bytes = net_client( vision_fd, vision_buf, &msg, MODE_OPEN );
 				vision_buf[recv_bytes] = '\0';
 				if ( recv_bytes > 0 ) {
 					messages_decode( vision_fd, vision_buf, &msg );
@@ -258,7 +258,7 @@ int main( int argc, char *argv[] )
 			}
 		}
 
-        /* Get nav data. Call this before labjack data. */
+        /* Get nav data. */
 		if ( nav_fd > 0 ) {
 			recv_bytes = net_client( nav_fd, nav_buf, &msg, MODE_PLANNER );
 			nav_buf[recv_bytes] = '\0';
@@ -267,21 +267,13 @@ int main( int argc, char *argv[] )
 			}
 		}
 
-		/* Get labjack data. Call this after nav data. */
+		/* Get labjack data. */
         if ( (cf.enable_labjack) && (lj_fd > 0) ) {
-            recv_bytes = net_client( lj_fd, lj_buf, &msg, MODE_STATUS );
+            recv_bytes = net_client( lj_fd, lj_buf, &msg, MODE_OPEN );
             lj_buf[recv_bytes] = '\0';
             if ( recv_bytes > 0 ) {
                 messages_decode( lj_fd, lj_buf, &msg );
             }
-
-            msg.target.data.curr_batt1 = msg.lj.data.battery1;
-            msg.target.data.curr_depth = msg.lj.data.pressure;
-            msg.status.data.battery1   = msg.lj.data.battery1;
-            msg.status.data.battery2   = msg.lj.data.battery2;
-            msg.status.data.pressure   = msg.lj.data.pressure;
-            msg.status.data.water      = msg.lj.data.water;
-			msg.status.data.depth      = msg.lj.data.pressure;
         }
 
 		/* Update the task dt. */

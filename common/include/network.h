@@ -35,6 +35,7 @@
 #define MODE_LJ			4
 #define MODE_STATUS		5
 #define MODE_JOY		6
+#define MODE_OPEN		7
 #endif /* NET_MODES */
 
 

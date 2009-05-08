@@ -180,6 +180,11 @@ int main( int argc, char *argv[] )
 				lj.battery2 = getBatteryVoltage( AIN_1 );
 				lj.pressure = getBatteryVoltage( AIN_2 );
 				lj.water    = getBatteryVoltage( AIN_3 );
+
+				msg.lj.data.battery1 = lj.battery1;
+				msg.lj.data.battery2 = lj.battery2;
+				msg.lj.data.pressure = lj.pressure;
+				msg.lj.data.water    = lj.water;
 			}
 		}
 		else {
@@ -191,24 +196,24 @@ int main( int argc, char *argv[] )
             dt = util_calc_dt( &time1s, &time1ms, &time2s, &time2ms );
 			if ( dt > 60000000 ) {
 				/* Simulate the switch being opened. Start simulation over.*/
-				msg.lj.data.battery1 = 0.04; // = lj.battery1;
-				msg.lj.data.battery2 += 0.2; // = lj.battery2;
-				msg.lj.data.pressure += 0.3; // = lj.pressure;
-				msg.lj.data.water += 0.4; // = lj.water;
+				msg.lj.data.battery1 = 0.04;
+				msg.lj.data.battery2 += 0.2;
+				msg.lj.data.pressure += 0.3;
+				msg.lj.data.water += 0.4;
 				gettimeofday( &sim_start, NULL );
 			}
 			else if ( dt > 10000000 ) {
             	/* Simulate the switch closed. */
-            	msg.lj.data.battery1 = 12.1; // = lj.battery1;
-				msg.lj.data.battery2 += 0.2; // = lj.battery2;
-				msg.lj.data.pressure += 0.3; // = lj.pressure;
-				msg.lj.data.water += 0.4; // = lj.water;
+            	msg.lj.data.battery1 = 12.1;
+				msg.lj.data.battery2 += 0.2;
+				msg.lj.data.pressure += 0.3;
+				msg.lj.data.water += 0.4;
 			}
 			else {
-				msg.lj.data.battery1 = 0.04; // = lj.battery1;
-				msg.lj.data.battery2 += 0.2; // = lj.battery2;
-				msg.lj.data.pressure += 0.3; // = lj.pressure;
-				msg.lj.data.water += 0.4; // = lj.water;
+				msg.lj.data.battery1 = 0.04;
+				msg.lj.data.battery2 += 0.2;
+				msg.lj.data.pressure += 0.3;
+				msg.lj.data.water += 0.4;
 			}
 		}
 

@@ -227,8 +227,6 @@ typedef struct _TARGET {
     float fx;       //!< Desired force in x direction
     float fy;       //!< Desired force in y direction
     float speed;    //!< Desired speed.
-    float curr_depth;	//!< Current depth from labjack.
-    float curr_batt1;	//!< Current motor battery from labjack.
 } TARGET;
 
 /*! API message to change the uuv operational mode. */
@@ -307,10 +305,6 @@ typedef struct _STATUS {
     float depth_ierr;   //!< Depth I error
     float depth_derr;   //!< Depth D error
     int depth_period;   //!< Depth dt
-    float battery1;     //!< Voltage of battery 1
-    float battery2;     //!< Voltage of battery 2
-    float pressure;     //!< Pressure sensor reading
-    float water;        //!< Water leak sensor reading
 } STAT;
 
 typedef struct _STATUS_MSG {

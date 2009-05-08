@@ -207,6 +207,7 @@ int main( int argc, char *argv[] )
     sigaction( SIGHUP, &sigint_action, NULL );
 
     int status = -1;
+	int pololu_initialized = FALSE;
     int recv_bytes = 0;
     int mode = MODE_STATUS;
     char recv_buf[MAX_MSG_SIZE];
@@ -230,8 +231,6 @@ int main( int argc, char *argv[] )
     int dt = 0;
 
     printf( "MAIN: Starting Navigation ... \n" );
-    printf( "MAIN: Open kill switch and then press ENTER key.\n" );
-    getchar( );
 
     /* Initialize variables. */
     server_fd = -1;
@@ -292,17 +291,17 @@ int main( int argc, char *argv[] )
     if ( cf.enable_pololu ) {
         pololu_fd = pololuSetup( cf.pololu_port, cf.pololu_baud );
 		if ( pololu_fd > 0 ) {
+			/* Initialize the pololu. */
+			pololuInitializeChannels( pololu_fd );
 			printf( "MAIN: Pololu setup OK.\n" );
 		}
 		else {
 			printf( "MAIN: WARNING!!! Pololu setup failed.\n" );
 		}
-        pololuInitializeChannels( pololu_fd );
     }
 
 	/* Connect to the labjack daemon. */
-    if ( cf.enable_labjack && strcmp( cf.labjackd_IP, "" ) != 0 &&
-    		cf.labjackd_port > 0 && cf.labjackd_port <= 65535 ) {
+	if ( (cf.enable_labjack > 0) && (cf.enable_pololu > 0) ) {
         lj_fd = net_client_setup( cf.labjackd_IP, cf.labjackd_port );
 		if ( lj_fd > 0 ) {
 			printf( "MAIN: Labjack client setup OK.\n" );
@@ -310,39 +309,8 @@ int main( int argc, char *argv[] )
 		else {
 			printf( "MAIN: WARNING!!! Labjack client setup failed.\n" );
 		}
-		
-		printf( "MAIN: Close the kill switch now.\n" );
-		
-		/* Check that the kill switch is closed via the labjack. Use either
-		 * the direct connection or the network connection. */
-		printf( "MAIN: Checking that kill switch is closed.\n" );
-		
-		if ( (cf.enable_labjack) && (lj_fd > 0) ) {
-			while ( status == 0 ) {
-				recv_bytes = net_client( lj_fd, lj_buf, &msg, mode );
-				lj_buf[recv_bytes] = '\0';
-				if ( recv_bytes > 0 ) {
-					messages_decode( lj_fd, lj_buf, &msg );
-				}
-				status = msg.lj.data.battery1;
-			}
-			printf( "MAIN: Kill switch is closed.\n" );
-
-			printf( "MAIN: Closing Labjack connection.\n" );
-			net_close( lj_fd );
-		}
-    }
-	else {
-		/* Labjack is not enabled so ignore kill switch. */
-		printf( "MAIN: Ignoring kill switch and continuing.\n" );
-		sleep( 3 );
 	}
 
-    /* Initialize the pololu again. */
-    if ( cf.enable_pololu ) {
-        pololuInitializeChannels( pololu_fd );
-    }
-    
     /* Initialize timers. */
     gettimeofday( &pitch_time, NULL );
     gettimeofday( &pitch_start, NULL );
@@ -357,9 +325,27 @@ int main( int argc, char *argv[] )
 
     /* Main loop. */
     while ( 1 ) {
+		/* Check labjack data until kill switch has been closed. */
+		if ( (!pololu_initialized) && (cf.enable_pololu > 0) &&
+				(cf.enable_labjack > 0) && (lj_fd > 0) ) {
+			recv_bytes = net_client( lj_fd, lj_buf, &msg, mode );
+			lj_buf[recv_bytes] = '\0';
+			if ( recv_bytes > 0 ) {
+				messages_decode( lj_fd, lj_buf, &msg );
+			}
+			pololu_initialized = msg.lj.data.battery1;
+			if ( pololu_initialized > 0 ) {
+				/* Initialize the Pololu again now that power is attached. */
+				pololuInitializeChannels( pololu_fd );
+				close( lj_fd );
+				lj_fd = 0;
+				printf( "MAIN: Kill switch closed.\n" );
+			}
+		}
+		
         /* Get network data. */
-        if ( ( cf.enable_server ) && ( server_fd > 0 ) ) {
-            recv_bytes = net_server( server_fd, recv_buf, &msg, MODE_NAV );
+        if ( (cf.enable_server) && (server_fd > 0) ) {
+            recv_bytes = net_server( server_fd, recv_buf, &msg, MODE_STATUS );
             if ( recv_bytes > 0 ) {
                 recv_buf[recv_bytes] = '\0';
                 messages_decode( server_fd, recv_buf, &msg );
@@ -419,7 +405,7 @@ int main( int argc, char *argv[] )
             time2ms =   pitch_start.tv_usec;
             dt = util_calc_dt( &time1s, &time1ms, &time2s, &time2ms );
             if ( dt > pid.pitch.period ) {
-                if ( ( cf.enable_pololu ) && ( pololu_fd > 0 ) ) {
+                if ( (cf.enable_pololu) && (pololu_fd > 0) && (pololu_initialized > 0) ) {
                     pid_loop( pololu_fd, &pid, &cf, &msg, dt, PID_PITCH );
                 }
                 msg.status.data.pitch_period = dt;
@@ -433,7 +419,7 @@ int main( int argc, char *argv[] )
             time2ms =   roll_start.tv_usec;
             dt = util_calc_dt( &time1s, &time1ms, &time2s, &time2ms );
             if ( dt > pid.roll.period ) {
-                if ( ( cf.enable_pololu ) && ( pololu_fd > 0 ) ) {
+                if ( (cf.enable_pololu) && (pololu_fd > 0) && (pololu_initialized > 0) ) {
                     pid_loop( pololu_fd, &pid, &cf, &msg, dt, PID_ROLL );
                 }
                 msg.status.data.roll_period = dt;
@@ -447,7 +433,7 @@ int main( int argc, char *argv[] )
             time2ms =   yaw_start.tv_usec;
             dt = util_calc_dt( &time1s, &time1ms, &time2s, &time2ms );
             if ( dt > pid.yaw.period ) {
-                if ( ( cf.enable_pololu ) && ( pololu_fd > 0 ) ) {
+                if ( (cf.enable_pololu) && (pololu_fd > 0) && (pololu_initialized > 0) ) {
                     pid_loop( pololu_fd, &pid, &cf, &msg, dt, PID_YAW );
                 }
                 msg.status.data.yaw_period = dt;
@@ -461,7 +447,7 @@ int main( int argc, char *argv[] )
             time2ms =   depth_start.tv_usec;
             dt = util_calc_dt( &time1s, &time1ms, &time2s, &time2ms );
             if ( dt > pid.depth.period ) {
-                if ( ( cf.enable_pololu ) && ( pololu_fd > 0 ) ) {
+                if ( (cf.enable_pololu) && (pololu_fd > 0) && (pololu_initialized > 0) ) {
                     pid_loop( pololu_fd, &pid, &cf, &msg, dt, PID_DEPTH );
                 }
                 msg.status.data.depth_period = dt;
