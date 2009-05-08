@@ -112,6 +112,14 @@ int main( int argc, char *argv[] )
 	MSG_DATA msg;
 	LABJACK_DATA lj;
 	CONF_VARS cf;
+	
+	struct timeval sim_time = {0, 0};
+	struct timeval sim_start = {0, 0};
+	int time1s = 0;
+    int time1ms = 0;
+    int time2s = 0;
+    int time2ms = 0;
+    int dt = 0;
 
 	printf( "MAIN: Starting Labjack daemon ...\n" );
 
@@ -138,11 +146,18 @@ int main( int argc, char *argv[] )
 
 	/* Set up the labjack. */
 	labjack_fd = init_labjack( );
-	printf( "MAIN: labjack_fd = %d\n", labjack_fd );
 	if ( labjack_fd ) {
 		status = query_labjack( );
 		printf( "MAIN: status = %d\n", status );
 	}
+	else
+	{
+		printf( "MAIN: SIMULATION MODE!!! Labjack data is simulated.\n" );
+	}
+	
+	 /* Initialize timers. */
+    gettimeofday( &sim_time, NULL );
+    gettimeofday( &sim_start, NULL );
 
 	printf( "MAIN: Labjack server running now.\n" );
 
@@ -168,11 +183,33 @@ int main( int argc, char *argv[] )
 			}
 		}
 		else {
-			/* Only here for testing. Remove for actual operation. */
-			msg.lj.data.battery1 += 0.1; // = lj.battery1;
-			msg.lj.data.battery2 += 0.2; // = lj.battery2;
-			msg.lj.data.pressure += 0.3; // = lj.pressure;
-			msg.lj.data.water += 0.4; // = lj.water;
+			/* Simulation Mode. This is where the simulated data is generated. */
+			time1s =    sim_time.tv_sec;
+            time1ms =   sim_time.tv_usec;
+            time2s =    sim_start.tv_sec;
+            time2ms =   sim_start.tv_usec;
+            dt = util_calc_dt( &time1s, &time1ms, &time2s, &time2ms );
+			if ( dt > 60000000 ) {
+				/* Simulate the switch being opened. Start simulation over.*/
+				msg.lj.data.battery1 = 0.04; // = lj.battery1;
+				msg.lj.data.battery2 += 0.2; // = lj.battery2;
+				msg.lj.data.pressure += 0.3; // = lj.pressure;
+				msg.lj.data.water += 0.4; // = lj.water;
+				gettimeofday( &sim_start, NULL );
+			}
+			else if ( dt > 10000000 ) {
+            	/* Simulate the switch closed. */
+            	msg.lj.data.battery1 = 12.1; // = lj.battery1;
+				msg.lj.data.battery2 += 0.2; // = lj.battery2;
+				msg.lj.data.pressure += 0.3; // = lj.pressure;
+				msg.lj.data.water += 0.4; // = lj.water;
+			}
+			else {
+				msg.lj.data.battery1 = 0.04; // = lj.battery1;
+				msg.lj.data.battery2 += 0.2; // = lj.battery2;
+				msg.lj.data.pressure += 0.3; // = lj.pressure;
+				msg.lj.data.water += 0.4; // = lj.water;
+			}
 		}
 
 		/* Check battery voltage. Make sure it is connected. If too low then
@@ -183,6 +220,9 @@ int main( int argc, char *argv[] )
 		if ( (lj.battery2 > BATT2_THRESH) && (lj.battery2 < BATT2_MIN) ) {
 			status = system( "shutdown -h now \"Labjackd: Computer battery has low voltage.\"" );
 		}
+		
+		/* Update timers. */
+        gettimeofday( &sim_time, NULL );
 	}
 
 	exit( 0 );

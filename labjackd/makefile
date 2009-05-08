@@ -24,6 +24,7 @@ PARSEDIR	= ../../libs/parser/lib
 EXE 		= labjackd
 
 # object files
+OBJS = util.o
 OBJS += messages.o
 OBJS += network.o
 OBJS += labjackd.o

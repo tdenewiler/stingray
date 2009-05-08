@@ -197,33 +197,40 @@ int main( int argc, char *argv[] )
 		}
     }
 
-    /* Open front camera. */
     /* Need to have a config about what cameras if any to open */
-    /* Commenting this out because my default camera does not work */
-    f_cam = cvCaptureFromCAM( camera );
-    if ( !f_cam ) {
-        cvReleaseCapture( &f_cam );
-        printf( "MAIN: Could not open f_cam.\n" );
-    }
-    else {
-        f_img = cvQueryFrame( f_cam );
-        f_bin_img = cvCreateImage( cvGetSize( f_img ), IPL_DEPTH_8U, 1 );
-    	fence_center = f_img->width / 2;
-		printf( "MAIN: Front camera opened OK.\n" );
-    }
-
-    /* Open bottom camera. */
-    camera = 1;
-    b_cam = cvCaptureFromCAM( camera );
-    if ( !b_cam ) {
-        cvReleaseCapture( &b_cam );
-        printf( "MAIN: Could not open b_cam.\n" );
-    }
-    else {
-        b_img = cvQueryFrame( b_cam );
-        b_bin_img = cvCreateImage( cvGetSize( b_img ), IPL_DEPTH_8U, 1 );
-		printf( "MAIN: Bottom camera opened OK.\n" );
-    }
+    if ( cf.op_mode == 99 )
+    {
+    	/* Special case for bad camera. */
+    	printf( "MAIN: Skipping camera opening.\n" );
+	}
+	else
+	{
+		/* Open front camera. */
+		f_cam = cvCaptureFromCAM( camera );
+		if ( !f_cam ) {
+			cvReleaseCapture( &f_cam );
+			printf( "MAIN: Could not open f_cam.\n" );
+		}
+		else {
+			f_img = cvQueryFrame( f_cam );
+			f_bin_img = cvCreateImage( cvGetSize( f_img ), IPL_DEPTH_8U, 1 );
+			fence_center = f_img->width / 2;
+			printf( "MAIN: Front camera opened OK.\n" );
+		}
+	
+		/* Open bottom camera. */
+		camera = 1;
+		b_cam = cvCaptureFromCAM( camera );
+		if ( !b_cam ) {
+			cvReleaseCapture( &b_cam );
+			printf( "MAIN: Could not open b_cam.\n" );
+		}
+		else {
+			b_img = cvQueryFrame( b_cam );
+			b_bin_img = cvCreateImage( cvGetSize( b_img ), IPL_DEPTH_8U, 1 );
+			printf( "MAIN: Bottom camera opened OK.\n" );
+		}
+	}
 
     /* Create windows to display video if set in configuration file. */
     if ( cf.vision_window ) {

@@ -207,7 +207,6 @@ int main( int argc, char *argv[] )
     sigaction( SIGHUP, &sigint_action, NULL );
 
     int status = -1;
-	int pololu_initialized = FALSE;
     int recv_bytes = 0;
     int mode = MODE_STATUS;
     char recv_buf[MAX_MSG_SIZE];
@@ -302,7 +301,8 @@ int main( int argc, char *argv[] )
     }
 
 	/* Connect to the labjack daemon. */
-    if ( cf.enable_labjack ) {
+    if ( cf.enable_labjack && strcmp( cf.labjackd_IP, "" ) != 0 &&
+    		cf.labjackd_port > 0 && cf.labjackd_port <= 65535 ) {
         lj_fd = net_client_setup( cf.labjackd_IP, cf.labjackd_port );
 		if ( lj_fd > 0 ) {
 			printf( "MAIN: Labjack client setup OK.\n" );
@@ -310,8 +310,39 @@ int main( int argc, char *argv[] )
 		else {
 			printf( "MAIN: WARNING!!! Labjack client setup failed.\n" );
 		}
-    }
+		
+		printf( "MAIN: Close the kill switch now.\n" );
+		
+		/* Check that the kill switch is closed via the labjack. Use either
+		 * the direct connection or the network connection. */
+		printf( "MAIN: Checking that kill switch is closed.\n" );
+		
+		if ( (cf.enable_labjack) && (lj_fd > 0) ) {
+			while ( status == 0 ) {
+				recv_bytes = net_client( lj_fd, lj_buf, &msg, mode );
+				lj_buf[recv_bytes] = '\0';
+				if ( recv_bytes > 0 ) {
+					messages_decode( lj_fd, lj_buf, &msg );
+				}
+				status = msg.lj.data.battery1;
+			}
+			printf( "MAIN: Kill switch is closed.\n" );
 
+			printf( "MAIN: Closing Labjack connection.\n" );
+			net_close( lj_fd );
+		}
+    }
+	else {
+		/* Labjack is not enabled so ignore kill switch. */
+		printf( "MAIN: Ignoring kill switch and continuing.\n" );
+		sleep( 3 );
+	}
+
+    /* Initialize the pololu again. */
+    if ( cf.enable_pololu ) {
+        pololuInitializeChannels( pololu_fd );
+    }
+    
     /* Initialize timers. */
     gettimeofday( &pitch_time, NULL );
     gettimeofday( &pitch_start, NULL );
@@ -321,29 +352,6 @@ int main( int argc, char *argv[] )
     gettimeofday( &yaw_start, NULL );
     gettimeofday( &depth_time, NULL );
     gettimeofday( &depth_start, NULL );
-
-    printf( "MAIN: Close the kill switch now.\n" );
-
-	/* Check that the kill switch is closed via the labjack. Use either
-	 * the direct connection or the network connection. */
-    printf( "MAIN: Checking for labjack data from planner.\n" );
-    if ( (cf.enable_labjack) && (server_fd > 0) ) {
-        while ( status == 0 ) {
-            recv_bytes = net_server( server_fd, recv_buf, &msg, mode );
-            recv_buf[recv_bytes] = '\0';
-            if ( recv_bytes > 0 ) {
-                messages_decode( server_fd, recv_buf, &msg );
-            }
-            status = msg.target.data.curr_batt1;
-        }
-        printf( "MAIN: Kill switch is closed.\n" );
-        sleep( 3 );
-    }
-
-    /* Initialize the pololu again. */
-    if ( cf.enable_pololu ) {
-        pololuInitializeChannels( pololu_fd );
-    }
 
 	printf( "MAIN: Nav running now.\n" );
 

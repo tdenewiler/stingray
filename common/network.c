@@ -163,7 +163,10 @@ int net_server( int fd, void *buf, MSG_DATA *msg, int mode )
                 }
                 else {
                     /* Send data to clients. */
-                    if ( mode == MODE_NAV ) {
+                    if ( mode == MODE_STATUS ) {
+                    	messages_send( ii, STATUS_MSGID, msg );
+					}
+                    else if ( mode == MODE_NAV ) {
 						messages_send( ii, STATUS_MSGID, msg );
                     }
                     else if ( mode == MODE_VISION ) {
