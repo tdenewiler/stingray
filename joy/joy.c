@@ -25,14 +25,12 @@
  *
  * Output:      fd: A file descriptor for the joystick.
  *
- * Globals:     None.
- *
  *****************************************************************************/
 
 int joy_setup( )
 {
     int fd = -1;
-    fd = open( "/dev/input/js0", O_RDONLY );
+    fd = open("/dev/input/js0", O_RDONLY);
 
     return fd;
 } /* end joy_setup() */
@@ -42,14 +40,13 @@ int joy_setup( )
  *
  * Title:       int joy_get_data( int fd, JOY_DATA *joy_data )
  *
- * Description: Gets joystick input.
+ * Description: Gets joystick input from the USB port. Uses the Linux
+ * 				joystick interface.
  *
  * Input:       fd: The file descriptor for the joystick.
  *              joy_data: A pointer to a struct to hold the data.
  *
  * Output:      read_bytes: Number of bytes read from fd.
- *
- * Globals:     None.
  *
  *****************************************************************************/
 

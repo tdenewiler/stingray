@@ -105,10 +105,10 @@
 #define _JOY_DATA_
 
 typedef struct {
-	unsigned int joy_axis;
-	unsigned int axis_value;
-	unsigned int joy_button;
-	unsigned int button_value;
+	unsigned int joy_axis;		//!< Specifies which axis input was found on.
+	unsigned int axis_value;	//!< Specifies the value of the axis input.
+	unsigned int joy_button;	//!< Specifies which button input was found on.
+	unsigned int button_value;	//!< Specifies the value of the button input.
 } JOY_DATA;
 
 #endif /* _JOY_DATA_ */
@@ -124,7 +124,7 @@ typedef struct {
 //! \return A file descriptor for the serial port.
 int joy_setup( );
 
-//! Get joystick input.
+//! Gets joystick input from the USB port. Uses the Linux joystick interface.
 //! \param fd A file descriptor for the serial port.
 //! \param joy_data A pointer to hold joystick data that was input.
 //! \return The number of bytes read.

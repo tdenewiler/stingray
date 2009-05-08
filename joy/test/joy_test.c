@@ -17,10 +17,10 @@ int main()
     pjoy_data = &joy_data;
 
     joy_fd = joy_setup( );
-    printf( "joy_fd = %d\n\n", joy_fd );
+    printf("joy_fd = %d\n\n", joy_fd);
 
     if ( joy_fd < 0 ) {
-        printf( "No joystick, quitting...\n" );
+        printf("No joystick, quitting...\n");
         return 0;
     }
 
@@ -29,14 +29,10 @@ int main()
         status = joy_get_data( joy_fd, pjoy_data );
 
         if ( status > 0 ) {
-            printf( "joy_axis = %d  axis_value = %d\n",
-                    joy_data.joy_axis,
-                    joy_data.axis_value
-                  );
-            printf( "joy_button = %d  button_value = %d\n",
-                    joy_data.joy_button,
-                    joy_data.button_value
-                  );
+            printf("joy_axis = %d  axis_value = %d\n",
+				joy_data.joy_axis, joy_data.axis_value);
+            printf("joy_button = %d  button_value = %d\n",
+				joy_data.joy_button, joy_data.button_value);
         }
     }
 
