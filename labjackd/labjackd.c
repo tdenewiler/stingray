@@ -165,10 +165,6 @@ int main( int argc, char *argv[] )
 				lj.battery2 = getBatteryVoltage( AIN_1 );
 				lj.pressure = getBatteryVoltage( AIN_2 );
 				lj.water    = getBatteryVoltage( AIN_3 );
-				msg.lj.data.battery1 = lj.battery1;
-				msg.lj.data.battery2 = lj.battery2;
-				msg.lj.data.pressure = lj.pressure;
-				msg.lj.data.water = lj.water;
 			}
 		}
 

@@ -61,9 +61,7 @@ void gui_update_status_text( )
     sprintf( sbuff,
              "Pitch, Roll, Yaw, Depth:\t[ %.3f\t%.3f\t%.3f\t%.3f ]\n"
              "Accel X, Y, Z:\t\t\t[ %.3f\t%.3f\t%.3f ]\n"
-             "Mag X, Y, Z:\t\t\t[ %.3f\t%.3f\t%.3f ]\n"
              "Ang Rate X, Y, Z:\t\t[ %.3f\t%.3f\t%.3f ]\n"
-             "Quaternions:\t\t\t[ %.3f\t%.3f\t%.3f\t%.3f ]\n"
              "Labjack:\t\t\t\t[ %.3fV\t%.3fV\t%.3f\t%.3f ]\n"
              "PID Errors:\n"
              "Pitch:\t\t\t\t[ %.3f\t%.3f\t%.3f ]\n"
@@ -77,16 +75,9 @@ void gui_update_status_text( )
              , msg.status.data.accel[0]
              , msg.status.data.accel[1]
              , msg.status.data.accel[2]
-             , msg.status.data.mag[0]
-             , msg.status.data.mag[1]
-             , msg.status.data.mag[2]
              , msg.status.data.ang_rate[0]
              , msg.status.data.ang_rate[1]
              , msg.status.data.ang_rate[2]
-             , msg.status.data.quat[0]
-             , msg.status.data.quat[1]
-             , msg.status.data.quat[2]
-             , msg.status.data.quat[3]
              , msg.status.data.battery1
              , msg.status.data.battery2
              , msg.status.data.pressure
@@ -104,7 +95,7 @@ void gui_update_status_text( )
              , msg.status.data.depth_ierr
              , msg.status.data.depth_derr
            );
-    //printf( "GUI_UPDATE_STATUS_TEXT: %s\n", sbuff );
+    //printf( "GUI_UPDATE_STATUS_TEXT:\n%s\n", sbuff );
 
     gtk_label_set_text( GTK_LABEL( label_status ), sbuff );
 } /* end gui_update_status_text() */
@@ -151,16 +142,11 @@ gint gui_timer_200ms( gpointer data )
     int recv_bytes = 0;
 	
     /* Get network data. */
-	printf( "GUI_200: 1.\n" );
     if ( planner_fd > 0 ) {
-		printf( "GUI_200: 2. planner_fd = %d\n", planner_fd );
         recv_bytes = net_client( planner_fd, planner_buf, &msg, MODE_STATUS );
-		printf( "GUI_200: 3.\n" );
         planner_buf[recv_bytes] = '\0';
 		if ( recv_bytes > 0 ) {
-			printf( "GUI_200: Got %d bytes.\n", recv_bytes );
         	messages_decode( planner_fd, planner_buf, &msg );
-			printf( "GUI_200: 4.\n" );
     	}
     }
 

@@ -258,7 +258,16 @@ int main( int argc, char *argv[] )
 			}
 		}
 
-		/* Get labjack data. Use either direct or network connection. */
+        /* Get nav data. Call this before labjack data. */
+		if ( nav_fd > 0 ) {
+			recv_bytes = net_client( nav_fd, nav_buf, &msg, MODE_PLANNER );
+			nav_buf[recv_bytes] = '\0';
+			if ( recv_bytes > 0 ) {
+				messages_decode( nav_fd, nav_buf, &msg );
+			}
+		}
+
+		/* Get labjack data. Call this after nav data. */
         if ( ( cf.enable_labjack ) && ( lj_fd > 0 ) ) {
             recv_bytes = net_client( lj_fd, lj_buf, &msg, MODE_STATUS );
             lj_buf[recv_bytes] = '\0';
@@ -272,16 +281,8 @@ int main( int argc, char *argv[] )
             msg.status.data.battery2   = msg.lj.data.battery2;
             msg.status.data.pressure   = msg.lj.data.pressure;
             msg.status.data.water      = msg.lj.data.water;
+			msg.status.data.depth      = msg.lj.data.pressure;
         }
-
-        /* Get nav data. */
-		if ( nav_fd > 0 ) {
-			recv_bytes = net_client( nav_fd, nav_buf, &msg, MODE_PLANNER );
-			nav_buf[recv_bytes] = '\0';
-			if ( recv_bytes > 0 ) {
-				messages_decode( nav_fd, nav_buf, &msg );
-			}
-		}
 
 		/* Update the task dt. */
 		time1s =    task_time.tv_sec;
