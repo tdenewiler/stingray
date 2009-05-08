@@ -42,8 +42,8 @@ void parse_line( CONF_VARS *config )
     }
 
     /* Check here to find out which variables to fill in. */
-    /* Server parameters */
-    if ( strncmp( tokens[0], "server", STRING_SIZE ) == 0 ) {
+    /* Nav parameters */
+    if ( strncmp( tokens[0], "nav", STRING_SIZE ) == 0 ) {
         if ( strncmp( tokens[1], "ip", STRING_SIZE ) == 0 ) {
             sscanf( tokens[2], "%d.%d.%d.%d"
                     , &( ip_octal[0] )
@@ -51,7 +51,17 @@ void parse_line( CONF_VARS *config )
                     , &( ip_octal[2] )
                     , &( ip_octal[3] )
                   );
-            strncpy( config->server_IP, tokens[2], STRING_SIZE );
+            strncpy( config->nav_IP, tokens[2], STRING_SIZE );
+        }
+        else if ( strncmp( tokens[1], "port", STRING_SIZE ) == 0 ) {
+            sscanf( tokens[2], "%hd", &config->nav_port );
+        }
+    } /* end nav parameters */
+
+	/* Server parameters */
+    if ( strncmp( tokens[0], "server", STRING_SIZE ) == 0 ) {
+        if ( strncmp( tokens[1], "port", STRING_SIZE ) == 0 ) {
+            sscanf( tokens[2], "%hd", &config->server_port );
         }
     } /* end server parameters */
 
@@ -103,9 +113,6 @@ void parse_line( CONF_VARS *config )
         if ( strncmp( tokens[1], "clients", STRING_SIZE ) == 0 ) {
             sscanf( tokens[2], "%d", &config->max_api_clients );
         }
-        else if ( strncmp( tokens[1], "port", STRING_SIZE ) == 0 ) {
-            sscanf( tokens[2], "%hd", &config->api_port );
-        }
     }
     else if ( strncmp( tokens[0], "net", STRING_SIZE ) == 0 ) {
         if ( strncmp( tokens[1], "mode", STRING_SIZE ) == 0 ) {
@@ -151,8 +158,8 @@ void parse_line( CONF_VARS *config )
         else if ( strncmp( tokens[1], "pololu", STRING_SIZE ) == 0 ) {
             sscanf( tokens[2], "%d", &config->enable_pololu );
         }
-        else if ( strncmp( tokens[1], "net", STRING_SIZE ) == 0 ) {
-            sscanf( tokens[2], "%d", &config->enable_net );
+        else if ( strncmp( tokens[1], "server", STRING_SIZE ) == 0 ) {
+            sscanf( tokens[2], "%d", &config->enable_server );
         }
         else if ( strncmp( tokens[1], "labjack", STRING_SIZE ) == 0 ) {
             sscanf( tokens[2], "%d", &config->enable_labjack );
@@ -162,6 +169,9 @@ void parse_line( CONF_VARS *config )
         }
         else if ( strncmp( tokens[1], "planner", STRING_SIZE ) == 0 ) {
             sscanf( tokens[2], "%d", &config->enable_planner );
+        }
+        else if ( strncmp( tokens[1], "nav", STRING_SIZE ) == 0 ) {
+            sscanf( tokens[2], "%d", &config->enable_nav );
         }
     }
     /* end enable parameters */
@@ -446,129 +456,6 @@ void parse_line( CONF_VARS *config )
         }
     }
 
-    /* Actuator parameters */
-    else if ( strncmp( tokens[0], "left", STRING_SIZE ) == 0 ) {
-        if ( strncmp( tokens[1], "thruster", STRING_SIZE ) == 0 ) {
-            if ( strncmp( tokens[2], "center", STRING_SIZE ) == 0 ) {
-                sscanf( tokens[3], "%d", &config->lthruster_center );
-            }
-            else if ( strncmp( tokens[2], "low", STRING_SIZE ) == 0 ) {
-                sscanf( tokens[3], "%d", &config->lthruster_min );
-            }
-            else if ( strncmp( tokens[2], "high", STRING_SIZE ) == 0 ) {
-                sscanf( tokens[3], "%d", &config->lthruster_max );
-            }
-        }
-        else if ( strncmp( tokens[1], "servo", STRING_SIZE ) == 0 ) {
-            if ( strncmp( tokens[2], "ang", STRING_SIZE ) == 0 ) {
-                if ( strncmp( tokens[3], "center", STRING_SIZE ) == 0 ) {
-                    sscanf( tokens[4], "%d", &config->lservo_ang_center );
-                }
-                else if ( strncmp( tokens[3], "low", STRING_SIZE ) == 0 ) {
-                    sscanf( tokens[4], "%d", &config->lservo_ang_min );
-                }
-                else if ( strncmp( tokens[3], "high", STRING_SIZE ) == 0 ) {
-                    sscanf( tokens[4], "%d", &config->lservo_ang_max );
-                }
-            }
-            else if ( strncmp( tokens[2], "rad", STRING_SIZE ) == 0 ) {
-                if ( strncmp( tokens[3], "center", STRING_SIZE ) == 0 ) {
-                    sscanf( tokens[4], "%d", &config->lservo_rad_center );
-                }
-                else if ( strncmp( tokens[3], "low", STRING_SIZE ) == 0 ) {
-                    sscanf( tokens[4], "%d", &config->lservo_rad_min );
-                }
-                else if ( strncmp( tokens[3], "high", STRING_SIZE ) == 0 ) {
-                    sscanf( tokens[4], "%d", &config->lservo_rad_max );
-                }
-            }
-        }
-        else if ( strncmp( tokens[1], "wing", STRING_SIZE ) == 0 ) {
-            if ( strncmp( tokens[2], "center", STRING_SIZE ) == 0 ) {
-                sscanf( tokens[3], "%d", &config->lwing_center );
-            }
-            else if ( strncmp( tokens[2], "low", STRING_SIZE ) == 0 ) {
-                sscanf( tokens[3], "%d", &config->lwing_min );
-            }
-            else if ( strncmp( tokens[2], "high", STRING_SIZE ) == 0 ) {
-                sscanf( tokens[3], "%d", &config->lwing_max );
-            }
-        }
-        else if ( strncmp( tokens[1], "tail", STRING_SIZE ) == 0 ) {
-            if ( strncmp( tokens[2], "center", STRING_SIZE ) == 0 ) {
-                sscanf( tokens[3], "%d", &config->ltail_center );
-            }
-            else if ( strncmp( tokens[2], "low", STRING_SIZE ) == 0 ) {
-                sscanf( tokens[3], "%d", &config->ltail_min );
-            }
-            else if ( strncmp( tokens[2], "high", STRING_SIZE ) == 0 ) {
-                sscanf( tokens[3], "%d", &config->ltail_max );
-            }
-        }
-    } /* end left actuators */
-
-    /* right actuators */
-    else if ( strncmp( tokens[0], "right", STRING_SIZE ) == 0 ) {
-        if ( strncmp( tokens[1], "thruster", STRING_SIZE ) == 0 ) {
-            if ( strncmp( tokens[2], "center", STRING_SIZE ) == 0 ) {
-                sscanf( tokens[3], "%d", &config->rthruster_center );
-            }
-            else if ( strncmp( tokens[2], "low", STRING_SIZE ) == 0 ) {
-                sscanf( tokens[3], "%d", &config->rthruster_min );
-            }
-            else if ( strncmp( tokens[2], "high", STRING_SIZE ) == 0 ) {
-                sscanf( tokens[3], "%d", &config->rthruster_max );
-            }
-        }
-        else if ( strncmp( tokens[1], "servo", STRING_SIZE ) == 0 ) {
-            if ( strncmp( tokens[2], "ang", STRING_SIZE ) == 0 ) {
-                if ( strncmp( tokens[3], "center", STRING_SIZE ) == 0 ) {
-                    sscanf( tokens[4], "%d", &config->rservo_ang_center );
-                }
-                else if ( strncmp( tokens[3], "low", STRING_SIZE ) == 0 ) {
-                    sscanf( tokens[4], "%d", &config->rservo_ang_min );
-                }
-                else if ( strncmp( tokens[3], "high", STRING_SIZE ) == 0 ) {
-                    sscanf( tokens[4], "%d", &config->rservo_ang_max );
-                }
-            }
-            else if ( strncmp( tokens[2], "rad", STRING_SIZE ) == 0 ) {
-                if ( strncmp( tokens[3], "center", STRING_SIZE ) == 0 ) {
-                    sscanf( tokens[4], "%d", &config->rservo_rad_center );
-                }
-                else if ( strncmp( tokens[3], "low", STRING_SIZE ) == 0 ) {
-                    sscanf( tokens[4], "%d", &config->rservo_rad_min );
-                }
-                else if ( strncmp( tokens[3], "high", STRING_SIZE ) == 0 ) {
-                    sscanf( tokens[4], "%d", &config->rservo_rad_max );
-                }
-            }
-        }
-        else if ( strncmp( tokens[1], "wing", STRING_SIZE ) == 0 ) {
-            if ( strncmp( tokens[2], "center", STRING_SIZE ) == 0 ) {
-                sscanf( tokens[3], "%d", &config->rwing_center );
-            }
-            else if ( strncmp( tokens[2], "low", STRING_SIZE ) == 0 ) {
-                sscanf( tokens[3], "%d", &config->rwing_min );
-            }
-            else if ( strncmp( tokens[2], "high", STRING_SIZE ) == 0 ) {
-                sscanf( tokens[3], "%d", &config->rwing_max );
-            }
-        }
-        else if ( strncmp( tokens[1], "tail", STRING_SIZE ) == 0 ) {
-            if ( strncmp( tokens[2], "center", STRING_SIZE ) == 0 ) {
-                sscanf( tokens[3], "%d", &config->rtail_center );
-            }
-            else if ( strncmp( tokens[2], "low", STRING_SIZE ) == 0 ) {
-                sscanf( tokens[3], "%d", &config->rtail_min );
-            }
-            else if ( strncmp( tokens[2], "high", STRING_SIZE ) == 0 ) {
-                sscanf( tokens[3], "%d", &config->rtail_max );
-            }
-        }
-    } /* end right actuators */
-    /* end actuator parameters */
-
 } /* end parse_line() */
 
 
@@ -722,7 +609,6 @@ int parse_cla( int argc,
 {
     /* Get command line arguments and parse configuration file. */
     char *cvalue = NULL;
-    int index;
     int cmd;
 
     /* Parse the configuration file passed in on command line. */
@@ -787,10 +673,14 @@ void parse_default_config( CONF_VARS *config )
     strncpy( config->imu_port, "/dev/ttyUSB5", STRING_SIZE );
 
     /* net */
-    config->enable_net = TRUE;
+    config->enable_server = TRUE;
+	config->server_port = 0;
     config->net_mode = 1;
-    config->api_port = 2000;
-    strncpy( config->server_IP, "127.0.0.1", STRING_SIZE );
+
+	/* nav */
+	config->enable_nav = FALSE;
+    config->nav_port = 2000;
+    strncpy( config->nav_IP, "127.0.0.1", STRING_SIZE );
     config->max_api_clients = 5;
 
     /* pid */
@@ -852,36 +742,6 @@ void parse_default_config( CONF_VARS *config )
     config->enable_pololu = TRUE;
     config->pololu_baud = 9600;
     strncpy( config->pololu_port, "/dev/ttyUSB4", STRING_SIZE );
-    config->lthruster_center = 0;
-    config->lthruster_min = 0;
-    config->lthruster_max = 100;
-    config->lservo_rad_center = 0;
-    config->lservo_rad_min = 0;
-    config->lservo_rad_max = 100;
-    config->lservo_ang_center = 0;
-    config->lservo_ang_min = 0;
-    config->lservo_ang_max = 100;
-    config->lwing_center = 0;
-    config->lwing_min = 0;
-    config->lwing_max = 100;
-    config->ltail_center = 0;
-    config->ltail_min = 0;
-    config->ltail_max = 100;
-    config->rthruster_center = 0;
-    config->rthruster_min = 0;
-    config->rthruster_max = 100;
-    config->rservo_rad_center = 0;
-    config->rservo_rad_min = 0;
-    config->rservo_rad_max = 100;
-    config->rservo_ang_center = 0;
-    config->rservo_ang_min = 0;
-    config->rservo_ang_max = 100;
-    config->rwing_center = 0;
-    config->rwing_min = 0;
-    config->rwing_max = 100;
-    config->rtail_center = 0;
-    config->rtail_min = 0;
-    config->rtail_max = 100;
 
     /* gui */
     config->enable_gui = FALSE;
