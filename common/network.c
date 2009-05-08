@@ -43,8 +43,6 @@ static struct hostent *hent;
  *
  * Output:      fd: File descriptor for the server.
  *
- * Globals:     read_fds, master, fdmax
- *
  *****************************************************************************/
 
 int net_server_setup( short port )
@@ -88,8 +86,6 @@ int net_server_setup( short port )
  *
  * Output:      fd: File descriptor for the client.
  *
- * Globals:     read_fds, master
- *
  *****************************************************************************/
 
 int net_client_setup( char *address, short port )
@@ -124,8 +120,6 @@ int net_client_setup( char *address, short port )
  *
  * Output:      recv_bytes: Number of bytes received.
  *
- * Globals:     read_fds, master, fdmax
- *
  *****************************************************************************/
 
 int net_server( int fd, void *buf, MSG_DATA *msg, int mode )
@@ -143,7 +137,7 @@ int net_server( int fd, void *buf, MSG_DATA *msg, int mode )
 
     /* Copy the master set into the read_fds set as read_fds gets modified by
      * the FD_ISSET() system call. */
-    memcpy( &read_fds, &master, sizeof( master ) );
+    memcpy( &read_fds, &master, sizeof(master) );
     net_select( tv );
 
     /* For each socket with data available read that data and then send UUV
@@ -198,8 +192,6 @@ int net_server( int fd, void *buf, MSG_DATA *msg, int mode )
  *
  * Output:      recv_bytes: Number of bytes received.
  *
- * Globals:     read_fds, master.
- *
  *****************************************************************************/
 
 int net_client( int fd, void *buf, MSG_DATA *msg, int mode )
@@ -236,8 +228,6 @@ int net_client( int fd, void *buf, MSG_DATA *msg, int mode )
  *
  * Output:      None.
  *
- * Globals:     None.
- *
  *****************************************************************************/
 
 void net_sigchld_handler( int socket )
@@ -255,8 +245,6 @@ void net_sigchld_handler( int socket )
  * Input:       None.
  *
  * Output:      fd: A network file descriptor.
- *
- * Globals:     None.
  *
  *****************************************************************************/
 
@@ -285,8 +273,6 @@ int net_socket( )
  * Input:       fd: A network file descriptor.
  *
  * Output:      -1 if error, else 0.
- *
- * Globals:     None.
  *
  *****************************************************************************/
 
@@ -318,8 +304,6 @@ int net_setsockopt( int *fd )
  * Input:       None.
  *
  * Output:      -1 if error, else 0.
- *
- * Globals:     None.
  *
  *****************************************************************************/
 
@@ -356,8 +340,6 @@ int net_setnonblock( int *fd )
  *
  * Output:      None.
  *
- * Globals:     None.
- *
  *****************************************************************************/
 
 void net_bind( int *fd, short port )
@@ -369,13 +351,13 @@ void net_bind( int *fd, short port )
     my_addr.sin_family = AF_INET;
     my_addr.sin_port = htons( port );
     my_addr.sin_addr.s_addr = INADDR_ANY;
-    memset( my_addr.sin_zero, '\0', sizeof( my_addr.sin_zero ) );
+    memset( my_addr.sin_zero, '\0', sizeof(my_addr.sin_zero) );
 
     /* Bind the socket with specific address and port. */
 
     if ( bind( *fd,
-               ( struct sockaddr * )&my_addr,
-               sizeof( struct sockaddr_in ) )
+               (struct sockaddr *)&my_addr,
+               sizeof(struct sockaddr_in) )
             == -1 ) {
         perror( "bind" );
     }
@@ -392,8 +374,6 @@ void net_bind( int *fd, short port )
  * Input:       fd: A pointer to a network file descriptor.
  *
  * Output:      None.
- *
- * Globals:     master, fdmax
  *
  *****************************************************************************/
 
@@ -422,8 +402,6 @@ void net_listen( int *fd )
  * Input:       None.
  *
  * Output:      None.
- *
- * Globals:     None.
  *
  *****************************************************************************/
 
@@ -454,8 +432,6 @@ void net_sigaction( )
  * Input:       fd_orig: The original network file descriptor.
  *
  * Output:      fd_ret: The modified file descriptor.
- *
- * Globals:     fdmax
  *
  *****************************************************************************/
 
@@ -493,8 +469,6 @@ int net_accept( int fd_orig )
  *
  * Output:      None.
  *
- * Globals:     None.
- *
  *****************************************************************************/
 
 void net_close( int fd )
@@ -515,8 +489,6 @@ void net_close( int fd )
  *
  * Output:      retval: Fills in read_fds struct with file descriptors waiting
  *                      to be read from using select() system call.
- *
- * Globals:     fdmax, read_fds
  *
  *****************************************************************************/
 
@@ -547,8 +519,6 @@ int net_select( struct timeval tv )
  *
  * Output:      None.
  *
- * Globals:     hent
- *
  *****************************************************************************/
 
 void net_gethostbyname( char *address )
@@ -570,8 +540,6 @@ void net_gethostbyname( char *address )
  *
  * Output:      fd on success, -1 on failure.
  *
- * Globals:     hent
- *
  *****************************************************************************/
 
 int net_connect( int fd, short port )
@@ -580,14 +548,14 @@ int net_connect( int fd, short port )
     struct sockaddr_in their_addr;
 
     /* Set socket parameters. */
-    memset( &their_addr, 0, sizeof( struct sockaddr_in ) );
+    memset( &their_addr, 0, sizeof(struct sockaddr_in) );
     their_addr.sin_family = AF_INET;
-    their_addr.sin_addr = *( ( struct in_addr * )hent->h_addr );
+    their_addr.sin_addr = *((struct in_addr *)hent->h_addr);
     their_addr.sin_port = htons( port );
 
     if ( connect( fd,
-                  ( struct sockaddr * )&their_addr,
-                  sizeof( struct sockaddr_in ) )
+                  (struct sockaddr *)&their_addr,
+                  sizeof(struct sockaddr_in) )
             == -1 ) {
         perror( "connect" );
         net_close( fd );
@@ -609,8 +577,6 @@ int net_connect( int fd, short port )
  *              len: The message length.
  *
  * Output:      send_bytes: The number of bytes sent.
- *
- * Globals:     None.
  *
  *****************************************************************************/
 
@@ -640,8 +606,6 @@ int net_send( int fd, const void *msg, int len )
  *              buf: A buffer for network data.
  *
  * Output:      recv_bytes: The number of bytes received.
- *
- * Globals:     None.
  *
  *****************************************************************************/
 

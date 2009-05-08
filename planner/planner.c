@@ -46,8 +46,6 @@ int nav_fd;
  *
  * Output:      None.
  *
- * Globals:     None.
- *
  *****************************************************************************/
 
 void planner_sigint( int signal )
@@ -67,18 +65,15 @@ void planner_sigint( int signal )
  *
  * Output:      None.
  *
- * Globals:     File descriptors: server_fd, pololu_fd, labjack_fd, imu_fd.
- *
  *****************************************************************************/
 
 void planner_exit( )
 {
-	printf( "PLANNER_EXIT: Shutting down planner program ... " );
+	printf("PLANNER_EXIT: Shutting down planner program ... ");
 	/* Sleep to let things shut down properly. */
 	usleep( 200000 );
 
 	/* Close the open file descriptors. */
-
 	if ( server_fd > 0 ) {
 		close( server_fd );
 	}
@@ -92,7 +87,7 @@ void planner_exit( )
 		close( nav_fd );
 	}
 
-	printf( "<OK>\n\n" );
+	printf("<OK>\n\n");
 } /* end planner_exit() */
 
 
@@ -106,8 +101,6 @@ void planner_exit( )
  *              argv: Array of command line arguments.
  *
  * Output:      None.
- *
- * Globals:     None.
  *
  *****************************************************************************/
 
@@ -147,7 +140,7 @@ int main( int argc, char *argv[] )
 
 	int old_task = 0;
 
-	printf( "MAIN: Starting Planner ... \n" );
+	printf("MAIN: Starting Planner ... \n");
 
 	/* Initialize variables. */
 	server_fd = -1;
@@ -173,10 +166,10 @@ int main( int argc, char *argv[] )
 	if ( cf.enable_server ) {
 		server_fd = net_server_setup( cf.server_port );
 		if ( server_fd > 0 ) {
-			printf( "MAIN: Server setup OK.\n" );
+			printf("MAIN: Server setup OK.\n");
 		}
 		else {
-			printf( "MAIN: WARNING!!! Server setup failed.\n" );
+			printf("MAIN: WARNING!!! Server setup failed.\n");
 		}
 	}
 
@@ -184,10 +177,10 @@ int main( int argc, char *argv[] )
 	if ( cf.enable_vision ) {
 		vision_fd = net_client_setup( cf.vision_IP, cf.vision_port );
 		if ( vision_fd > 0 ) {
-			printf( "MAIN: Vision client setup OK.\n" );
+			printf("MAIN: Vision client setup OK.\n");
 		}
 		else {
-			printf( "MAIN: WARNING!!! Vision client setup failed.\n" );
+			printf("MAIN: WARNING!!! Vision client setup failed.\n");
 		}
 	}
 
@@ -195,10 +188,10 @@ int main( int argc, char *argv[] )
     if ( cf.enable_labjack ) {
         lj_fd = net_client_setup( cf.labjackd_IP, cf.labjackd_port );
 		if ( lj_fd > 0 ) {
-			printf( "MAIN: Labjack client setup OK.\n" );
+			printf("MAIN: Labjack client setup OK.\n");
 		}
 		else {
-			printf( "MAIN: WARNING!!! Labjack client setup failed.\n" );
+			printf("MAIN: WARNING!!! Labjack client setup failed.\n");
 		}
     }
 
@@ -206,10 +199,10 @@ int main( int argc, char *argv[] )
 	if ( cf.enable_nav ) {
         nav_fd = net_client_setup( cf.nav_IP, cf.nav_port );
 		if ( nav_fd > 0 ) {
-			printf( "MAIN: Nav client setup OK.\n" );
+			printf("MAIN: Nav client setup OK.\n");
 		}
 		else {
-			printf( "MAIN: WARNING!!! Nav client setup failed.\n" );
+			printf("MAIN: WARNING!!! Nav client setup failed.\n");
 		}
     }
 
@@ -220,7 +213,7 @@ int main( int argc, char *argv[] )
 	gettimeofday( &plan_start, NULL );
 	gettimeofday( &task_time, NULL );
 	gettimeofday( &task_start, NULL );
-	printf( "MAIN: Planner running now.\n" );
+	printf("MAIN: Planner running now.\n");
 
 	/* Main loop. */
 	while ( 1 ) {

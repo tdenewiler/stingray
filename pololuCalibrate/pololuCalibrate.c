@@ -25,18 +25,19 @@ int main( void )
 	pololu_fd = pololuSetup( pololu_port, 9600 );
 
 	/* Send full throttle commands to channels 0 and 3. */
+	printf("MAIN: Sending full throttle commands.\n");
 	pololuSetPosition7Bit(pololu_fd,0,127);
 	pololuSetPosition7Bit(pololu_fd,3,127);
-	printf( "MAIN: Waiting for you to press a key ... " );
+	printf("MAIN: Waiting for you to press a key before setting neutral position ... ");
 	getchar( );
 	printf( "<OK>\n" );
 
 	/* Set the desired neutral position for channels 0 and 3. */
 	pololuSetPosition7Bit(pololu_fd,0,63);
 	pololuSetPosition7Bit(pololu_fd,3,63);
-	printf( "MAIN: Waiting for you to press a key ... " );
+	printf("MAIN: Waiting for you to press a key to exit ... ");
 	getchar( );
-	printf( "<OK>\n" );
+	printf("<OK>\n");
 
 	return 0;
 } /* end main() */

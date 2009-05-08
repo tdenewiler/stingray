@@ -55,7 +55,6 @@ int lj_fd;
  *
  * Description: Uploads data to the SSA dataserver
  *
- *
  *****************************************************************************/
 
 static void ssa_update_telemetry(
@@ -123,8 +122,6 @@ static void ssa_update_telemetry(
  *
  * Output:      None.
  *
- * Globals:     None.
- *
  *****************************************************************************/
 
 void nav_sigint( int signal )
@@ -145,13 +142,11 @@ void nav_sigint( int signal )
  *
  * Output:      None.
  *
- * Globals:     File descriptors: server_fd, pololu_fd, labjack_fd, imu_fd.
- *
  *****************************************************************************/
 
 void nav_exit( )
 {
-    printf( "\nNAV_EXIT: Shutting down nav program ... " );
+    printf("\nNAV_EXIT: Shutting down nav program ... ");
     /* Sleep to let things shut down properly. */
     usleep( 200000 );
 
@@ -172,7 +167,7 @@ void nav_exit( )
 		close( lj_fd );
 	}
 
-    printf( "<OK>\n\n" );
+    printf("<OK>\n\n");
 } /* end nav_exit() */
 
 
@@ -186,8 +181,6 @@ void nav_exit( )
  *              argv: Array of command line arguments.
  *
  * Output:      None.
- *
- * Globals:     None.
  *
  *****************************************************************************/
 
@@ -230,7 +223,7 @@ int main( int argc, char *argv[] )
     int time2ms = 0;
     int dt = 0;
 
-    printf( "MAIN: Starting Navigation ... \n" );
+    printf("MAIN: Starting Navigation ... \n");
 
     /* Initialize variables. */
     server_fd = -1;
@@ -269,10 +262,10 @@ int main( int argc, char *argv[] )
     if ( cf.enable_server ) {
         server_fd = net_server_setup( cf.server_port );
 		if ( server_fd > 0 ) {
-			printf( "MAIN: Nav server setup OK.\n" );
+			printf("MAIN: Nav server setup OK.\n");
 		}
 		else {
-			printf( "MAIN: WARNING!!! Nav server setup failed.\n" );
+			printf("MAIN: WARNING!!! Nav server setup failed.\n");
 		}
     }
 
@@ -280,10 +273,10 @@ int main( int argc, char *argv[] )
     if ( cf.enable_imu ) {
         imu_fd = mstrain_setup( cf.imu_port , cf.imu_baud );
 		if ( imu_fd > 0 ) {
-			printf( "MAIN: IMU setup OK.\n" );
+			printf("MAIN: IMU setup OK.\n");
 		}
 		else {
-			printf( "MAIN: WARNING!!! IMU setup failed.\n" );
+			printf("MAIN: WARNING!!! IMU setup failed.\n");
 		}
     }
 
@@ -293,10 +286,10 @@ int main( int argc, char *argv[] )
 		if ( pololu_fd > 0 ) {
 			/* Initialize the pololu. */
 			pololuInitializeChannels( pololu_fd );
-			printf( "MAIN: Pololu setup OK.\n" );
+			printf("MAIN: Pololu setup OK.\n");
 		}
 		else {
-			printf( "MAIN: WARNING!!! Pololu setup failed.\n" );
+			printf("MAIN: WARNING!!! Pololu setup failed.\n");
 		}
     }
 
@@ -304,10 +297,10 @@ int main( int argc, char *argv[] )
 	if ( (cf.enable_labjack > 0) && (cf.enable_pololu > 0) ) {
         lj_fd = net_client_setup( cf.labjackd_IP, cf.labjackd_port );
 		if ( lj_fd > 0 ) {
-			printf( "MAIN: Labjack client setup OK.\n" );
+			printf("MAIN: Labjack client setup OK.\n");
 		}
 		else {
-			printf( "MAIN: WARNING!!! Labjack client setup failed.\n" );
+			printf("MAIN: WARNING!!! Labjack client setup failed.\n");
 		}
 	}
 
@@ -321,7 +314,7 @@ int main( int argc, char *argv[] )
     gettimeofday( &depth_time, NULL );
     gettimeofday( &depth_start, NULL );
 
-	printf( "MAIN: Nav running now.\n" );
+	printf("MAIN: Nav running now.\n");
 
     /* Main loop. */
     while ( 1 ) {
@@ -339,7 +332,7 @@ int main( int argc, char *argv[] )
 				pololuInitializeChannels( pololu_fd );
 				close( lj_fd );
 				lj_fd = 0;
-				printf( "MAIN: Kill switch closed.\n" );
+				printf("MAIN: Kill switch closed.\n");
 			}
 		}
 		
@@ -354,8 +347,8 @@ int main( int argc, char *argv[] )
 
         /* Check state of emergency stop value. */
         if ( msg.stop.data.state == TRUE ) {
-            printf( "MAIN:  EMERGENCY STOP received. Setting actuators to\n"
-                    "       safe positions!\n" );
+            printf("MAIN: EMERGENCY STOP received. Setting actuators to\n"
+                    "     safe positions!\n");
             /* Set all the actuators to safe positions. */
             pololuInitializeChannels( pololu_fd );
         }
@@ -387,13 +380,9 @@ int main( int argc, char *argv[] )
 
         /* Get Microstrain data. */
         if ( ( cf.enable_imu ) && ( imu_fd > 0 ) ) {
-            recv_bytes = mstrain_euler_vectors( imu_fd,
-                                                &msg.mstrain.data.pitch,
-                                                &msg.mstrain.data.roll,
-                                                &msg.mstrain.data.yaw,
-                                                msg.mstrain.data.accel,
-                                                msg.mstrain.data.ang_rate
-                                              );
+            recv_bytes = mstrain_euler_vectors( imu_fd, &msg.mstrain.data.pitch,
+				&msg.mstrain.data.roll, &msg.mstrain.data.yaw, msg.mstrain.data.accel,
+				msg.mstrain.data.ang_rate );
         }
 
         /* Perform PID loops. */

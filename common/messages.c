@@ -33,8 +33,6 @@
  *
  * Output:      None.
  *
- * Globals:     None.
- *
  *****************************************************************************/
 
 void messages_send( int fd,
@@ -59,7 +57,7 @@ void messages_send( int fd,
             msg->mstrain.data.eeprom_value    = htons( msg->mstrain.data.eeprom_value );
 
             /* Actually send message here. */
-            net_send( fd, &msg->mstrain, sizeof( MSTRAIN_MSG ) );
+            net_send( fd, &msg->mstrain, sizeof(MSTRAIN_MSG) );
 
             /* Convert the values back to host byte order. */
             msg->mstrain.data.serial_number   = ntohl( msg->mstrain.data.serial_number );
@@ -71,7 +69,7 @@ void messages_send( int fd,
             msg->stop.hdr.msgid = STOP_MSGID;
 
             /* Actually send message here. */
-            net_send( fd, &msg->stop, sizeof( STOP_MSG ) );
+            net_send( fd, &msg->stop, sizeof(STOP_MSG) );
             break;
 
         case SERVO_MSGID:
@@ -79,7 +77,7 @@ void messages_send( int fd,
             msg->servo.data.sync = SSC_SYNC;
 
             /* Actually send message here. */
-            net_send( fd, &msg->servo, sizeof( SERVO_MSG ) );
+            net_send( fd, &msg->servo, sizeof(SERVO_MSG) );
             break;
 
         case CLIENT_MSGID:
@@ -94,7 +92,7 @@ void messages_send( int fd,
             msg->client.data.dropper        = htonl( msg->client.data.dropper );
 
             /* Actually send message here. */
-            net_send( fd, &msg->client, sizeof( CLIENT_MSG ) );
+            net_send( fd, &msg->client, sizeof(CLIENT_MSG) );
 
             /* Convert the values back to host byte order. */
             msg->client.data.enable_servos  = ntohl( msg->client.data.enable_servos );
@@ -116,7 +114,7 @@ void messages_send( int fd,
             msg->target.data.depth = htonl( msg->target.data.depth );
 
             /* Actually send message here. */
-            net_send( fd, &msg->target, sizeof( TARGET_MSG ) );
+            net_send( fd, &msg->target, sizeof(TARGET_MSG) );
 
             /* Convert the values back to host byte order. */
             msg->target.data.mode  = ntohl( msg->target.data.mode );
@@ -130,7 +128,7 @@ void messages_send( int fd,
             msg->gain.hdr.msgid = GAIN_MSGID;
 
             /* Actually send message here. */
-            net_send( fd, &msg->gain, sizeof( GAIN_MSG ) );
+            net_send( fd, &msg->gain, sizeof(GAIN_MSG) );
             break;
 
         case STATUS_MSGID:
@@ -143,7 +141,7 @@ void messages_send( int fd,
             msg->status.data.depth_period   = htonl( msg->status.data.depth_period );
 
             /* Actually send message here. */
-            net_send( fd, &msg->status, sizeof( STATUS_MSG ) );
+            net_send( fd, &msg->status, sizeof(STATUS_MSG) );
 
             /* Convert the values back to host byte order. */
             msg->status.data.pitch_period   = ntohl( msg->status.data.pitch_period );
@@ -161,7 +159,7 @@ void messages_send( int fd,
             msg->vision.data.bottom_x   = htonl( msg->vision.data.bottom_x );
 
             /* Actually send message here. */
-            net_send( fd, &msg->vision, sizeof( VISION_MSG ) );
+            net_send( fd, &msg->vision, sizeof(VISION_MSG) );
 
             /* Convert the values back to host byte order. */
             msg->vision.data.front_x    = ntohl( msg->vision.data.front_x );
@@ -173,14 +171,14 @@ void messages_send( int fd,
             msg->task.hdr.msgid = TASK_MSGID;
 
             /* Actually send message here. */
-            net_send( fd, &msg->task, sizeof( TASK_MSG ) );
+            net_send( fd, &msg->task, sizeof(TASK_MSG) );
             break;
 
         case LJ_MSGID:
             msg->lj.hdr.msgid = LJ_MSGID;
 
             /* Actually send message here. */
-            net_send( fd, &msg->lj, sizeof( LJ_MSG ) );
+            net_send( fd, &msg->lj, sizeof(LJ_MSG) );
             break;
 
         case VSETTING_MSGID:
@@ -193,7 +191,7 @@ void messages_send( int fd,
             msg->vsetting.data.save_fvideo = htonl( msg->vsetting.data.save_fvideo );
 
             /* Actually send message here. */
-            net_send( fd, &msg->vsetting, sizeof( VSETTING_MSG ) );
+            net_send( fd, &msg->vsetting, sizeof(VSETTING_MSG) );
 
             /* Convert the values back to host byte order. */
             msg->vsetting.data.save_bframe = ntohl( msg->vsetting.data.save_bframe );
@@ -205,7 +203,7 @@ void messages_send( int fd,
             msg->teleop.hdr.msgid = TELEOP_MSGID;
 
             /* Actually send message here. */
-            net_send( fd, &msg->teleop, sizeof( TELEOP_MSG ) );
+            net_send( fd, &msg->teleop, sizeof(TELEOP_MSG) );
             break;
     }
 } /* end messages_send() */
@@ -227,8 +225,6 @@ void messages_send( int fd,
  *
  * Output:      None.
  *
- * Globals:     None.
- *
  *****************************************************************************/
 
 void messages_decode( int fd, char *buf, MSG_DATA *msg )
@@ -236,11 +232,11 @@ void messages_decode( int fd, char *buf, MSG_DATA *msg )
     /* Determine what message type was received. */
     switch ( ( ( HEADER * )buf )->msgid ) {
         case OPEN_MSGID:
-            msg->open.hdr.msgid = ( ( HEADER * )buf )->msgid;
+            msg->open.hdr.msgid = ((HEADER *)buf)->msgid;
             break;
 
         case MSTRAIN_MSGID:
-            msg->mstrain.data = ( ( MSTRAIN_MSG * )buf )->data;
+            msg->mstrain.data = ((MSTRAIN_MSG *)buf)->data;
 
             /* Convert from network to host byte order. */
             msg->mstrain.data.serial_number  = ntohl( msg->mstrain.data.serial_number );
@@ -249,15 +245,15 @@ void messages_decode( int fd, char *buf, MSG_DATA *msg )
             break;
 
         case STOP_MSGID:
-            msg->stop.data = ( ( STOP_MSG * )buf )->data;
+            msg->stop.data = ((STOP_MSG *)buf)->data;
             break;
 
         case SERVO_MSGID:
-            msg->servo.data = ( ( SERVO_MSG * )buf )->data;
+            msg->servo.data = ((SERVO_MSG *)buf)->data;
             break;
 
         case CLIENT_MSGID:
-            msg->client.data = ( ( CLIENT_MSG * )buf )->data;
+            msg->client.data = ((CLIENT_MSG *)buf)->data;
 
             /* Convert from network to host byte order. */
             msg->client.data.enable_servos = ntohl( msg->client.data.enable_servos );
@@ -269,22 +265,22 @@ void messages_decode( int fd, char *buf, MSG_DATA *msg )
             break;
 
         case TARGET_MSGID:
-            msg->target.data = ( ( TARGET_MSG * )buf )->data;
+            msg->target.data = ((TARGET_MSG *)buf)->data;
 				
             /* Convert from network to host byte order. */
             msg->target.data.mode  = ntohl( msg->target.data.mode );
             break;
 
         case GAIN_MSGID:
-			msg->gain.data = ( ( GAIN_MSG * )buf )->data;
+			msg->gain.data = ((GAIN_MSG *)buf)->data;
             break;
 
         case STATUS_MSGID:
-            msg->status.data = ( ( STATUS_MSG * )buf )->data;
+            msg->status.data = ((STATUS_MSG *)buf)->data;
             break;
 
         case VISION_MSGID:
-            msg->vision.data = ( ( VISION_MSG * )buf )->data;
+            msg->vision.data = ((VISION_MSG *)buf)->data;
 
             /* Convert from network to host byte order. */
             msg->vision.data.front_x    = ntohl( msg->vision.data.front_x );
@@ -293,16 +289,16 @@ void messages_decode( int fd, char *buf, MSG_DATA *msg )
             break;
 
         case TASK_MSGID:
-        	printf( "MSGS_DECODE: task=%d\n", ( ( TASK_MSG * )buf )->data.num );
-            msg->task.data = ( ( TASK_MSG * )buf )->data;
+        	printf( "MSGS_DECODE: task=%d\n", ((TASK_MSG *)buf)->data.num);
+            msg->task.data = ((TASK_MSG *)buf)->data;
             break;
 
         case LJ_MSGID:
-            msg->lj.data = ( ( LJ_MSG * )buf )->data;
+            msg->lj.data = ((LJ_MSG *)buf)->data;
             break;
 
         case VSETTING_MSGID:
-            msg->vsetting.data = ( ( VSETTING_MSG * )buf )->data;
+            msg->vsetting.data = ((VSETTING_MSG *)buf)->data;
 
             /* Convert from network to host byte order. */
             msg->vsetting.data.save_bframe = ntohl( msg->vsetting.data.save_bframe );
@@ -312,7 +308,7 @@ void messages_decode( int fd, char *buf, MSG_DATA *msg )
             break;
 
         case TELEOP_MSGID:
-            msg->teleop.data = ( ( TELEOP_MSG * )buf )->data;
+            msg->teleop.data = ((TELEOP_MSG *)buf)->data;
             break;
     }
 } /* end messages_decode() */
@@ -328,26 +324,24 @@ void messages_decode( int fd, char *buf, MSG_DATA *msg )
  *
  * Output:      None.
  *
- * Globals:     None.
- *
  *****************************************************************************/
 
 void messages_update( MSG_DATA *msg )
 {
-    msg->status.data.mag[0] = msg->mstrain.data.mag[0];
-    msg->status.data.mag[1] = msg->mstrain.data.mag[1];
-    msg->status.data.mag[2] = msg->mstrain.data.mag[2];
-    msg->status.data.accel[0] = msg->mstrain.data.accel[0];
-    msg->status.data.accel[1] = msg->mstrain.data.accel[1];
-    msg->status.data.accel[2] = msg->mstrain.data.accel[2];
+    msg->status.data.mag[0]      = msg->mstrain.data.mag[0];
+    msg->status.data.mag[1]      = msg->mstrain.data.mag[1];
+    msg->status.data.mag[2]      = msg->mstrain.data.mag[2];
+    msg->status.data.accel[0]    = msg->mstrain.data.accel[0];
+    msg->status.data.accel[1]    = msg->mstrain.data.accel[1];
+    msg->status.data.accel[2]    = msg->mstrain.data.accel[2];
     msg->status.data.ang_rate[0] = msg->mstrain.data.ang_rate[0];
     msg->status.data.ang_rate[1] = msg->mstrain.data.ang_rate[1];
     msg->status.data.ang_rate[2] = msg->mstrain.data.ang_rate[2];
-    msg->status.data.quat[0] = msg->mstrain.data.quat[0];
-    msg->status.data.quat[1] = msg->mstrain.data.quat[1];
-    msg->status.data.quat[2] = msg->mstrain.data.quat[2];
-    msg->status.data.quat[3] = msg->mstrain.data.quat[3];
-    msg->status.data.pitch = msg->mstrain.data.pitch;
-    msg->status.data.roll = msg->mstrain.data.roll;
-    msg->status.data.yaw = msg->mstrain.data.yaw;
+    msg->status.data.quat[0]     = msg->mstrain.data.quat[0];
+    msg->status.data.quat[1]     = msg->mstrain.data.quat[1];
+    msg->status.data.quat[2]     = msg->mstrain.data.quat[2];
+    msg->status.data.quat[3]     = msg->mstrain.data.quat[3];
+    msg->status.data.pitch       = msg->mstrain.data.pitch;
+    msg->status.data.roll        = msg->mstrain.data.roll;
+    msg->status.data.yaw         = msg->mstrain.data.yaw;
 } /* end messages_update() */

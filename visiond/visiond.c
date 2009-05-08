@@ -46,8 +46,6 @@ IplImage *b_bin_img;
  *
  * Output:      None.
  *
- * Globals:     None.
- *
  *****************************************************************************/
 
 void visiond_sigint( int signal )
@@ -67,13 +65,11 @@ void visiond_sigint( int signal )
  *
  * Output:      None.
  *
- * Globals:     File descriptors: server_fd, pololu_fd, labjack_fd, imu_fd.
- *
  *****************************************************************************/
 
 void visiond_exit( )
 {
-    printf( "\nVISIOND_EXIT: Shutting down visiond program ... " );
+    printf("\nVISIOND_EXIT: Shutting down visiond program ... ");
     /* Sleep to let things shut down properly. */
     usleep( 200000 );
 
@@ -94,7 +90,7 @@ void visiond_exit( )
     cvReleaseImage( &b_bin_img );
     cvReleaseImage( &f_bin_img );
 
-    printf( "<OK>\n\n" );
+    printf("<OK>\n\n");
 } /* end visiond_exit() */
 
 
@@ -108,8 +104,6 @@ void visiond_exit( )
  *              argv: Array of command line arguments.
  *
  * Output:      None.
- *
- * Globals:     None.
  *
  *****************************************************************************/
 
@@ -190,32 +184,30 @@ int main( int argc, char *argv[] )
     if ( cf.enable_server ) {
         server_fd = net_server_setup( cf.server_port );
 		if ( server_fd > 0 ) {
-			printf( "MAIN: Server setup OK.\n" );
+			printf("MAIN: Server setup OK.\n");
 		}
 		else {
-			printf( "MAIN: WARNING!!! Server setup failed.\n" );
+			printf("MAIN: WARNING!!! Server setup failed.\n");
 		}
     }
 
     /* Need to have a config about what cameras if any to open */
-    if ( cf.op_mode == 99 )
-    {
+    if ( cf.op_mode == 99 ) {
     	/* Special case for bad camera. */
-    	printf( "MAIN: Skipping camera opening.\n" );
+    	printf("MAIN: Skipping camera opening because op mode = 99 in configuration file.\n");
 	}
-	else
-	{
+	else {
 		/* Open front camera. */
 		f_cam = cvCaptureFromCAM( camera );
 		if ( !f_cam ) {
 			cvReleaseCapture( &f_cam );
-			printf( "MAIN: Could not open f_cam.\n" );
+			printf("MAIN: Could not open f_cam.\n");
 		}
 		else {
 			f_img = cvQueryFrame( f_cam );
 			f_bin_img = cvCreateImage( cvGetSize( f_img ), IPL_DEPTH_8U, 1 );
 			fence_center = f_img->width / 2;
-			printf( "MAIN: Front camera opened OK.\n" );
+			printf("MAIN: Front camera opened OK.\n");
 		}
 	
 		/* Open bottom camera. */
@@ -223,12 +215,12 @@ int main( int argc, char *argv[] )
 		b_cam = cvCaptureFromCAM( camera );
 		if ( !b_cam ) {
 			cvReleaseCapture( &b_cam );
-			printf( "MAIN: Could not open b_cam.\n" );
+			printf("MAIN: Could not open b_cam.\n");
 		}
 		else {
 			b_img = cvQueryFrame( b_cam );
 			b_bin_img = cvCreateImage( cvGetSize( b_img ), IPL_DEPTH_8U, 1 );
-			printf( "MAIN: Bottom camera opened OK.\n" );
+			printf("MAIN: Bottom camera opened OK.\n");
 		}
 	}
 
@@ -237,7 +229,7 @@ int main( int argc, char *argv[] )
         cvNamedWindow( f_win, CV_WINDOW_AUTOSIZE );
         cvNamedWindow( b_win, CV_WINDOW_AUTOSIZE );
     }
-    printf( "MAIN: Vision server running now.\n" );
+    printf("MAIN: Vision server running now.\n");
 
     /* Main loop. */
     int loop_counter = 0;

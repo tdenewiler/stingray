@@ -31,8 +31,6 @@
  *
  * Output:      dt: The time difference in microseconds.
  *
- * Globals:     None.
- *
  *****************************************************************************/
 
 int util_calc_dt( int *time1s, int *time1ms, int *time2s, int *time2ms )
@@ -58,8 +56,6 @@ int util_calc_dt( int *time1s, int *time1ms, int *time2s, int *time2ms )
  * Input:       None.
  *
  * Output:      None.
- *
- * Globals:     None.
  *
  *****************************************************************************/
 
@@ -96,8 +92,6 @@ void util_print_help( int app )
  * Input:       None.
  *
  * Output:      None.
- *
- * Globals:     None.
  *
  *****************************************************************************/
 
@@ -158,8 +152,6 @@ void util_print_config_help( )
  * Input:       value: Value to check sign of.
  *
  * Output:      Either 1 or -1 depeding on sign.
- *
- * Globals:     None.
  *
  *****************************************************************************/
 

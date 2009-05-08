@@ -31,8 +31,6 @@
  *
  * Output:      0 on success, -1 on error.
  *
- * Globals:     None.
- *
  *****************************************************************************/
 
 int pid_init( PID *pid, CONF_VARS *cf )
@@ -92,8 +90,6 @@ int pid_init( PID *pid, CONF_VARS *cf )
  *
  * Output:      None.
  *
- * Globals:     None.
- *
  *****************************************************************************/
 
 void pid_loop( int pololu_fd,
@@ -105,7 +101,7 @@ void pid_loop( int pololu_fd,
              )
 {
 	/* These next three need to be set from vison, hydrophone, gui, etc. */
-	pid->voith_angle = atan2f( msg->target.data.fy, msg->target.data.fx );
+	pid->voith_angle = atan2f( msg->target.data.fx, msg->target.data.fy );
 	pid->voith_speed = msg->target.data.speed;
 	pid->voith_thrust = sqrt( msg->target.data.fx * msg->target.data.fx +
 	                          msg->target.data.fy * msg->target.data.fy );
@@ -265,8 +261,6 @@ void pid_loop( int pololu_fd,
  *
  * Output:      diff: Difference between angles.
  *
- * Globals:     None.
- *
  *****************************************************************************/
 
 float pid_subtract_angles( float ang1, float ang2 )
@@ -308,8 +302,6 @@ float pid_subtract_angles( float ang1, float ang2 )
  * 				bound: Bound to check against.
  *
  * Output:      Value or the bound limit.
- *
- * Globals:     None.
  *
  *****************************************************************************/
 

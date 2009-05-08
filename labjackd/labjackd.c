@@ -39,8 +39,6 @@ int labjackd_fd;
  *
  * Output:      None.
  *
- * Globals:     None.
- *
  *****************************************************************************/
 
 void labjackd_sigint( int signal )
@@ -60,12 +58,12 @@ void labjackd_sigint( int signal )
  *
  * Output:      None.
  *
- * Globals:     File descriptors: labjackd_fd.
- *
  *****************************************************************************/
 
 void labjackd_exit( )
 {
+	printf("LABJACKD_EXIT: Shutting down ... ");
+	
 	/* Sleep to let things shut down properly. */
 	usleep( 200000 );
 
@@ -76,6 +74,8 @@ void labjackd_exit( )
 	if ( labjack_fd > 0 ) {
 		close( labjack_fd );
 	}
+
+	printf("<OK>\n");
 } /* end labjackd_exit() */
 
 
@@ -89,8 +89,6 @@ void labjackd_exit( )
  *              argv: Array of command line arguments.
  *
  * Output:      None.
- *
- * Globals:     None.
  *
  *****************************************************************************/
 
@@ -121,7 +119,7 @@ int main( int argc, char *argv[] )
     int time2ms = 0;
     int dt = 0;
 
-	printf( "MAIN: Starting Labjack daemon ...\n" );
+	printf("MAIN: Starting Labjack daemon ...\n");
 
 	/* Initialize variables. */
 	labjack_fd = -1;
@@ -138,28 +136,28 @@ int main( int argc, char *argv[] )
 	/* Set up server. */
 	labjackd_fd = net_server_setup( cf.server_port );
 	if ( labjackd_fd > 0 ) {
-		printf( "MAIN: Server setup OK.\n" );
+		printf("MAIN: Server setup OK.\n");
 	}
 	else {
-		printf( "MAIN: WARNING!!! Server setup failed.\n" );
+		printf("MAIN: WARNING!!! Server setup failed.\n");
 	}
 
 	/* Set up the labjack. */
 	labjack_fd = init_labjack( );
 	if ( labjack_fd ) {
 		status = query_labjack( );
-		printf( "MAIN: status = %d\n", status );
+		printf("MAIN: status = %d\n", status);
 	}
 	else
 	{
-		printf( "MAIN: SIMULATION MODE!!! Labjack data is simulated.\n" );
+		printf("MAIN: SIMULATION MODE!!! Labjack data is simulated.\n");
 	}
 	
 	 /* Initialize timers. */
     gettimeofday( &sim_time, NULL );
     gettimeofday( &sim_start, NULL );
 
-	printf( "MAIN: Labjack server running now.\n" );
+	printf("MAIN: Labjack server running now.\n");
 
 	/* Main loop. */
 	while ( 1 ) {
@@ -220,10 +218,10 @@ int main( int argc, char *argv[] )
 		/* Check battery voltage. Make sure it is connected. If too low then
 		 * have the computer shut down so that the battery is not damaged. */
 		if ( (lj.battery1 > BATT1_THRESH) && (lj.battery1 < BATT1_MIN) ) {
-			status = system( "shutdown -h now \"Labjackd: Motor battery has low voltage.\"" );
+			status = system("shutdown -h now \"Labjackd: Motor battery has low voltage.\"");
 		}
 		if ( (lj.battery2 > BATT2_THRESH) && (lj.battery2 < BATT2_MIN) ) {
-			status = system( "shutdown -h now \"Labjackd: Computer battery has low voltage.\"" );
+			status = system("shutdown -h now \"Labjackd: Computer battery has low voltage.\"");
 		}
 		
 		/* Update timers. */

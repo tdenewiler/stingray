@@ -36,8 +36,6 @@
  *
  * Output:      None.
  *
- * Globals:     None.
- *
  *****************************************************************************/
 
 void task_run( MSG_DATA *msg, int dt )
@@ -45,22 +43,21 @@ void task_run( MSG_DATA *msg, int dt )
 	float heading = 0;
 
 	switch ( msg->task.data.num ) {
+	case TASK_BUOY:
+		task_buoy( msg, dt );
+		break;
 
-		case TASK_BUOY:
-			task_buoy( msg, dt );
-			break;
+	case TASK_GATE:
+		task_gate( msg, heading, dt );
+		break;
 
-		case TASK_GATE:
-			task_gate( msg, heading, dt );
-			break;
+	case TASK_PIPE:
+		task_pipe( msg, dt );
+		break;
 
-		case TASK_PIPE:
-			task_pipe( msg, dt );
-			break;
-
-		case TASK_SQUARE:
-			task_square( msg, heading, dt );
-			break;
+	case TASK_SQUARE:
+		task_square( msg, heading, dt );
+		break;
 	}
 } /* end task_run() */
 
@@ -75,8 +72,6 @@ void task_run( MSG_DATA *msg, int dt )
  *              dt: The task time.
  *
  * Output:      None.
- *
- * Globals:     None.
  *
  *****************************************************************************/
 
@@ -100,8 +95,6 @@ void task_buoy( MSG_DATA *msg, int dt )
  *
  * Output:      None.
  *
- * Globals:     None.
- *
  *****************************************************************************/
 
 void task_gate( MSG_DATA *msg, float heading, int dt )
@@ -120,8 +113,6 @@ void task_gate( MSG_DATA *msg, float heading, int dt )
  *              dt: The task time.
  *
  * Output:      None.
- *
- * Globals:     None.
  *
  *****************************************************************************/
 
@@ -144,8 +135,6 @@ void task_pipe( MSG_DATA *msg, int dt )
  *              dt: The task time.
  *
  * Output:      None.
- *
- * Globals:     None.
  *
  *****************************************************************************/
 
