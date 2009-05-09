@@ -335,7 +335,7 @@ int main( int argc, char *argv[] )
 				printf("MAIN: Kill switch closed.\n");
 			}
 		}
-		
+
         /* Get network data. */
         if ( (cf.enable_server) && (server_fd > 0) ) {
             recv_bytes = net_server( server_fd, recv_buf, &msg, MODE_STATUS );

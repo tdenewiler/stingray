@@ -148,9 +148,9 @@ int main( int argc, char *argv[] )
 	lj_fd = -1;
 	nav_fd = -1;
 
-	memset( &msg, 0, sizeof( MSG_DATA ) );
-	memset( &pid, 0, sizeof( PID ) );
-	memset( &lj, 0, sizeof( LABJACK_DATA ) );
+	memset( &msg, 0, sizeof(MSG_DATA) );
+	memset( &pid, 0, sizeof(PID) );
+	memset( &lj,  0, sizeof(LABJACK_DATA) );
 
 	/* Parse command line arguments. */
 	parse_default_config( &cf );

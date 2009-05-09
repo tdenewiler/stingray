@@ -105,7 +105,7 @@ void messages_send( int fd,
 
         case TARGET_MSGID:
             msg->target.hdr.msgid = TARGET_MSGID;
-			
+
             /* Use network byte order. */
             msg->target.data.mode  = htonl( msg->target.data.mode );
             msg->target.data.pitch = htonl( msg->target.data.pitch );
@@ -266,7 +266,7 @@ void messages_decode( int fd, char *buf, MSG_DATA *msg )
 
         case TARGET_MSGID:
             msg->target.data = ((TARGET_MSG *)buf)->data;
-				
+
             /* Convert from network to host byte order. */
             msg->target.data.mode  = ntohl( msg->target.data.mode );
             break;
