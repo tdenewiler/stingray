@@ -151,7 +151,8 @@ int net_server( int fd, void *buf, MSG_DATA *msg, int mode )
             else {
                 /* Get the data from the socket. */
                 recv_bytes = net_recv( ii, buf );
-                if ( recv_bytes == 0 ) { /* Connection lost. Close socket. */
+                if ( recv_bytes == 0 ) {
+					/* Connection lost. Close socket. */
                     net_close( ii );
                     FD_CLR( ii, &master );
                 }

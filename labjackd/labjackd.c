@@ -151,6 +151,8 @@ int main( int argc, char *argv[] )
 	else
 	{
 		printf("MAIN: SIMULATION MODE!!! Labjack data is simulated.\n");
+		/* Seed the random variable. */
+		srand((unsigned int) time(NULL) );
 	}
 	
 	 /* Initialize timers. */
@@ -192,26 +194,12 @@ int main( int argc, char *argv[] )
             time2s =    sim_start.tv_sec;
             time2ms =   sim_start.tv_usec;
             dt = util_calc_dt( &time1s, &time1ms, &time2s, &time2ms );
-			if ( dt > 60000000 ) {
-				/* Simulate the switch being opened. Start simulation over.*/
-				msg.lj.data.battery1 = 0.04;
-				msg.lj.data.battery2 += 0.2;
-				msg.lj.data.pressure += 0.3;
-				msg.lj.data.water += 0.4;
+			if ( dt > 100000 ) {
+				msg.lj.data.battery1 = 10.0  + rand() / (float)RAND_MAX;
+				msg.lj.data.battery2 = 14.0  + rand() / (float)RAND_MAX;
+				msg.lj.data.pressure = 0.543 + rand() / (float)RAND_MAX;
+				msg.lj.data.water    = 0.289 + rand() / (float)RAND_MAX;
 				gettimeofday( &sim_start, NULL );
-			}
-			else if ( dt > 10000000 ) {
-            	/* Simulate the switch closed. */
-            	msg.lj.data.battery1 = 12.1;
-				msg.lj.data.battery2 += 0.2;
-				msg.lj.data.pressure += 0.3;
-				msg.lj.data.water += 0.4;
-			}
-			else {
-				msg.lj.data.battery1 = 0.04;
-				msg.lj.data.battery2 += 0.2;
-				msg.lj.data.pressure += 0.3;
-				msg.lj.data.water += 0.4;
 			}
 		}
 

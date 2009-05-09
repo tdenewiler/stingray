@@ -276,7 +276,9 @@ int main( int argc, char *argv[] )
 			printf("MAIN: IMU setup OK.\n");
 		}
 		else {
-			printf("MAIN: WARNING!!! IMU setup failed.\n");
+			printf("MAIN: SIMULATION MODE!!! IMU data is simulated.\n");
+			/* Seed the random variable. */
+			srand((unsigned int) time(NULL) );
 		}
     }
 
@@ -379,11 +381,23 @@ int main( int argc, char *argv[] )
         }
 
         /* Get Microstrain data. */
-        if ( ( cf.enable_imu ) && ( imu_fd > 0 ) ) {
+        if ( (cf.enable_imu) && (imu_fd > 0) ) {
             recv_bytes = mstrain_euler_vectors( imu_fd, &msg.mstrain.data.pitch,
 				&msg.mstrain.data.roll, &msg.mstrain.data.yaw, msg.mstrain.data.accel,
 				msg.mstrain.data.ang_rate );
         }
+		else {
+			/* Simulation Mode. This is where the simulated data is generated. */
+			msg.mstrain.data.pitch       = cf.target_pitch  + rand() / (float)RAND_MAX;
+			msg.mstrain.data.roll        = cf.target_roll   + rand() / (float)RAND_MAX;
+			msg.mstrain.data.yaw         = cf.target_yaw    + rand() / (float)RAND_MAX;
+			msg.mstrain.data.accel[0]    = 0 + rand() / (float)RAND_MAX;
+			msg.mstrain.data.accel[1]    = 0 + rand() / (float)RAND_MAX;
+			msg.mstrain.data.accel[2]    = 0 + rand() / (float)RAND_MAX;
+			msg.mstrain.data.ang_rate[0] = 0 + rand() / (float)RAND_MAX;
+			msg.mstrain.data.ang_rate[1] = 0 + rand() / (float)RAND_MAX;
+			msg.mstrain.data.ang_rate[2] = 0 + rand() / (float)RAND_MAX;
+		}
 
         /* Perform PID loops. */
         if ( msg.stop.data.state == FALSE ) {
