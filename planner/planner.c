@@ -34,6 +34,7 @@ int server_fd;
 int vision_fd;
 int lj_fd;
 int nav_fd;
+FILE *f_log;
 
 
 /******************************************************************************
@@ -86,6 +87,11 @@ void planner_exit( )
 	if ( nav_fd > 0 ) {
 		close( nav_fd );
 	}
+	
+	/* Close the open file pointers. */
+	if ( f_log ) {
+		fclose( f_log );
+	}
 
 	printf("<OK>\n\n");
 } /* end planner_exit() */
@@ -132,6 +138,8 @@ int main( int argc, char *argv[] )
 	struct timeval plan_start = {0, 0};
 	struct timeval task_time = {0, 0};
 	struct timeval task_start = {0, 0};
+	struct timeval log_time = {0, 0};
+	struct timeval log_start = {0, 0};
 	int time1s = 0;
 	int time1ms = 0;
 	int time2s = 0;
@@ -205,6 +213,16 @@ int main( int argc, char *argv[] )
 			printf("MAIN: WARNING!!! Nav client setup failed.\n");
 		}
     }
+    
+    /* Open log file if flag set. */
+    if ( cf.enable_log ) {
+    	f_log = fopen( "planner_log.dat", "a+" );
+    	if ( f_log ) {
+    		fprintf( f_log, "------------------------------\n" );
+    		fprintf( f_log, "--  BEGIN NEW LOG SESSION   --\n" );
+    		fprintf( f_log, "------------------------------\n" );
+		}
+	}
 
 	/* Initialize timers. */
 	gettimeofday( &vision_time, NULL );
@@ -213,6 +231,9 @@ int main( int argc, char *argv[] )
 	gettimeofday( &plan_start, NULL );
 	gettimeofday( &task_time, NULL );
 	gettimeofday( &task_start, NULL );
+	gettimeofday( &log_time, NULL );
+	gettimeofday( &log_start, NULL );
+	
 	printf("MAIN: Planner running now.\n");
 
 	/* Main loop. */
@@ -268,6 +289,27 @@ int main( int argc, char *argv[] )
                 messages_decode( lj_fd, lj_buf, &msg );
             }
         }
+        
+        /* Log if flag is set. */
+        if ( cf.enable_log && f_log ) {
+        	time1s =    log_time.tv_sec;
+			time1ms =   log_time.tv_usec;
+			time2s =    log_start.tv_sec;
+			time2ms =   log_start.tv_usec;
+			dt = util_calc_dt( &time1s, &time1ms, &time2s, &time2ms );
+			
+			/* Log the every (enable_log) seconds. */
+			if ( dt > (cf.enable_log*1000000) ) {
+				STAT cs = msg.status.data;
+				fprintf( f_log, "<%ld.%.6ld> pitch=%.04f roll=%.04f yaw=%.04f psi=%.04f", 
+					log_time.tv_sec, log_time.tv_usec, cs.pitch, cs.roll, cs.roll, cs.depth );
+				fprintf( f_log, " accel=[%.04f  %.04f  %.04f] ang=[%.04f  %.04f  %.04f]\n",
+					cs.accel[0], cs.accel[1], cs.accel[2], 
+					cs.ang_rate[0], cs.ang_rate[1], cs.ang_rate[2] );
+				
+				gettimeofday( &log_start, NULL );
+			}
+		}
 
 		/* Update the task dt. */
 		time1s =    task_time.tv_sec;
@@ -283,6 +325,7 @@ int main( int argc, char *argv[] )
 		gettimeofday( &vision_time, NULL );
 		gettimeofday( &plan_time, NULL );
 		gettimeofday( &task_time, NULL );
+		gettimeofday( &log_time, NULL );
 	}
 
 	exit( 0 );
