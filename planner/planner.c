@@ -221,6 +221,7 @@ int main( int argc, char *argv[] )
     		fprintf( f_log, "------------------------------\n" );
     		fprintf( f_log, "--  BEGIN NEW LOG SESSION   --\n" );
     		fprintf( f_log, "------------------------------\n" );
+    		fprintf( f_log, "pitch,roll,yaw,psi,accel1,accel2,accel3,ang1,ang2,ang3\n" );
 		}
 	}
 
@@ -301,9 +302,8 @@ int main( int argc, char *argv[] )
 			/* Log the every (enable_log) seconds. */
 			if ( dt > (cf.enable_log*1000000) ) {
 				STAT cs = msg.status.data;
-				fprintf( f_log, "<%ld.%.6ld> pitch=%.04f roll=%.04f yaw=%.04f psi=%.04f", 
-					log_time.tv_sec, log_time.tv_usec, cs.pitch, cs.roll, cs.roll, cs.depth );
-				fprintf( f_log, " accel=[%.04f  %.04f  %.04f] ang=[%.04f  %.04f  %.04f]\n",
+				fprintf( f_log, "%.04f,%.04f,%.04f,%.04f,%.04f,%.04f,%.04f,%.04f,%.04f,%.04f\n", 
+					cs.pitch, cs.roll, cs.roll, msg.lj.data.pressure,
 					cs.accel[0], cs.accel[1], cs.accel[2], 
 					cs.ang_rate[0], cs.ang_rate[1], cs.ang_rate[2] );
 				
