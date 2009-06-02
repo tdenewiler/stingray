@@ -15,6 +15,7 @@
 #include <math.h>
 #include <time.h>
 #include <sys/time.h>
+#include <cv.h>
 
 #include "planner.h"
 #include "microstrain.h"
@@ -22,6 +23,7 @@
 #include "parser.h"
 #include "labjack.h"
 #include "pololu.h"
+#include "kalman.h"
 #include "util.h"
 #include "serial.h"
 #include "messages.h"
@@ -34,6 +36,7 @@ int server_fd;
 int vision_fd;
 int lj_fd;
 int nav_fd;
+int bKF;
 FILE *f_log;
 
 
@@ -92,6 +95,11 @@ void planner_exit( )
 	if ( f_log ) {
 		fclose( f_log );
 	}
+	
+	/* Close the Kalman filter. */
+	if ( bKF > 0 ) {
+		close_kalman();
+	}
 
 	printf("<OK>\n\n");
 } /* end planner_exit() */
@@ -140,6 +148,8 @@ int main( int argc, char *argv[] )
 	struct timeval task_start = {0, 0};
 	struct timeval log_time = {0, 0};
 	struct timeval log_start = {0, 0};
+	struct timeval kalman_time = {0, 0};
+	struct timeval kalman_start = {0,0};
 	int time1s = 0;
 	int time1ms = 0;
 	int time2s = 0;
@@ -147,6 +157,8 @@ int main( int argc, char *argv[] )
 	int dt = 0;
 
 	int old_task = 0;
+	
+	CvPoint3D32f loc;
 
 	printf("MAIN: Starting Planner ... \n");
 
@@ -155,6 +167,7 @@ int main( int argc, char *argv[] )
 	vision_fd = -1;
 	lj_fd = -1;
 	nav_fd = -1;
+	bKF = -1;
 
 	memset( &msg, 0, sizeof(MSG_DATA) );
 	memset( &pid, 0, sizeof(PID) );
@@ -169,6 +182,16 @@ int main( int argc, char *argv[] )
     msg.target.data.roll    = cf.target_roll;
     msg.target.data.yaw     = cf.target_yaw;
     msg.target.data.depth   = cf.target_depth;
+    
+    /* Set up Kalman filter. */
+    bKF = init_kalman();
+    if ( bKF > 0 ) {
+		printf("MAIN: Kalman filter setup OK.\n");
+		kalman_print_test();
+	}
+	else {
+		printf("MAIN: WARNING!!! Kalman filter setup failed.\n");
+	}
 
 	/* Set up communications. */
 	if ( cf.enable_server ) {
@@ -234,9 +257,12 @@ int main( int argc, char *argv[] )
 	gettimeofday( &task_start, NULL );
 	gettimeofday( &log_time, NULL );
 	gettimeofday( &log_start, NULL );
+	gettimeofday( &kalman_time, NULL );
+	gettimeofday( &kalman_start, NULL );
 	
+	float accel_count = 0.0;
+	float accel_inc = 0.1;
 	printf("MAIN: Planner running now.\n");
-
 	/* Main loop. */
 	while ( 1 ) {
 		/* Get network data. */
@@ -281,6 +307,52 @@ int main( int argc, char *argv[] )
 				messages_decode( nav_fd, nav_buf, &msg );
 			}
 		}
+		
+		/* Update Kalman filter. */
+		if ( bKF ) {
+			time1s =    kalman_time.tv_sec;
+			time1ms =   kalman_time.tv_usec;
+			time2s =    kalman_start.tv_sec;
+			time2ms =   kalman_start.tv_usec;
+			dt = util_calc_dt( &time1s, &time1ms, &time2s, &time2ms );
+			
+			/* If it has been long enough, update the filter. */
+			if ( dt > 0.1 * 1000000 ) {
+				STAT cs = msg.status.data;
+				
+				/*printf( "\rdt=%f depth=%f ang=[%f,%f,%f] accel=[%f,%f,%f] ang_rate=[%f,%f,%f]",
+					((float)dt)/1000000, msg.lj.data.pressure, 
+					cs.pitch, cs.roll, cs.yaw,
+					cs.accel[0], cs.accel[1], cs.accel[2], 
+					cs.ang_rate[0], cs.ang_rate[1], cs.ang_rate[2] );*/
+					
+				float ang[] = { cs.pitch, cs.roll, cs.yaw };
+				float real_accel[] = { cs.accel[0], cs.accel[1], cs.accel[2] - 9.86326398 };
+				
+				/* Test the algorithm. */
+				real_accel[0] = 0;
+				real_accel[1] = accel_count;
+				real_accel[2] = 0;
+				if ( accel_count > 15.0 || accel_count < 0.0 ) {
+					accel_inc = -1 * accel_inc;
+				}
+				accel_count += accel_inc;
+				
+				
+				/* Update the kalman filter. */
+				kalman_update( ((float)dt)/1000000, msg.lj.data.pressure, ang,
+						real_accel, cs.ang_rate );
+				
+				gettimeofday( &kalman_start, NULL );
+			}
+			
+			/* Get current location estimation. */
+			kalman_get_location( loc );
+			
+			/* Print the location estimation. */
+			//printf( "\rKalman Location Estimation = ( %f, %f, %f )", 
+				//loc.x, loc.y, loc.z );
+		}
 
 		/* Get labjack data. */
         if ( (cf.enable_labjack) && (lj_fd > 0) ) {
@@ -303,7 +375,7 @@ int main( int argc, char *argv[] )
 			if ( dt > (cf.enable_log*1000000) ) {
 				STAT cs = msg.status.data;
 				fprintf( f_log, "%.04f,%.04f,%.04f,%.04f,%.04f,%.04f,%.04f,%.04f,%.04f,%.04f\n", 
-					cs.pitch, cs.roll, cs.roll, msg.lj.data.pressure,
+					cs.pitch, cs.roll, cs.yaw, msg.lj.data.pressure,
 					cs.accel[0], cs.accel[1], cs.accel[2], 
 					cs.ang_rate[0], cs.ang_rate[1], cs.ang_rate[2] );
 				
@@ -326,6 +398,7 @@ int main( int argc, char *argv[] )
 		gettimeofday( &plan_time, NULL );
 		gettimeofday( &task_time, NULL );
 		gettimeofday( &log_time, NULL );
+		gettimeofday( &kalman_time, NULL );
 	}
 
 	exit( 0 );

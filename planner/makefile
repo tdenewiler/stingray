@@ -6,12 +6,15 @@ INCLUDES	+= -I../../libs/serial/include
 INCLUDES	+= -I../../libs/microstrain/include
 INCLUDES	+= -I../../libs/labjack/include
 INCLUDES	+= -I../../libs/pololu/include
+INCLUDES	+= -I../../libs/kalman/include
+INCLUDES	+= -I/usr/include/opencv
 
 # compiler and flags
 CC        	= g++
 CFLAGS    	= -Wall
 CFLAGS    	+= -O2
 CFLAGS    	+= -g
+LINK		= -lcv
 
 # libraries
 PARSELIB	= parser.a
@@ -19,6 +22,7 @@ SERLIB		= serial.a
 MSLIB		= microstrain.a
 LJLIB		= labjack.a
 POLLIB		= pololu.a
+KALLIB		= kalman.a
 STDLIBS		= -lm
 
 # library directories
@@ -27,6 +31,7 @@ SERDIR		= ../../libs/serial/lib
 MSDIR		= ../../libs/microstrain/lib
 LJDIR		= ../../libs/labjack/lib
 POLDIR		= ../../libs/pololu/lib
+KALDIR		= ../../libs/kalman/lib
 
 # executables to build
 EXE 		= planner
@@ -48,6 +53,8 @@ $(EXE): $(OBJS)
 												$(LJDIR)/$(LJLIB) \
 												$(POLDIR)/$(POLLIB) \
 												$(SERDIR)/$(SERLIB) \
+												$(KALDIR)/$(KALLIB) \
+												$(LINK) \
 												$(STDLIBS)
 
 %.o: %.cpp
