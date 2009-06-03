@@ -161,6 +161,10 @@ int main( int argc, char *argv[] )
 	int time2ms = 0;
 	int dt = 0;
 
+	/* Declare timestamp variables. */
+	struct timeval ctime;
+    struct tm ct;
+    char write_time[80] = {0};
 
 	printf("MAIN: Starting Planner ... \n");
 
@@ -247,7 +251,7 @@ int main( int argc, char *argv[] )
     		fprintf( f_log, "------------------------------\n" );
     		fprintf( f_log, "--  BEGIN NEW LOG SESSION   --\n" );
     		fprintf( f_log, "------------------------------\n" );
-    		fprintf( f_log, "pitch,roll,yaw,psi,accel1,accel2,accel3,ang1,ang2,ang3\n" );
+    		fprintf( f_log, "time,pitch,roll,yaw,psi,accel1,accel2,accel3,ang1,ang2,ang3\n" );
 		}
 	}
 
@@ -373,11 +377,18 @@ int main( int argc, char *argv[] )
 			time2ms =   log_start.tv_usec;
 			dt = util_calc_dt( &time1s, &time1ms, &time2s, &time2ms );
 			
+			/* Get a timestamp and use for log. */
+            gettimeofday( &ctime, NULL );
+            ct = *( localtime ((const time_t*) &ctime.tv_sec) );
+			strftime( write_time, sizeof(write_time), "20%y-%m-%d_%H:%M:%S", &ct);
+            snprintf( write_time + strlen(write_time),
+            		strlen(write_time), ".%03ld", ctime.tv_usec );
+			
 			/* Log the every (enable_log) seconds. */
 			if ( dt > (cf.enable_log*1000000) ) {
 				STAT cs = msg.status.data;
-				fprintf( f_log, "%.04f,%.04f,%.04f,%.04f,%.04f,%.04f,%.04f,%.04f,%.04f,%.04f\n", 
-					cs.pitch, cs.roll, cs.yaw, msg.lj.data.pressure,
+				fprintf( f_log, "%s, %.04f,%.04f,%.04f,%.04f,%.04f,%.04f,%.04f,%.04f,%.04f,%.04f\n", 
+					write_time, cs.pitch, cs.roll, cs.yaw, msg.lj.data.pressure,
 					cs.accel[0], cs.accel[1], cs.accel[2], 
 					cs.ang_rate[0], cs.ang_rate[1], cs.ang_rate[2] );
 				
