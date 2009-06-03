@@ -44,13 +44,6 @@ int mstrain_setup( char *portname,
 		fd = setup_serial( portname, baud );
 	}
 
-	if ( fd > 0 ) {
-		int s_num = -1;
-		if ( mstrain_serial_number( fd, &s_num ) != 1 ) {
-			fd = -1;
-		}
-	}
-	
 	return fd;
 } /* end mstrain_setup() */
 

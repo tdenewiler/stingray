@@ -98,13 +98,6 @@
 #endif /* CHECKSUM_MASK */
 //@}
 
-/** @name Serial number of Microstrain IMU #1. */
-//@{
-#ifndef MSTRAIN_SERIAL1
-#define MSTRAIN_SERIAL1 2108
-#endif /* MSTRAIN_SERIAL1 */
-//@}
-
 
 /******************************
  *
