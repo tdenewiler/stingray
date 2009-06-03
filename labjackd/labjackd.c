@@ -63,7 +63,7 @@ void labjackd_sigint( int signal )
 void labjackd_exit( )
 {
 	printf("LABJACKD_EXIT: Shutting down ... ");
-	
+
 	/* Sleep to let things shut down properly. */
 	usleep( 200000 );
 
@@ -110,7 +110,7 @@ int main( int argc, char *argv[] )
 	MSG_DATA msg;
 	LABJACK_DATA lj;
 	CONF_VARS cf;
-	
+
 	struct timeval sim_time = {0, 0};
 	struct timeval sim_start = {0, 0};
 	int time1s = 0;
@@ -147,7 +147,7 @@ int main( int argc, char *argv[] )
 	labjack_fd = init_labjack( );
 	if ( labjack_fd ) {
 		status = query_labjack( );
-		printf("MAIN: status = %d\n", status);
+		printf("MAIN: Labjack setup OK.\n", status);
 	}
 	else
 	{
@@ -155,7 +155,7 @@ int main( int argc, char *argv[] )
 		/* Seed the random variable. */
 		srand((unsigned int) time(NULL) );
 	}
-	
+
 	 /* Initialize timers. */
     gettimeofday( &sim_time, NULL );
     gettimeofday( &sim_start, NULL );
@@ -212,7 +212,7 @@ int main( int argc, char *argv[] )
 		if ( (lj.battery2 > BATT2_THRESH) && (lj.battery2 < BATT2_MIN) ) {
 			status = system("shutdown -h now \"Labjackd: Computer battery has low voltage.\"");
 		}
-		
+
 		/* Update timers. */
         gettimeofday( &sim_time, NULL );
 	}

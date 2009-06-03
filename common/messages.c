@@ -238,7 +238,7 @@ int messages_decode( int fd, char *buf, MSG_DATA *msg, int bytes )
 	int found_header = FALSE;
 	int found_footer = FALSE;
 	int num_footers = 0;
-	
+
 	/* Decode messages in buffer. */
 	while ( bytes > 0 ) {
 		/* Look for header. */
@@ -248,7 +248,7 @@ int messages_decode( int fd, char *buf, MSG_DATA *msg, int bytes )
 				break;
 			}
 		}
-		
+
 		/* Look for footer. */
 		for ( jj = ii; jj < bytes; jj++ ) {
 			if ( buf[jj] == MSG_END ) {
@@ -257,13 +257,12 @@ int messages_decode( int fd, char *buf, MSG_DATA *msg, int bytes )
 				break;
 			}
 		}
-		printf("MSGS_DECODE: num_footers = %d\n", num_footers);
-		
+
 		/* Return if a header OR a footer are NOT found. */
 		if ( !found_header || !found_footer ) {
 			return bytes;
 		}
-		
+
 		/* Determine what message type was received. */
 		switch ( ((HEADER *)buf)->msgid ) {
 		case OPEN_MSGID:
@@ -271,7 +270,6 @@ int messages_decode( int fd, char *buf, MSG_DATA *msg, int bytes )
 
 			bytes -= sizeof(OPEN_MSG);
 			memmove( msg, msg, sizeof(OPEN_MSG) );
-			printf("MSGS_DECODE: OPEN %d\n", bytes);
 			break;
 
 		case MSTRAIN_MSGID:
@@ -284,7 +282,6 @@ int messages_decode( int fd, char *buf, MSG_DATA *msg, int bytes )
 
 			bytes -= sizeof(MSTRAIN_MSG);
 			memmove( msg, msg, sizeof(MSTRAIN_MSG) );
-			printf("MSGS_DECODE: MSTRAIN %d\n", bytes);
 			break;
 
 		case STOP_MSGID:
@@ -292,7 +289,6 @@ int messages_decode( int fd, char *buf, MSG_DATA *msg, int bytes )
 
 			bytes -= sizeof(STOP_MSG);
 			memmove( msg, msg, sizeof(STOP_MSG) );
-			printf("MSGS_DECODE: STOP %d\n", bytes);
 			break;
 
 		case SERVO_MSGID:
@@ -300,7 +296,6 @@ int messages_decode( int fd, char *buf, MSG_DATA *msg, int bytes )
 
 			bytes -= sizeof(SERVO_MSG);
 			memmove( msg, msg, sizeof(SERVO_MSG) );
-			printf("MSGS_DECODE: SERVO %d\n", bytes);
 			break;
 
 		case CLIENT_MSGID:
@@ -316,7 +311,6 @@ int messages_decode( int fd, char *buf, MSG_DATA *msg, int bytes )
 
 			bytes -= sizeof(CLIENT_MSG);
 			memmove( msg, msg, sizeof(CLIENT_MSG) );
-			printf("MSGS_DECODE: CLIENT %d\n", bytes);
 			break;
 
 		case TARGET_MSGID:
@@ -327,7 +321,6 @@ int messages_decode( int fd, char *buf, MSG_DATA *msg, int bytes )
 
 			bytes -= sizeof(TARGET_MSG);
 			memmove( msg, msg, sizeof(TARGET_MSG) );
-			printf("MSGS_DECODE: TARGET %d\n", bytes);
 			break;
 
 		case GAIN_MSGID:
@@ -335,7 +328,6 @@ int messages_decode( int fd, char *buf, MSG_DATA *msg, int bytes )
 
 			bytes -= sizeof(GAIN_MSG);
 			memmove( msg, msg, sizeof(GAIN_MSG) );
-			printf("MSGS_DECODE: GAIN %d\n", bytes);
 			break;
 
 		case STATUS_MSGID:
@@ -343,7 +335,6 @@ int messages_decode( int fd, char *buf, MSG_DATA *msg, int bytes )
 
 			bytes -= sizeof(STATUS_MSG);
 			memmove( msg, msg, sizeof(STATUS_MSG) );
-			printf("MSGS_DECODE: STATUS %d\n", bytes);
 			break;
 
 		case VISION_MSGID:
@@ -356,7 +347,6 @@ int messages_decode( int fd, char *buf, MSG_DATA *msg, int bytes )
 
 			bytes -= sizeof(VISION_MSG);
 			memmove( msg, msg, sizeof(VISION_MSG) );
-			printf("MSGS_DECODE: VISION %d\n", bytes);
 			break;
 
 		case TASK_MSGID:
@@ -364,7 +354,6 @@ int messages_decode( int fd, char *buf, MSG_DATA *msg, int bytes )
 
 			bytes -= sizeof(TASK_MSG);
 			memmove( msg, msg, sizeof(TASK_MSG) );
-			printf("MSGS_DECODE: TASK %d\n", bytes);
 			break;
 
 		case LJ_MSGID:
@@ -372,7 +361,6 @@ int messages_decode( int fd, char *buf, MSG_DATA *msg, int bytes )
 
 			bytes -= sizeof(LJ_MSG);
 			memmove( msg, msg, sizeof(LJ_MSG) );
-			printf("MSGS_DECODE: LJ %d\n", bytes);
 			break;
 
 		case VSETTING_MSGID:
@@ -386,7 +374,6 @@ int messages_decode( int fd, char *buf, MSG_DATA *msg, int bytes )
 
 			bytes -= sizeof(VSETTING_MSG);
 			memmove( msg, msg, sizeof(VSETTING_MSG) );
-			printf("MSGS_DECODE: VSETTING %d\n", bytes);
 			break;
 
 		case TELEOP_MSGID:
@@ -394,11 +381,10 @@ int messages_decode( int fd, char *buf, MSG_DATA *msg, int bytes )
 
 			bytes -= sizeof(TELEOP_MSG);
 			memmove( msg, msg, sizeof(TELEOP_MSG) );
-			printf("MSGS_DECODE: TELEOP %d\n", bytes);
 			break;
 		}
 	}
-	
+
 	return bytes;
 } /* end messages_decode() */
 

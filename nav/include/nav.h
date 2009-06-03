@@ -27,6 +27,13 @@
 #endif /* STINGRAY_FILENAME */
 //@}
 
+/** @name Serial number of Microstrain IMU. */
+//@{
+#ifndef MSTRAIN_SERIAL
+#define MSTRAIN_SERIAL 2104
+#endif /* MSTRAIN_SERIAL */
+//@}
+
 #ifndef STRING_SIZE
 #define STRING_SIZE 64
 #endif /* STRING_SIZE */

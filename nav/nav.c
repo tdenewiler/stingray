@@ -204,7 +204,7 @@ int main( int argc, char *argv[] )
 	int pololu_initialized = FALSE;
     int recv_bytes = 0;
     int mode = MODE_STATUS;
-	int mstrain_serial1 = 0;
+	int mstrain_serial = 0;
     char recv_buf[MAX_MSG_SIZE];
 	char lj_buf[MAX_MSG_SIZE];
     CONF_VARS cf;
@@ -275,8 +275,8 @@ int main( int argc, char *argv[] )
     /* Set up the Microstrain IMU. */
     if ( cf.enable_imu ) {
         imu_fd = mstrain_setup( cf.imu_port , cf.imu_baud );
-		status = mstrain_serial_number( imu_fd, &mstrain_serial1 );
-		if ( mstrain_serial1 == MSTRAIN_SERIAL1 ) {
+		status = mstrain_serial_number( imu_fd, &mstrain_serial );
+		if ( mstrain_serial == MSTRAIN_SERIAL ) {
 			printf("MAIN: IMU setup OK.\n");
 		}
 		else {

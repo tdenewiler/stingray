@@ -168,8 +168,8 @@ int net_server( int fd, void *buf, MSG_DATA *msg, int mode )
                         messages_send( ii, LJ_MSGID, msg );
                     }
                     else if ( mode == MODE_PLANNER ) {
-                        messages_send( ii, STATUS_MSGID, msg );
                         messages_send( ii, LJ_MSGID, msg );
+                        messages_send( ii, STATUS_MSGID, msg );
                     }
                 }
             }
