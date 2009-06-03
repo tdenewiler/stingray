@@ -98,6 +98,13 @@
 #endif /* CHECKSUM_MASK */
 //@}
 
+/** @name Serial number of Microstrain IMU #1. */
+//@{
+#ifndef MSTRAIN_SERIAL1
+#define MSTRAIN_SERIAL1 2108
+#endif /* MSTRAIN_SERIAL1 */
+//@}
+
 
 /******************************
  *
@@ -109,7 +116,6 @@
 #define _MSTRAIN_DATA_
 
 /*! Struct to store data from the IMU. */
-
 typedef struct _MSTRAIN_DATA {
 	int   serial_number;      //!< Serial number
 	float temp;               //!< Temperature inside the IMU housing
