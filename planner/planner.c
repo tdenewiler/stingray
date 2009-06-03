@@ -130,6 +130,7 @@ int main( int argc, char *argv[] )
 	sigint_action.sa_flags = 0;
 	sigaction( SIGINT, &sigint_action, NULL );
 
+	/* Declare variables. */
 	int recv_bytes = 0;
 	char recv_buf[MAX_MSG_SIZE];
 	char vision_buf[MAX_MSG_SIZE];
@@ -139,6 +140,10 @@ int main( int argc, char *argv[] )
 	MSG_DATA msg;
 	PID pid;
 	LABJACK_DATA lj;
+	//float accel_count = 0.0;
+	//float accel_inc = 0.1;
+	int old_task = 0;
+	CvPoint3D32f loc;
 
 	struct timeval vision_time = {0, 0};
 	struct timeval vision_start = {0, 0};
@@ -156,9 +161,6 @@ int main( int argc, char *argv[] )
 	int time2ms = 0;
 	int dt = 0;
 
-	int old_task = 0;
-	
-	CvPoint3D32f loc;
 
 	printf("MAIN: Starting Planner ... \n");
 
@@ -172,6 +174,7 @@ int main( int argc, char *argv[] )
 	memset( &msg, 0, sizeof(MSG_DATA) );
 	memset( &pid, 0, sizeof(PID) );
 	memset( &lj,  0, sizeof(LABJACK_DATA) );
+	messages_init( &msg );
 
 	/* Parse command line arguments. */
 	parse_default_config( &cf );
@@ -193,7 +196,7 @@ int main( int argc, char *argv[] )
 		printf("MAIN: WARNING!!! Kalman filter setup failed.\n");
 	}
 
-	/* Set up communications. */
+	/* Set up server. */
 	if ( cf.enable_server ) {
 		server_fd = net_server_setup( cf.server_port );
 		if ( server_fd > 0 ) {
@@ -260,9 +263,8 @@ int main( int argc, char *argv[] )
 	gettimeofday( &kalman_time, NULL );
 	gettimeofday( &kalman_start, NULL );
 	
-	float accel_count = 0.0;
-	float accel_inc = 0.1;
 	printf("MAIN: Planner running now.\n");
+	
 	/* Main loop. */
 	while ( 1 ) {
 		/* Get network data. */
@@ -270,7 +272,7 @@ int main( int argc, char *argv[] )
 			recv_bytes = net_server( server_fd, recv_buf, &msg, MODE_PLANNER );
 			if ( recv_bytes > 0 ) {
 				recv_buf[recv_bytes] = '\0';
-				messages_decode( server_fd, recv_buf, &msg );
+				messages_decode( server_fd, recv_buf, &msg, recv_bytes );
 			}
 		}
 
@@ -286,7 +288,7 @@ int main( int argc, char *argv[] )
 				recv_bytes = net_client( vision_fd, vision_buf, &msg, MODE_OPEN );
 				vision_buf[recv_bytes] = '\0';
 				if ( recv_bytes > 0 ) {
-					messages_decode( vision_fd, vision_buf, &msg );
+					messages_decode( vision_fd, vision_buf, &msg, recv_bytes );
 
                     gettimeofday( &vision_start, NULL );
 				}
@@ -304,7 +306,7 @@ int main( int argc, char *argv[] )
 			recv_bytes = net_client( nav_fd, nav_buf, &msg, MODE_PLANNER );
 			nav_buf[recv_bytes] = '\0';
 			if ( recv_bytes > 0 ) {
-				messages_decode( nav_fd, nav_buf, &msg );
+				messages_decode( nav_fd, nav_buf, &msg, recv_bytes );
 			}
 		}
 		
@@ -359,7 +361,7 @@ int main( int argc, char *argv[] )
             recv_bytes = net_client( lj_fd, lj_buf, &msg, MODE_OPEN );
             lj_buf[recv_bytes] = '\0';
             if ( recv_bytes > 0 ) {
-                messages_decode( lj_fd, lj_buf, &msg );
+                messages_decode( lj_fd, lj_buf, &msg, recv_bytes );
             }
         }
         

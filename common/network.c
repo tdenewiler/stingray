@@ -28,7 +28,6 @@
 static int fdmax;
 static fd_set master;
 static fd_set read_fds;
-
 static struct hostent *hent;
 
 
@@ -50,12 +49,12 @@ int net_server_setup( short port )
     int fd = -1;
 
     /* Zero out the file descriptor sets. Used to keep track of fd's available to
-     *read data from. */
+     * read data from. Basically a list of clients that are connected. */
     FD_ZERO( &read_fds );
     FD_ZERO( &master );
 
     /* Make each system call. Error checking is done within the following
-     *functions. */
+     * functions. */
     fd = net_socket( );
     net_setnonblock( &fd );
     net_setsockopt( &fd );
@@ -64,8 +63,9 @@ int net_server_setup( short port )
     net_sigaction( );
 
     /* Set the maximum file descriptor number to look for data to read. Also add
-     * server_fd to the master set. The master set is necessary because read_fds
-     * gets modified by the FD_ISSET() system call. */
+     * fd to the master set. The master set is necessary because read_fds
+     * gets modified by the FD_ISSET() system call inside the net_server()
+	 * function. */
     fdmax = fd;
     FD_SET( fd, &master );
 

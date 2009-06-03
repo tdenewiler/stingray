@@ -152,9 +152,11 @@ int main( int argc, char *argv[] )
     char write_time[80] = {0};
 
     printf( "MAIN: Starting Vision daemon ...\n" );
+
     /* Initialize variables. */
     server_fd = -1;
     memset( &msg, 0, sizeof( MSG_DATA ) );
+	messages_init( &msg );
 
     /* Parse command line arguments. */
     parse_default_config( &cf );
@@ -346,7 +348,7 @@ int main( int argc, char *argv[] )
             recv_bytes = net_server( server_fd, recv_buf, &msg, MODE_VISION );
             if ( recv_bytes > 0 ) {
                 recv_buf[recv_bytes] = '\0';
-                messages_decode( server_fd, recv_buf, &msg );
+                messages_decode( server_fd, recv_buf, &msg, recv_bytes );
             }
         }
 

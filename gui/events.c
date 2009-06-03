@@ -391,7 +391,7 @@ void events_gain_get( )
         planner_buf[recv_bytes] = '\0';
     }
     if ( recv_bytes > 0 ) {
-        messages_decode( planner_fd, planner_buf, &msg );
+        messages_decode( planner_fd, planner_buf, &msg, recv_bytes );
     }
 
     gtk_spin_button_set_value( ( GtkSpinButton * )button_kp_yaw, msg.gain.data.kp_yaw );

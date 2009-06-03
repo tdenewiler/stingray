@@ -128,6 +128,7 @@ int main( int argc, char *argv[] )
 	memset( &msg, 0, sizeof( MSG_DATA ) );
 	memset( &cf, 0, sizeof( CONF_VARS ) );
 	memset( &lj, 0, sizeof( LABJACK_DATA ) );
+	messages_init( &msg );
 
 	/* Parse command line arguments. */
 	parse_default_config( &cf );
@@ -168,7 +169,7 @@ int main( int argc, char *argv[] )
 			recv_bytes = net_server( labjackd_fd, recv_buf, &msg, MODE_LJ );
 			if ( recv_bytes > 0 ) {
 				recv_buf[recv_bytes] = '\0';
-				messages_decode( labjackd_fd, recv_buf, &msg );
+				messages_decode( labjackd_fd, recv_buf, &msg, recv_bytes );
 			}
 		}
 

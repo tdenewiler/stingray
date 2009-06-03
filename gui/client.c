@@ -47,7 +47,8 @@ int main( int argc, char *argv[] )
 {
 	printf( "MAIN: Starting GUI ...\n" );
 	
-    memset( &msg, 0, sizeof( MSG_DATA ) );
+    memset( &msg, 0, sizeof(MSG_DATA) );
+	messages_init( &msg );
 
     /* Parse command line arguments. */
     parse_default_config( &cf );

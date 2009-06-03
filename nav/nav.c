@@ -199,10 +199,12 @@ int main( int argc, char *argv[] )
     sigaction( SIGQUIT, &sigint_action, NULL );
     sigaction( SIGHUP, &sigint_action, NULL );
 
+	/* Declare variables. */
     int status = -1;
 	int pololu_initialized = FALSE;
     int recv_bytes = 0;
     int mode = MODE_STATUS;
+	int mstrain_serial1 = 0;
     char recv_buf[MAX_MSG_SIZE];
 	char lj_buf[MAX_MSG_SIZE];
     CONF_VARS cf;
@@ -234,6 +236,7 @@ int main( int argc, char *argv[] )
     memset( &msg, 0, sizeof( MSG_DATA ) );
     memset( &pid, 0, sizeof( PID ) );
     memset( &recv_buf, 0, MAX_MSG_SIZE );
+	messages_init( &msg );
 
     /* Parse command line arguments. */
     parse_default_config( &cf );
@@ -272,7 +275,8 @@ int main( int argc, char *argv[] )
     /* Set up the Microstrain IMU. */
     if ( cf.enable_imu ) {
         imu_fd = mstrain_setup( cf.imu_port , cf.imu_baud );
-		if ( imu_fd > 0 ) {
+		status = mstrain_serial_number( imu_fd, &mstrain_serial1 );
+		if ( mstrain_serial1 == MSTRAIN_SERIAL1 ) {
 			printf("MAIN: IMU setup OK.\n");
 		}
 		else {
@@ -281,6 +285,11 @@ int main( int argc, char *argv[] )
 			srand((unsigned int) time(NULL) );
 		}
     }
+	else {
+		printf("MAIN: SIMULATION MODE!!! IMU data is simulated.\n");
+		/* Seed the random variable. */
+		srand((unsigned int) time(NULL) );
+	}
 
     /* Set up the Pololu servo controller. */
     if ( cf.enable_pololu ) {
@@ -326,7 +335,7 @@ int main( int argc, char *argv[] )
 			recv_bytes = net_client( lj_fd, lj_buf, &msg, mode );
 			lj_buf[recv_bytes] = '\0';
 			if ( recv_bytes > 0 ) {
-				messages_decode( lj_fd, lj_buf, &msg );
+				messages_decode( lj_fd, lj_buf, &msg, recv_bytes );
 			}
 			pololu_initialized = msg.lj.data.battery1;
 			if ( pololu_initialized > 0 ) {
@@ -343,7 +352,7 @@ int main( int argc, char *argv[] )
             recv_bytes = net_server( server_fd, recv_buf, &msg, MODE_STATUS );
             if ( recv_bytes > 0 ) {
                 recv_buf[recv_bytes] = '\0';
-                messages_decode( server_fd, recv_buf, &msg );
+                messages_decode( server_fd, recv_buf, &msg, recv_bytes );
             }
         }
 

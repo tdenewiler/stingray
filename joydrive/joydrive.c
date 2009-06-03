@@ -116,6 +116,7 @@ int main( int argc, char *argv[] )
     memset( &msg, 0, sizeof(MSG_DATA) );
     memset( &cf,  0, sizeof(CONF_VARS) );
     memset( &joy, 0, sizeof(JOY_DATA) );
+	messages_init( &msg );
 
     /* Parse command line arguments. */
     parse_default_config( &cf );
@@ -141,7 +142,7 @@ int main( int argc, char *argv[] )
             recv_bytes = net_client( nav_fd, recv_buf, &msg, mode );
             if ( recv_bytes > 0 ) {
                 recv_buf[recv_bytes] = '\0';
-                messages_decode( nav_fd, recv_buf, &msg );
+                messages_decode( nav_fd, recv_buf, &msg, recv_bytes );
             }
         }
         /* Reset the target change values back to zero. */
@@ -191,7 +192,7 @@ int main( int argc, char *argv[] )
             msg.teleop.data.depth = -0.01;
                 printf("MAIN: depth - 0.01.\n");
         }
-        else if ( joy.joy_button == JOY_B3 ) {
+       else if ( joy.joy_button == JOY_B3 ) {
             msg.teleop.data.depth = 0.01;
                 printf("MAIN: depth + 0.01.\n");
         }

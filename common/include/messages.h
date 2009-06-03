@@ -90,6 +90,15 @@
 //@}
 #endif /* TASKS */
 
+/* Header and footer. */
+#ifndef MSG_START
+#define MSG_START 'A'
+#endif /* MSG_START */
+
+#ifndef MSG_END
+#define MSG_END 'Z'
+#endif /* MSG_END */
+
 
 /******************************
 **
@@ -99,43 +108,43 @@
 
 #ifndef _HEADER_
 #define _HEADER_
-
 /*! Header for API messages. */
-
 typedef struct _HEADER {
-    unsigned char msgid; //!< Message ID for decoding on other end of connection
+	unsigned char msgstart;	//!< Beginning of message character
+    unsigned char msgid;	//!< Message ID for decoding on other end of connection
 } HEADER;
-
 #endif /* _HEADER_ */
+
+#ifndef _FOOTER_
+#define _FOOTER_
+/*! Footer for API messages. */
+typedef struct _FOOTER {
+	unsigned char msgend; //!< End of message character
+} FOOTER;
+#endif /* _FOOTER_ */
 
 #ifndef _OPEN_MSG_
 #define _OPEN_MSG_
-
 /*! Default message to send to API server. */
-
 typedef struct _OPEN_MSG {
     HEADER hdr; //!< Header struct
+	FOOTER ftr; //!< Footer struct
 } OPEN_MSG;
-
 #endif /* _OPEN_MSG_ */
 
 #ifndef _MSTRAIN_MSG_
 #define _MSTRAIN_MSG_
-
 /*! API message with IMU data. */
-
 typedef struct _MSTRAIN_MSG {
     HEADER hdr;         //!< Header struct
     MSTRAIN_DATA data;  //!< IMU Data struct
+	FOOTER ftr;			//!< Footer struct
 } MSTRAIN_MSG;
-
 #endif /* _MSTRAIN_MSG_ */
 
 #ifndef _SERVO_MSG_
 #define _SERVO_MSG_
-
 /*! Manual servo and thruster values. */
-
 typedef struct _SERVO {
     unsigned char sync;     //!< Sync byte
     unsigned char servo;    //!< Port that servo is plugged into on SSC
@@ -143,38 +152,32 @@ typedef struct _SERVO {
 } SERVO;
 
 /*! API message to send servo and thruster values. */
-
 typedef struct _SERVO_MSG {
     HEADER hdr; //!< Header struct
     SERVO data; //!< Servo struct
+	FOOTER ftr;	//!< Footer struct
 } SERVO_MSG;
-
 #endif /* _SERVO_MSG_ */
 
 #ifndef _STOP_MSG_
 #define _STOP_MSG_
-
 /*! Emergency stop message. */
-
 typedef struct _STOP {
     unsigned char state;    //!< State
 } STOP;
 
 /*! API message to send emergency stop command. */
-
 typedef struct _STOP_MSG {
     HEADER hdr; //!< Header struct
     STOP data;  //!< Stop struct
+	FOOTER ftr;	//!< Footer struct
 } STOP_MSG;
-
 #endif /* _STOP_MSG_ */
 
 #ifndef _CLIENT_MSG_
 #define _CLIENT_MSG_
-
 /*! uuv functionality that can be modified remotely. Mostly used for
     debugging */
-
 typedef struct _CLIENT {
     int enable_servos;      //!< Enable use of the servos
     int enable_log;         //!< Enable saving data to a log file
@@ -185,17 +188,15 @@ typedef struct _CLIENT {
 } CLIENT;
 
 /*! API message to change specific uuv functionality. */
-
 typedef struct _CLIENT_MSG {
     HEADER hdr;  //!< Header struct
-    CLIENT data;  //!< Client struct
+    CLIENT data; //!< Client struct
+	FOOTER ftr;	 //!< Footer struct
 } CLIENT_MSG;
-
 #endif /* _CLIENT_MSG_ */
 
 #ifndef _TELEOP_MSG_
 #define _TELEOP_MSG_
-
 typedef struct _TELEOP {
 	float pitch;
 	float roll;
@@ -207,17 +208,15 @@ typedef struct _TELEOP {
 } TELEOP;
 
 typedef struct _TELEOP_MSG {
-	HEADER hdr;
-	TELEOP data;
+	HEADER hdr;  //!< Header struct
+	TELEOP data; //!< Teleop struct
+	FOOTER ftr;	 //!< Footer struct
 } TELEOP_MSG;
-
 #endif /* _TELEOP_MSG_ */
 
 #ifndef _TARGET_MSG_
 #define _TARGET_MSG_
-
 /*! Operational mode and target pose and motion values. */
-
 typedef struct _TARGET {
     int mode;       //!< Operational mode
     float pitch;    //!< Desired pitch angle
@@ -230,19 +229,16 @@ typedef struct _TARGET {
 } TARGET;
 
 /*! API message to change the uuv operational mode. */
-
 typedef struct _TARGET_MSG {
     HEADER hdr;     //!< Header struct
     TARGET data;    //!< Target struct
+	FOOTER ftr;		//!< Footer struct
 } TARGET_MSG;
-
 #endif /* _TARGET_MSG_ */
 
 #ifndef _GAIN_MSG_
 #define _GAIN_MSG_
-
 /*! Gains used by the uuv. Typically used with a PID controller */
-
 typedef struct _GAIN {
     char mode;          //!< Gains mode. Either GET_GAINS or SET_GAINS
     double kp_yaw;      //!< Proportional gain for the yaw angle
@@ -269,17 +265,15 @@ typedef struct _GAIN {
 } GAIN;
 
 /*! API message to change the gains used by the UUV in PID loops. */
-
 typedef struct _GAIN_MSG {
     HEADER hdr;  //!< Header struct
-    GAIN data;      //!< Gains struct
+    GAIN data;   //!< Gains struct
+	FOOTER ftr;	 //!< Footer struct
 } GAIN_MSG;
-
 #endif /* _GAIN_MSG_ */
 
 #ifndef _STATUS_MSG_
 #define _STATUS_MSG_
-
 typedef struct _STATUS {
     float mag[3];       //!< Magnetometer vector
     float accel[3];     //!< Acceleration vector
@@ -310,13 +304,12 @@ typedef struct _STATUS {
 typedef struct _STATUS_MSG {
     HEADER  hdr;    //!< Header struct
     STAT    data;   //!< Status struct
+	FOOTER  ftr;	//!< Footer struct
 } STATUS_MSG;
-
 #endif /* _STATUS_MSG_ */
 
 #ifndef _VISION_MSG_
 #define _VISION_MSG_
-
 typedef struct _VISION {
     int front_x;    //!< The x component of the detected object in front camera.
     int front_y;    //!< The y component of the detected object in front camera.
@@ -327,13 +320,12 @@ typedef struct _VISION {
 typedef struct _VISION_MSG {
     HEADER hdr;     //!< Header struct
     VISION data;    //!< Vision struct
+	FOOTER ftr;		//!< Footer struct
 } VISION_MSG;
-
 #endif /* _VISION_MSG_ */
 
 #ifndef _TASK_MSG_
 #define _TASK_MSG_
-
 typedef struct _TASK {
     char num;           //!< The task to attempt.
     float time_forward; //!< The time to go forward in the square task.
@@ -345,13 +337,12 @@ typedef struct _TASK {
 typedef struct _TASK_MSG {
     HEADER hdr;     //!< Header struct
     TASK data;      //!< Tasks struct
+	FOOTER ftr;		//!< Footer struct
 } TASK_MSG;
-
 #endif /* _TASK_MSG_ */
 
 #ifndef _LJ_MSG_
 #define _LJ_MSG_
-
 typedef struct _LJ_DATA {
     float battery1;
     float battery2;
@@ -360,15 +351,14 @@ typedef struct _LJ_DATA {
 } LJ_DATA;
 
 typedef struct _LJ_MSG {
-    HEADER hdr;
-    LJ_DATA data;
+    HEADER hdr;   //!< Header struct
+    LJ_DATA data; //!< Labjack struct
+	FOOTER ftr;	  //!< Footer struct
 } LJ_MSG;
-
 #endif /* _LJ_MSG_ */
 
 #ifndef _VSETTING_MSG_
 #define _VSETTING_MSG_
-
 typedef struct _HSV_HL {
     float hL;
     float hH;
@@ -379,25 +369,24 @@ typedef struct _HSV_HL {
 } HSV_HL;
 
 typedef struct _VSETTING {
-    HSV_HL pipe_hsv;            //!< HSV limits for pipe.
-    HSV_HL buoy_hsv;            //!< HSV limits for pipe.
-    HSV_HL fence_hsv;           //!< HSV limits for pipe.
-    int save_bframe;           //!< Save bottom frame.
-    int save_fframe;           //!< Save front frame.
-    int save_bvideo;           //!< Save bottom video.
-    int save_fvideo;           //!< Save front video.
+    HSV_HL pipe_hsv;	//!< HSV limits for pipe.
+    HSV_HL buoy_hsv;	//!< HSV limits for pipe.
+    HSV_HL fence_hsv;	//!< HSV limits for pipe.
+    int save_bframe;	//!< Save bottom frame.
+    int save_fframe;	//!< Save front frame.
+    int save_bvideo;	//!< Save bottom video.
+    int save_fvideo;	//!< Save front video.
 } VSETTING;
 
 typedef struct _VSETTING_MSG {
     HEADER hdr;     //!< Header struct
     VSETTING data;  //!< Vision settings struct
+	FOOTER ftr;		//!< Footer struct
 } VSETTING_MSG;
-
 #endif /* _VSETTING_MSG_ */
 
 #ifndef _MSG_DATA_
 #define _MSG_DATA_
-
 typedef struct _MSG_DATA {
     OPEN_MSG open;
     MSTRAIN_MSG mstrain;
@@ -413,7 +402,6 @@ typedef struct _MSG_DATA {
     VSETTING_MSG vsetting;
     TELEOP_MSG teleop;
 } MSG_DATA;
-
 #endif /* _MSG_DATA_ */
 
 
@@ -433,11 +421,17 @@ void messages_send( int fd, int msg_id, MSG_DATA *msg );
 //! \param fd Network file descriptor.
 //! \param buf A buffer to store network data.
 //! \param msg Pointer to message data.
-void messages_decode( int fd, char *buf, MSG_DATA *msg );
+//! \param bytes Number of bytes in buffer.
+//! \return Number of bytes remaining in buffer.
+int messages_decode( int fd, char *buf, MSG_DATA *msg, int bytes );
 
 //! Updates status data with current data.
 //! \param msg Pointer to message data.
 void messages_update( MSG_DATA *msg );
+
+//! Initialize the header and footer variables.
+//! \param msg Pointer to message data.
+void messages_init( MSG_DATA *msg );
 
 
 #endif /* _MESSAGES_H_ */

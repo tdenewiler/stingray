@@ -211,9 +211,11 @@ void messages_send( int fd,
 
 /******************************************************************************
  *
- * Title:       void messages_decode( int fd,
- *                                      char *buf,
- *                                      MSG_DATA *msg )
+ * Title:       int messages_decode( int fd,
+ *                                   char *buf,
+ *                                   MSG_DATA *msg
+ * 								     int bytes
+ * 									)
  *
  * Description: Called if data is received on the network buffer. The network
  *              data is decoded here and the appropriate variables are
@@ -222,95 +224,182 @@ void messages_send( int fd,
  * Input:       fd: Network file descriptor.
  *              buf: A buffer to store network data.
  *              msg: A pointer to message data.
+ * 				bytes: Number of bytes in buffer.
  *
- * Output:      None.
+ * Output:      bytes: Number of bytes remaining in buf.
  *
  *****************************************************************************/
 
-void messages_decode( int fd, char *buf, MSG_DATA *msg )
+int messages_decode( int fd, char *buf, MSG_DATA *msg, int bytes )
 {
-    /* Determine what message type was received. */
-    switch ( ( ( HEADER * )buf )->msgid ) {
-        case OPEN_MSGID:
-            msg->open.hdr.msgid = ((HEADER *)buf)->msgid;
-            break;
+	/* Check that a full message is available in the buffer. */
+	int ii = 0;
+	int jj = 0;
+	int found_header = FALSE;
+	int found_footer = FALSE;
+	int num_footers = 0;
+	
+	/* Decode messages in buffer. */
+	while ( bytes > 0 ) {
+		/* Look for header. */
+		for ( ii = jj; ii < bytes; ii++ ) {
+			if ( buf[ii] == MSG_START ) {
+				found_header = TRUE;
+				break;
+			}
+		}
+		
+		/* Look for footer. */
+		for ( jj = ii; jj < bytes; jj++ ) {
+			if ( buf[jj] == MSG_END ) {
+				found_footer = TRUE;
+				num_footers++;
+				break;
+			}
+		}
+		printf("MSGS_DECODE: num_footers = %d\n", num_footers);
+		
+		/* Return if a header OR a footer are NOT found. */
+		if ( !found_header || !found_footer ) {
+			return bytes;
+		}
+		
+		/* Determine what message type was received. */
+		switch ( ((HEADER *)buf)->msgid ) {
+		case OPEN_MSGID:
+			msg->open.hdr.msgid = ((HEADER *)buf)->msgid;
 
-        case MSTRAIN_MSGID:
-            msg->mstrain.data = ((MSTRAIN_MSG *)buf)->data;
+			bytes -= sizeof(OPEN_MSG);
+			memmove( msg, msg, sizeof(OPEN_MSG) );
+			printf("MSGS_DECODE: OPEN %d\n", bytes);
+			break;
 
-            /* Convert from network to host byte order. */
-            msg->mstrain.data.serial_number  = ntohl( msg->mstrain.data.serial_number );
-            msg->mstrain.data.eeprom_address = ntohs( msg->mstrain.data.eeprom_address );
-            msg->mstrain.data.eeprom_value   = ntohs( msg->mstrain.data.eeprom_value );
-            break;
+		case MSTRAIN_MSGID:
+			msg->mstrain.data = ((MSTRAIN_MSG *)buf)->data;
 
-        case STOP_MSGID:
-            msg->stop.data = ((STOP_MSG *)buf)->data;
-            break;
+			/* Convert from network to host byte order. */
+			msg->mstrain.data.serial_number  = ntohl( msg->mstrain.data.serial_number );
+			msg->mstrain.data.eeprom_address = ntohs( msg->mstrain.data.eeprom_address );
+			msg->mstrain.data.eeprom_value   = ntohs( msg->mstrain.data.eeprom_value );
 
-        case SERVO_MSGID:
-            msg->servo.data = ((SERVO_MSG *)buf)->data;
-            break;
+			bytes -= sizeof(MSTRAIN_MSG);
+			memmove( msg, msg, sizeof(MSTRAIN_MSG) );
+			printf("MSGS_DECODE: MSTRAIN %d\n", bytes);
+			break;
 
-        case CLIENT_MSGID:
-            msg->client.data = ((CLIENT_MSG *)buf)->data;
+		case STOP_MSGID:
+			msg->stop.data = ((STOP_MSG *)buf)->data;
 
-            /* Convert from network to host byte order. */
-            msg->client.data.enable_servos = ntohl( msg->client.data.enable_servos );
-            msg->client.data.enable_log    = ntohl( msg->client.data.enable_log );
-            msg->client.data.enable_imu    = ntohl( msg->client.data.enable_imu );
-            msg->client.data.imu_stab      = ntohl( msg->client.data.imu_stab );
-            msg->client.data.debug_level   = ntohl( msg->client.data.debug_level );
-            msg->client.data.dropper       = ntohl( msg->client.data.dropper );
-            break;
+			bytes -= sizeof(STOP_MSG);
+			memmove( msg, msg, sizeof(STOP_MSG) );
+			printf("MSGS_DECODE: STOP %d\n", bytes);
+			break;
 
-        case TARGET_MSGID:
-            msg->target.data = ((TARGET_MSG *)buf)->data;
+		case SERVO_MSGID:
+			msg->servo.data = ((SERVO_MSG *)buf)->data;
 
-            /* Convert from network to host byte order. */
-            msg->target.data.mode  = ntohl( msg->target.data.mode );
-            break;
+			bytes -= sizeof(SERVO_MSG);
+			memmove( msg, msg, sizeof(SERVO_MSG) );
+			printf("MSGS_DECODE: SERVO %d\n", bytes);
+			break;
 
-        case GAIN_MSGID:
+		case CLIENT_MSGID:
+			msg->client.data = ((CLIENT_MSG *)buf)->data;
+
+			/* Convert from network to host byte order. */
+			msg->client.data.enable_servos = ntohl( msg->client.data.enable_servos );
+			msg->client.data.enable_log    = ntohl( msg->client.data.enable_log );
+			msg->client.data.enable_imu    = ntohl( msg->client.data.enable_imu );
+			msg->client.data.imu_stab      = ntohl( msg->client.data.imu_stab );
+			msg->client.data.debug_level   = ntohl( msg->client.data.debug_level );
+			msg->client.data.dropper       = ntohl( msg->client.data.dropper );
+
+			bytes -= sizeof(CLIENT_MSG);
+			memmove( msg, msg, sizeof(CLIENT_MSG) );
+			printf("MSGS_DECODE: CLIENT %d\n", bytes);
+			break;
+
+		case TARGET_MSGID:
+			msg->target.data = ((TARGET_MSG *)buf)->data;
+
+			/* Convert from network to host byte order. */
+			msg->target.data.mode  = ntohl( msg->target.data.mode );
+
+			bytes -= sizeof(TARGET_MSG);
+			memmove( msg, msg, sizeof(TARGET_MSG) );
+			printf("MSGS_DECODE: TARGET %d\n", bytes);
+			break;
+
+		case GAIN_MSGID:
 			msg->gain.data = ((GAIN_MSG *)buf)->data;
-            break;
 
-        case STATUS_MSGID:
-            msg->status.data = ((STATUS_MSG *)buf)->data;
-            break;
+			bytes -= sizeof(GAIN_MSG);
+			memmove( msg, msg, sizeof(GAIN_MSG) );
+			printf("MSGS_DECODE: GAIN %d\n", bytes);
+			break;
 
-        case VISION_MSGID:
-            msg->vision.data = ((VISION_MSG *)buf)->data;
+		case STATUS_MSGID:
+			msg->status.data = ((STATUS_MSG *)buf)->data;
 
-            /* Convert from network to host byte order. */
-            msg->vision.data.front_x    = ntohl( msg->vision.data.front_x );
-            msg->vision.data.front_y    = ntohl( msg->vision.data.front_y );
-            msg->vision.data.bottom_x   = ntohl( msg->vision.data.bottom_x );
-            break;
+			bytes -= sizeof(STATUS_MSG);
+			memmove( msg, msg, sizeof(STATUS_MSG) );
+			printf("MSGS_DECODE: STATUS %d\n", bytes);
+			break;
 
-        case TASK_MSGID:
-        	printf( "MSGS_DECODE: task=%d\n", ((TASK_MSG *)buf)->data.num);
-            msg->task.data = ((TASK_MSG *)buf)->data;
-            break;
+		case VISION_MSGID:
+			msg->vision.data = ((VISION_MSG *)buf)->data;
 
-        case LJ_MSGID:
-            msg->lj.data = ((LJ_MSG *)buf)->data;
-            break;
+			/* Convert from network to host byte order. */
+			msg->vision.data.front_x    = ntohl( msg->vision.data.front_x );
+			msg->vision.data.front_y    = ntohl( msg->vision.data.front_y );
+			msg->vision.data.bottom_x   = ntohl( msg->vision.data.bottom_x );
 
-        case VSETTING_MSGID:
-            msg->vsetting.data = ((VSETTING_MSG *)buf)->data;
+			bytes -= sizeof(VISION_MSG);
+			memmove( msg, msg, sizeof(VISION_MSG) );
+			printf("MSGS_DECODE: VISION %d\n", bytes);
+			break;
 
-            /* Convert from network to host byte order. */
-            msg->vsetting.data.save_bframe = ntohl( msg->vsetting.data.save_bframe );
-            msg->vsetting.data.save_fframe = ntohl( msg->vsetting.data.save_fframe );
-            msg->vsetting.data.save_bvideo = ntohl( msg->vsetting.data.save_bvideo );
-            msg->vsetting.data.save_fvideo = ntohl( msg->vsetting.data.save_fvideo );
-            break;
+		case TASK_MSGID:
+			msg->task.data = ((TASK_MSG *)buf)->data;
 
-        case TELEOP_MSGID:
-            msg->teleop.data = ((TELEOP_MSG *)buf)->data;
-            break;
-    }
+			bytes -= sizeof(TASK_MSG);
+			memmove( msg, msg, sizeof(TASK_MSG) );
+			printf("MSGS_DECODE: TASK %d\n", bytes);
+			break;
+
+		case LJ_MSGID:
+			msg->lj.data = ((LJ_MSG *)buf)->data;
+
+			bytes -= sizeof(LJ_MSG);
+			memmove( msg, msg, sizeof(LJ_MSG) );
+			printf("MSGS_DECODE: LJ %d\n", bytes);
+			break;
+
+		case VSETTING_MSGID:
+			msg->vsetting.data = ((VSETTING_MSG *)buf)->data;
+
+			/* Convert from network to host byte order. */
+			msg->vsetting.data.save_bframe = ntohl( msg->vsetting.data.save_bframe );
+			msg->vsetting.data.save_fframe = ntohl( msg->vsetting.data.save_fframe );
+			msg->vsetting.data.save_bvideo = ntohl( msg->vsetting.data.save_bvideo );
+			msg->vsetting.data.save_fvideo = ntohl( msg->vsetting.data.save_fvideo );
+
+			bytes -= sizeof(VSETTING_MSG);
+			memmove( msg, msg, sizeof(VSETTING_MSG) );
+			printf("MSGS_DECODE: VSETTING %d\n", bytes);
+			break;
+
+		case TELEOP_MSGID:
+			msg->teleop.data = ((TELEOP_MSG *)buf)->data;
+
+			bytes -= sizeof(TELEOP_MSG);
+			memmove( msg, msg, sizeof(TELEOP_MSG) );
+			printf("MSGS_DECODE: TELEOP %d\n", bytes);
+			break;
+		}
+	}
+	
+	return bytes;
 } /* end messages_decode() */
 
 
@@ -345,3 +434,47 @@ void messages_update( MSG_DATA *msg )
     msg->status.data.roll        = msg->mstrain.data.roll;
     msg->status.data.yaw         = msg->mstrain.data.yaw;
 } /* end messages_update() */
+
+
+/******************************************************************************
+ *
+ * Title:       void messages_init( MSG_DATA *msg )
+ *
+ * Description: Initialize the header and footer variables.
+ *
+ * Input:       msg: A pointer to message data.
+ *
+ * Output:      None.
+ *
+ *****************************************************************************/
+
+void messages_init( MSG_DATA *msg )
+{
+	/* Set the header and footer for each of the message types. */
+	msg->open.hdr.msgstart		= MSG_START;
+	msg->mstrain.hdr.msgstart	= MSG_START;
+	msg->servo.hdr.msgstart		= MSG_START;
+	msg->client.hdr.msgstart	= MSG_START;
+	msg->target.hdr.msgstart	= MSG_START;
+	msg->gain.hdr.msgstart		= MSG_START;
+	msg->status.hdr.msgstart	= MSG_START;
+	msg->vision.hdr.msgstart	= MSG_START;
+	msg->task.hdr.msgstart		= MSG_START;
+	msg->stop.hdr.msgstart		= MSG_START;
+	msg->lj.hdr.msgstart		= MSG_START;
+	msg->vsetting.hdr.msgstart	= MSG_START;
+	msg->teleop.hdr.msgstart	= MSG_START;
+	msg->open.ftr.msgend		= MSG_END;
+	msg->mstrain.ftr.msgend		= MSG_END;
+	msg->servo.ftr.msgend		= MSG_END;
+	msg->client.ftr.msgend		= MSG_END;
+	msg->target.ftr.msgend		= MSG_END;
+	msg->gain.ftr.msgend		= MSG_END;
+	msg->status.ftr.msgend		= MSG_END;
+	msg->vision.ftr.msgend		= MSG_END;
+	msg->task.ftr.msgend		= MSG_END;
+	msg->stop.ftr.msgend		= MSG_END;
+	msg->lj.ftr.msgend			= MSG_END;
+	msg->vsetting.ftr.msgend	= MSG_END;
+	msg->teleop.ftr.msgend		= MSG_END;
+} /* end messages_init() */
