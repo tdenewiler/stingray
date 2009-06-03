@@ -330,13 +330,13 @@ int main( int argc, char *argv[] )
 				float real_accel[] = { cs.accel[0], cs.accel[1], cs.accel[2] - 9.86326398 };
 				
 				/* Test the algorithm. */
-				real_accel[0] = 0;
+				/*real_accel[0] = 0;
 				real_accel[1] = accel_count;
 				real_accel[2] = 0;
 				if ( accel_count > 15.0 || accel_count < 0.0 ) {
 					accel_inc = -1 * accel_inc;
 				}
-				accel_count += accel_inc;
+				accel_count += accel_inc;*/
 				
 				
 				/* Update the kalman filter. */
