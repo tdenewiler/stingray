@@ -194,7 +194,7 @@ int main( int argc, char *argv[] )
     bKF = init_kalman();
     if ( bKF > 0 ) {
 		printf("MAIN: Kalman filter setup OK.\n");
-		kalman_print_test();
+		//kalman_print_test();
 	}
 	else {
 		printf("MAIN: WARNING!!! Kalman filter setup failed.\n");
@@ -268,6 +268,7 @@ int main( int argc, char *argv[] )
 	gettimeofday( &kalman_start, NULL );
 	
 	printf("MAIN: Planner running now.\n");
+	printf( "\n" );
 	
 	/* Main loop. */
 	while ( 1 ) {
@@ -381,8 +382,8 @@ int main( int argc, char *argv[] )
             gettimeofday( &ctime, NULL );
             ct = *( localtime ((const time_t*) &ctime.tv_sec) );
 			strftime( write_time, sizeof(write_time), "20%y-%m-%d_%H:%M:%S", &ct);
-            snprintf( write_time + strlen(write_time),
-            		strlen(write_time), ".%03ld", ctime.tv_usec );
+            //snprintf( write_time + strlen(write_time),
+            	//	strlen(write_time), ".%03ld", ctime.tv_usec );
 			
 			/* Log the every (enable_log) seconds. */
 			if ( dt > (cf.enable_log*1000000) ) {
@@ -392,6 +393,11 @@ int main( int argc, char *argv[] )
 					cs.accel[0], cs.accel[1], cs.accel[2], 
 					cs.ang_rate[0], cs.ang_rate[1], cs.ang_rate[2] );
 				
+				printf( "%s, %.04f,%.04f,%.04f,%.04f,%.04f,%.04f,%.04f,%.04f,%.04f,%.04f\n", 
+					write_time, cs.pitch, cs.roll, cs.yaw, msg.lj.data.pressure,
+					cs.accel[0], cs.accel[1], cs.accel[2], 
+					cs.ang_rate[0], cs.ang_rate[1], cs.ang_rate[2] );
+					
 				gettimeofday( &log_start, NULL );
 			}
 		}
