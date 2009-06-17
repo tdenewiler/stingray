@@ -139,14 +139,14 @@ gint gui_timer_1s( gpointer data )
 gint gui_timer_200ms( gpointer data )
 {
     buttons_update_values( );
-    static int recv_bytes;
+    static int bytes_left;
+	int recv_bytes;
 	
     /* Get network data from planner. */
     if ( planner_fd > 0 ) {
-        recv_bytes += net_client( planner_fd, planner_buf, &msg, MODE_OPEN );
-        planner_buf[recv_bytes] = '\0';
+        recv_bytes = net_client( planner_fd, planner_buf, &msg, MODE_OPEN );
 		if ( recv_bytes > 0 ) {
-        	recv_bytes = messages_decode( planner_fd, planner_buf, &msg, recv_bytes );
+        	bytes_left = messages_decode( planner_fd, planner_buf, &msg, recv_bytes );
     	}
     }
 

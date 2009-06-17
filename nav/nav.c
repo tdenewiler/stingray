@@ -283,6 +283,7 @@ int main( int argc, char *argv[] )
 			printf("MAIN: SIMULATION MODE!!! IMU data is simulated.\n");
 			/* Seed the random variable. */
 			srand((unsigned int) time(NULL) );
+			imu_fd = 0;
 		}
     }
 	else {
@@ -397,9 +398,9 @@ int main( int argc, char *argv[] )
         }
 		else {
 			/* Simulation Mode. This is where the simulated data is generated. */
-			msg.mstrain.data.pitch       = cf.target_pitch  + rand() / (float)RAND_MAX;
-			msg.mstrain.data.roll        = cf.target_roll   + rand() / (float)RAND_MAX;
-			msg.mstrain.data.yaw         = cf.target_yaw    + rand() / (float)RAND_MAX;
+			msg.mstrain.data.pitch       = cf.target_pitch + rand() / (float)RAND_MAX;
+			msg.mstrain.data.roll        = cf.target_roll  + rand() / (float)RAND_MAX;
+			msg.mstrain.data.yaw         = cf.target_yaw   + rand() / (float)RAND_MAX;
 			msg.mstrain.data.accel[0]    = 0 + rand() / (float)RAND_MAX;
 			msg.mstrain.data.accel[1]    = 0 + rand() / (float)RAND_MAX;
 			msg.mstrain.data.accel[2]    = 0 + rand() / (float)RAND_MAX;

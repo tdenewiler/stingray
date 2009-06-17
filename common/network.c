@@ -30,6 +30,13 @@ static fd_set master;
 static fd_set read_fds;
 static struct hostent *hent;
 
+/* This variable is in here as a hack. Planner is supposed to send 2 messages
+ * to GUI but only 1 is making it through most of the time. Rarely the second
+ * message gets to GUI as well. This will send STATUS one time, LJ the next.
+ * messages_decode() should fix this but it's not working yet. */
+static int hack_msg_num;
+
+
 
 /******************************************************************************
  *
@@ -127,7 +134,7 @@ int net_server( int fd, void *buf, MSG_DATA *msg, int mode )
     int ii;
     int new_fd;
     int recv_bytes = 0;
-
+	
     struct timeval tv;
 
     /* This value is modified by the select() system call and must be zeroed out
@@ -167,9 +174,18 @@ int net_server( int fd, void *buf, MSG_DATA *msg, int mode )
                     else if ( mode == MODE_LJ ) {
                         messages_send( ii, LJ_MSGID, msg );
                     }
+					/* This is a hack. Both messages should be sent at once.
+					 * messages_decode() should fix this but it's not working
+					 * yet. */
                     else if ( mode == MODE_PLANNER ) {
-                        messages_send( ii, LJ_MSGID, msg );
-                        messages_send( ii, STATUS_MSGID, msg );
+						if ( hack_msg_num == 1 ) {
+							messages_send( ii, LJ_MSGID, msg );
+							hack_msg_num = 2;
+						}
+						else {
+							messages_send( ii, STATUS_MSGID, msg );
+							hack_msg_num = 1;
+						}
                     }
                 }
             }
