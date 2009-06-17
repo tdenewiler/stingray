@@ -35,6 +35,7 @@ static struct hostent *hent;
  * message gets to GUI as well. This will send STATUS one time, LJ the next.
  * messages_decode() should fix this but it's not working yet. */
 static int hack_msg_num;
+static int hack_msg_num2;
 
 
 
@@ -134,7 +135,7 @@ int net_server( int fd, void *buf, MSG_DATA *msg, int mode )
     int ii;
     int new_fd;
     int recv_bytes = 0;
-	
+
     struct timeval tv;
 
     /* This value is modified by the select() system call and must be zeroed out
@@ -223,7 +224,9 @@ int net_client( int fd, void *buf, MSG_DATA *msg, int mode )
         messages_send( fd, (int)TELEOP_MSGID, msg );
     }
     else if ( mode == MODE_PLANNER ) {
-    	messages_send( fd, (int)TARGET_MSGID, msg );
+    	/* This is a hack too. */
+		messages_send( fd, (int)GAIN_MSGID, msg );
+		messages_send( fd, (int)TARGET_MSGID, msg );
     	messages_send( fd, (int)LJ_MSGID, msg );
 	}
 	else if ( mode == MODE_OPEN ) {

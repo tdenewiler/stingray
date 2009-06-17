@@ -90,12 +90,12 @@ void planner_exit( )
 	if ( nav_fd > 0 ) {
 		close( nav_fd );
 	}
-	
+
 	/* Close the open file pointers. */
 	if ( f_log ) {
 		fclose( f_log );
 	}
-	
+
 	/* Close the Kalman filter. */
 	if ( bKF > 0 ) {
 		close_kalman();
@@ -185,11 +185,23 @@ int main( int argc, char *argv[] )
 	parse_cla( argc, argv, &cf, STINGRAY, ( const char * )PLANNER_FILENAME );
 
 	/* Set up the default values for the target. */
-	msg.target.data.pitch   = cf.target_pitch;
+    msg.target.data.pitch   = cf.target_pitch;
     msg.target.data.roll    = cf.target_roll;
     msg.target.data.yaw     = cf.target_yaw;
     msg.target.data.depth   = cf.target_depth;
-    
+    msg.gain.data.kp_pitch  = cf.kp_pitch;
+    msg.gain.data.ki_pitch  = cf.ki_pitch;
+    msg.gain.data.kd_pitch  = cf.kd_pitch;
+    msg.gain.data.kp_roll   = cf.kp_roll;
+    msg.gain.data.ki_roll   = cf.ki_roll;
+    msg.gain.data.kd_roll   = cf.kd_roll;
+    msg.gain.data.kp_yaw    = cf.kp_yaw;
+    msg.gain.data.ki_yaw    = cf.ki_yaw;
+    msg.gain.data.kd_yaw    = cf.kd_yaw;
+    msg.gain.data.kp_depth  = cf.kp_depth;
+    msg.gain.data.ki_depth  = cf.ki_depth;
+    msg.gain.data.kd_depth  = cf.kd_depth;
+
     /* Set up Kalman filter. */
     bKF = init_kalman();
     if ( bKF > 0 ) {
@@ -243,7 +255,7 @@ int main( int argc, char *argv[] )
 			printf("MAIN: WARNING!!! Nav client setup failed.\n");
 		}
     }
-    
+
     /* Open log file if flag set. */
     if ( cf.enable_log ) {
     	f_log = fopen( "planner_log.dat", "a+" );
@@ -266,10 +278,10 @@ int main( int argc, char *argv[] )
 	gettimeofday( &log_start, NULL );
 	gettimeofday( &kalman_time, NULL );
 	gettimeofday( &kalman_start, NULL );
-	
+
 	printf("MAIN: Planner running now.\n");
 	printf( "\n" );
-	
+
 	/* Main loop. */
 	while ( 1 ) {
 		/* Get network data. */
@@ -314,7 +326,7 @@ int main( int argc, char *argv[] )
 				messages_decode( nav_fd, nav_buf, &msg, recv_bytes );
 			}
 		}
-		
+
 		/* Update Kalman filter. */
 		if ( bKF ) {
 			time1s =    kalman_time.tv_sec;
@@ -322,20 +334,20 @@ int main( int argc, char *argv[] )
 			time2s =    kalman_start.tv_sec;
 			time2ms =   kalman_start.tv_usec;
 			dt = util_calc_dt( &time1s, &time1ms, &time2s, &time2ms );
-			
+
 			/* If it has been long enough, update the filter. */
 			if ( dt > 0.1 * 1000000 ) {
 				STAT cs = msg.status.data;
-				
+
 				/*printf( "\rdt=%f depth=%f ang=[%f,%f,%f] accel=[%f,%f,%f] ang_rate=[%f,%f,%f]",
-					((float)dt)/1000000, msg.lj.data.pressure, 
+					((float)dt)/1000000, msg.lj.data.pressure,
 					cs.pitch, cs.roll, cs.yaw,
-					cs.accel[0], cs.accel[1], cs.accel[2], 
+					cs.accel[0], cs.accel[1], cs.accel[2],
 					cs.ang_rate[0], cs.ang_rate[1], cs.ang_rate[2] );*/
-					
+
 				float ang[] = { cs.pitch, cs.roll, cs.yaw };
 				float real_accel[] = { cs.accel[0], cs.accel[1], cs.accel[2] - 9.86326398 };
-				
+
 				/* Test the algorithm. */
 				/*real_accel[0] = 0;
 				real_accel[1] = accel_count;
@@ -344,20 +356,20 @@ int main( int argc, char *argv[] )
 					accel_inc = -1 * accel_inc;
 				}
 				accel_count += accel_inc;*/
-				
-				
+
+
 				/* Update the kalman filter. */
 				kalman_update( ((float)dt)/1000000, msg.lj.data.pressure, ang,
 						real_accel, cs.ang_rate );
-				
+
 				gettimeofday( &kalman_start, NULL );
 			}
-			
+
 			/* Get current location estimation. */
 			kalman_get_location( loc );
-			
+
 			/* Print the location estimation. */
-			//printf( "\rKalman Location Estimation = ( %f, %f, %f )", 
+			//printf( "\rKalman Location Estimation = ( %f, %f, %f )",
 				//loc.x, loc.y, loc.z );
 		}
 
@@ -369,7 +381,7 @@ int main( int argc, char *argv[] )
                 messages_decode( lj_fd, lj_buf, &msg, recv_bytes );
             }
         }
-        
+
         /* Log if flag is set. */
         if ( cf.enable_log && f_log ) {
         	time1s =    log_time.tv_sec;
@@ -377,27 +389,31 @@ int main( int argc, char *argv[] )
 			time2s =    log_start.tv_sec;
 			time2ms =   log_start.tv_usec;
 			dt = util_calc_dt( &time1s, &time1ms, &time2s, &time2ms );
-			
+
 			/* Get a timestamp and use for log. */
             gettimeofday( &ctime, NULL );
             ct = *( localtime ((const time_t*) &ctime.tv_sec) );
 			strftime( write_time, sizeof(write_time), "20%y-%m-%d_%H:%M:%S", &ct);
             //snprintf( write_time + strlen(write_time),
             	//	strlen(write_time), ".%03ld", ctime.tv_usec );
-			
+
 			/* Log the every (enable_log) seconds. */
 			if ( dt > (cf.enable_log*1000000) ) {
 				STAT cs = msg.status.data;
-				fprintf( f_log, "%s, %.04f,%.04f,%.04f,%.04f,%.04f,%.04f,%.04f,%.04f,%.04f,%.04f\n", 
+				fprintf( f_log, "%s, %.04f,%.04f,%.04f,%.04f,%.04f,%.04f,%.04f,%.04f,%.04f,%.04f\n",
 					write_time, cs.pitch, cs.roll, cs.yaw, msg.lj.data.pressure,
-					cs.accel[0], cs.accel[1], cs.accel[2], 
+					cs.accel[0], cs.accel[1], cs.accel[2],
 					cs.ang_rate[0], cs.ang_rate[1], cs.ang_rate[2] );
-				
-				printf( "%s, %.04f,%.04f,%.04f,%.04f,%.04f,%.04f,%.04f,%.04f,%.04f,%.04f\n", 
-					write_time, cs.pitch, cs.roll, cs.yaw, msg.lj.data.pressure,
-					cs.accel[0], cs.accel[1], cs.accel[2], 
-					cs.ang_rate[0], cs.ang_rate[1], cs.ang_rate[2] );
-					
+
+				//printf( "%s, %.04f,%.04f,%.04f,%.04f,%.04f,%.04f,%.04f,%.04f,%.04f,%.04f\n",
+				//	write_time, cs.pitch, cs.roll, cs.yaw, msg.lj.data.pressure,
+				//	cs.accel[0], cs.accel[1], cs.accel[2],
+				//	cs.ang_rate[0], cs.ang_rate[1], cs.ang_rate[2] );
+				//printf( "%s, %.04f,%.04f,%.04f,%.04f,%.04f,%.04f,%.04f,%.04f,%.04f,%.04f\n",
+				//	write_time, cs.pitch, cs.roll, cs.yaw, msg.lj.data.pressure,
+				//	cs.accel[0], cs.accel[1], cs.accel[2],
+				//	cs.ang_rate[0], cs.ang_rate[1], cs.ang_rate[2] );
+
 				gettimeofday( &log_start, NULL );
 			}
 		}
