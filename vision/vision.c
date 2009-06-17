@@ -55,7 +55,7 @@ int vision_find_dot( int *dotx,
                    )
 {
     CvPoint center;
-    IplImage *hsv_image = NULL;
+    IplImage *hsvImg = NULL;
     IplImage *outImg = NULL;
     IplConvKernel *w = cvCreateStructuringElementEx( 2, 2,
             (int)floor( ( 3.0 ) / 2 ), (int)floor( ( 3.0 ) / 2 ), CV_SHAPE_RECT );
@@ -64,20 +64,22 @@ int vision_find_dot( int *dotx,
     center.x = -1;
     center.y = -1;
 
+	/* Capture a new source image. */
     srcImg = cvQueryFrame( cap );
     if ( !srcImg ) {
         return 0;
     }
 
-    hsv_image = cvCreateImage( cvGetSize( srcImg ), IPL_DEPTH_8U, 3 );
+	/* Create images to work on. */
+    hsvImg = cvCreateImage( cvGetSize( srcImg ), IPL_DEPTH_8U, 3 );
     outImg = cvCreateImage( cvGetSize( srcImg ), IPL_DEPTH_8U, 1 );
 
     /* Flip the source image. */
     cvFlip( srcImg, srcImg );
 
     /* Segment the flipped image into a binary image. */
-    cvCvtColor( srcImg, hsv_image, CV_RGB2HSV );
-    cvInRangeS( hsv_image, cvScalar(hL, sL, vL), cvScalar(hH, sH, vH), binImg );
+    cvCvtColor( srcImg, hsvImg, CV_RGB2HSV );
+    cvInRangeS( hsvImg, cvScalar(hL, sL, vL), cvScalar(hH, sH, vH), binImg );
 
     /* Perform erosion, dilation, and conversion. */
     cvErode( binImg, binImg, w );
@@ -86,13 +88,11 @@ int vision_find_dot( int *dotx,
 
     /* Find the centroid. */
     center = vision_find_centroid( outImg, 5 );
-    //*dotx = center.x - srcImg->width / 2;
-    //*doty = center.y - srcImg->height / 2;
     *dotx = center.x;
     *doty = center.y;
 
     /* Clear variables to free memory. */
-    cvReleaseImage( &hsv_image );
+    cvReleaseImage( &hsvImg );
     cvReleaseImage( &outImg );
 
     return 1;
@@ -372,7 +372,6 @@ CvPoint vision_find_centroid( IplImage *binImage, int thresh )
     /* Check if an object is detected. */
     if ( count > thresh )
         detected = true;
-
     if ( detected ) {
         centroid.x = (int)colTotal / count;
         centroid.y = (int)rowTotal / count;
