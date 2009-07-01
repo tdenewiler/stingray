@@ -108,20 +108,12 @@ void messages_send( int fd,
 
             /* Use network byte order. */
             msg->target.data.mode  = htonl( msg->target.data.mode );
-            msg->target.data.pitch = htonl( msg->target.data.pitch );
-            msg->target.data.roll  = htonl( msg->target.data.roll );
-            msg->target.data.yaw   = htonl( msg->target.data.yaw );
-            msg->target.data.depth = htonl( msg->target.data.depth );
 
             /* Actually send message here. */
             net_send( fd, &msg->target, sizeof(TARGET_MSG) );
 
             /* Convert the values back to host byte order. */
             msg->target.data.mode  = ntohl( msg->target.data.mode );
-            msg->target.data.pitch = htonl( msg->target.data.pitch );
-            msg->target.data.roll  = htonl( msg->target.data.roll );
-            msg->target.data.yaw   = htonl( msg->target.data.yaw );
-            msg->target.data.depth = htonl( msg->target.data.depth );
             break;
 
         case GAIN_MSGID:

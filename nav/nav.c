@@ -244,22 +244,6 @@ int main( int argc, char *argv[] )
 
     /* Initialize the PID controllers with configuration file values. */
     status = pid_init( &pid, &cf );
-    msg.target.data.pitch   = cf.target_pitch;
-    msg.target.data.roll    = cf.target_roll;
-    msg.target.data.yaw     = cf.target_yaw;
-    msg.target.data.depth   = cf.target_depth;
-    msg.gain.data.kp_pitch  = cf.kp_pitch;
-    msg.gain.data.ki_pitch  = cf.ki_pitch;
-    msg.gain.data.kd_pitch  = cf.kd_pitch;
-    msg.gain.data.kp_roll   = cf.kp_roll;
-    msg.gain.data.ki_roll   = cf.ki_roll;
-    msg.gain.data.kd_roll   = cf.kd_roll;
-    msg.gain.data.kp_yaw    = cf.kp_yaw;
-    msg.gain.data.ki_yaw    = cf.ki_yaw;
-    msg.gain.data.kd_yaw    = cf.kd_yaw;
-    msg.gain.data.kp_depth  = cf.kp_depth;
-    msg.gain.data.ki_depth  = cf.ki_depth;
-    msg.gain.data.kd_depth  = cf.kd_depth;
 
     /* Set up server. */
     if ( cf.enable_server ) {
@@ -418,9 +402,9 @@ int main( int argc, char *argv[] )
             time2ms =   pitch_start.tv_usec;
             dt = util_calc_dt( &time1s, &time1ms, &time2s, &time2ms );
             if ( dt > pid.pitch.period ) {
-                if ( (cf.enable_pololu) && (pololu_fd > 0) && (pololu_initialized > 0) ) {
+                //if ( (cf.enable_pololu) && (pololu_fd > 0) && (pololu_initialized > 0) ) {
                     pid_loop( pololu_fd, &pid, &cf, &msg, dt, PID_PITCH );
-                }
+                //}
                 msg.status.data.pitch_period = dt;
                 gettimeofday( &pitch_start, NULL );
             }
@@ -432,9 +416,9 @@ int main( int argc, char *argv[] )
             time2ms =   roll_start.tv_usec;
             dt = util_calc_dt( &time1s, &time1ms, &time2s, &time2ms );
             if ( dt > pid.roll.period ) {
-                if ( (cf.enable_pololu) && (pololu_fd > 0) && (pololu_initialized > 0) ) {
+                //if ( (cf.enable_pololu) && (pololu_fd > 0) && (pololu_initialized > 0) ) {
                     pid_loop( pololu_fd, &pid, &cf, &msg, dt, PID_ROLL );
-                }
+                //}
                 msg.status.data.roll_period = dt;
                 gettimeofday( &roll_start, NULL );
             }
@@ -446,11 +430,11 @@ int main( int argc, char *argv[] )
             time2ms =   yaw_start.tv_usec;
             dt = util_calc_dt( &time1s, &time1ms, &time2s, &time2ms );
             if ( dt > pid.yaw.period ) {
-                if ( (cf.enable_pololu) && (pololu_fd > 0) && (pololu_initialized > 0) ) {
+                //if ( (cf.enable_pololu) && (pololu_fd > 0) && (pololu_initialized > 0) ) {
                     pid_loop( pololu_fd, &pid, &cf, &msg, dt, PID_YAW );
-                }
-                msg.status.data.yaw_period = dt;
-                gettimeofday( &yaw_start, NULL );
+                //}
+				msg.status.data.yaw_period = dt;
+				gettimeofday( &yaw_start, NULL );
             }
 
             /* Depth. */
@@ -460,9 +444,9 @@ int main( int argc, char *argv[] )
             time2ms =   depth_start.tv_usec;
             dt = util_calc_dt( &time1s, &time1ms, &time2s, &time2ms );
             if ( dt > pid.depth.period ) {
-                if ( (cf.enable_pololu) && (pololu_fd > 0) && (pololu_initialized > 0) ) {
+                //if ( (cf.enable_pololu) && (pololu_fd > 0) && (pololu_initialized > 0) ) {
                     pid_loop( pololu_fd, &pid, &cf, &msg, dt, PID_DEPTH );
-                }
+                //}
                 msg.status.data.depth_period = dt;
                 gettimeofday( &depth_start, NULL );
             }
