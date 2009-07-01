@@ -32,7 +32,7 @@
 #define POLOLU_REVERSE          0
 #define POLOLU_DEFAULT_RANGE    15
 #define POLOLU_DEFAULT_NEUTRAL  3000
-#define POLOLU_SLEEP            0
+#define POLOLU_SLEEP            10
 //@}
 
 /** @name Neutral positions for the voith servos */

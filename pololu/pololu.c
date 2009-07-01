@@ -94,7 +94,7 @@ int pololuSetParameters( int fd,
                        )
 {
 	// sleep for a bit
-	usleep( POLOLU_SLEEP );
+	// usleep( POLOLU_SLEEP );
 	// check ranges
 	int result = 0;
 
@@ -166,7 +166,7 @@ int pololuSetSpeed( int fd,
                   )
 {
 	// sleep for a bit
-	usleep( POLOLU_SLEEP );
+	// usleep( POLOLU_SLEEP );
 
 	// set speed
 	int result = 0;
@@ -225,7 +225,7 @@ int pololuSetPosition7Bit( int fd,
                          )
 {
 	// sleep for a bit
-	usleep( POLOLU_SLEEP );
+	// usleep( POLOLU_SLEEP );
 
 	// check ranges
 	int result = 0;
@@ -283,7 +283,7 @@ int pololuSetPosition8Bit( int fd,
                          )
 {
 	// sleep for a bit
-	usleep( POLOLU_SLEEP );
+	// usleep( POLOLU_SLEEP );
 
 	// check ranges
 	int result = 0;
@@ -349,7 +349,7 @@ int pololuSetPositionAbsolute( int fd,
                              )
 {
 	// sleep for a bit
-	usleep( POLOLU_SLEEP );
+	// usleep( POLOLU_SLEEP );
 
 	// check ranges
 	int result = 0;
@@ -410,7 +410,7 @@ int pololuSetNeutral( int fd,
                     )
 {
 	// sleep for a bit
-	usleep( POLOLU_SLEEP );
+	// usleep( POLOLU_SLEEP );
 
 	// set neutral
 	// check ranges
@@ -476,13 +476,13 @@ int pololuInitializeChannels( int fd )
 	result += pololuSetPosition7Bit( fd, 3, 63 );
 	result += pololuSetParameters( fd, 7, 1, 1, 15 );
 	result += pololuSetParameters( fd, 8, 1, 1, 15 );
-	result += pololuSetParameters( fd, 9, 1, 1, 15 );
+	result += pololuSetParameters( fd, 10, 1, 1, 15 );
 	result += pololuSetSpeed( fd, 7, 0 );
 	result += pololuSetSpeed( fd, 8, 0 );
-	result += pololuSetSpeed( fd, 9, 0 );
+	result += pololuSetSpeed( fd, 10, 0 );
 	result += pololuSetPosition7Bit( fd, 7, 63 );
 	result += pololuSetPosition7Bit( fd, 8, 63 );
-	result += pololuSetPosition7Bit( fd, 9, 63 );
+	result += pololuSetPosition7Bit( fd, 10, 63 );
 	result += pololuSetParameters( fd, 1, 1, 1, 15 ) ;
 	result += pololuSetNeutral( fd, 1, POLOLU_CH1_NEUTRAL );
 	result += pololuSetPosition7Bit( fd, 1, 63 );
@@ -527,7 +527,10 @@ int pololuInitializeChannels( int fd )
  *              VSPs together.
  *
  * Input:
- *
+ *	voithThrust: between 0 and 100
+ *	thrustAngle: between 0 and 360
+ *	thrust: between -100 and 100
+ *	yawTorque: between -100 and 100
  *
  * Output:      1 for success and -1 for failure
  *
@@ -686,7 +689,7 @@ int controlVertical( int fd,
 	int bytes = 0;
 	bytes += pololuSetPosition7Bit( fd, 7, leftCmd );
 	bytes += pololuSetPosition7Bit( fd, 8, rightCmd );
-	bytes += pololuSetPosition7Bit( fd, 9, tailCmd );
+	bytes += pololuSetPosition7Bit( fd, 10, tailCmd );
 
 	// check the number of bytes sent and return success or failure
 	if ( bytes == 15 ) {
