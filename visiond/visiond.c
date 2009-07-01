@@ -133,7 +133,6 @@ int main( int argc, char *argv[] )
     int fence_center = -1;
 	int y_max = -1;
     double bearing = -1;
-    int amt = 2;
     int ii = 0;
     int lineWidth = 75;
     int camera = 0;
@@ -207,11 +206,11 @@ int main( int argc, char *argv[] )
 		}
 		else {
 			f_img = cvQueryFrame( f_cam );
-			f_bin_img = cvCreateImage( cvGetSize( f_img ), IPL_DEPTH_8U, 1 );
+			f_bin_img = cvCreateImage( cvGetSize(f_img), IPL_DEPTH_8U, 1 );
 			fence_center = f_img->width / 2;
 			printf("MAIN: Front camera opened OK.\n");
 		}
-	
+
 		/* Open bottom camera. */
 		camera = 1;
 		b_cam = cvCaptureFromCAM( camera );
@@ -221,7 +220,7 @@ int main( int argc, char *argv[] )
 		}
 		else {
 			b_img = cvQueryFrame( b_cam );
-			b_bin_img = cvCreateImage( cvGetSize( b_img ), IPL_DEPTH_8U, 1 );
+			b_bin_img = cvCreateImage( cvGetSize(b_img), IPL_DEPTH_8U, 1 );
 			printf("MAIN: Bottom camera opened OK.\n");
 		}
 	}
@@ -253,8 +252,8 @@ int main( int argc, char *argv[] )
 		}
         else if ( msg.task.data.num == TASK_BUOY && f_cam ) {
 			/* Look for the buoy. */
-			status = vision_find_dot( &dotx, &doty, &width, &height, amt,
-					f_cam, f_img, f_bin_img,
+			status = vision_find_dot( &dotx, &doty, &width, &height,
+					cf.vision_angle, f_cam, f_img, f_bin_img,
 					msg.vsetting.data.buoy_hsv.hL,
 					msg.vsetting.data.buoy_hsv.hH,
 					msg.vsetting.data.buoy_hsv.sL,
@@ -263,8 +262,8 @@ int main( int argc, char *argv[] )
 					msg.vsetting.data.buoy_hsv.vH );
 
 			if ( status == 1 ) {
-				msg.vision.data.front_x = -1 * (dotx - f_img->width / 2);
-				msg.vision.data.front_y = -1 * (doty - f_img->height / 2);
+				msg.vision.data.front_x = (f_img->width / 2) - dotx;
+				msg.vision.data.front_y = (f_img->height / 2) - doty;
 				if ( cf.vision_window ) {
 					if ( cvWaitKey( 5 ) >= 0 );
 					cvCircle( f_img, cvPoint(dotx, doty),
@@ -341,7 +340,6 @@ int main( int argc, char *argv[] )
 				msg.vision.data.front_y = loop_counter;
 			}
 		}
-
 
         /* Get network data. */
         if ( ( cf.enable_server ) && ( server_fd > 0 ) ) {
