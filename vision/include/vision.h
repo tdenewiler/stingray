@@ -44,14 +44,14 @@ CvPoint vision_find_centroid( IplImage *binImage, int thresh );
 //! Finds a circular object from a camera.
 //! \param dotx Pointer to variable for x position of dot.
 //! \param doty Pointer to variable for y position of dot.
-//! \param amt The amount of erosion/dilation to perform.
+//! \param angle The angle to rotate the image by.
 //! \param cam A pointer to an open camera.
 //! \param srcImg The unprocessed image.
 int vision_find_dot( int *dotx,
                      int *doty,
                      int *width,
                      int *height,
-                     int amt,
+                     int angle,
                      CvCapture *cam,
                      IplImage *srcImg,
                      IplImage *binImg,

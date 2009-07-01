@@ -42,7 +42,7 @@ int vision_find_dot( int *dotx,
                      int *doty,
                      int *width,
                      int *height,
-                     int amt,
+                     int angle,
                      CvCapture *cap,
                      IplImage *srcImg,
                      IplImage *binImg,
@@ -55,6 +55,9 @@ int vision_find_dot( int *dotx,
                    )
 {
     CvPoint center;
+    //CvPoint2D32f rotCenter;
+    //CvMat *rotation;
+    //IplImage *rotateImg = NULL;
     IplImage *hsvImg = NULL;
     IplImage *outImg = NULL;
     IplConvKernel *w = cvCreateStructuringElementEx( 2, 2,
@@ -63,16 +66,25 @@ int vision_find_dot( int *dotx,
     /* Initialize to impossible values. */
     center.x = -1;
     center.y = -1;
+    //rotCenter.x = srcImg->width / 2;
+    //rotCenter.y = srcImg->height / 2;
+    //rotation = cvCreateMat( 2 , 3 , CV_32FC1 );
 
 	/* Capture a new source image. */
     srcImg = cvQueryFrame( cap );
     if ( !srcImg ) {
         return 0;
     }
+	//rotateImg = cvCreateImage( cvGetSize( srcImg ), IPL_DEPTH_8U, 3 );
+
+    /* Rotate image. First find rotation matrix. Then apply affine warp. */
+    //cv2DRotationMatrix( rotCenter, angle, 1, rotation );
+    //cvWarpAffine( srcImg, rotateImg, rotation );
+    //cvCopy( rotateImg, srcImg );
 
 	/* Create images to work on. */
-    hsvImg = cvCreateImage( cvGetSize( srcImg ), IPL_DEPTH_8U, 3 );
-    outImg = cvCreateImage( cvGetSize( srcImg ), IPL_DEPTH_8U, 1 );
+    hsvImg = cvCreateImage( cvGetSize(srcImg), IPL_DEPTH_8U, 3 );
+    outImg = cvCreateImage( cvGetSize(srcImg), IPL_DEPTH_8U, 1 );
 
     /* Flip the source image. */
     cvFlip( srcImg, srcImg );
@@ -94,6 +106,7 @@ int vision_find_dot( int *dotx,
     /* Clear variables to free memory. */
     cvReleaseImage( &hsvImg );
     cvReleaseImage( &outImg );
+    //cvReleaseImage( &rotateImg );
 
     return 1;
 } /* end vision_find_dot() */

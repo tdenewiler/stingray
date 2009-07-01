@@ -133,6 +133,9 @@ void parse_line( CONF_VARS *config )
         else if ( strncmp( tokens[1], "window", STRING_SIZE ) == 0 ) {
             sscanf( tokens[2], "%d", &config->vision_window );
         }
+        else if ( strncmp( tokens[1], "angle", STRING_SIZE ) == 0 ) {
+            sscanf( tokens[2], "%d", &config->vision_angle );
+        }
     }
     /* end net parameters */
 
@@ -453,6 +456,7 @@ void parse_line( CONF_VARS *config )
             sscanf( tokens[2], "%f", &config->fence_vH );
         }
     }
+    /* end vision HSV values */
 
 } /* end parse_line() */
 
