@@ -161,11 +161,47 @@ void events_target_speed( GtkWidget *widget,
                           gpointer data
                         );
 
+//! Sets the target values to the current vehicle pose.
+//! \param widget A pointer to the button widget.
+//! \param event A pointer to the event that triggered the callback.
+//! \param data A pointer to data that can be manipulated.
+void events_target_current( GtkWidget *widget,
+                          GdkEvent *event,
+                          gpointer data
+                        );
+
+//! Sets the target mode to ZERO_PID_ERRORS.
+//! \param widget A pointer to the button widget.
+//! \param event A pointer to the event that triggered the callback.
+//! \param data A pointer to data that can be manipulated.
+void events_zero_pid( GtkWidget *widget,
+                          GdkEvent *event,
+                          gpointer data
+                        );
+
 //! Event associated with the Gains button.
 //! \param widget A pointer to the button widget.
 //! \param event A pointer to the event that triggered the callback.
 //! \param data A pointer to data that can be manipulated.
 void events_gain( GtkWidget *widget,
+                  GdkEvent *event,
+                  gpointer data
+                );
+
+//! Causes the configuration file gains to be set as current gains.
+//! \param widget A pointer to the button widget.
+//! \param event A pointer to the event that triggered the callback.
+//! \param data A pointer to data that can be manipulated.
+void events_gain_cf( GtkWidget *widget,
+                  GdkEvent *event,
+                  gpointer data
+                );
+
+//! Causes the gains to be set to zero.
+//! \param widget A pointer to the button widget.
+//! \param event A pointer to the event that triggered the callback.
+//! \param data A pointer to data that can be manipulated.
+void events_gain_zero( GtkWidget *widget,
                   GdkEvent *event,
                   gpointer data
                 );

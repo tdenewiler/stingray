@@ -100,6 +100,22 @@ void pid_loop( int pololu_fd,
                int mode
              )
 {
+	/* Check to see if the errors should be reset to zero. */
+	if ( msg->target.data.mode == ZERO_PID_ERRORS ) {
+		pid->pitch.perr = 0;
+		pid->pitch.ierr = 0;
+		pid->pitch.derr = 0;
+		pid->roll.perr = 0;
+		pid->roll.ierr = 0;
+		pid->roll.derr = 0;
+		pid->yaw.perr = 0;
+		pid->yaw.ierr = 0;
+		pid->yaw.derr = 0;
+		pid->depth.perr = 0;
+		pid->depth.ierr = 0;
+		pid->depth.derr = 0;
+	}
+	
 	/* These next three need to be set from vison, hydrophone, gui, etc. */
 	pid->voith_angle = atan2f( msg->target.data.fx, msg->target.data.fy );
 	pid->voith_speed = msg->target.data.speed;

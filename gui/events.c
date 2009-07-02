@@ -84,6 +84,16 @@ extern GtkWidget *button_kp_az;
 extern GtkWidget *button_ki_az;
 extern GtkWidget *button_kd_az;
 
+/* Target buttons. */
+extern GtkWidget *button_target_yaw;
+extern GtkWidget *button_target_roll;
+extern GtkWidget *button_target_pitch;
+extern GtkWidget *button_target_depth;
+extern GtkWidget *button_target_fx;
+extern GtkWidget *button_target_fy;
+extern GtkWidget *button_target_speed;
+extern GtkWidget *button_target_current;
+
 /* Network API messages. */
 extern MSG_DATA msg;
 extern int planner_fd;
@@ -331,34 +341,146 @@ void events_gain( GtkWidget *widget,
 
 	/* Get the values of the buttons. */
 	msg.gain.data.mode 		= 0;
-    msg.gain.data.kp_yaw    = gtk_spin_button_get_value( ( GtkSpinButton * )
+    msg.gain.data.kp_yaw    = gtk_spin_button_get_value( (GtkSpinButton *)
                               button_kp_yaw );
-    msg.gain.data.ki_yaw    = gtk_spin_button_get_value( ( GtkSpinButton * )
+    msg.gain.data.ki_yaw    = gtk_spin_button_get_value( (GtkSpinButton *)
                               button_ki_yaw );
-    msg.gain.data.kd_yaw    = gtk_spin_button_get_value( ( GtkSpinButton * )
+    msg.gain.data.kd_yaw    = gtk_spin_button_get_value( (GtkSpinButton *)
                               button_kd_yaw );
-    msg.gain.data.kp_pitch  = gtk_spin_button_get_value( ( GtkSpinButton * )
+    msg.gain.data.kp_pitch  = gtk_spin_button_get_value( (GtkSpinButton *)
                               button_kp_pitch );
-    msg.gain.data.ki_pitch  = gtk_spin_button_get_value( ( GtkSpinButton * )
+    msg.gain.data.ki_pitch  = gtk_spin_button_get_value( (GtkSpinButton *)
                               button_ki_pitch );
-    msg.gain.data.kd_pitch  = gtk_spin_button_get_value( ( GtkSpinButton * )
+    msg.gain.data.kd_pitch  = gtk_spin_button_get_value( (GtkSpinButton *)
                               button_kd_pitch );
-    msg.gain.data.kp_roll   = gtk_spin_button_get_value( ( GtkSpinButton * )
+    msg.gain.data.kp_roll   = gtk_spin_button_get_value( (GtkSpinButton *)
                               button_kp_roll );
-    msg.gain.data.ki_roll   = gtk_spin_button_get_value( ( GtkSpinButton * )
+    msg.gain.data.ki_roll   = gtk_spin_button_get_value( (GtkSpinButton *)
                               button_ki_roll );
-    msg.gain.data.kd_roll   = gtk_spin_button_get_value( ( GtkSpinButton * )
+    msg.gain.data.kd_roll   = gtk_spin_button_get_value( (GtkSpinButton *)
                               button_kd_roll );
-    msg.gain.data.kp_depth  = gtk_spin_button_get_value( ( GtkSpinButton * )
+    msg.gain.data.kp_depth  = gtk_spin_button_get_value( (GtkSpinButton *)
                               button_kp_depth );
-    msg.gain.data.ki_depth  = gtk_spin_button_get_value( ( GtkSpinButton * )
+    msg.gain.data.ki_depth  = gtk_spin_button_get_value( (GtkSpinButton *)
                               button_ki_depth );
-    msg.gain.data.kd_depth  = gtk_spin_button_get_value( ( GtkSpinButton * )
+    msg.gain.data.kd_depth  = gtk_spin_button_get_value( (GtkSpinButton *)
                               button_kd_depth );
 
     /* Send the gain message. */
     messages_send( planner_fd, GAIN_MSGID, &msg );
 } /* end events_gain() */
+
+
+/******************************************************************************
+ *
+ * Title:       void events_gain_cf( GtkWidget *widget,
+ *                                   GdkEvent *event,
+ *                                   gpointer data )
+ *
+ * Description: Called when use config file gains button clicked. Sets the
+ * 				current gains to be the gains in the configuration file.
+ *
+ * Input:       widget: A pointer to the button widget.
+ *              event: A pointer to the event that triggered the callback.
+ *              data: A pointer to data that can be manipulated.
+ *
+ * Output:      None.
+ *
+ * Globals:     None.
+ *
+ *****************************************************************************/
+
+void events_gain_cf( GtkWidget *widget,
+                  GdkEvent *event,
+                  gpointer data )
+{
+	/* Set the message values. */
+    msg.gain.data.kp_pitch  = cf.kp_pitch;
+    msg.gain.data.ki_pitch  = cf.ki_pitch;
+    msg.gain.data.kd_pitch  = cf.kd_pitch;
+    msg.gain.data.kp_roll   = cf.kp_roll;
+    msg.gain.data.ki_roll   = cf.ki_roll;
+    msg.gain.data.kd_roll   = cf.kd_roll;
+    msg.gain.data.kp_yaw    = cf.kp_yaw;
+    msg.gain.data.ki_yaw    = cf.ki_yaw;
+    msg.gain.data.kd_yaw    = cf.kd_yaw;
+    msg.gain.data.kp_depth  = cf.kp_depth;
+    msg.gain.data.ki_depth  = cf.ki_depth;
+    msg.gain.data.kd_depth  = cf.kd_depth;
+	
+	/* Set the button values. */
+    gtk_spin_button_set_value( (GtkSpinButton *)button_kp_yaw, msg.gain.data.kp_yaw );
+    gtk_spin_button_set_value( (GtkSpinButton *)button_ki_yaw, msg.gain.data.ki_yaw );
+    gtk_spin_button_set_value( (GtkSpinButton *)button_kd_yaw, msg.gain.data.kd_yaw );
+    gtk_spin_button_set_value( (GtkSpinButton *)button_kp_pitch, msg.gain.data.kp_pitch );
+    gtk_spin_button_set_value( (GtkSpinButton *)button_ki_pitch, msg.gain.data.ki_pitch );
+    gtk_spin_button_set_value( (GtkSpinButton *)button_kd_pitch, msg.gain.data.kd_pitch );
+    gtk_spin_button_set_value( (GtkSpinButton *)button_kp_roll, msg.gain.data.kp_roll );
+    gtk_spin_button_set_value( (GtkSpinButton *)button_ki_roll, msg.gain.data.ki_roll );
+    gtk_spin_button_set_value( (GtkSpinButton *)button_kd_roll, msg.gain.data.kd_roll );
+    gtk_spin_button_set_value( (GtkSpinButton *)button_kp_depth, msg.gain.data.kp_depth );
+    gtk_spin_button_set_value( (GtkSpinButton *)button_ki_depth, msg.gain.data.ki_depth );
+    gtk_spin_button_set_value( (GtkSpinButton *)button_kd_depth, msg.gain.data.kd_depth );
+	
+    /* Send the gain message. */
+    messages_send( planner_fd, GAIN_MSGID, &msg );
+} /* end events_gain_cf() */
+
+
+/******************************************************************************
+ *
+ * Title:       void events_gain_zero( GtkWidget *widget,
+ *                                   GdkEvent *event,
+ *                                   gpointer data )
+ *
+ * Description: Called when use zero gains button clicked. Sets the
+ * 				current gains to be zero.
+ *
+ * Input:       widget: A pointer to the button widget.
+ *              event: A pointer to the event that triggered the callback.
+ *              data: A pointer to data that can be manipulated.
+ *
+ * Output:      None.
+ *
+ * Globals:     None.
+ *
+ *****************************************************************************/
+
+void events_gain_zero( GtkWidget *widget,
+                  GdkEvent *event,
+                  gpointer data )
+{
+	/* Set the message values. */
+    msg.gain.data.kp_pitch  = 0;
+    msg.gain.data.ki_pitch  = 0;
+    msg.gain.data.kd_pitch  = 0;
+    msg.gain.data.kp_roll   = 0;
+    msg.gain.data.ki_roll   = 0;
+    msg.gain.data.kd_roll   = 0;
+    msg.gain.data.kp_yaw    = 0;
+    msg.gain.data.ki_yaw    = 0;
+    msg.gain.data.kd_yaw    = 0;
+    msg.gain.data.kp_depth  = 0;
+    msg.gain.data.ki_depth  = 0;
+    msg.gain.data.kd_depth  = 0;
+	
+	/* Set the button values. */
+    gtk_spin_button_set_value( (GtkSpinButton *)button_kp_yaw, msg.gain.data.kp_yaw );
+    gtk_spin_button_set_value( (GtkSpinButton *)button_ki_yaw, msg.gain.data.ki_yaw );
+    gtk_spin_button_set_value( (GtkSpinButton *)button_kd_yaw, msg.gain.data.kd_yaw );
+    gtk_spin_button_set_value( (GtkSpinButton *)button_kp_pitch, msg.gain.data.kp_pitch );
+    gtk_spin_button_set_value( (GtkSpinButton *)button_ki_pitch, msg.gain.data.ki_pitch );
+    gtk_spin_button_set_value( (GtkSpinButton *)button_kd_pitch, msg.gain.data.kd_pitch );
+    gtk_spin_button_set_value( (GtkSpinButton *)button_kp_roll, msg.gain.data.kp_roll );
+    gtk_spin_button_set_value( (GtkSpinButton *)button_ki_roll, msg.gain.data.ki_roll );
+    gtk_spin_button_set_value( (GtkSpinButton *)button_kd_roll, msg.gain.data.kd_roll );
+    gtk_spin_button_set_value( (GtkSpinButton *)button_kp_depth, msg.gain.data.kp_depth );
+    gtk_spin_button_set_value( (GtkSpinButton *)button_ki_depth, msg.gain.data.ki_depth );
+    gtk_spin_button_set_value( (GtkSpinButton *)button_kd_depth, msg.gain.data.kd_depth );
+	
+    /* Send the gain message. */
+    messages_send( planner_fd, GAIN_MSGID, &msg );
+} /* end events_gain_zero() */
 
 
 /******************************************************************************
@@ -394,18 +516,18 @@ void events_gain_get( )
         messages_decode( planner_fd, planner_buf, &msg, recv_bytes );
     }
 
-    gtk_spin_button_set_value( ( GtkSpinButton * )button_kp_yaw, msg.gain.data.kp_yaw );
-    gtk_spin_button_set_value( ( GtkSpinButton * )button_ki_yaw, msg.gain.data.ki_yaw );
-    gtk_spin_button_set_value( ( GtkSpinButton * )button_kd_yaw, msg.gain.data.kd_yaw );
-    gtk_spin_button_set_value( ( GtkSpinButton * )button_kp_pitch, msg.gain.data.kp_pitch );
-    gtk_spin_button_set_value( ( GtkSpinButton * )button_ki_pitch, msg.gain.data.ki_pitch );
-    gtk_spin_button_set_value( ( GtkSpinButton * )button_kd_pitch, msg.gain.data.kd_pitch );
-    gtk_spin_button_set_value( ( GtkSpinButton * )button_kp_roll, msg.gain.data.kp_roll );
-    gtk_spin_button_set_value( ( GtkSpinButton * )button_ki_roll, msg.gain.data.ki_roll );
-    gtk_spin_button_set_value( ( GtkSpinButton * )button_kd_roll, msg.gain.data.kd_roll );
-    gtk_spin_button_set_value( ( GtkSpinButton * )button_kp_depth, msg.gain.data.kp_depth );
-    gtk_spin_button_set_value( ( GtkSpinButton * )button_ki_depth, msg.gain.data.ki_depth );
-    gtk_spin_button_set_value( ( GtkSpinButton * )button_kd_depth, msg.gain.data.kd_depth );
+    gtk_spin_button_set_value( (GtkSpinButton *)button_kp_yaw, msg.gain.data.kp_yaw );
+    gtk_spin_button_set_value( (GtkSpinButton *)button_ki_yaw, msg.gain.data.ki_yaw );
+    gtk_spin_button_set_value( (GtkSpinButton *)button_kd_yaw, msg.gain.data.kd_yaw );
+    gtk_spin_button_set_value( (GtkSpinButton *)button_kp_pitch, msg.gain.data.kp_pitch );
+    gtk_spin_button_set_value( (GtkSpinButton *)button_ki_pitch, msg.gain.data.ki_pitch );
+    gtk_spin_button_set_value( (GtkSpinButton *)button_kd_pitch, msg.gain.data.kd_pitch );
+    gtk_spin_button_set_value( (GtkSpinButton *)button_kp_roll, msg.gain.data.kp_roll );
+    gtk_spin_button_set_value( (GtkSpinButton *)button_ki_roll, msg.gain.data.ki_roll );
+    gtk_spin_button_set_value( (GtkSpinButton *)button_kd_roll, msg.gain.data.kd_roll );
+    gtk_spin_button_set_value( (GtkSpinButton *)button_kp_depth, msg.gain.data.kp_depth );
+    gtk_spin_button_set_value( (GtkSpinButton *)button_ki_depth, msg.gain.data.ki_depth );
+    gtk_spin_button_set_value( (GtkSpinButton *)button_kd_depth, msg.gain.data.kd_depth );
 } /* end events_gain_get() */
 
 
@@ -425,29 +547,29 @@ void events_gain_get( )
 
 void events_gain_set( )
 {
-    msg.gain.data.kp_yaw    = gtk_spin_button_get_value( ( GtkSpinButton * )
+    msg.gain.data.kp_yaw    = gtk_spin_button_get_value( (GtkSpinButton *)
                               button_kp_yaw );
-    msg.gain.data.ki_yaw    = gtk_spin_button_get_value( ( GtkSpinButton * )
+    msg.gain.data.ki_yaw    = gtk_spin_button_get_value( (GtkSpinButton *)
                               button_ki_yaw );
-    msg.gain.data.kd_yaw    = gtk_spin_button_get_value( ( GtkSpinButton * )
+    msg.gain.data.kd_yaw    = gtk_spin_button_get_value( (GtkSpinButton *)
                               button_kd_yaw );
-    msg.gain.data.kp_pitch  = gtk_spin_button_get_value( ( GtkSpinButton * )
+    msg.gain.data.kp_pitch  = gtk_spin_button_get_value( (GtkSpinButton *)
                               button_kp_pitch );
-    msg.gain.data.ki_pitch  = gtk_spin_button_get_value( ( GtkSpinButton * )
+    msg.gain.data.ki_pitch  = gtk_spin_button_get_value( (GtkSpinButton *)
                               button_ki_pitch );
-    msg.gain.data.kd_pitch  = gtk_spin_button_get_value( ( GtkSpinButton * )
+    msg.gain.data.kd_pitch  = gtk_spin_button_get_value( (GtkSpinButton *)
                               button_kd_pitch );
-    msg.gain.data.kp_roll   = gtk_spin_button_get_value( ( GtkSpinButton * )
+    msg.gain.data.kp_roll   = gtk_spin_button_get_value( (GtkSpinButton *)
                               button_kp_roll );
-    msg.gain.data.ki_roll   = gtk_spin_button_get_value( ( GtkSpinButton * )
+    msg.gain.data.ki_roll   = gtk_spin_button_get_value( (GtkSpinButton *)
                               button_ki_roll );
-    msg.gain.data.kd_roll   = gtk_spin_button_get_value( ( GtkSpinButton * )
+    msg.gain.data.kd_roll   = gtk_spin_button_get_value( (GtkSpinButton *)
                               button_kd_roll );
-    msg.gain.data.kp_depth  = gtk_spin_button_get_value( ( GtkSpinButton * )
+    msg.gain.data.kp_depth  = gtk_spin_button_get_value( (GtkSpinButton *)
                               button_kp_depth );
-    msg.gain.data.ki_depth  = gtk_spin_button_get_value( ( GtkSpinButton * )
+    msg.gain.data.ki_depth  = gtk_spin_button_get_value( (GtkSpinButton *)
                               button_ki_depth );
-    msg.gain.data.kd_depth  = gtk_spin_button_get_value( ( GtkSpinButton * )
+    msg.gain.data.kd_depth  = gtk_spin_button_get_value( (GtkSpinButton *)
                               button_kd_depth );
     msg.gain.data.mode = GAIN_SET;
 
@@ -654,7 +776,7 @@ void events_debug_level( GtkWidget *widget,
 
     /* Check the state of the button. */
     msg.client.data.debug_level = gtk_spin_button_get_value_as_int(
-                                      ( GtkSpinButton * )widget );
+                                      (GtkSpinButton *)widget );
 
     /* Send the value of the button to the server. */
     if ( planner_fd > 0 ) {
@@ -688,7 +810,7 @@ void events_dropper( GtkWidget *widget,
 {
     /* Check the state of the button. */
     msg.client.data.dropper = gtk_spin_button_get_value_as_int(
-                                      ( GtkSpinButton * )widget );
+                                      (GtkSpinButton *)widget );
 
     /* Send the value of the button to the server. */
     if ( planner_fd > 0 ) {
@@ -805,7 +927,7 @@ void events_target_yaw( GtkWidget *widget,
 
     /* Set the target values to the spin buttons. */
     msg.target.data.yaw = gtk_spin_button_get_value_as_float(
-                              ( GtkSpinButton * )widget );
+                              (GtkSpinButton *)widget );
 
     /* Send the state of the button to the server if not in MANUAL mode. */
     if ( msg.target.data.mode != MANUAL ) {
@@ -843,7 +965,7 @@ void events_target_roll( GtkWidget *widget,
 
     /* Set the target values to the spin buttons. */
     msg.target.data.roll = gtk_spin_button_get_value_as_float(
-                               ( GtkSpinButton * )widget );
+                               (GtkSpinButton *)widget );
 
     /* Send the state of the button to the server if not in MANUAL mode. */
     if ( msg.target.data.mode != MANUAL ) {
@@ -881,7 +1003,7 @@ void events_target_pitch( GtkWidget *widget,
 
     /* Set the target values to the spin buttons. */
     msg.target.data.pitch = gtk_spin_button_get_value_as_float(
-                                ( GtkSpinButton * )widget );
+                                (GtkSpinButton *)widget );
 
     /* Send the state of the button to the server if not in MANUAL mode. */
     if ( msg.target.data.mode != MANUAL ) {
@@ -919,7 +1041,7 @@ void events_target_depth( GtkWidget *widget,
 
     /* Set the target values to the spin buttons. */
     msg.target.data.depth = gtk_spin_button_get_value_as_float(
-                                ( GtkSpinButton * )widget );
+                                (GtkSpinButton *)widget );
 
     /* Send the state of the button to the server if not in MANUAL mode. */
     if ( msg.target.data.mode != MANUAL ) {
@@ -957,7 +1079,7 @@ void events_target_fx( GtkWidget *widget,
 
     /* Set the target values to the spin buttons. */
     msg.target.data.fx = gtk_spin_button_get_value_as_float(
-                             ( GtkSpinButton * )widget );
+                             (GtkSpinButton *)widget );
 
     /* Send the state of the button to the server if not in MANUAL mode. */
     if ( msg.target.data.mode != MANUAL ) {
@@ -995,7 +1117,7 @@ void events_target_fy( GtkWidget *widget,
 
     /* Set the target values to the spin buttons. */
     msg.target.data.fy = gtk_spin_button_get_value_as_float(
-                             ( GtkSpinButton * )widget );
+                             (GtkSpinButton *)widget );
 
     /* Send the state of the button to the server if not in MANUAL mode. */
     if ( msg.target.data.mode != MANUAL ) {
@@ -1033,10 +1155,107 @@ void events_target_speed( GtkWidget *widget,
 
     /* Set the target values to the spin buttons. */
     msg.target.data.speed = gtk_spin_button_get_value_as_float(
-                                ( GtkSpinButton * )widget );
+                                (GtkSpinButton *)widget );
 
     /* Send the state of the button to the server if not in MANUAL mode. */
     if ( msg.target.data.mode != MANUAL ) {
         messages_send( planner_fd, TARGET_MSGID, &msg );
     }
 } /* end events_target_speed() */
+
+
+/******************************************************************************
+ *
+ * Title:       void events_target_current( GtkWidget *widget,
+ *                                      GdkEvent *event,
+ *                                      gpointer data )
+ *
+ * Description: Used to set target values to current vehicle pose.
+ *
+ * Input:       widget: A pointer to the button widget.
+ *              event: A pointer to the event that triggered the callback.
+ *              data: A pointer to data that can be manipulated.
+ *
+ * Output:      None.
+ *
+ * Globals:     None.
+ *
+ *****************************************************************************/
+
+void events_target_current( GtkWidget *widget,
+                          GdkEvent *event,
+                          gpointer data
+                        )
+{
+    if ( cf.debug_level > 5 ) {
+        g_print( "TARGET_EVENT: Current target button clicked.\n" );
+    }
+
+    /* Set the target values to the current vehicle pose. */
+	msg.target.data.pitch = msg.status.data.pitch;
+	msg.target.data.roll  = msg.status.data.roll;
+	msg.target.data.yaw   = msg.status.data.yaw;
+	msg.target.data.depth = msg.status.data.depth;
+	msg.target.data.fx    = 0;
+	msg.target.data.fy    = 0;
+	msg.target.data.speed = 0;
+	
+	/* Set the button values to the current target values. */
+	gtk_spin_button_set_value( (GtkSpinButton *)button_target_pitch, msg.target.data.pitch);
+	gtk_spin_button_set_value( (GtkSpinButton *)button_target_roll, msg.target.data.roll);
+	gtk_spin_button_set_value( (GtkSpinButton *)button_target_yaw, msg.target.data.yaw);
+	gtk_spin_button_set_value( (GtkSpinButton *)button_target_depth, msg.target.data.depth);
+	gtk_spin_button_set_value( (GtkSpinButton *)button_target_fx, msg.target.data.fx);
+	gtk_spin_button_set_value( (GtkSpinButton *)button_target_fy, msg.target.data.fy);
+	gtk_spin_button_set_value( (GtkSpinButton *)button_target_speed, msg.target.data.speed);
+
+    /* Send the state of the button to the server if not in MANUAL mode. */
+    if ( msg.target.data.mode != MANUAL ) {
+        messages_send( planner_fd, TARGET_MSGID, &msg );
+    }
+} /* end events_target_current() */
+
+
+/******************************************************************************
+ *
+ * Title:       void events_zero_pid( GtkWidget *widget,
+ *                                      GdkEvent *event,
+ *                                      gpointer data )
+ *
+ * Description: Sets targets mode to ZERO_PID_ERRORS.
+ *
+ * Input:       widget: A pointer to the button widget.
+ *              event: A pointer to the event that triggered the callback.
+ *              data: A pointer to data that can be manipulated.
+ *
+ * Output:      None.
+ *
+ * Globals:     None.
+ *
+ *****************************************************************************/
+
+void events_zero_pid( GtkWidget *widget,
+                          GdkEvent *event,
+                          gpointer data
+                        )
+{
+    if ( cf.debug_level > 5 ) {
+        g_print( "TARGET_EVENT: Zero PID errors button clicked.\n" );
+    }
+
+    /* Set the target values to the current vehicle pose. */
+	msg.target.data.mode = ZERO_PID_ERRORS;
+
+    /* Send the state of the button to the server if not in MANUAL mode. */
+    if ( msg.target.data.mode != MANUAL ) {
+        messages_send( planner_fd, TARGET_MSGID, &msg );
+    }
+	
+	/* Reset the mode to AUTONOMOUS. */
+	msg.target.data.mode = AUTONOMOUS;
+
+    /* Send the state of the button to the server if not in MANUAL mode. */
+    if ( msg.target.data.mode != MANUAL ) {
+        messages_send( planner_fd, TARGET_MSGID, &msg );
+    }
+} /* end events_zero_pid() */

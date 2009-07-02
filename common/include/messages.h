@@ -73,6 +73,7 @@
 #define HOLD_ANG_RATE   5
 #define MANUAL          6
 #define AUTONOMOUS      7
+#define ZERO_PID_ERRORS 8
 //@}
 #endif /* OPERATING_MODES */
 

@@ -338,39 +338,17 @@ int main( int argc, char *argv[] )
 			/* If it has been long enough, update the filter. */
 			if ( dt > 0.1 * 1000000 ) {
 				STAT cs = msg.status.data;
-
-				/*printf( "\rdt=%f depth=%f ang=[%f,%f,%f] accel=[%f,%f,%f] ang_rate=[%f,%f,%f]",
-					((float)dt)/1000000, msg.lj.data.pressure,
-					cs.pitch, cs.roll, cs.yaw,
-					cs.accel[0], cs.accel[1], cs.accel[2],
-					cs.ang_rate[0], cs.ang_rate[1], cs.ang_rate[2] );*/
-
 				float ang[] = { cs.pitch, cs.roll, cs.yaw };
 				float real_accel[] = { cs.accel[0], cs.accel[1], cs.accel[2] - 9.86326398 };
-
-				/* Test the algorithm. */
-				/*real_accel[0] = 0;
-				real_accel[1] = accel_count;
-				real_accel[2] = 0;
-				if ( accel_count > 15.0 || accel_count < 0.0 ) {
-					accel_inc = -1 * accel_inc;
-				}
-				accel_count += accel_inc;*/
-
 
 				/* Update the kalman filter. */
 				kalman_update( ((float)dt)/1000000, msg.lj.data.pressure, ang,
 						real_accel, cs.ang_rate );
-
 				gettimeofday( &kalman_start, NULL );
 			}
 
 			/* Get current location estimation. */
 			kalman_get_location( loc );
-
-			/* Print the location estimation. */
-			//printf( "\rKalman Location Estimation = ( %f, %f, %f )",
-				//loc.x, loc.y, loc.z );
 		}
 
 		/* Get labjack data. */
@@ -404,17 +382,7 @@ int main( int argc, char *argv[] )
 					write_time, cs.pitch, cs.roll, cs.yaw, msg.lj.data.pressure,
 					cs.accel[0], cs.accel[1], cs.accel[2],
 					cs.ang_rate[0], cs.ang_rate[1], cs.ang_rate[2] );
-
-				//printf( "%s, %.04f,%.04f,%.04f,%.04f,%.04f,%.04f,%.04f,%.04f,%.04f,%.04f\n",
-				//	write_time, cs.pitch, cs.roll, cs.yaw, msg.lj.data.pressure,
-				//	cs.accel[0], cs.accel[1], cs.accel[2],
-				//	cs.ang_rate[0], cs.ang_rate[1], cs.ang_rate[2] );
-				//printf( "%s, %.04f,%.04f,%.04f,%.04f,%.04f,%.04f,%.04f,%.04f,%.04f,%.04f\n",
-				//	write_time, cs.pitch, cs.roll, cs.yaw, msg.lj.data.pressure,
-				//	cs.accel[0], cs.accel[1], cs.accel[2],
-				//	cs.ang_rate[0], cs.ang_rate[1], cs.ang_rate[2] );
-
-				gettimeofday( &log_start, NULL );
+					gettimeofday( &log_start, NULL );
 			}
 		}
 

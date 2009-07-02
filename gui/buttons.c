@@ -90,6 +90,19 @@ GtkWidget *button_ki_az;
 GtkWidget *button_kd_az;
 GtkWidget *button_get_gain;
 GtkWidget *button_set_gain;
+GtkWidget *button_cf_gains;
+GtkWidget *button_zero_gains;
+
+/* Target buttons. */
+GtkWidget *button_target_yaw;
+GtkWidget *button_target_roll;
+GtkWidget *button_target_pitch;
+GtkWidget *button_target_depth;
+GtkWidget *button_target_fx;
+GtkWidget *button_target_fy;
+GtkWidget *button_target_speed;
+GtkWidget *button_target_current;
+GtkWidget *button_zero_pid;
 
 /* Network API messages. */
 extern MSG_DATA msg;
@@ -788,21 +801,16 @@ int buttons_vision( GtkWidget *box )
 
 int buttons_targets( GtkWidget *box )
 {
-    GtkWidget *button_target_yaw;
-    GtkWidget *button_target_roll;
-    GtkWidget *button_target_pitch;
-    GtkWidget *button_target_depth;
-    GtkWidget *button_target_fx;
-    GtkWidget *button_target_fy;
-    GtkWidget *button_target_speed;
     GtkWidget *targets_frame;
     GtkAdjustment *adj;
     GtkWidget *hbox;
     GtkWidget *vbox;
+	GtkWidget *hbox1;
 
     /* Create new boxes. */
     hbox = gtk_hbox_new( TRUE, 0 );
     vbox = gtk_vbox_new( TRUE, 0 );
+    hbox1 = gtk_hbox_new( TRUE, 0 );
 
     /* Create frame. */
     targets_frame = buttons_make_frame( "Targets" );
@@ -812,6 +820,7 @@ int buttons_targets( GtkWidget *box )
 
     /* Add boxes to the frames. */
     gtk_container_add( GTK_CONTAINER( targets_frame ), hbox );
+	gtk_container_add( GTK_CONTAINER( vbox ), hbox1 );
 
     /* Create the spin buttons. */
     adj = ( GtkAdjustment * )gtk_adjustment_new( cf.target_pitch, 0, 360, 0.1, 10, 0 );
@@ -845,9 +854,21 @@ int buttons_targets( GtkWidget *box )
     adj = ( GtkAdjustment * )gtk_adjustment_new( msg.target.data.speed, 0, 100, 1, 10, 0 );
     button_target_speed = buttons_make_spin( "Speed",
 		GTK_SIGNAL_FUNC( events_target_speed ), hbox, adj );
+	
+	/* Create normal buttons. */
+    button_target_current = gtk_button_new_with_label( "Set Target to Current" );
+    button_zero_pid = gtk_button_new_with_label( "Zero PID Errors" );
+
+    /* Connect the normal buttons to callbacks. */
+    g_signal_connect( button_target_current, "clicked",
+            G_CALLBACK( events_target_current ), NULL );
+    g_signal_connect( button_zero_pid, "clicked",
+            G_CALLBACK( events_zero_pid ), NULL );
 
     /* Pack the boxes. */
     gtk_box_pack_start( GTK_BOX( box ), vbox, TRUE, FALSE, 0 );
+    gtk_container_add( GTK_CONTAINER( hbox1 ), button_target_current );
+    gtk_container_add( GTK_CONTAINER( hbox1 ), button_zero_pid );
 
     return TRUE;
 } /* end buttons_targets() */
@@ -1059,16 +1080,24 @@ int buttons_gains( GtkWidget *box )
     /* Create normal buttons. */
     button_get_gain = gtk_button_new_with_label( "Get Gains" );
     button_set_gain = gtk_button_new_with_label( "Set Gains" );
+	button_cf_gains = gtk_button_new_with_label( "Config File Gains" );
+	button_zero_gains = gtk_button_new_with_label( "Zero Gains" );
 
     /* Connect the normal buttons to callbacks. */
     g_signal_connect( button_get_gain, "clicked",
             G_CALLBACK( events_gain_get ), NULL );
     g_signal_connect( button_set_gain, "clicked",
             G_CALLBACK( events_gain_set ), NULL );
+    g_signal_connect( button_cf_gains, "clicked",
+            G_CALLBACK( events_gain_cf ), NULL );
+    g_signal_connect( button_zero_gains, "clicked",
+            G_CALLBACK( events_gain_zero ), NULL );
 
     /* Put normal and check buttons into box. */
-    gtk_container_add( GTK_CONTAINER( vbox16 ), button_get_gain );
-    gtk_container_add( GTK_CONTAINER( vbox16 ), button_set_gain );
+    //gtk_container_add( GTK_CONTAINER( vbox16 ), button_get_gain );
+    //gtk_container_add( GTK_CONTAINER( vbox16 ), button_set_gain );
+    gtk_container_add( GTK_CONTAINER( vbox16 ), button_cf_gains );
+    gtk_container_add( GTK_CONTAINER( vbox16 ), button_zero_gains );
 
     /* Create the spin buttons. */
     adj = ( GtkAdjustment * )gtk_adjustment_new( msg.gain.data.kp_yaw,
