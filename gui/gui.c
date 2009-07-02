@@ -62,7 +62,7 @@ void gui_update_status_text( )
              "Pitch, Roll, Yaw, Depth:\t[ %.3f\t%.3f\t%.3f\t%.3f ]\n"
              "Accel X, Y, Z:\t\t\t[ %.3f\t%.3f\t%.3f ]\n"
              "Ang Rate X, Y, Z:\t\t[ %.3f\t%.3f\t%.3f ]\n"
-             "Labjack:\t\t\t\t[ %.3fV\t%.3fV\t%.3f\t%.3f ]\n"
+             "Labjack (B1 B2 D W):\t[ %.3fV\t%.3fV\t%.3f\t%.3f ]\n"
              "PID Errors:\n"
              "Pitch:\t\t\t\t[ %.3f\t%.3f\t%.3f ]\n"
              "Roll:\t\t\t\t\t[ %.3f\t%.3f\t%.3f ]\n"
@@ -332,13 +332,13 @@ int gui_pack_boxes( GtkWidget *top_level_window )
 
     /* Add the notebook to the lower box. */
     gtk_container_add( GTK_CONTAINER( vbox2 ), notebook );
-    gtk_container_add( GTK_CONTAINER( notebook ), vbox3 );
-    gtk_notebook_set_tab_label( GTK_NOTEBOOK( notebook ), vbox3,
-                                gtk_label_new( "Options" ) );
+    gtk_container_add( GTK_CONTAINER( notebook ), vbox4 );
+    gtk_notebook_set_tab_label( GTK_NOTEBOOK( notebook ), vbox4,
+                                gtk_label_new( "Navigation" ) );
 
     /* Append another page to the notebook. */
-    gtk_notebook_append_page( GTK_NOTEBOOK( notebook ), vbox4,
-                              gtk_label_new( "Navigation" ) );
+    gtk_notebook_append_page( GTK_NOTEBOOK( notebook ), vbox3,
+                              gtk_label_new( "Options" ) );
 
     /* Append another page to the notebook. */
     gtk_notebook_append_page( GTK_NOTEBOOK( notebook ), vbox6,

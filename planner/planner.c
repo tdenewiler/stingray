@@ -341,7 +341,7 @@ int main( int argc, char *argv[] )
 				float ang[] = { cs.pitch, cs.roll, cs.yaw };
 				float real_accel[] = { cs.accel[0], cs.accel[1], cs.accel[2] - 9.86326398 };
 
-				/* Update the kalman filter. */
+				/* Update the Kalman filter. */
 				kalman_update( ((float)dt)/1000000, msg.lj.data.pressure, ang,
 						real_accel, cs.ang_rate );
 				gettimeofday( &kalman_start, NULL );
@@ -357,6 +357,7 @@ int main( int argc, char *argv[] )
             lj_buf[recv_bytes] = '\0';
             if ( recv_bytes > 0 ) {
                 messages_decode( lj_fd, lj_buf, &msg, recv_bytes );
+				msg.status.data.depth = msg.lj.data.pressure;
             }
         }
 

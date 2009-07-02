@@ -58,6 +58,22 @@ void task_run( MSG_DATA *msg, int dt )
 	case TASK_SQUARE:
 		task_square( msg, heading, dt );
 		break;
+
+	case TASK_NONE:
+		task_none( msg, dt );
+		break;
+
+	case TASK_BOXES:
+		task_boxes( msg, dt );
+		break;
+
+	case TASK_FENCE:
+		task_fence( msg, dt );
+		break;
+
+	case TASK_SUITCASE:
+		task_suitcase( msg, dt );
+		break;
 	}
 } /* end task_run() */
 
@@ -145,3 +161,88 @@ void task_square( MSG_DATA *msg, float heading, int dt )
 	msg->target.data.depth = 0.518;
 	msg->target.data.yaw = heading;
 } /* end task_square() */
+
+
+/******************************************************************************
+ *
+ * Title:       void task_none( MSG_DATA *msg, int dt )
+ *
+ * Description: Hold the current position.
+ *
+ * Input:       msg: Current message data.
+ *              dt: The task time.
+ *
+ * Output:      None.
+ *
+ *****************************************************************************/
+
+void task_none( MSG_DATA *msg, int dt )
+{
+	msg->target.data.pitch = msg->status.data.pitch;
+	msg->target.data.roll  = msg->status.data.roll;
+	msg->target.data.depth = msg->status.data.depth;
+	msg->target.data.yaw   = msg->status.data.yaw;
+	msg->target.data.fx    = 0;
+	msg->target.data.fy    = 0;
+	msg->target.data.speed = 0;
+} /* end task_none() */
+
+
+/******************************************************************************
+ *
+ * Title:       void task_boxes( MSG_DATA *msg, int dt )
+ *
+ * Description: Find and go to the boxes. Drop marbles over the correct boxes.
+ *
+ * Input:       msg: Current message data.
+ *              dt: The task time.
+ *
+ * Output:      None.
+ *
+ *****************************************************************************/
+
+void task_boxes( MSG_DATA *msg, int dt )
+{
+
+} /* end task_boxes() */
+
+
+/******************************************************************************
+ *
+ * Title:       void task_fence( MSG_DATA *msg, int dt )
+ *
+ * Description: Find and go under the two fence pieces. Stay below the
+ * 				horizontal fence members but above a minimum depth.
+ *
+ * Input:       msg: Current message data.
+ *              dt: The task time.
+ *
+ * Output:      None.
+ *
+ *****************************************************************************/
+
+void task_fence( MSG_DATA *msg, int dt )
+{
+
+} /* end task_fence() */
+
+
+/******************************************************************************
+ *
+ * Title:       void task_suitcase( MSG_DATA *msg, int dt )
+ *
+ * Description: Find and retrieve the suitcase. First center vehicle above the
+ * 				suitcase and then lower depth until the suitcase is picked up
+ * 				using the caribiners on the bottoms of the Voith motors.
+ *
+ * Input:       msg: Current message data.
+ *              dt: The task time.
+ *
+ * Output:      None.
+ *
+ *****************************************************************************/
+
+void task_suitcase( MSG_DATA *msg, int dt )
+{
+
+} /* end task_suitcase() */

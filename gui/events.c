@@ -57,6 +57,9 @@ extern GtkWidget *button_task_buoy;
 extern GtkWidget *button_task_pipe;
 extern GtkWidget *button_task_square;
 extern GtkWidget *button_task_none;
+extern GtkWidget *button_task_fence;
+extern GtkWidget *button_task_boxes;
+extern GtkWidget *button_task_suitcase;
 extern GtkWidget *button_task_square_time1;
 extern GtkWidget *button_task_square_time2;
 extern GtkWidget *button_task_square_time3;
@@ -187,6 +190,15 @@ void events_tasks( GtkWidget *widget,
     else if ( widget == button_task_none ) {
         msg.task.data.num = TASK_NONE;
     }
+    else if ( widget == button_task_fence ) {
+        msg.task.data.num = TASK_FENCE;
+    }
+    else if ( widget == button_task_boxes ) {
+        msg.task.data.num = TASK_BOXES;
+    }
+    else if ( widget == button_task_suitcase ) {
+        msg.task.data.num = TASK_SUITCASE;
+    }
 	
     if ( planner_fd > 0 ) {
         messages_send( planner_fd, TASK_MSGID, &msg );
@@ -293,7 +305,7 @@ void events_vision( GtkWidget *widget,
     }
     else if ( widget == button_save_bvideo ) {
         if ( gtk_toggle_button_get_active((GtkToggleButton *)widget) ) {
-            //msg.vsetting.data.save_bvideo = TRUE;
+            msg.vsetting.data.save_bvideo = TRUE;
         }
         else {
             msg.vsetting.data.save_bvideo = FALSE;
@@ -301,7 +313,7 @@ void events_vision( GtkWidget *widget,
     }
     else if ( widget == button_save_fvideo ) {
         if ( gtk_toggle_button_get_active((GtkToggleButton *)widget) ) {
-            //msg.vsetting.data.save_fvideo = TRUE;
+            msg.vsetting.data.save_fvideo = TRUE;
         }
         else {
             msg.vsetting.data.save_fvideo = FALSE;

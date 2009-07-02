@@ -173,7 +173,7 @@ int main( int argc, char *argv[] )
 			}
 		}
 
-		/* Get Labjack data. */
+		/* Get Labjack data and put it in network message. */
 		if ( labjack_fd > 0 ) {
 			status = query_labjack( );
 			if ( status > 0 ) {

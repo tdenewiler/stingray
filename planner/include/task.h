@@ -63,5 +63,28 @@ void task_pipe( MSG_DATA *msg, int dt );
 //! \param dt The task time.
 void task_square( MSG_DATA *msg, float heading, int dt );
 
+//! Hold the current position.
+//! \param msg The current message data.
+//! \param dt The task time.
+void task_none( MSG_DATA *msg, int dt );
+
+//! Find and go to the boxes. Drop marbles over the correct boxes.
+//! \param msg The current message data.
+//! \param dt The task time.
+void task_boxes( MSG_DATA *msg, int dt );
+
+//! Find and go under the two fence pieces. Stay below the horizontal fence
+//! members but above a minimum depth.
+//! \param msg The current message data.
+//! \param dt The task time.
+void task_fence( MSG_DATA *msg, int dt );
+
+//! Find and retrieve the suitcase. First center vehicle above the suitcase and
+//! then lower depth until the suitcase is picked up using the caribiners on
+//! the bottoms of the Voith motors.
+//! \param msg The current message data.
+//! \param dt The task time.
+void task_suitcase( MSG_DATA *msg, int dt );
+
 
 #endif /* _TASK_H_ */

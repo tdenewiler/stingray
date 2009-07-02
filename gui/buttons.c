@@ -62,6 +62,9 @@ GtkWidget *button_task_buoy;
 GtkWidget *button_task_pipe;
 GtkWidget *button_task_square;
 GtkWidget *button_task_none;
+GtkWidget *button_task_fence;
+GtkWidget *button_task_boxes;
+GtkWidget *button_task_suitcase;
 GtkWidget *button_task_square_time1;
 GtkWidget *button_task_square_time2;
 GtkWidget *button_task_square_time3;
@@ -464,7 +467,7 @@ int buttons_opmode( GtkWidget *box )
     gtk_box_pack_start( GTK_BOX( box ), vbox, FALSE, TRUE, 0 );
 
     /* Activate specific buttons by default. */
-    gtk_toggle_button_set_active( ( GtkToggleButton * )button_hold_yaw, TRUE );
+    gtk_toggle_button_set_active( ( GtkToggleButton * )button_autonomous, TRUE );
 
     return TRUE;
 } /* end buttons_opmode() */
@@ -548,6 +551,12 @@ int buttons_tasks( GtkWidget *box )
 		GTK_SIGNAL_FUNC( events_tasks ), tasks_group );
     button_task_none = buttons_make_radio( "None",
 		GTK_SIGNAL_FUNC( events_tasks ), tasks_group );
+    button_task_fence = buttons_make_radio( "Fence",
+		GTK_SIGNAL_FUNC( events_tasks ), tasks_group );
+    button_task_boxes = buttons_make_radio( "Boxes",
+		GTK_SIGNAL_FUNC( events_tasks ), tasks_group );
+    button_task_suitcase = buttons_make_radio( "Suitcase",
+		GTK_SIGNAL_FUNC( events_tasks ), tasks_group );
 
     /* Create the spin buttons. */
     //adj = ( GtkAdjustment * )gtk_adjustment_new( 0, 0, 100, 0.1, 10, 0 );
@@ -571,6 +580,9 @@ int buttons_tasks( GtkWidget *box )
     gtk_box_pack_start( GTK_BOX( hbox3 ), button_task_buoy, FALSE, TRUE, 0 );
     gtk_box_pack_start( GTK_BOX( hbox3 ), button_task_pipe, FALSE, TRUE, 0 );
     gtk_box_pack_start( GTK_BOX( hbox3 ), button_task_gate, FALSE, TRUE, 0 );
+    gtk_box_pack_start( GTK_BOX( hbox3 ), button_task_fence, FALSE, TRUE, 0 );
+    gtk_box_pack_start( GTK_BOX( hbox3 ), button_task_boxes, FALSE, TRUE, 0 );
+    gtk_box_pack_start( GTK_BOX( hbox3 ), button_task_suitcase, FALSE, TRUE, 0 );
 
     /* Pack the boxes. */
     gtk_box_pack_start( GTK_BOX( box ), vbox1, TRUE, FALSE, 0 );
@@ -855,7 +867,7 @@ int buttons_targets( GtkWidget *box )
 		GTK_SIGNAL_FUNC( events_target_speed ), hbox, adj );
 	
 	/* Create normal buttons. */
-    button_target_current = gtk_button_new_with_label( "Set Target to Current" );
+    button_target_current = gtk_button_new_with_label( "Set Targets to Current Status" );
     button_zero_pid = gtk_button_new_with_label( "Zero PID Errors" );
 
     /* Connect the normal buttons to callbacks. */
@@ -1079,7 +1091,7 @@ int buttons_gains( GtkWidget *box )
     /* Create normal buttons. */
     button_get_gain = gtk_button_new_with_label( "Get Gains" );
     button_set_gain = gtk_button_new_with_label( "Set Gains" );
-	button_cf_gains = gtk_button_new_with_label( "Config File Gains" );
+	button_cf_gains = gtk_button_new_with_label( "Use Config File Gains" );
 	button_zero_gains = gtk_button_new_with_label( "Zero Gains" );
 
     /* Connect the normal buttons to callbacks. */

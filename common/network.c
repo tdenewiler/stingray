@@ -224,7 +224,6 @@ int net_client( int fd, void *buf, MSG_DATA *msg, int mode )
         messages_send( fd, (int)TELEOP_MSGID, msg );
     }
     else if ( mode == MODE_PLANNER ) {
-    	/* This is a hack too. */
 		messages_send( fd, (int)GAIN_MSGID, msg );
 		messages_send( fd, (int)TARGET_MSGID, msg );
     	messages_send( fd, (int)LJ_MSGID, msg );
