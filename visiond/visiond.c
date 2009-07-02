@@ -387,6 +387,9 @@ int main( int argc, char *argv[] )
             cvReleaseVideoWriter( &f_writer );
             saving_fvideo = FALSE;
         }
+		else if ( msg.vsetting.data.save_fvideo && saving_fvideo ) {
+			cvWriteFrame( f_writer, f_img );
+		}
         if ( msg.vsetting.data.save_bvideo && !saving_bvideo && b_cam ) {
             /* Get a timestamp and use for filename. */
             gettimeofday( &ctime, NULL );
@@ -403,6 +406,9 @@ int main( int argc, char *argv[] )
             cvReleaseVideoWriter( &b_writer );
             saving_bvideo = FALSE;
         }
+		else if ( msg.vsetting.data.save_bvideo && saving_bvideo ) {
+			cvWriteFrame( b_writer, b_img );
+		}
     }
 
     exit( 0 );
