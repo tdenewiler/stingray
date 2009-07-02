@@ -10,10 +10,10 @@
 #define LABJACK_VALS
 #define BATTERY_1 0
 #define BATTERY_2 1
-#define AIN_0 0
-#define AIN_1 1
-#define AIN_2 2
-#define AIN_3 3
+#define AIN_0 0 //!< Motor battery.
+#define AIN_1 1 //!< Electronics battery.
+#define AIN_2 2 //!< Depth (pressure) sensor.
+#define AIN_3 3 //!< Water leak sensor.
 #endif /* LABJACK_VALS */
 
 #ifndef _LABJACK_DATA_
