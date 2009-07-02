@@ -672,7 +672,7 @@ int controlVertical( int fd,
 	float rightNeutral = 63.5;
 	float tailNeutral = 63.5;
 
-	// -0.1-0.1 is our new dead zone
+	// [-0.1,0.1] is our new dead zone
 	if ( left > dzRadius ) leftNeutral = 67.5;
 	if ( left < -dzRadius ) leftNeutral = 59.5;
 	if ( right > dzRadius ) rightNeutral = 67.5;
