@@ -127,6 +127,8 @@ int main( int argc, char *argv[] )
     MSG_DATA msg;
     int dotx = -1;
     int doty = -1;
+    int tmp_dotx = -1;
+    int tmp_doty = -1;
     int width = -1;
     int height = -1;
     int pipex = -1;
@@ -264,6 +266,14 @@ int main( int argc, char *argv[] )
 			if ( status == 1 ) {
 				msg.vision.data.front_x = (f_img->width / 2) - dotx;
 				msg.vision.data.front_y = (f_img->height / 2) - doty;
+				/* Rotate centroid to account for camera mounted at angle. */
+				tmp_dotx = msg.vision.data.front_x;
+				tmp_doty = msg.vision.data.front_y;
+				msg.vision.data.front_x = tmp_dotx * cos(cf.vision_angle) +
+					tmp_doty * sin(cf.vision_angle);
+				msg.vision.data.front_y = tmp_dotx * sin(cf.vision_angle) +
+					tmp_doty * cos(cf.vision_angle);
+
 				if ( cf.vision_window ) {
 					if ( cvWaitKey( 5 ) >= 0 );
 					cvCircle( f_img, cvPoint(dotx, doty),

@@ -115,7 +115,7 @@ void pid_loop( int pololu_fd,
 		pid->depth.ierr = 0;
 		pid->depth.derr = 0;
 	}
-	
+
 	/* These next three need to be set from vison, hydrophone, gui, etc. They
 	 * depend on the target values reported from those sensor systems. */
 	pid->voith_angle = atan2f( msg->target.data.fx, msg->target.data.fy );
@@ -200,13 +200,22 @@ void pid_loop( int pololu_fd,
 		pid->yaw.ki		= msg->gain.data.ki_yaw;
 		pid->yaw.kd		= msg->gain.data.kd_yaw;
 
-		/* Calculate the errors. */
-		pid->yaw.ref	= msg->target.data.yaw;
-		pid->yaw.cval	= msg->mstrain.data.yaw;
-		pid->yaw.perr	= pid_subtract_angles( pid->yaw.cval, pid->yaw.ref );
-		pid->yaw.ierr	+= pid->yaw.perr * dt / 1000000;
-		pid->yaw.ierr	= pid_bound_integral( pid->yaw.ierr, pid->yaw.ki, PID_YAW_INTEGRAL );
-		pid->yaw.derr	= msg->mstrain.data.ang_rate[2];
+		/* Check if we are looking for buoy. */
+		if ( msg->task.data.num == TASK_BUOY ) {
+			printf("PID_LOOP: Looking for buoy.\n");
+			pid->yaw.perr = msg->target.data.yaw;
+			pid->yaw.ierr = 0;
+			pid->yaw.derr = 0;
+		}
+		else {
+			/* Calculate the errors. */
+			pid->yaw.ref	= msg->target.data.yaw;
+			pid->yaw.cval	= msg->mstrain.data.yaw;
+			pid->yaw.perr	= pid_subtract_angles( pid->yaw.cval, pid->yaw.ref );
+			pid->yaw.ierr	+= pid->yaw.perr * dt / 1000000;
+			pid->yaw.ierr	= pid_bound_integral( pid->yaw.ierr, pid->yaw.ki, PID_YAW_INTEGRAL );
+			pid->yaw.derr	= msg->mstrain.data.ang_rate[2];
+		}
 
 		/* Update status message. */
 		msg->status.data.yaw_perr	= pid->yaw.perr;
