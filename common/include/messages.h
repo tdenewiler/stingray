@@ -90,6 +90,7 @@
 #define TASK_FENCE		5
 #define TASK_BOXES		6
 #define TASK_SUITCASE	7
+#define TASK_COURSE		8
 //@}
 #endif /* TASKS */
 

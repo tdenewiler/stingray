@@ -246,3 +246,22 @@ void task_suitcase( MSG_DATA *msg, int dt )
 {
 
 } /* end task_suitcase() */
+
+
+/******************************************************************************
+ *
+ * Title:       void task_course( MSG_DATA *msg, int dt )
+ *
+ * Description: Run the entire course.
+ *
+ * Input:       msg: Current message data.
+ *              dt: The task time.
+ *
+ * Output:      None.
+ *
+ *****************************************************************************/
+
+void task_course( MSG_DATA *msg, int dt )
+{
+
+} /* end task_course() */

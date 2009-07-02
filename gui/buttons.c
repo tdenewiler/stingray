@@ -65,6 +65,7 @@ GtkWidget *button_task_none;
 GtkWidget *button_task_fence;
 GtkWidget *button_task_boxes;
 GtkWidget *button_task_suitcase;
+GtkWidget *button_task_course;
 GtkWidget *button_task_square_time1;
 GtkWidget *button_task_square_time2;
 GtkWidget *button_task_square_time3;
@@ -557,6 +558,8 @@ int buttons_tasks( GtkWidget *box )
 		GTK_SIGNAL_FUNC( events_tasks ), tasks_group );
     button_task_suitcase = buttons_make_radio( "Suitcase",
 		GTK_SIGNAL_FUNC( events_tasks ), tasks_group );
+    button_task_course = buttons_make_radio( "Course",
+		GTK_SIGNAL_FUNC( events_tasks ), tasks_group );
 
     /* Create the spin buttons. */
     //adj = ( GtkAdjustment * )gtk_adjustment_new( 0, 0, 100, 0.1, 10, 0 );
@@ -583,6 +586,7 @@ int buttons_tasks( GtkWidget *box )
     gtk_box_pack_start( GTK_BOX( hbox3 ), button_task_fence, FALSE, TRUE, 0 );
     gtk_box_pack_start( GTK_BOX( hbox3 ), button_task_boxes, FALSE, TRUE, 0 );
     gtk_box_pack_start( GTK_BOX( hbox3 ), button_task_suitcase, FALSE, TRUE, 0 );
+    gtk_box_pack_start( GTK_BOX( hbox3 ), button_task_course, FALSE, TRUE, 0 );
 
     /* Pack the boxes. */
     gtk_box_pack_start( GTK_BOX( box ), vbox1, TRUE, FALSE, 0 );

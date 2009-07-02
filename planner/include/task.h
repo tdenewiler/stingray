@@ -86,5 +86,10 @@ void task_fence( MSG_DATA *msg, int dt );
 //! \param dt The task time.
 void task_suitcase( MSG_DATA *msg, int dt );
 
+//! Run the entire course.
+//! \param msg The current message data.
+//! \param dt The task time.
+void task_course( MSG_DATA *msg, int dt );
+
 
 #endif /* _TASK_H_ */
