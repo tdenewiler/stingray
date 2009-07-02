@@ -52,14 +52,15 @@ extern GtkWidget *button_save_bvideo;
 extern GtkWidget *button_save_fvideo;
 
 /* Tasks buttons. */
-extern GtkWidget *button_gate;
-extern GtkWidget *button_buoy;
-extern GtkWidget *button_pipe;
-extern GtkWidget *button_square;
-extern GtkWidget *button_square_time1;
-extern GtkWidget *button_square_time2;
-extern GtkWidget *button_square_time3;
-extern GtkWidget *button_square_time4;
+extern GtkWidget *button_task_gate;
+extern GtkWidget *button_task_buoy;
+extern GtkWidget *button_task_pipe;
+extern GtkWidget *button_task_square;
+extern GtkWidget *button_task_none;
+extern GtkWidget *button_task_square_time1;
+extern GtkWidget *button_task_square_time2;
+extern GtkWidget *button_task_square_time3;
+extern GtkWidget *button_task_square_time4;
 
 /* Gain buttons. */
 extern GtkWidget *button_kp_yaw;
@@ -157,31 +158,34 @@ void events_tasks( GtkWidget *widget,
                  )
 {
     /* Check the state of the buttons. */
-    if ( widget == button_square ||
-		widget == button_square_time1 ||
-		widget == button_square_time2 ||
-		widget == button_square_time3 ||
-		widget == button_square_time4 ) {
-        if ( gtk_toggle_button_get_active( ( GtkToggleButton * )button_square ) ) {
+    if ( widget == button_task_square ||
+		widget == button_task_square_time1 ||
+		widget == button_task_square_time2 ||
+		widget == button_task_square_time3 ||
+		widget == button_task_square_time4 ) {
+        if ( gtk_toggle_button_get_active( ( GtkToggleButton * )button_task_square ) ) {
             msg.task.data.num = TASK_SQUARE;
             msg.task.data.time_forward  = gtk_spin_button_get_value_as_float(
-				GTK_SPIN_BUTTON( button_square_time1 ) );
+				GTK_SPIN_BUTTON( button_task_square_time1 ) );
             msg.task.data.time_left = gtk_spin_button_get_value_as_float(
-				GTK_SPIN_BUTTON( button_square_time2 ) );
+				GTK_SPIN_BUTTON( button_task_square_time2 ) );
             msg.task.data.time_reverse  = gtk_spin_button_get_value_as_float(
-				GTK_SPIN_BUTTON( button_square_time3 ) );
+				GTK_SPIN_BUTTON( button_task_square_time3 ) );
             msg.task.data.time_right    = gtk_spin_button_get_value_as_float(
-				GTK_SPIN_BUTTON( button_square_time4 ) );
+				GTK_SPIN_BUTTON( button_task_square_time4 ) );
         }
     }
-    else if ( widget == button_buoy ) {
+    else if ( widget == button_task_buoy ) {
         msg.task.data.num = TASK_BUOY;
     }
-    else if ( widget == button_pipe ) {
+    else if ( widget == button_task_pipe ) {
         msg.task.data.num = TASK_PIPE;
     }
-    else if ( widget == button_gate ) {
+    else if ( widget == button_task_gate ) {
         msg.task.data.num = TASK_GATE;
+    }
+    else if ( widget == button_task_none ) {
+        msg.task.data.num = TASK_NONE;
     }
 	
     if ( planner_fd > 0 ) {

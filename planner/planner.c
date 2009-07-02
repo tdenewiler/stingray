@@ -375,8 +375,8 @@ int main( int argc, char *argv[] )
             //snprintf( write_time + strlen(write_time),
             	//	strlen(write_time), ".%03ld", ctime.tv_usec );
 
-			/* Log the every (enable_log) seconds. */
-			if ( dt > (cf.enable_log*1000000) ) {
+			/* Log every (enable_log) seconds. */
+			if ( dt > (cf.enable_log * 1000000) ) {
 				STAT cs = msg.status.data;
 				fprintf( f_log, "%s, %.04f,%.04f,%.04f,%.04f,%.04f,%.04f,%.04f,%.04f,%.04f,%.04f\n",
 					write_time, cs.pitch, cs.roll, cs.yaw, msg.lj.data.pressure,

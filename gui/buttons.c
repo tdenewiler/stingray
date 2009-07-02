@@ -57,14 +57,15 @@ GtkWidget *button_save_bvideo;
 GtkWidget *button_save_fvideo;
 
 /* Tasks buttons. */
-GtkWidget *button_gate;
-GtkWidget *button_buoy;
-GtkWidget *button_pipe;
-GtkWidget *button_square;
-GtkWidget *button_square_time1;
-GtkWidget *button_square_time2;
-GtkWidget *button_square_time3;
-GtkWidget *button_square_time4;
+GtkWidget *button_task_gate;
+GtkWidget *button_task_buoy;
+GtkWidget *button_task_pipe;
+GtkWidget *button_task_square;
+GtkWidget *button_task_none;
+GtkWidget *button_task_square_time1;
+GtkWidget *button_task_square_time2;
+GtkWidget *button_task_square_time3;
+GtkWidget *button_task_square_time4;
 
 /* Gain buttons. */
 GtkWidget *button_kp_yaw;
@@ -451,13 +452,13 @@ int buttons_opmode( GtkWidget *box )
         GTK_SIGNAL_FUNC( events_opmode ), opmode_group );
 
     /* Pack the boxes. */
-    gtk_box_pack_start( GTK_BOX( hbox ), button_hold_yaw, FALSE, TRUE, 0 );
-    gtk_box_pack_start( GTK_BOX( hbox ), button_hold_roll, FALSE, TRUE, 0 );
-    gtk_box_pack_start( GTK_BOX( hbox ), button_hold_pitch, FALSE, TRUE, 0 );
-    gtk_box_pack_start( GTK_BOX( hbox ), button_hold_accel, FALSE, TRUE, 0 );
-    gtk_box_pack_start( GTK_BOX( hbox ), button_hold_ang_rate, FALSE, TRUE, 0 );
-    gtk_box_pack_start( GTK_BOX( hbox ), button_manual, FALSE, TRUE, 0 );
+    //gtk_box_pack_start( GTK_BOX( hbox ), button_hold_yaw, FALSE, TRUE, 0 );
+    //gtk_box_pack_start( GTK_BOX( hbox ), button_hold_roll, FALSE, TRUE, 0 );
+    //gtk_box_pack_start( GTK_BOX( hbox ), button_hold_pitch, FALSE, TRUE, 0 );
+    //gtk_box_pack_start( GTK_BOX( hbox ), button_hold_accel, FALSE, TRUE, 0 );
+    //gtk_box_pack_start( GTK_BOX( hbox ), button_hold_ang_rate, FALSE, TRUE, 0 );
     gtk_box_pack_start( GTK_BOX( hbox ), button_autonomous, FALSE, TRUE, 0 );
+    gtk_box_pack_start( GTK_BOX( hbox ), button_manual, FALSE, TRUE, 0 );
 
     /* Add box with buttons to the frame. */
     gtk_box_pack_start( GTK_BOX( box ), vbox, FALSE, TRUE, 0 );
@@ -537,47 +538,45 @@ int buttons_tasks( GtkWidget *box )
     gtk_container_add( GTK_CONTAINER( hbox2 ), vbox5 );
 
     /* Create radio buttons. */
-    button_buoy = buttons_make_radio( "Buoy",
+    button_task_buoy = buttons_make_radio( "Buoy",
         GTK_SIGNAL_FUNC( events_tasks ), tasks_group );
-    button_gate = buttons_make_radio( "Gate",
+    button_task_gate = buttons_make_radio( "Gate",
         GTK_SIGNAL_FUNC( events_tasks ), tasks_group );
-    button_pipe = buttons_make_radio( "Pipe",
+    button_task_pipe = buttons_make_radio( "Pipe",
         GTK_SIGNAL_FUNC( events_tasks ), tasks_group );
-    button_square = buttons_make_radio( "Square",
+    button_task_square = buttons_make_radio( "Square",
+		GTK_SIGNAL_FUNC( events_tasks ), tasks_group );
+    button_task_none = buttons_make_radio( "None",
 		GTK_SIGNAL_FUNC( events_tasks ), tasks_group );
 
     /* Create the spin buttons. */
-    adj = ( GtkAdjustment * )gtk_adjustment_new( 0, 0, 100, 0.1, 10, 0 );
+    //adj = ( GtkAdjustment * )gtk_adjustment_new( 0, 0, 100, 0.1, 10, 0 );
+    //button_task_square_time1 = buttons_make_spin( "Forward Time [s]",
+		//GTK_SIGNAL_FUNC( events_tasks ), vbox5, adj );
 
-    button_square_time1 = buttons_make_spin( "Forward Time [s]",
-		GTK_SIGNAL_FUNC( events_tasks ), vbox5, adj );
+    //adj = ( GtkAdjustment * )gtk_adjustment_new( 0, 0, 100, 0.1, 10, 0 );
+    //button_task_square_time2 = buttons_make_spin( "Left Time [s]",
+		//GTK_SIGNAL_FUNC( events_tasks ), vbox5, adj );
 
-    adj = ( GtkAdjustment * )gtk_adjustment_new( 0, 0, 100, 0.1, 10, 0 );
+    //adj = ( GtkAdjustment * )gtk_adjustment_new( 0, 0, 100, 0.1, 10, 0 );
+    //button_task_square_time3 = buttons_make_spin( "Reverse Time [s]",
+		//GTK_SIGNAL_FUNC( events_tasks ), vbox5, adj );
 
-    button_square_time2 = buttons_make_spin( "Left Time [s]",
-		GTK_SIGNAL_FUNC( events_tasks ), vbox5, adj );
-
-    adj = ( GtkAdjustment * )gtk_adjustment_new( 0, 0, 100, 0.1, 10, 0 );
-
-    button_square_time3 = buttons_make_spin( "Reverse Time [s]",
-		GTK_SIGNAL_FUNC( events_tasks ), vbox5, adj );
-
-    adj = ( GtkAdjustment * )gtk_adjustment_new( 0, 0, 100, 0.1, 10, 0 );
-
-    button_square_time4 = buttons_make_spin( "Right Time [s]",
-		GTK_SIGNAL_FUNC( events_tasks ), vbox5, adj );
+    //adj = ( GtkAdjustment * )gtk_adjustment_new( 0, 0, 100, 0.1, 10, 0 );
+    //button_task_square_time4 = buttons_make_spin( "Right Time [s]",
+		//GTK_SIGNAL_FUNC( events_tasks ), vbox5, adj );
 
     /* Pack the radio buttons into boxes. */
-    gtk_box_pack_start( GTK_BOX( hbox5 ), button_buoy, FALSE, TRUE, 0 );
-    gtk_box_pack_start( GTK_BOX( hbox4 ), button_gate, FALSE, TRUE, 0 );
-    gtk_box_pack_start( GTK_BOX( hbox3 ), button_pipe, FALSE, TRUE, 0 );
-    gtk_box_pack_start( GTK_BOX( vbox4 ), button_square, FALSE, TRUE, 0 );
+    gtk_box_pack_start( GTK_BOX( hbox3 ), button_task_none, FALSE, TRUE, 0 );
+    gtk_box_pack_start( GTK_BOX( hbox3 ), button_task_buoy, FALSE, TRUE, 0 );
+    gtk_box_pack_start( GTK_BOX( hbox3 ), button_task_pipe, FALSE, TRUE, 0 );
+    gtk_box_pack_start( GTK_BOX( hbox3 ), button_task_gate, FALSE, TRUE, 0 );
 
     /* Pack the boxes. */
     gtk_box_pack_start( GTK_BOX( box ), vbox1, TRUE, FALSE, 0 );
 
     /* Activate specific buttons by default. */
-    gtk_toggle_button_set_active( ( GtkToggleButton * )button_square, TRUE );
+    gtk_toggle_button_set_active( ( GtkToggleButton * )button_task_none, TRUE );
 
     return TRUE;
 } /* end buttons_tasks() */
