@@ -344,6 +344,7 @@ int main( int argc, char *argv[] )
 					if ( dt > POLOLU_INIT_TIME ) {
 						pololu_initialized = TRUE;
 						pololu_starting = FALSE;
+						printf("MAIN: Pololu initialized.\n");
 					}
 				}
 				else {
@@ -409,6 +410,8 @@ int main( int argc, char *argv[] )
             recv_bytes = mstrain_euler_vectors( imu_fd, &msg.mstrain.data.pitch,
 				&msg.mstrain.data.roll, &msg.mstrain.data.yaw, msg.mstrain.data.accel,
 				msg.mstrain.data.ang_rate );
+			//printf("MAIN:       %f        %f        %f\n",
+				//msg.mstrain.data.pitch, msg.mstrain.data.roll, msg.mstrain.data.yaw);
         }
 		else {
 			/* Simulation Mode. This is where the simulated data is generated. */
