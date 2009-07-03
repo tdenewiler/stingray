@@ -31,9 +31,11 @@ extern GtkWidget *label_status;
 
 /* A buffer to store network data. */
 char planner_buf[MAX_MSG_SIZE];
+char nav_buf[MAX_MSG_SIZE];
 
 /* Network API messages. */
 extern int planner_fd;
+extern int nav_fd;
 extern MSG_DATA msg;
 
 /* Configuration file variables. */
@@ -150,8 +152,19 @@ gint gui_timer_200ms( gpointer data )
     	}
     }
 
+    /* Get network data from nav. */
+    if ( nav_fd > 0 ) {
+        recv_bytes = net_client( nav_fd, nav_buf, &msg, MODE_OPEN );
+		if ( recv_bytes > 0 ) {
+        	bytes_left = messages_decode( nav_fd, nav_buf, &msg, recv_bytes );
+    	}
+    }
+
     /* Update GUI status. */
     if ( planner_fd > 0 ) {
+	    gui_update_status_text( );
+	}
+    if ( nav_fd > 0 ) {
 	    gui_update_status_text( );
 	}
 

@@ -103,6 +103,7 @@ extern GtkWidget *button_target_current;
 extern MSG_DATA msg;
 extern int planner_fd;
 extern int vision_fd;
+extern int nav_fd;
 
 /* Configuration file variables. */
 extern CONF_VARS cf;
@@ -138,6 +139,9 @@ void events_estop( GtkWidget *widget )
     /* Send the stop message. */
     if ( planner_fd  > 0 ) {
         messages_send( planner_fd, STOP_MSGID, &msg );
+    }
+    if ( nav_fd  > 0 ) {
+        messages_send( nav_fd, STOP_MSGID, &msg );
     }
 } /* end events_estop() */
 
@@ -209,6 +213,9 @@ void events_tasks( GtkWidget *widget,
 	
     if ( planner_fd > 0 ) {
         messages_send( planner_fd, TASK_MSGID, &msg );
+    }
+    if ( nav_fd > 0 ) {
+        messages_send( nav_fd, TASK_MSGID, &msg );
     }
 } /* end events_tasks() */
 
@@ -390,7 +397,12 @@ void events_gain( GtkWidget *widget,
                               button_kd_depth );
 
     /* Send the gain message. */
-    messages_send( planner_fd, GAIN_MSGID, &msg );
+	if ( planner_fd > 0 ) {
+		messages_send( planner_fd, GAIN_MSGID, &msg );
+	}
+	if ( nav_fd > 0 ) {
+		messages_send( nav_fd, GAIN_MSGID, &msg );
+	}
 } /* end events_gain() */
 
 
@@ -446,7 +458,12 @@ void events_gain_cf( GtkWidget *widget,
     gtk_spin_button_set_value( (GtkSpinButton *)button_kd_depth, msg.gain.data.kd_depth );
 	
     /* Send the gain message. */
-    messages_send( planner_fd, GAIN_MSGID, &msg );
+	if ( planner_fd > 0 ) {
+		messages_send( planner_fd, GAIN_MSGID, &msg );
+	}
+	if ( nav_fd > 0 ) {
+		messages_send( nav_fd, GAIN_MSGID, &msg );
+	}
 } /* end events_gain_cf() */
 
 
@@ -502,7 +519,12 @@ void events_gain_zero( GtkWidget *widget,
     gtk_spin_button_set_value( (GtkSpinButton *)button_kd_depth, msg.gain.data.kd_depth );
 	
     /* Send the gain message. */
-    messages_send( planner_fd, GAIN_MSGID, &msg );
+	if ( planner_fd > 0 ) {
+		messages_send( planner_fd, GAIN_MSGID, &msg );
+	}
+	if ( nav_fd > 0 ) {
+		messages_send( nav_fd, GAIN_MSGID, &msg );
+	}
 } /* end events_gain_zero() */
 
 
@@ -527,8 +549,13 @@ void events_gain_get( )
     msg.gain.data.mode = GAIN_GET;
 
     /* Send the gain message. */
-    messages_send( planner_fd, GAIN_MSGID, &msg );
-    msg.gain.data.mode = 0;
+ 	if ( planner_fd > 0 ) {
+		messages_send( planner_fd, GAIN_MSGID, &msg );
+	}
+	if ( nav_fd > 0 ) {
+		messages_send( nav_fd, GAIN_MSGID, &msg );
+	}
+   msg.gain.data.mode = 0;
 
     /* Get network data. */
     if ( planner_fd > 0 ) {
@@ -597,7 +624,12 @@ void events_gain_set( )
     msg.gain.data.mode = GAIN_SET;
 
     /* Send the gain message. */
-    messages_send( planner_fd, GAIN_MSGID, &msg );
+	if ( planner_fd > 0 ) {
+		messages_send( planner_fd, GAIN_MSGID, &msg );
+	}
+	if ( nav_fd > 0 ) {
+		messages_send( nav_fd, GAIN_MSGID, &msg );
+	}
     msg.gain.data.mode = 0;
 } /* end events_gain_set() */
 
@@ -641,6 +673,9 @@ void events_enable_servos( GtkWidget *widget,
     if ( planner_fd > 0 ) {
         messages_send( planner_fd, CLIENT_MSGID, &msg );
     }
+    if ( nav_fd > 0 ) {
+        messages_send( nav_fd, CLIENT_MSGID, &msg );
+    }
 } /* end events_enable_servos() */
 
 
@@ -682,6 +717,9 @@ void events_enable_imu( GtkWidget *widget,
     /* Send the state of the button to the server. */
     if ( planner_fd > 0 ) {
         messages_send( planner_fd, CLIENT_MSGID, &msg );
+    }
+    if ( nav_fd > 0 ) {
+        messages_send( nav_fd, CLIENT_MSGID, &msg );
     }
 } /* end events_enable_imu() */
 
@@ -725,6 +763,9 @@ void events_enable_log( GtkWidget *widget,
     if ( planner_fd > 0 ) {
         messages_send( planner_fd, CLIENT_MSGID, &msg );
     }
+    if ( nav_fd > 0 ) {
+        messages_send( nav_fd, CLIENT_MSGID, &msg );
+    }
 } /* end events_enable_log() */
 
 
@@ -767,6 +808,9 @@ void events_imu_stab( GtkWidget *widget,
     if ( planner_fd > 0 ) {
         messages_send( planner_fd, CLIENT_MSGID, &msg );
     }
+    if ( nav_fd > 0 ) {
+        messages_send( nav_fd, CLIENT_MSGID, &msg );
+    }
 } /* end events_imu_stab() */
 
 
@@ -805,6 +849,9 @@ void events_debug_level( GtkWidget *widget,
     if ( planner_fd > 0 ) {
         messages_send( planner_fd, CLIENT_MSGID, &msg );
     }
+    if ( nav_fd > 0 ) {
+        messages_send( nav_fd, CLIENT_MSGID, &msg );
+    }
 } /* end events_debug_level() */
 
 
@@ -838,6 +885,9 @@ void events_dropper( GtkWidget *widget,
     /* Send the value of the button to the server. */
     if ( planner_fd > 0 ) {
         messages_send( planner_fd, CLIENT_MSGID, &msg );
+    }
+    if ( nav_fd > 0 ) {
+        messages_send( nav_fd, CLIENT_MSGID, &msg );
     }
 } /* end events_debug_level() */
 
@@ -875,12 +925,18 @@ void events_opmode( GtkWidget *widget,
         if ( planner_fd > 0 ) {
             messages_send( planner_fd, TARGET_MSGID, &msg );
         }
+        if ( nav_fd > 0 ) {
+            messages_send( nav_fd, TARGET_MSGID, &msg );
+        }
     }
 
     else if ( gtk_toggle_button_get_active( ( GtkToggleButton * )button_hold_roll ) ) {
         msg.target.data.mode = (int)HOLD_ROLL;
         if ( planner_fd > 0 ) {
             messages_send( planner_fd, TARGET_MSGID, &msg );
+        }
+        if ( nav_fd > 0 ) {
+            messages_send( nav_fd, TARGET_MSGID, &msg );
         }
     }
 
@@ -889,12 +945,18 @@ void events_opmode( GtkWidget *widget,
         if ( planner_fd > 0 ) {
             messages_send( planner_fd, TARGET_MSGID, &msg );
         }
+        if ( nav_fd > 0 ) {
+            messages_send( nav_fd, TARGET_MSGID, &msg );
+        }
     }
 
     else if ( gtk_toggle_button_get_active( ( GtkToggleButton * )button_hold_accel ) ) {
         msg.target.data.mode = (int)HOLD_ACCEL;
         if ( planner_fd > 0 ) {
             messages_send( planner_fd, TARGET_MSGID, &msg );
+        }
+        if ( nav_fd > 0 ) {
+            messages_send( nav_fd, TARGET_MSGID, &msg );
         }
     }
 
@@ -903,6 +965,9 @@ void events_opmode( GtkWidget *widget,
         if ( planner_fd > 0 ) {
             messages_send( planner_fd, TARGET_MSGID, &msg );
         }
+        if ( nav_fd > 0 ) {
+            messages_send( nav_fd, TARGET_MSGID, &msg );
+        }
     }
 
     else if ( gtk_toggle_button_get_active( ( GtkToggleButton * )button_manual ) ) {
@@ -910,12 +975,18 @@ void events_opmode( GtkWidget *widget,
         if ( planner_fd > 0 ) {
             messages_send( planner_fd, TARGET_MSGID, &msg );
         }
+        if ( nav_fd > 0 ) {
+            messages_send( nav_fd, TARGET_MSGID, &msg );
+        }
     }
 
     else if ( gtk_toggle_button_get_active( ( GtkToggleButton * )button_autonomous ) ) {
         msg.target.data.mode = (int)AUTONOMOUS;
         if ( planner_fd > 0 ) {
             messages_send( planner_fd, TARGET_MSGID, &msg );
+        }
+        if ( nav_fd > 0 ) {
+            messages_send( nav_fd, TARGET_MSGID, &msg );
         }
     }
 } /* end events_opmode() */
@@ -954,7 +1025,12 @@ void events_target_yaw( GtkWidget *widget,
 
     /* Send the state of the button to the server if not in MANUAL mode. */
     if ( msg.target.data.mode != MANUAL ) {
-        messages_send( planner_fd, TARGET_MSGID, &msg );
+		if ( planner_fd > 0 ) {
+			messages_send( planner_fd, TARGET_MSGID, &msg );
+		}
+		if ( nav_fd > 0 ) {
+			messages_send( nav_fd, TARGET_MSGID, &msg );
+		}
     }
 } /* end events_target_yaw() */
 
@@ -992,7 +1068,12 @@ void events_target_roll( GtkWidget *widget,
 
     /* Send the state of the button to the server if not in MANUAL mode. */
     if ( msg.target.data.mode != MANUAL ) {
-        messages_send( planner_fd, TARGET_MSGID, &msg );
+		if ( planner_fd > 0 ) {
+			messages_send( planner_fd, TARGET_MSGID, &msg );
+		}
+		if ( nav_fd > 0 ) {
+			messages_send( nav_fd, TARGET_MSGID, &msg );
+		}
     }
 } /* end events_target_roll() */
 
@@ -1030,7 +1111,12 @@ void events_target_pitch( GtkWidget *widget,
 
     /* Send the state of the button to the server if not in MANUAL mode. */
     if ( msg.target.data.mode != MANUAL ) {
-        messages_send( planner_fd, TARGET_MSGID, &msg );
+		if ( planner_fd > 0 ) {
+			messages_send( planner_fd, TARGET_MSGID, &msg );
+		}
+		if ( nav_fd > 0 ) {
+			messages_send( nav_fd, TARGET_MSGID, &msg );
+		}
     }
 } /* end events_target_pitch() */
 
@@ -1068,7 +1154,12 @@ void events_target_depth( GtkWidget *widget,
 
     /* Send the state of the button to the server if not in MANUAL mode. */
     if ( msg.target.data.mode != MANUAL ) {
-        messages_send( planner_fd, TARGET_MSGID, &msg );
+		if ( planner_fd > 0 ) {
+			messages_send( planner_fd, TARGET_MSGID, &msg );
+		}
+		if ( nav_fd > 0 ) {
+			messages_send( nav_fd, TARGET_MSGID, &msg );
+		}
     }
 } /* end events_target_pitch() */
 
@@ -1106,7 +1197,12 @@ void events_target_fx( GtkWidget *widget,
 
     /* Send the state of the button to the server if not in MANUAL mode. */
     if ( msg.target.data.mode != MANUAL ) {
-        messages_send( planner_fd, TARGET_MSGID, &msg );
+		if ( planner_fd > 0 ) {
+			messages_send( planner_fd, TARGET_MSGID, &msg );
+		}
+		if ( nav_fd > 0 ) {
+			messages_send( nav_fd, TARGET_MSGID, &msg );
+		}
     }
 } /* end events_target_fx() */
 
@@ -1144,7 +1240,12 @@ void events_target_fy( GtkWidget *widget,
 
     /* Send the state of the button to the server if not in MANUAL mode. */
     if ( msg.target.data.mode != MANUAL ) {
-        messages_send( planner_fd, TARGET_MSGID, &msg );
+		if ( planner_fd > 0 ) {
+			messages_send( planner_fd, TARGET_MSGID, &msg );
+		}
+		if ( nav_fd > 0 ) {
+			messages_send( nav_fd, TARGET_MSGID, &msg );
+		}
     }
 } /* end events_target_fy() */
 
@@ -1182,7 +1283,12 @@ void events_target_speed( GtkWidget *widget,
 
     /* Send the state of the button to the server if not in MANUAL mode. */
     if ( msg.target.data.mode != MANUAL ) {
-        messages_send( planner_fd, TARGET_MSGID, &msg );
+		if ( planner_fd > 0 ) {
+			messages_send( planner_fd, TARGET_MSGID, &msg );
+		}
+		if ( nav_fd > 0 ) {
+			messages_send( nav_fd, TARGET_MSGID, &msg );
+		}
     }
 } /* end events_target_speed() */
 
@@ -1234,7 +1340,12 @@ void events_target_current( GtkWidget *widget,
 
     /* Send the state of the button to the server if not in MANUAL mode. */
     if ( msg.target.data.mode != MANUAL ) {
-        messages_send( planner_fd, TARGET_MSGID, &msg );
+		if ( planner_fd > 0 ) {
+			messages_send( planner_fd, TARGET_MSGID, &msg );
+		}
+		if ( nav_fd > 0 ) {
+			messages_send( nav_fd, TARGET_MSGID, &msg );
+		}
     }
 } /* end events_target_current() */
 
@@ -1279,6 +1390,11 @@ void events_zero_pid( GtkWidget *widget,
 
     /* Send the state of the button to the server if not in MANUAL mode. */
     if ( msg.target.data.mode != MANUAL ) {
-        messages_send( planner_fd, TARGET_MSGID, &msg );
+		if ( planner_fd > 0 ) {
+			messages_send( planner_fd, TARGET_MSGID, &msg );
+		}
+		if ( nav_fd > 0 ) {
+			messages_send( nav_fd, TARGET_MSGID, &msg );
+		}
     }
 } /* end events_zero_pid() */
