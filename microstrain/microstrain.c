@@ -570,6 +570,98 @@ int mstrain_euler_vectors( int fd,
 
 /******************************************************************************
  *
+ * Title:       int mstrain_set_tare( int fd )
+ *
+ * Description: Set tare for coordinate system.
+ *
+ * Input:       fd: A file descriptor for the IMU port.
+ *
+ * Output:      1 on success, 0 on failure.
+ *
+ *****************************************************************************/
+
+int mstrain_set_tare( int fd )
+{
+	int response_length = (int)IMU_LENGTH_0F;
+	int status = 0;
+	char response[response_length];
+	char cmd[4];
+	
+	/* Set the command byte. */
+	cmd[0] = IMU_TARE_COORDINATE_SYSTEM;
+	
+	/* Set the command data bytes. */
+	cmd[1] = IMU_TARE_BYTE1;
+	cmd[2] = IMU_TARE_BYTE2;
+	cmd[3] = IMU_TARE_BYTE3;
+
+	/* Send request to and receive data from IMU. */
+	status = send_serial( fd, &cmd, sizeof(cmd) );
+
+	if ( status > 0 ) {
+		status = serial_bytes_available( fd );
+		if ( status < response_length ) {
+			usleep( SERIAL_EXTRA_DELAY_LENGTH );
+		}
+		status = recv_serial( fd, response, response_length );
+	}
+
+	if ( status != response_length ) {
+		return 0;
+	}
+
+	return 1;
+} /* end mstrain_set_tare() */
+
+
+/******************************************************************************
+ *
+ * Title:       int mstrain_remove_tare( int fd )
+ *
+ * Description: Removes tare for coordinate system.
+ *
+ * Input:       fd: A file descriptor for the IMU port.
+ *
+ * Output:      1 on success, 0 on failure.
+ *
+ *****************************************************************************/
+
+int mstrain_remove_tare( int fd )
+{
+	int response_length = (int)IMU_LENGTH_11;
+	int status = 0;
+	char response[response_length];
+	char cmd[4];
+	
+	/* Set the command byte. */
+	cmd[0] = IMU_REMOVE_TARE;
+	
+	/* Set the command data bytes. */
+	cmd[1] = IMU_TARE_BYTE1;
+	cmd[2] = IMU_TARE_BYTE2;
+	cmd[3] = IMU_TARE_BYTE3;
+
+	/* Send request to and receive data from IMU. */
+	status = send_serial( fd, &cmd, sizeof(cmd) );
+
+	if ( status > 0 ) {
+		status = serial_bytes_available( fd );
+		if ( status < response_length ) {
+			usleep( SERIAL_EXTRA_DELAY_LENGTH );
+		}
+		status = recv_serial( fd, response, response_length );
+	}
+
+	if ( status != response_length ) {
+		return 0;
+	}
+
+	return 1;
+} /* end mstrain_remove_tare() */
+
+
+/******************************************************************************
+ *
  * Title:       int convert2int( char *buffer )
  *
  * Description: Convert two adjacent bytes to an integer.

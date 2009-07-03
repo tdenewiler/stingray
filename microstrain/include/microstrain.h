@@ -98,6 +98,12 @@
 #endif /* CHECKSUM_MASK */
 //@}
 
+/** @name Bytes for setting and removing tare for coordinate system. */
+//@{
+#define IMU_TARE_BYTE1	0xC1
+#define IMU_TARE_BYTE2	0xC3
+#define IMU_TARE_BYTE3	0xC5
+//@}
 
 /******************************
  *
@@ -234,6 +240,14 @@ int mstrain_vectors( int fd,
                      float *accel,
                      float *ang_rate
                    );
+
+//! Set tare for coordinate system.
+//! \return 1 on success, 0 on failure.
+int mstrain_set_tare( int fd );
+
+//! Remove tare for coordinate system.
+//! \return 1 on success, 0 on failure.
+int mstrain_remove_tare( int fd );
 
 //! Convert two adjacent bytes to an integer value.
 //! Returns an integer value.

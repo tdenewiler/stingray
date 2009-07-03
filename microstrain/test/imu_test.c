@@ -33,7 +33,6 @@ int main( )
 	int *serial_num     = (int *)calloc( 1, sizeof(int) );
 
 	/* Initialize orient in the heap. */
-
 	for ( ii = 0; ii < 3; ii++ ) {
 		orient[ii] = orient_mem + 3 * ii;
 	}
@@ -69,18 +68,18 @@ int main( )
 		printf("Roll: %f\nPitch: %f\nYaw: %f\n\n", *roll, *pitch, *yaw);
 
 		/* Get the orientation vectors. */
-		status = mstrain_orientation( imu_fd, gyro_stab, orient );
-		printf("%f %f %f\n%f %f %f\n%f %f %f\n"
-		       , orient[0][0]
-		       , orient[1][0]
-		       , orient[2][0]
-		       , orient[0][1]
-		       , orient[1][1]
-		       , orient[2][1]
-		       , orient[0][2]
-		       , orient[1][2]
-		       , orient[2][2]
-		      );
+		//status = mstrain_orientation( imu_fd, gyro_stab, orient );
+		//printf("%f %f %f\n%f %f %f\n%f %f %f\n"
+		       //, orient[0][0]
+		       //, orient[1][0]
+		       //, orient[2][0]
+		       //, orient[0][1]
+		       //, orient[1][1]
+		       //, orient[2][1]
+		       //, orient[0][2]
+		       //, orient[1][2]
+		       //, orient[2][2]
+		      //);
 	}
 
 	/* Free used heap memory and throw away the keys. */
