@@ -45,7 +45,7 @@
 
 /** @name The time (ms) it takes for the Pololu to initialize. */
 //@{
-#define POLOLU_INIT_TIME		7000
+#define POLOLU_INIT_TIME		7000000
 //@}
 
 
