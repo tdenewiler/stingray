@@ -325,6 +325,7 @@ int main( int argc, char *argv[] )
 			lj_buf[recv_bytes] = '\0';
 			if ( recv_bytes > 0 ) {
 				messages_decode( lj_fd, lj_buf, &msg, recv_bytes );
+				msg.status.data.depth = msg.lj.data.pressure;
 			}
 			if ( pololu_initialized == FALSE ) {
 				/* Get the state of the kill switch. */
@@ -365,7 +366,8 @@ int main( int argc, char *argv[] )
 
         /* Get network data. */
         if ( (cf.enable_server) && (server_fd > 0) ) {
-            recv_bytes = net_server( server_fd, recv_buf, &msg, MODE_STATUS );
+            //recv_bytes = net_server( server_fd, recv_buf, &msg, MODE_STATUS );
+            recv_bytes = net_server( server_fd, recv_buf, &msg, MODE_PLANNER );
             if ( recv_bytes > 0 ) {
                 recv_buf[recv_bytes] = '\0';
                 messages_decode( server_fd, recv_buf, &msg, recv_bytes );
