@@ -102,18 +102,18 @@ void pid_loop( int pololu_fd,
 {
 	/* Check to see if the errors should be reset to zero. */
 	if ( msg->target.data.mode == ZERO_PID_ERRORS ) {
-		pid->pitch.perr = 0;
-		pid->pitch.ierr = 0;
-		pid->pitch.derr = 0;
-		pid->roll.perr = 0;
-		pid->roll.ierr = 0;
-		pid->roll.derr = 0;
-		pid->yaw.perr = 0;
-		pid->yaw.ierr = 0;
-		pid->yaw.derr = 0;
-		pid->depth.perr = 0;
-		pid->depth.ierr = 0;
-		pid->depth.derr = 0;
+		//pid->pitch.perr = 0;
+		//pid->pitch.ierr = 0;
+		//pid->pitch.derr = 0;
+		//pid->roll.perr = 0;
+		//pid->roll.ierr = 0;
+		//pid->roll.derr = 0
+		//pid->yaw.perr = 0;
+		//pid->yaw.ierr = 0;
+		//pid->yaw.derr = 0;
+		//pid->depth.perr = 0;
+		//pid->depth.ierr = 0;
+		//pid->depth.derr = 0;
 	}
 
 	/* These next three need to be set from vison, hydrophone, gui, etc. They
@@ -200,22 +200,13 @@ void pid_loop( int pololu_fd,
 		pid->yaw.ki		= msg->gain.data.ki_yaw;
 		pid->yaw.kd		= msg->gain.data.kd_yaw;
 
-		/* Check if we are looking for buoy. */
-		if ( msg->task.data.num == TASK_BUOY ) {
-			printf("PID_LOOP: Looking for buoy.\n");
-			pid->yaw.perr = msg->target.data.yaw;
-			pid->yaw.ierr = 0;
-			pid->yaw.derr = 0;
-		}
-		else {
-			/* Calculate the errors. */
-			pid->yaw.ref	= msg->target.data.yaw;
-			pid->yaw.cval	= msg->mstrain.data.yaw;
-			pid->yaw.perr	= pid_subtract_angles( pid->yaw.cval, pid->yaw.ref );
-			pid->yaw.ierr	+= pid->yaw.perr * dt / 1000000;
-			pid->yaw.ierr	= pid_bound_integral( pid->yaw.ierr, pid->yaw.ki, PID_YAW_INTEGRAL );
-			pid->yaw.derr	= msg->mstrain.data.ang_rate[2];
-		}
+		/* Calculate the errors. */
+		pid->yaw.ref	= msg->target.data.yaw;
+		pid->yaw.cval	= msg->mstrain.data.yaw;
+		pid->yaw.perr	= pid_subtract_angles( pid->yaw.cval, pid->yaw.ref );
+		pid->yaw.ierr	+= pid->yaw.perr * dt / 1000000;
+		pid->yaw.ierr	= pid_bound_integral( pid->yaw.ierr, pid->yaw.ki, PID_YAW_INTEGRAL );
+		pid->yaw.derr	= msg->mstrain.data.ang_rate[2];
 
 		/* Update status message. */
 		msg->status.data.yaw_perr	= pid->yaw.perr;

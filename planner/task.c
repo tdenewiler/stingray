@@ -159,7 +159,7 @@ void task_square( MSG_DATA *msg, float heading, int dt )
 {
 	msg->target.data.pitch = 0;
 	msg->target.data.roll = 0;
-	msg->target.data.depth = 0.518;
+	msg->target.data.depth = 0;
 	msg->target.data.yaw = heading;
 } /* end task_square() */
 
@@ -179,13 +179,7 @@ void task_square( MSG_DATA *msg, float heading, int dt )
 
 void task_none( MSG_DATA *msg, int dt )
 {
-	msg->target.data.pitch = msg->status.data.pitch;
-	msg->target.data.roll  = msg->status.data.roll;
-	msg->target.data.depth = msg->status.data.depth;
-	msg->target.data.yaw   = msg->status.data.yaw;
-	msg->target.data.fx    = 0;
-	msg->target.data.fy    = 0;
-	msg->target.data.speed = 0;
+
 } /* end task_none() */
 
 
