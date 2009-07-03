@@ -76,7 +76,8 @@ int pid_init( PID *pid, CONF_VARS *cf )
  * 								PID *pid,
  * 								CONF_VARS *cf,
  * 								MSG_DATA *msg,
- * 								int mode
+ * 								int mode,
+ * 								int motor_init
  * 								)
  *
  * Description: Runs through one iteration of a PID controller.
@@ -87,6 +88,7 @@ int pid_init( PID *pid, CONF_VARS *cf )
  * 				msg: Pointer to message data.
  * 				dt: Time difference from last loop run.
  * 				mode: Which PID loop to run.
+ * 				motor_init: Boolean for whether motor controller is initialized.
  *
  * Output:      None.
  *
@@ -97,23 +99,24 @@ void pid_loop( int pololu_fd,
                CONF_VARS *cf,
                MSG_DATA *msg,
                int dt,
-               int mode
+               int mode,
+			   int motor_init
              )
 {
 	/* Check to see if the errors should be reset to zero. */
 	if ( msg->target.data.mode == ZERO_PID_ERRORS ) {
-		//pid->pitch.perr = 0;
-		//pid->pitch.ierr = 0;
-		//pid->pitch.derr = 0;
-		//pid->roll.perr = 0;
-		//pid->roll.ierr = 0;
-		//pid->roll.derr = 0
-		//pid->yaw.perr = 0;
-		//pid->yaw.ierr = 0;
-		//pid->yaw.derr = 0;
-		//pid->depth.perr = 0;
-		//pid->depth.ierr = 0;
-		//pid->depth.derr = 0;
+		pid->pitch.perr = 0;
+		pid->pitch.ierr = 0;
+		pid->pitch.derr = 0;
+		pid->roll.perr = 0;
+		pid->roll.ierr = 0;
+		pid->roll.derr = 0;
+		pid->yaw.perr = 0;
+		pid->yaw.ierr = 0;
+		pid->yaw.derr = 0;
+		pid->depth.perr = 0;
+		pid->depth.ierr = 0;
+		pid->depth.derr = 0;
 	}
 
 	/* These next three need to be set from vison, hydrophone, gui, etc. They
@@ -190,7 +193,9 @@ void pid_loop( int pololu_fd,
 		}
 
 		/* Control motors. */
-		r1 = controlVertical( pololu_fd, pid->vertical_thrust, pid->roll_torque, pid->pitch_torque );
+		if ( motor_init ) {
+			r1 = controlVertical( pololu_fd, pid->vertical_thrust, pid->roll_torque, pid->pitch_torque );
+		}
 
 		break;
 
@@ -224,7 +229,9 @@ void pid_loop( int pololu_fd,
 		}
 
 		/* Control Voiths. */
-		r2 = controlVoiths( pololu_fd, pid->voith_speed, pid->voith_angle, pid->voith_thrust, pid->yaw_torque );
+		if ( motor_init ) {
+			r2 = controlVoiths( pololu_fd, pid->voith_speed, pid->voith_angle, pid->voith_thrust, pid->yaw_torque );
+		}
 
 		break;
 
@@ -262,7 +269,9 @@ void pid_loop( int pololu_fd,
 		}
 
 		/* Control depth. */
-		r1 = controlVertical( pololu_fd, pid->vertical_thrust, pid->roll_torque, pid->pitch_torque );
+		if ( motor_init ) {
+			r1 = controlVertical( pololu_fd, pid->vertical_thrust, pid->roll_torque, pid->pitch_torque );
+		}
 
 		break;
 	}

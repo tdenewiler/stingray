@@ -26,6 +26,7 @@
 #include "serial.h"
 #include "messages.h"
 #include "pid.h"
+#include "labjackd.h"
 
 #ifdef USE_SSA
 #include <sys/timeb.h>
@@ -191,6 +192,7 @@ int main( int argc, char *argv[] )
     exit_ptr = nav_exit;
     atexit( exit_ptr );
 
+	/* Attach signals to exit function. */
     struct sigaction sigint_action;
     sigint_action.sa_handler = nav_sigint;
     sigint_action.sa_flags = 0;
@@ -202,6 +204,7 @@ int main( int argc, char *argv[] )
 	/* Declare variables. */
     int status = -1;
 	int pololu_initialized = FALSE;
+	int pololu_starting = FALSE;
     int recv_bytes = 0;
     int mode = MODE_STATUS;
 	int mstrain_serial = 0;
@@ -210,15 +213,16 @@ int main( int argc, char *argv[] )
     CONF_VARS cf;
     MSG_DATA msg;
     PID pid;
-
     struct timeval pitch_time = {0, 0};
     struct timeval roll_time = {0, 0};
     struct timeval yaw_time = {0, 0};
     struct timeval depth_time = {0, 0};
+	struct timeval pololu_time = {0, 0};
     struct timeval pitch_start = {0, 0};
     struct timeval roll_start = {0, 0};
     struct timeval yaw_start = {0, 0};
     struct timeval depth_start = {0, 0};
+	struct timeval pololu_start = {0, 0};
     int time1s = 0;
     int time1ms = 0;
     int time2s = 0;
@@ -232,7 +236,6 @@ int main( int argc, char *argv[] )
     pololu_fd = -1;
     imu_fd = -1;
 	lj_fd = 0;
-
     memset( &msg, 0, sizeof( MSG_DATA ) );
     memset( &pid, 0, sizeof( PID ) );
     memset( &recv_buf, 0, MAX_MSG_SIZE );
@@ -309,26 +312,53 @@ int main( int argc, char *argv[] )
     gettimeofday( &yaw_start, NULL );
     gettimeofday( &depth_time, NULL );
     gettimeofday( &depth_start, NULL );
+    gettimeofday( &pololu_time, NULL );
+    gettimeofday( &pololu_start, NULL );
 
 	printf("MAIN: Nav running now.\n");
 
     /* Main loop. */
     while ( 1 ) {
-		/* Check labjack data until kill switch has been closed. */
-		if ( (!pololu_initialized) && (cf.enable_pololu > 0) &&
-				(cf.enable_labjack > 0) && (lj_fd > 0) ) {
+		/* Check labjack data to see if kill switch has been closed. */
+		if ( (cf.enable_pololu > 0) && (cf.enable_labjack > 0) && (lj_fd > 0) ) {
 			recv_bytes = net_client( lj_fd, lj_buf, &msg, mode );
 			lj_buf[recv_bytes] = '\0';
 			if ( recv_bytes > 0 ) {
 				messages_decode( lj_fd, lj_buf, &msg, recv_bytes );
 			}
-			pololu_initialized = msg.lj.data.battery1;
-			if ( pololu_initialized > 0 ) {
-				/* Initialize the Pololu again now that power is attached. */
-				pololuInitializeChannels( pololu_fd );
-				close( lj_fd );
-				lj_fd = 0;
-				printf("MAIN: Kill switch closed.\n");
+			if ( pololu_initialized == FALSE ) {
+				/* Get the state of the kill switch. */
+				if ( msg.lj.data.battery1 > BATT1_THRESH ) {
+					if ( pololu_starting == FALSE ) {
+						pololuInitializeChannels( pololu_fd );
+						pololu_starting = TRUE;
+						/* Start the timer. */
+						gettimeofday( &pololu_start, NULL );
+					}
+					/* Check that 7 seconds have elapsed since initializing Pololu. */
+		            time1s =    pololu_time.tv_sec;
+					time1ms =   pololu_time.tv_usec;
+					time2s =    pololu_start.tv_sec;
+					time2ms =   pololu_start.tv_usec;
+					dt = util_calc_dt( &time1s, &time1ms, &time2s, &time2ms );
+					if ( dt > POLOLU_INIT_TIME ) {
+						pololu_initialized = TRUE;
+						pololu_starting = FALSE;
+					}
+				}
+				else {
+					pololu_initialized = FALSE;
+					pololu_starting = FALSE;
+				}
+			}
+			else {
+				/* Get the state of the kill switch. */
+				if ( msg.lj.data.battery1 > BATT1_THRESH ) {
+					pololu_initialized = TRUE;
+				}
+				else {
+					pololu_initialized = FALSE;
+				}
 			}
 		}
 
@@ -342,17 +372,17 @@ int main( int argc, char *argv[] )
         }
 
         /* Check state of emergency stop value. */
-        if ( msg.stop.data.state == TRUE ) {
-            printf("MAIN: EMERGENCY STOP received. Setting actuators to\n"
-                    "     safe positions!\n");
-            /* Set all the actuators to safe positions. */
-            pololuInitializeChannels( pololu_fd );
-        }
+        //if ( msg.stop.data.state == TRUE ) {
+            //printf("MAIN: EMERGENCY STOP received. Setting actuators to\n"
+                    //"     safe positions!\n");
+            ///* Set all the actuators to safe positions. */
+            //pololuInitializeChannels( pololu_fd );
+        //}
 
-        /* Send dropper servo command. */
-        if ( pololu_fd > 0 ) {
-            status = pololuSetPosition7Bit( pololu_fd, 11, msg.client.data.dropper );
-        }
+        /* Send dropper servo command. Check that Pololu is initialized. */
+        //if ( (pololu_fd > 0) && (pololu_initialized) ) {
+            //status = pololuSetPosition7Bit( pololu_fd, 12, msg.client.data.dropper );
+        //}
 
         /* Check for assisted teleop commands. */
         if ( msg.target.data.mode == MANUAL ) {
@@ -402,9 +432,7 @@ int main( int argc, char *argv[] )
             time2ms =   pitch_start.tv_usec;
             dt = util_calc_dt( &time1s, &time1ms, &time2s, &time2ms );
             if ( dt > pid.pitch.period ) {
-                //if ( (cf.enable_pololu) && (pololu_fd > 0) && (pololu_initialized > 0) ) {
-                    pid_loop( pololu_fd, &pid, &cf, &msg, dt, PID_PITCH );
-                //}
+                pid_loop( pololu_fd, &pid, &cf, &msg, dt, PID_PITCH, pololu_initialized );
                 msg.status.data.pitch_period = dt;
                 gettimeofday( &pitch_start, NULL );
             }
@@ -416,9 +444,7 @@ int main( int argc, char *argv[] )
             time2ms =   roll_start.tv_usec;
             dt = util_calc_dt( &time1s, &time1ms, &time2s, &time2ms );
             if ( dt > pid.roll.period ) {
-                //if ( (cf.enable_pololu) && (pololu_fd > 0) && (pololu_initialized > 0) ) {
-                    pid_loop( pololu_fd, &pid, &cf, &msg, dt, PID_ROLL );
-                //}
+                pid_loop( pololu_fd, &pid, &cf, &msg, dt, PID_ROLL, pololu_initialized );
                 msg.status.data.roll_period = dt;
                 gettimeofday( &roll_start, NULL );
             }
@@ -430,9 +456,7 @@ int main( int argc, char *argv[] )
             time2ms =   yaw_start.tv_usec;
             dt = util_calc_dt( &time1s, &time1ms, &time2s, &time2ms );
             if ( dt > pid.yaw.period ) {
-                //if ( (cf.enable_pololu) && (pololu_fd > 0) && (pololu_initialized > 0) ) {
-                    pid_loop( pololu_fd, &pid, &cf, &msg, dt, PID_YAW );
-                //}
+                pid_loop( pololu_fd, &pid, &cf, &msg, dt, PID_YAW, pololu_initialized );
 				msg.status.data.yaw_period = dt;
 				gettimeofday( &yaw_start, NULL );
             }
@@ -444,9 +468,7 @@ int main( int argc, char *argv[] )
             time2ms =   depth_start.tv_usec;
             dt = util_calc_dt( &time1s, &time1ms, &time2s, &time2ms );
             if ( dt > pid.depth.period ) {
-                //if ( (cf.enable_pololu) && (pololu_fd > 0) && (pololu_initialized > 0) ) {
-                    pid_loop( pololu_fd, &pid, &cf, &msg, dt, PID_DEPTH );
-                //}
+                pid_loop( pololu_fd, &pid, &cf, &msg, dt, PID_DEPTH, pololu_initialized );
                 msg.status.data.depth_period = dt;
                 gettimeofday( &depth_start, NULL );
             }
@@ -466,6 +488,7 @@ int main( int argc, char *argv[] )
         gettimeofday( &roll_time, NULL );
         gettimeofday( &yaw_time, NULL );
         gettimeofday( &depth_time, NULL );
+        gettimeofday( &pololu_time, NULL );
     }
 
     exit( 0 );

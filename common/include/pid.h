@@ -104,12 +104,14 @@ int pid_init( PID *pid, CONF_VARS *cf );
 //! \param msg Pointer to message data.
 //! \param dt Time difference from last loop run.
 //! \param mode Which PID loop to run.
+//! \param motor_init Boolean for whether motor controller is initialized.
 void pid_loop( int pololu_fd,
                PID *pid,
                CONF_VARS *cf,
                MSG_DATA *msg,
                int dt,
-               int mode
+               int mode,
+			   int motor_init
              );
 
 //! Calculates the difference between two angles.

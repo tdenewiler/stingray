@@ -189,7 +189,10 @@ void events_tasks( GtkWidget *widget,
         msg.task.data.num = TASK_GATE;
     }
     else if ( widget == button_task_none ) {
-        msg.task.data.num = TASK_NONE;
+        msg.task.data.num     = TASK_NONE;
+		msg.target.data.pitch = msg.status.data.pitch;
+		msg.target.data.roll  = msg.status.data.roll;
+		msg.target.data.yaw   = msg.status.data.yaw;
     }
     else if ( widget == button_task_fence ) {
         msg.task.data.num = TASK_FENCE;
