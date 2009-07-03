@@ -35,12 +35,17 @@
 #define POLOLU_SLEEP            10
 //@}
 
-/** @name Neutral positions for the voith servos */
+/** @name Neutral positions for the Voith servos. */
 //@{
 #define POLOLU_CH1_NEUTRAL      2824
 #define POLOLU_CH2_NEUTRAL      3192
 #define POLOLU_CH4_NEUTRAL      3083
 #define POLOLU_CH5_NEUTRAL      3127
+//@}
+
+/** @name The time (ms) it takes for the Pololu to initialize. */
+//@{
+#define POLOLU_INIT_TIME		7000
 //@}
 
 
