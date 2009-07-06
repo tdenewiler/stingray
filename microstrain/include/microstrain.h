@@ -110,6 +110,7 @@
 #endif /* MSTRAIN_SERIAL_DELAY */
 
 #ifndef IMU_ERROR_HEADER
+#define IMU_SUCCESS			1
 #define IMU_ERROR_HEADER	-1
 #define IMU_ERROR_CHECKSUM	-2
 #define IMU_ERROR_LENGTH	-3
@@ -251,6 +252,12 @@ int mstrain_vectors( int fd,
                      float *accel,
                      float *ang_rate
                    );
+
+//! Calculate the checksum for a message.
+//! \param buffer The response buffer with the IMU message data.
+//! \param length The size of the message.
+//! \return 1 on success, error code on failure.
+int mstrain_calc_checksum( char *buffer, int length );
 
 //! Convert two adjacent bytes to an integer value.
 //! Returns an integer value.

@@ -314,7 +314,6 @@ int mstrain_euler_angles( int fd,
 	if ( status > 0 ) {
 		usleep( MSTRAIN_SERIAL_DELAY );
 		status = recv_serial( fd, response, response_length );
-		printf("MSTRAIN_EULER_ANGLES: %d\n", status);
 	}
 
 	if ( status != response_length ) {
@@ -525,7 +524,6 @@ int mstrain_euler_vectors( int fd,
 	if ( status > 0 ) {
 		usleep( MSTRAIN_SERIAL_DELAY );
 		status = recv_serial( fd, response, response_length );
-		//printf("\nMSTRAIN_EULER_VECTORS: %d %x\n\n", status, response[0]);
 		if ( response[0] != IMU_GYRO_STAB_EULER_VECTORS ) {
 			printf("MSTRAIN_EULER_VECTORS: ***** HEADER *****\n");
 			return IMU_ERROR_HEADER;
@@ -558,6 +556,12 @@ int mstrain_euler_vectors( int fd,
 		return IMU_ERROR_CHECKSUM;
 	}
 	
+	/* Try the checksum function. */
+	if( !mstrain_calc_checksum( response, response_length ) ) {
+		printf("MSTRAIN_EULER_VECTORS: ***** CHECKSUM FUNCTION *****\n");
+		//return IMU_ERROR_CHECKSUM;
+	}
+		
 	/* Set argument pointers to the temp values. */
 	*roll = cs_roll * euler_convert_factor;
 	*pitch = cs_pitch * euler_convert_factor;
@@ -673,6 +677,41 @@ int mstrain_remove_tare( int fd )
 
 	return 1;
 } /* end mstrain_remove_tare() */
+
+/******************************************************************************
+ *
+ * Title:       int mstrain_calc_checksum( char *buffer, int length )
+ *
+ * Description: Calculate the checksum for a message..
+ *
+ * Input:       buffer: The response buffer with the IMU message data.
+ * 				length: The size of the message.
+ *
+ * Output:      1 on success, error code on failure.
+ *
+ *****************************************************************************/
+
+int mstrain_calc_checksum( char *buffer, int length )
+{
+	int ii = 0;
+	short int cs_total = 0;
+	
+	/* Set total to the header byte. */
+	cs_total = buffer[0];
+	
+	/* Calculate the values of the remaining bytes in the buffer excluding the
+	 * checksum byte. */
+	for( ii = 1; ii < length - 2; ii++ ) {
+		cs_total += convert2short( &buffer[ii] );
+		ii++;
+	}
+	
+	if( cs_total != convert2short( &buffer[length - 2] ) ) {
+		return IMU_ERROR_CHECKSUM;
+	}
+	
+	return IMU_SUCCESS;
+} /* end mstrain_calc_checksum() */
 
 
 /******************************************************************************
