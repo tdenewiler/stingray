@@ -14,7 +14,8 @@ int main( )
 	char port_name[15];
 	char *imu_port;
 
-	strncpy( port_name, "/dev/ttyS0", 15 );
+	//strncpy( port_name, "/dev/ttyS0", 15 );
+	strncpy( port_name, "/dev/ttyUSB0", 15 );
 	imu_port = port_name;
 
 	/* Baud rate must be 38400 unless IMU is reconfigured. To reconfigure, use
