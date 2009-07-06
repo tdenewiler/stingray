@@ -383,7 +383,7 @@ int main( int argc, char *argv[] )
 					write_time, cs.pitch, cs.roll, cs.yaw, msg.lj.data.pressure,
 					cs.accel[0], cs.accel[1], cs.accel[2],
 					cs.ang_rate[0], cs.ang_rate[1], cs.ang_rate[2] );
-					gettimeofday( &log_start, NULL );
+				gettimeofday( &log_start, NULL );
 			}
 		}
 
