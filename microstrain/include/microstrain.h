@@ -105,6 +105,17 @@
 #define IMU_TARE_BYTE3	0xC5
 //@}
 
+#ifndef MSTRAIN_SERIAL_DELAY
+#define MSTRAIN_SERIAL_DELAY 40000
+#endif /* MSTRAIN_SERIAL_DELAY */
+
+#ifndef IMU_ERROR_HEADER
+#define IMU_ERROR_HEADER	-1
+#define IMU_ERROR_CHECKSUM	-2
+#define IMU_ERROR_LENGTH	-3
+#endif /* IMU_ERROR_HEADER */
+
+
 /******************************
  *
  * Data types
@@ -240,14 +251,6 @@ int mstrain_vectors( int fd,
                      float *accel,
                      float *ang_rate
                    );
-
-//! Set tare for coordinate system.
-//! \return 1 on success, 0 on failure.
-int mstrain_set_tare( int fd );
-
-//! Remove tare for coordinate system.
-//! \return 1 on success, 0 on failure.
-int mstrain_remove_tare( int fd );
 
 //! Convert two adjacent bytes to an integer value.
 //! Returns an integer value.
