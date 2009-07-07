@@ -675,19 +675,19 @@ int pololuControlVertical( int fd,
 	if( left > dzRadius ) {
 		leftNeutral += POLOLU_DZ_NEUTRAL;
 	}
-	if( left < -dzRadius ) {
+	if( left < -1 * dzRadius ) {
 		leftNeutral -= POLOLU_DZ_NEUTRAL;
 	}
 	if( right > dzRadius ) {
 		rightNeutral += POLOLU_DZ_NEUTRAL;
 	}
-	if( right < -dzRadius ) {
+	if( right < -1 * dzRadius ) {
 		rightNeutral -= POLOLU_DZ_NEUTRAL;
 	}
 	if( tail > dzRadius ) {
 		tailNeutral += POLOLU_DZ_NEUTRAL;
 	}
-	if( tail < -dzRadius ) {
+	if( tail < -1 * dzRadius ) {
 		tailNeutral -= POLOLU_DZ_NEUTRAL;
 	}
 
