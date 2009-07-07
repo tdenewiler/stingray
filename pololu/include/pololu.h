@@ -20,7 +20,7 @@
  *
  *****************************/
 
-/** @name Standard values for the Pololu Protocol. */
+/** @name Standard values for the Pololu protocol. */
 //@{
 #define POLOLU_SUCCESS          1
 #define POLOLU_FAILURE          -1
@@ -35,17 +35,47 @@
 #define POLOLU_SLEEP            10
 //@}
 
-/** @name Neutral positions for the Voith servos. */
+/** @name Neutral positions for the Voith servos and motors. */
 //@{
-#define POLOLU_CH1_NEUTRAL      2824
-#define POLOLU_CH2_NEUTRAL      3192
-#define POLOLU_CH4_NEUTRAL      3083
-#define POLOLU_CH5_NEUTRAL      3127
+#define POLOLU_CH1_NEUTRAL      	2824
+#define POLOLU_CH2_NEUTRAL      	3192
+#define POLOLU_CH4_NEUTRAL      	3083
+#define POLOLU_CH5_NEUTRAL      	3127
+#define POLOLU_SERVO_NEUTRAL		63.5
+#define POLOLU_DEADZONE				0.1
+#define POLOLU_DZ_NEUTRAL			4
+#define POLOLU_NEUTRAL_GAIN			0.605
+#define POLOLU_SERVO_GAIN			0.2
+#define POLOLU_LEFT_ANGLE_OFFSET	230
+#define POLOLU_RIGHT_ANGLE_OFFSET	40
+#define POLOLU_VOITH_GAIN			0.64
+#define POLOLU_VOITH_NEUTRAL		63
+#define POLOLU_SERVO_BOUND			100
 //@}
 
 /** @name The time (ms) it takes for the Pololu to initialize. */
 //@{
-#define POLOLU_INIT_TIME		7000000
+#define POLOLU_INIT_TIME	7000000
+//@}
+
+/** @name The number of bytes expected to be sent for vertical and Voith commands. */
+//@{
+#define POLOLU_BYTES_VERTICAL	15
+#define POLOLU_BYTES_VOITH		30
+//@}
+
+/** @name The channel assignments for the servos and motors. */
+//@{
+#define POLOLU_LEFT_SERVO1			1
+#define POLOLU_LEFT_SERVO2			2
+#define POLOLU_RIGHT_SERVO1			4
+#define POLOLU_RIGHT_SERVO2			5
+#define POLOLU_RIGHT_VOITH_MOTOR	0		
+#define POLOLU_LEFT_VOITH_MOTOR		3
+#define POLOLU_LEFT_WING_MOTOR		7
+#define POLOLU_RIGHT_WING_MOTOR		8
+#define POLOLU_TAIL_MOTOR			10
+#define POLOLU_DROPPER_SERVO		11
 //@}
 
 
@@ -153,7 +183,7 @@ int pololuInitializeChannels( int fd );
 //! \param thrust between -100 and 100
 //! \param yawTorque between -100 and 100
 //! \return A value that indicates success or failure.
-int controlVoiths( int fd,
+int pololuControlVoiths( int fd,
                    int voithThrust,
                    float thrustAngle,
                    int thrust,
@@ -166,7 +196,7 @@ int controlVoiths( int fd,
 //! \param rollTorque between 0 and 100
 //! \param pitchTorque between 0 and 100
 //! \return A value that indicates success or failure.
-int controlVertical( int fd,
+int pololuControlVertical( int fd,
                      int vertForce,
                      int rollTorque,
                      int pitchTorque

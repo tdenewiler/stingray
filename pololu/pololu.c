@@ -517,7 +517,7 @@ int pololuInitializeChannels( int fd )
 
 /******************************************************************************
  *
- * Title:   int controlVoiths( int voithThrust,
+ * Title:   int pololuControlVoiths( int voithThrust,
  *                             float thrustAngle,
  *                             int thrust,
  *                             int yawTorque
@@ -535,92 +535,75 @@ int pololuInitializeChannels( int fd )
  * Output:      1 for success and -1 for failure
  *
  *****************************************************************************/
-int controlVoiths( int fd,
+int pololuControlVoiths( int fd,
                    int voithThrust,
                    float thrustAngle,
                    int thrust,
                    int yawTorque
                  )
 {
-	// voithThrust: between 0 and 100
-	// thrustAngle: between 0 and 360
-	// thrust: between -100 and 100
-	// yawTorque: between -100 and 100
-
-	// check bounds on all inputs
-	// if bounds don't check then we return -1
-	if ( (fd < 0) ||
-	        (voithThrust < 0) ||
-	        (voithThrust > 100) ||
-	        (thrust < -100) ||
-	        (thrust > 100) ||
-	        (yawTorque < -100) ||
-	        (yawTorque > 100) ) {
+	/* The forces need to be in the range [-100,100]. They will then be scaled
+	 * to the range [0,128] before being sent to the Pololu. If any force is
+	 * outside the acceptable range then an error code will be returned. */
+	if( (fd < 0) ||
+	    (voithThrust < 0) ||
+	    (voithThrust > POLOLU_SERVO_BOUND) ||
+	    (thrust < -1 * POLOLU_SERVO_BOUND) ||
+	    (thrust > POLOLU_SERVO_BOUND) ||
+	    (yawTorque < -1 * POLOLU_SERVO_BOUND) ||
+	    (yawTorque > POLOLU_SERVO_BOUND) ) {
 		return POLOLU_FAILURE;
 	}
-	float angle = 0;
 
-	// unchanging
+	/* Set up angle variables. */
+	int bytes = 0;
+	float angle = 0;
 	angle = thrustAngle; // * ( M_PI / 180 );
 
-	// angle offsets are between 0 and 360
-	// 250 original
-	float leftAngleOffset = 230 * ( M_PI / 180 );
+	/* Set up the angle offset in the range [0,360]. */
+	float leftAngleOffset = POLOLU_LEFT_ANGLE_OFFSET * ( M_PI / 180 );
+	float rightAngleOffset = POLOLU_RIGHT_ANGLE_OFFSET * ( M_PI / 180 );
 
-	// 40 original
-	float rightAngleOffset = 40 * ( M_PI / 180 );
-
-	// radius1 and radius2 should be between -100 and 100
+	/* Calculate the radius values for where the Voith pins should be. */
 	int radius1 = yawTorque + thrust;
 	int radius2 = yawTorque - thrust;
 
-	// the commands to send to the servos
-	int leftCmd1 = (int)( 63.5 + 0.2 * radius1 * cos(angle + leftAngleOffset) );
-	int leftCmd2 = (int)( 63.5 + 0.2 * radius1 * sin(angle + leftAngleOffset) );
-	int rightCmd1 = (int)( 63.5 - 0.2 * radius2 * cos(angle + rightAngleOffset) );
-	int rightCmd2 = (int)( 63.5 - 0.2 * radius2 * sin(angle + rightAngleOffset) );
+	/* Calculate the commands to send to the servos to control Voith direction. */
+	int leftCmd1  = (int)( POLOLU_SERVO_NEUTRAL + POLOLU_SERVO_GAIN * radius1 * cos(angle + leftAngleOffset) );
+	int leftCmd2  = (int)( POLOLU_SERVO_NEUTRAL + POLOLU_SERVO_GAIN * radius1 * sin(angle + leftAngleOffset) );
+	int rightCmd1 = (int)( POLOLU_SERVO_NEUTRAL - POLOLU_SERVO_GAIN * radius2 * cos(angle + rightAngleOffset) );
+	int rightCmd2 = (int)( POLOLU_SERVO_NEUTRAL - POLOLU_SERVO_GAIN * radius2 * sin(angle + rightAngleOffset) );
 
-	// I think integer arithmatic should work -AM
-	int scaledVoithThrust = ( voithThrust * 64 ) / 100 + 63;
+	/* Scale the Voith thrust value. */
+	int scaledVoithThrust = voithThrust * POLOLU_VOITH_GAIN + POLOLU_VOITH_NEUTRAL;
 
-	// now set all of the positions
-	// there should be 5 bytes sent for each command
-	int bytes = 0;
+	/* Send the commands to the Pololu to control servo and motor positions. */
+	bytes += pololuSetPosition7Bit( fd, POLOLU_LEFT_SERVO1, leftCmd1 );
+	bytes += pololuSetPosition7Bit( fd, POLOLU_LEFT_SERVO2, leftCmd2 );
+	bytes += pololuSetPosition7Bit( fd, POLOLU_RIGHT_SERVO1, rightCmd1 );
+	bytes += pololuSetPosition7Bit( fd, POLOLU_RIGHT_SERVO2, rightCmd2 );
+	bytes += pololuSetPosition7Bit( fd, POLOLU_LEFT_VOITH_MOTOR, scaledVoithThrust );
+	bytes += pololuSetPosition7Bit( fd, POLOLU_RIGHT_VOITH_MOTOR, scaledVoithThrust );
 
-	bytes += pololuSetPosition7Bit( fd, 1, leftCmd1 );
-	bytes += pololuSetPosition7Bit( fd, 2, leftCmd2 );
-	bytes += pololuSetPosition7Bit( fd, 4, rightCmd1 );
-	bytes += pololuSetPosition7Bit( fd, 5, rightCmd2 );
-	bytes += pololuSetPosition7Bit( fd, 0, scaledVoithThrust );
-	bytes += pololuSetPosition7Bit( fd, 3, scaledVoithThrust );
-
-	// check the number of bytes sent and return success or failure
-	if ( bytes == 30 ) {
-		//fprintf( stderr, "DEBUG controlVoiths SUCCESS, L1 = %d, L2 = %d, R1 = %d, R2 = %d, voithThrust = %d\n"
-		         //, leftCmd1
-		         //, leftCmd2
-		         //, rightCmd1
-		         //, rightCmd2
-		         //, voithThrust
-		       //);
+	/* Check the number of bytes sent and return success or failure. There are
+	 * 5 bytes for each command --> 5 * 6 = 30. */
+	if( bytes == POLOLU_BYTES_VOITH ) {
 		return POLOLU_SUCCESS;
 	}
-	else {
-		//fprintf( stderr, "DEBUG controlVoiths ERROR, %d bytes sent.\n", bytes );
-		return POLOLU_FAILURE;
-	}
-} /* end controlVoiths() */
+
+	return POLOLU_FAILURE;
+} /* end pololuControlVoiths() */
 
 
 /******************************************************************************
  *
- * Title:   int controlVertical( int fd,
+ * Title:   int pololuControlVertical( int fd,
  *                               int vertForce,
  *                               int rollTorque,
  *                               int pitchTorque
  *                              )
  *
- * Description: The is a higher level function that controls the vertical
+ * Description: This is a higher level function that controls the vertical
  *              thrusters together.
  *
  * Input:
@@ -629,79 +612,98 @@ int controlVoiths( int fd,
  *
  *****************************************************************************/
 
-int controlVertical( int fd,
+int pololuControlVertical( int fd,
                      int vertForce,
                      int rollTorque,
                      int pitchTorque
                    )
 {
-	// between -100 to 100 and will be scaled to 0-128
-	// check bounds on all inputs
-	// if bounds don't check then we return -1
-	if ( (fd < 0) ||
-	        (vertForce < -100) ||
-	        (vertForce > 100) ||
-	        (rollTorque < -100) ||
-	        (rollTorque > 100) ||
-	        (pitchTorque < -100) ||
-	        (pitchTorque > 100) ) {
+	/* The forces need to be in the range [-100,100]. They will then be scaled
+	 * to the range [0,128] before being sent to the Pololu. If any force is
+	 * outside the acceptable range then an error code will be returned. */
+	if( (fd < 0) ||
+	    (vertForce < -1 * POLOLU_SERVO_BOUND) ||
+	    (vertForce > POLOLU_SERVO_BOUND) ||
+	    (rollTorque < -1 * POLOLU_SERVO_BOUND) ||
+	    (rollTorque > POLOLU_SERVO_BOUND) ||
+	    (pitchTorque < -1 * POLOLU_SERVO_BOUND) ||
+	    (pitchTorque > POLOLU_SERVO_BOUND) ) {
 		return POLOLU_FAILURE;
 	}
 
+	/* Set up motor command variables. */
+	int bytes = 0;
 	int leftCmd = 0;
 	int rightCmd = 0;
 	int tailCmd = 0;
-	float left, right, tail;
+	float left = 0;
+	float right = 0;
+	float tail = 0;
 
-	// calculate the servo commands
+	/* Set up the motor dead zone variables. */
+	float dzRadius = POLOLU_DEADZONE;
+	float leftNeutral = POLOLU_SERVO_NEUTRAL;
+	float rightNeutral = POLOLU_SERVO_NEUTRAL;
+	float tailNeutral = POLOLU_SERVO_NEUTRAL;
+
+	/* Calculate the servo commands. */
 	left = vertForce + rollTorque;
 	right = vertForce - rollTorque;
-
-	// check bounds
-	if ( left > 100 ) left = 100;
-	if ( left < -100 ) left = -100;
-	if ( right > 100 ) right = 100;
-	if ( right < -100 ) right = -100;
-
-	usleep( POLOLU_SLEEP );
 	tail = pitchTorque;
 
-	// account for dead zone here
-	float dzRadius = 0.1;
-	float leftNeutral = 63.5;
-	float rightNeutral = 63.5;
-	float tailNeutral = 63.5;
+	/* Check the bounds on the servo commands. */
+	if( left > POLOLU_SERVO_BOUND ) {
+		left = POLOLU_SERVO_BOUND;
+	}
+	if( left < -1 * POLOLU_SERVO_BOUND ) {
+		left = -1 * POLOLU_SERVO_BOUND;
+	}
+	if( right > POLOLU_SERVO_BOUND ) {
+		right = POLOLU_SERVO_BOUND;
+	}
+	if( right < -1 * POLOLU_SERVO_BOUND ) {
+		right = -1 * POLOLU_SERVO_BOUND;
+	}
 
-	// [-0.1,0.1] is our new dead zone
-	if ( left > dzRadius ) leftNeutral = 67.5;
-	if ( left < -dzRadius ) leftNeutral = 59.5;
-	if ( right > dzRadius ) rightNeutral = 67.5;
-	if ( right < -dzRadius ) rightNeutral = 59.5;
-	if ( tail > dzRadius ) tailNeutral = 67.5;
-	if ( tail < -dzRadius ) tailNeutral = 59.5;
+	/* Need a very short sleep before sending out commands. */
+	usleep( POLOLU_SLEEP );
 
-	leftCmd = (int)( leftNeutral + 0.605 * left );
-	rightCmd = (int)( rightNeutral + 0.605 * right );
-	tailCmd = (int)( tailNeutral + 0.605 * tail );
+	/* The range [-0.1,0.1] is our new dead zone. */
+	if( left > dzRadius ) {
+		leftNeutral += POLOLU_DZ_NEUTRAL;
+	}
+	if( left < -dzRadius ) {
+		leftNeutral -= POLOLU_DZ_NEUTRAL;
+	}
+	if( right > dzRadius ) {
+		rightNeutral += POLOLU_DZ_NEUTRAL;
+	}
+	if( right < -dzRadius ) {
+		rightNeutral -= POLOLU_DZ_NEUTRAL;
+	}
+	if( tail > dzRadius ) {
+		tailNeutral += POLOLU_DZ_NEUTRAL;
+	}
+	if( tail < -dzRadius ) {
+		tailNeutral -= POLOLU_DZ_NEUTRAL;
+	}
 
-	// now set all of the positions
-	// there should be 5 bytes sent for each command
-	int bytes = 0;
-	bytes += pololuSetPosition7Bit( fd, 7, leftCmd );
-	bytes += pololuSetPosition7Bit( fd, 8, rightCmd );
-	bytes += pololuSetPosition7Bit( fd, 10, tailCmd );
+	/* Actually calculate the values to send to the Pololu now that we have the
+	 * dead zone accounted for. */
+	leftCmd = (int)( leftNeutral + POLOLU_NEUTRAL_GAIN * left );
+	rightCmd = (int)( rightNeutral + POLOLU_NEUTRAL_GAIN * right );
+	tailCmd = (int)( tailNeutral + POLOLU_NEUTRAL_GAIN * tail );
 
-	// check the number of bytes sent and return success or failure
-	if ( bytes == 15 ) {
-		//fprintf( stderr, "DEBUG: controlVertical SUCCESS, L = %d, R = %d, T = %d\n",
-		         //leftCmd,
-		         //rightCmd,
-		         //tailCmd
-		       //);
+	/* Send the commands to the Pololu to control servo and motor positions. */
+	bytes += pololuSetPosition7Bit( fd, POLOLU_LEFT_WING_MOTOR, leftCmd );
+	bytes += pololuSetPosition7Bit( fd, POLOLU_RIGHT_WING_MOTOR, rightCmd );
+	bytes += pololuSetPosition7Bit( fd, POLOLU_TAIL_MOTOR, tailCmd );
+
+	/* Check the number of bytes sent and return success or failure. There are
+	 * 5 bytes for each command --> 5 * 3 = 15. */
+	if( bytes == POLOLU_BYTES_VERTICAL ) {
 		return POLOLU_SUCCESS;
 	}
-	else {
-		//fprintf( stderr, "DEBUG: controlVertical ERROR, bytes = %d\n", bytes );
-		return POLOLU_FAILURE;
-	}
-} /* end controlVertical() */
+
+	return POLOLU_FAILURE;
+} /* end pololuControlVertical() */
