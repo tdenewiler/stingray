@@ -46,6 +46,10 @@
 #define MAX_PORT_LEN 8
 #endif /* MAX_PORT_LEN */
 
+#ifndef SSA_SLEEP
+#define SSA_SLEEP 500000
+#endif /* SSA_SLEEP */
+
 
 /******************************
 **

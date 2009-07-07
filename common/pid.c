@@ -260,12 +260,9 @@ void pid_loop( int pololu_fd,
 							   pid->depth.kd * pid->depth.derr;
 
 		/* Check bounds. */
-		if ( fabsf( pid->vertical_thrust ) > PID_VERTICAL_THRUST ) {
-			pid->vertical_thrust = util_sign_value( pid->vertical_thrust ) * PID_VERTICAL_THRUST;
-		}
-
 		if ( ( fabsf( pid->vertical_thrust ) + fabsf( pid->roll_torque ) ) > PID_TOTAL_VERTICAL_THRUST ) {
-			pid->vertical_thrust = PID_TOTAL_VERTICAL_THRUST - fabsf( pid->roll_torque );
+			pid->vertical_thrust = util_sign_value( pid->vertical_thrust ) * 
+				(PID_TOTAL_VERTICAL_THRUST - fabsf(pid->roll_torque) );
 		}
 
 		/* Control depth. */
