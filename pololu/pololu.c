@@ -495,6 +495,9 @@ int pololuInitializeChannels( int fd )
 	result += pololuSetParameters( fd, 5, 1, 1, 15 );
 	result += pololuSetNeutral( fd, 5, POLOLU_CH5_NEUTRAL );
 	result += pololuSetPosition7Bit( fd, 5, 63 );
+	result += pololuSetParameters( fd, 15, 1, 1, 15 );
+	result += pololuSetNeutral( fd, 15, POLOLU_DROPPER_NEUTRAL );
+	result += pololuSetPosition7Bit( fd, 15, 63 );
 
 	// the total number of bytes sent
 	// 5 for each normal command and 6 for each pololuSetNeutral command
