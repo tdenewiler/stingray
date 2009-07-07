@@ -143,6 +143,7 @@ int main( int argc, char *argv[] )
 	//float accel_count = 0.0;
 	//float accel_inc = 0.1;
 	int old_task = 0;
+	int old_dropper = 0;
 	CvPoint3D32f loc;
 
 	struct timeval vision_time = {0, 0};
@@ -290,6 +291,12 @@ int main( int argc, char *argv[] )
 			if ( recv_bytes > 0 ) {
 				recv_buf[recv_bytes] = '\0';
 				messages_decode( server_fd, recv_buf, &msg, recv_bytes );
+			}
+			if( old_dropper != msg.client.data.dropper ) {
+				if ( nav_fd > 0 ) {
+					messages_send( nav_fd, CLIENT_MSGID, &msg );
+				}
+				old_dropper = msg.client.data.dropper;
 			}
 		}
 

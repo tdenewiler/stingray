@@ -387,9 +387,9 @@ int main( int argc, char *argv[] )
         //}
 
         /* Send dropper servo command. Check that Pololu is initialized. */
-        //if ( (pololu_fd > 0) && (pololu_initialized) ) {
-            //status = pololuSetPosition7Bit( pololu_fd, POLOLU_DROPPER_SERVO, msg.client.data.dropper );
-        //}
+        if ( (pololu_fd > 0) && (pololu_initialized) ) {
+            status = pololuSetPosition7Bit( pololu_fd, POLOLU_DROPPER_SERVO, msg.client.data.dropper );
+        }
 
         /* Check for assisted teleop commands. */
         if ( msg.target.data.mode == MANUAL ) {
