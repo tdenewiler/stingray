@@ -25,16 +25,16 @@ int config_labjack();
 // returns 0 for initialization failure, 1 for success
 int init_labjack()
 {
-	if ( ( hDevice = openUSBConnection( -1 ) ) == NULL )
+	if( ( hDevice = openUSBConnection( -1 ) ) == NULL )
 		return 0;
 
 	// how is the labjack pre-configured?
-	if ( getCalibrationInfo( hDevice, &caliInfo ) < 0 ) {
+	if( getCalibrationInfo( hDevice, &caliInfo ) < 0 ) {
 		return 0;
 	}
 
 	// configure the labjack
-	if ( config_labjack() != 0 ) {
+	if( config_labjack() != 0 ) {
 		return 0;
 	}
 
@@ -82,8 +82,8 @@ int config_labjack()
 	extendedChecksum( sendBuff, 12 );
 
 	//Sending command to U3
-	if ( ( sendChars = LJUSB_BulkWrite( hDevice, U3_PIPE_EP1_OUT, sendBuff, 12 ) ) < 12 ) {
-		if ( sendChars == 0 )
+	if( ( sendChars = LJUSB_BulkWrite( hDevice, U3_PIPE_EP1_OUT, sendBuff, 12 ) ) < 12 ) {
+		if( sendChars == 0 )
 			printf( "%s: write failed\n", fName );
 		else
 			printf( "%s: did not write all of the buffer\n", fName );
@@ -92,8 +92,8 @@ int config_labjack()
 	}
 
 	//Reading response from U3
-	if ( ( recChars = LJUSB_BulkRead( hDevice, U3_PIPE_EP1_IN, recBuff, 12 ) ) < 12 ) {
-		if ( recChars == 0 )
+	if( ( recChars = LJUSB_BulkRead( hDevice, U3_PIPE_EP1_IN, recBuff, 12 ) ) < 12 ) {
+		if( recChars == 0 )
 			printf( "%s: read failed\n", fName );
 		else
 			printf( "%s: did not read all of the buffer\n", fName );
@@ -103,31 +103,31 @@ int config_labjack()
 
 	checksumTotal = extendedChecksum16( recBuff, 12 );
 
-	if ( ( uint8 )( ( checksumTotal / 256 ) & 0xff ) != recBuff[5] ) {
+	if( ( uint8 )( ( checksumTotal / 256 ) & 0xff ) != recBuff[5] ) {
 		printf( "%s: read buffer has bad checksum16(MSB)\n", fName );
 		return -1;
 	}
-	if ( ( uint8 )( checksumTotal & 0xff ) != recBuff[4] ) {
+	if( ( uint8 )( checksumTotal & 0xff ) != recBuff[4] ) {
 		printf( "%s: read buffer has bad checksum16(LBS)\n", fName );
 		return -1;
 	}
-	if ( extendedChecksum8( recBuff ) != recBuff[0] ) {
+	if( extendedChecksum8( recBuff ) != recBuff[0] ) {
 		printf( "%s: read buffer has bad checksum8\n", fName );
 		return -1;
 	}
-	if ( recBuff[1] != ( uint8 )( 0xF8 ) || recBuff[2] != ( uint8 )( 0x03 ) || recBuff[3] != ( uint8 )( 0x0B ) ) {
+	if( recBuff[1] != ( uint8 )( 0xF8 ) || recBuff[2] != ( uint8 )( 0x03 ) || recBuff[3] != ( uint8 )( 0x0B ) ) {
 		printf( "%s: read buffer has wrong command bytes\n", fName );
 		return -1;
 	}
-	if ( recBuff[6] != 0 ) {
+	if( recBuff[6] != 0 ) {
 		printf( "%s: read buffer received errorcode %d\n", fName, recBuff[6] );
 		return -1;
 	}
-	if ( recBuff[8] != timerCounterConfig ) {
+	if( recBuff[8] != timerCounterConfig ) {
 		printf( "%s: TimerCounterConfig did not get set correctly\n", fName );
 		return -1;
 	}
-	if ( recBuff[10] != fioAnalog && recBuff[10] != ( fioAnalog | ( 0x0F ) ) ) {
+	if( recBuff[10] != fioAnalog && recBuff[10] != ( fioAnalog | ( 0x0F ) ) ) {
 		printf( "%s: FIOAnalog(%d) did not set correctly\n", fName, recBuff[10] );
 		return -1;
 	}
@@ -187,8 +187,8 @@ int query_labjack()
 	extendedChecksum( sendBuff, 20 );
 
 	//Sending command to U3
-	if ( ( sendChars = LJUSB_BulkWrite( hDevice, U3_PIPE_EP1_OUT, sendBuff, 20 ) ) < 20 ) {
-		if ( sendChars == 0 )
+	if( ( sendChars = LJUSB_BulkWrite( hDevice, U3_PIPE_EP1_OUT, sendBuff, 20 ) ) < 20 ) {
+		if( sendChars == 0 )
 			printf( "%s: write failed\n", fName );
 		else
 			printf( "%s: did not write all of the buffer\n", fName );
@@ -197,8 +197,8 @@ int query_labjack()
 	}
 
 	//Reading response from U3 (9 + data)
-	if ( ( recChars = LJUSB_BulkRead( hDevice, U3_PIPE_EP1_IN, recBuff, 18 ) ) < 18 ) {
-		if ( recChars == 0 ) {
+	if( ( recChars = LJUSB_BulkRead( hDevice, U3_PIPE_EP1_IN, recBuff, 18 ) ) < 18 ) {
+		if( recChars == 0 ) {
 			printf( "%s: read failed\n", fName );
 			printf( "%s: got response of size %d containing |%s|\n", fName, recChars, recBuff );
 			return -1;
@@ -207,34 +207,34 @@ int query_labjack()
 			printf( "%s: did not read all of the expected buffer\n", fName );
 	}
 
-	if ( recChars < 10 ) {
+	if( recChars < 10 ) {
 		printf( "%s: response is not large enough\n", fName );
 		return -1;
 	}
 
 	checksumTotal = extendedChecksum16( recBuff, recChars );
 
-	if ( ( uint8 )( ( checksumTotal / 256 ) & 0xff ) != recBuff[5] ) {
+	if( ( uint8 )( ( checksumTotal / 256 ) & 0xff ) != recBuff[5] ) {
 		printf( "%s: read buffer has bad checksum16(MSB)\n", fName );
 		return -1;
 	}
 
-	if ( ( uint8 )( checksumTotal & 0xff ) != recBuff[4] ) {
+	if( ( uint8 )( checksumTotal & 0xff ) != recBuff[4] ) {
 		printf( "%s: read buffer has bad checksum16(LBS)\n", fName );
 		return -1;
 	}
 
-	if ( extendedChecksum8( recBuff ) != recBuff[0] ) {
+	if( extendedChecksum8( recBuff ) != recBuff[0] ) {
 		printf( "%s: read buffer has bad checksum8\n", fName );
 		return -1;
 	}
 
-	if ( recBuff[1] != ( uint8 )( 0xF8 ) ||  recBuff[3] != ( uint8 )( 0x00 ) ) {
+	if( recBuff[1] != ( uint8 )( 0xF8 ) ||  recBuff[3] != ( uint8 )( 0x00 ) ) {
 		printf( "%s: read buffer has wrong command bytes \n", fName );
 		return -1;
 	}
 
-	if ( recBuff[6] != 0 ) {
+	if( recBuff[6] != 0 ) {
 		printf( "%s: received errorcode %d for frame %d ", fName, recBuff[6], recBuff[7] );
 
 		switch ( recBuff[7] ) {

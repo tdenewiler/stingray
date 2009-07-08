@@ -40,13 +40,13 @@ int pololuSetup( char *portname,
 	int fd = -1;
 	int result = 0;
 
-	if ( portname != NULL ) {
+	if( portname != NULL ) {
 		fd = setup_serial( portname, baud );
 	}
 
 	// if fd<0 setup_serial failed
 	// NOTE THAT THIS IS FAILURE VALUE FROM setup_serial
-	if ( fd < 0 ) {
+	if( fd < 0 ) {
 		return fd;
 	}
 	else {
@@ -54,7 +54,7 @@ int pololuSetup( char *portname,
 		result = pololuInitializeChannels( fd );
 		// if the channels don't initialize then failure
 
-		if ( result < 0 ) {
+		if( result < 0 ) {
 			close( fd );
 			return POLOLU_FAILURE;
 		}
@@ -98,7 +98,7 @@ int pololuSetParameters( int fd,
 	// check ranges
 	int result = 0;
 
-	if ( (fd >= 0) &&
+	if( (fd >= 0) &&
 	        (channel >= 0) &&
 	        (channel <= 15) &&
 	        (range >= 0)
@@ -120,12 +120,12 @@ int pololuSetParameters( int fd,
 		// setup some masks
 		unsigned char bit5 = 0; // 0 is default for forward in protocol
 
-		if ( !direction ) {
+		if( !direction ) {
 			bit5 = 32;  // 16 is reverse
 		}
 
 		unsigned char bit6 = 0; // 0 is for off
-		if ( channelOn ) {
+		if( channelOn ) {
 			bit6 = 64;  // 32 is for on
 		}
 
@@ -172,7 +172,7 @@ int pololuSetSpeed( int fd,
 	int result = 0;
 	// check ranges
 
-	if ( (fd >= 0) &&
+	if( (fd >= 0) &&
 	        (channel >= 0) &&
 	        (channel <= 15) &&
 	        (speed >= 0) &&
@@ -230,7 +230,7 @@ int pololuSetPosition7Bit( int fd,
 	// check ranges
 	int result = 0;
 
-	if ( (fd >= 0) &&
+	if( (fd >= 0) &&
 	        (channel >= 0) &&
 	        (channel <= 15) &&
 	        (position >= 0) &&
@@ -288,7 +288,7 @@ int pololuSetPosition8Bit( int fd,
 	// check ranges
 	int result = 0;
 
-	if ( (fd >= 0) &&
+	if( (fd >= 0) &&
 	        (channel >= 0) &&
 	        (channel <= 15) &&
 	        (position >= 0) &&
@@ -308,7 +308,7 @@ int pololuSetPosition8Bit( int fd,
 		// [128 64 32 16 8 4 2 1]
 		// 0th bit of msg[4] is 7th bit of position
 
-		if ( p & 128 ) {
+		if( p & 128 ) {
 			msg[4] = 1;
 		}
 		else {
@@ -354,7 +354,7 @@ int pololuSetPositionAbsolute( int fd,
 	// check ranges
 	int result = 0;
 
-	if ( (fd >= 0) &&
+	if( (fd >= 0) &&
 	        (channel >= 0) &&
 	        (channel <= 15) &&
 	        (position >= 500) &&
@@ -416,7 +416,7 @@ int pololuSetNeutral( int fd,
 	// check ranges
 	int result = 0;
 
-	if ( (fd >= 0) &&
+	if( (fd >= 0) &&
 	        (channel >= 0) &&
 	        (channel <= 15) &&
 	        (position >= 500) &&
@@ -463,7 +463,7 @@ int pololuInitializeChannels( int fd )
 	int result = 0;
 
 	// if invalid fd return failure
-	if ( fd < 0 ) {
+	if( fd < 0 ) {
 		return POLOLU_FAILURE;
 	}
 
@@ -498,7 +498,7 @@ int pololuInitializeChannels( int fd )
 
 	// the total number of bytes sent
 	// 5 for each normal command and 6 for each pololuSetNeutral command
-	if ( result == 139 ) {
+	if( result == 139 ) {
 		result = POLOLU_SUCCESS;
 	}
 	else {

@@ -72,7 +72,7 @@ int vision_find_dot( int *dotx,
 
 	/* Capture a new source image. */
     srcImg = cvQueryFrame( cap );
-    if ( !srcImg ) {
+    if( !srcImg ) {
         return 0;
     }
 	//rotateImg = cvCreateImage( cvGetSize( srcImg ), IPL_DEPTH_8U, 3 );
@@ -157,7 +157,7 @@ int vision_find_pipe( int *pipex,
     center.y = -1;
 
     srcImg = cvQueryFrame( cap );
-    if ( !srcImg ) {
+    if( !srcImg ) {
         return 0;
     }
 
@@ -228,28 +228,28 @@ double vision_get_bearing( IplImage *inputBinImg )
     int j = 0;
 
     /* Initialize edge arrays, mset may be better. */
-    for ( i = 0; i < imHeight; i++ ) {
+    for( i = 0; i < imHeight; i++ ) {
         leftEdge[i][1] = 0;
         leftEdge[i][2] = 0;
         rightEdge[i][1] = 0;
         rightEdge[i][2] = 0;
     }
-    for ( i = 0; i < imHeight - 240; i++ ) {
+    for( i = 0; i < imHeight - 240; i++ ) {
         /* Scan through each line of image and look for first non zero pixel
          * then get the (i,j) pixel value. */
-        while ( (cvGet2D(inputBinImg, i, j).val[0] < 1) && (j<imWidth - 1) ) {
+        while( (cvGet2D(inputBinImg, i, j).val[0] < 1) && (j<imWidth - 1) ) {
             j++;
         }
         /* If we exit before getting to end of row, edge exists. */
-        if ( (j < imWidth - 1) && (j > 0) ) {
+        if( (j < imWidth - 1) && (j > 0) ) {
             leftEdge[leftEdgeCount][1] = i;
             leftEdge[leftEdgeCount][2] = j;
             leftEdgeCount++;
             /* Continue scanning to find right edge. */
-            while ( (cvGet2D(inputBinImg, i, j).val[0] > 0) && (j < imWidth - 1) ) {
+            while( (cvGet2D(inputBinImg, i, j).val[0] > 0) && (j < imWidth - 1) ) {
                 j++;
             }
-            if ( j < imWidth - 2 ) { /* Scan didn't get to end of image so
+            if( j < imWidth - 2 ) { /* Scan didn't get to end of image so
             						  * right edge exists. */
                 rightEdge[rightEdgeCount][1] = i;
                 rightEdge[rightEdgeCount][2] = j;
@@ -259,7 +259,7 @@ double vision_get_bearing( IplImage *inputBinImg )
         j = 0;
     }
 
-    if ( (leftEdgeCount < edgeThreshold) && (rightEdgeCount < edgeThreshold) ) {
+    if( (leftEdgeCount < edgeThreshold) && (rightEdgeCount < edgeThreshold) ) {
         return 0.0;
     }
 
@@ -270,14 +270,14 @@ double vision_get_bearing( IplImage *inputBinImg )
     storage = cvCreateMemStorage( 0 );
     point_seq = cvCreateSeq( CV_32FC2, sizeof(CvSeq), sizeof(CvPoint2D32f), storage );
 
-    if ( leftEdgeCount > edgeThreshold ) {
-        for ( i = 0; i < leftEdgeCount; i++ ) {
+    if( leftEdgeCount > edgeThreshold ) {
+        for( i = 0; i < leftEdgeCount; i++ ) {
             cvSeqPush( point_seq, &cvPoint2D32f(leftEdge[i][1],leftEdge[i][2]) );
         }
         cvFitLine( point_seq, CV_DIST_L2, 0, 0.01, 0.01, left_line );
         mL = left_line[1] / left_line[0];
         LError = cvCreateMat( 1, leftEdgeCount - 1, CV_32SC1 );
-        for ( k = 0; k < leftEdgeCount - 1; k++ ) {
+        for( k = 0; k < leftEdgeCount - 1; k++ ) {
             /* Save errors in vector LError. */
             cvSetReal2D( LError, 0, k, (double)(leftEdge[k][2])
                 - (double)(mL * (leftEdge[k][1] - left_line[2]) + left_line[3]) );
@@ -287,14 +287,14 @@ double vision_get_bearing( IplImage *inputBinImg )
         cvClearSeq( point_seq );
     }
 
-    if ( rightEdgeCount > edgeThreshold ) {
-        for ( i = 0; i < rightEdgeCount; i++ ) {
+    if( rightEdgeCount > edgeThreshold ) {
+        for( i = 0; i < rightEdgeCount; i++ ) {
             cvSeqPush( point_seq, &cvPoint2D32f(rightEdge[i][1],rightEdge[i][2]) );
         }
         cvFitLine( point_seq, CV_DIST_L2, 0, 0.01, 0.01, right_line );
         mR = right_line[1] / right_line[0];
         RError = cvCreateMat( 1, rightEdgeCount - 1, CV_32SC1 );
-        for ( k = 0; k < rightEdgeCount - 1; k++ ) {
+        for( k = 0; k < rightEdgeCount - 1; k++ ) {
             cvSetReal2D( RError, 0, k, (double)(rightEdge[k][2])
                 - (double)(mR* (rightEdge[k][1]-right_line[2]) + right_line[3]) );
         }
@@ -303,16 +303,16 @@ double vision_get_bearing( IplImage *inputBinImg )
     }
 
     /* If estimate is really poor, do not update bearing. */
-    if ( (Right_STD.val[0] > maxSTD) && (Left_STD.val[0] > maxSTD) ) {
+    if( (Right_STD.val[0] > maxSTD) && (Left_STD.val[0] > maxSTD) ) {
         return m;
     }
 
     /* Only a left edge, ignore right. */
-    if ( rightEdgeCount <= edgeThreshold ) {
+    if( rightEdgeCount <= edgeThreshold ) {
         m = mL;
     }
     /* Only a right edge, ignore left. */
-    else if ( leftEdgeCount <= edgeThreshold ) {
+    else if( leftEdgeCount <= edgeThreshold ) {
         m = mR;
     }
     /* Both edges exist, scale each estimate by variances. */
@@ -362,14 +362,14 @@ CvPoint vision_find_centroid( IplImage *binImage, int thresh )
     bool detected = FALSE;
 
     /* Find centroid. */
-    for ( ii = ( binImage->roi == NULL ? 0 : ( unsigned int )binImage->roi->xOffset );
+    for( ii = ( binImage->roi == NULL ? 0 : ( unsigned int )binImage->roi->xOffset );
             ii < ( binImage->roi == NULL ? ( unsigned int )width : ( unsigned int )( binImage->roi->xOffset + binImage->roi->width ) );
             ii++ ) {
-        for ( jj = ( binImage->roi == NULL ? 0 : ( unsigned int )binImage->roi->yOffset );
+        for( jj = ( binImage->roi == NULL ? 0 : ( unsigned int )binImage->roi->yOffset );
                 jj < ( binImage->roi == NULL ? ( unsigned int )height : ( unsigned int )( binImage->roi->yOffset + binImage->roi->height ) );
                 jj++ ) {
-            if ( binImage->imageData[ii + jj * width] != 0 ) {
-                if ( binImage->roi == NULL ) {
+            if( binImage->imageData[ii + jj * width] != 0 ) {
+                if( binImage->roi == NULL ) {
                     colTotal += ii;
                     rowTotal += jj;
                 }
@@ -383,9 +383,9 @@ CvPoint vision_find_centroid( IplImage *binImage, int thresh )
     }
 
     /* Check if an object is detected. */
-    if ( count > thresh )
+    if( count > thresh )
         detected = true;
-    if ( detected ) {
+    if( detected ) {
         centroid.x = (int)colTotal / count;
         centroid.y = (int)rowTotal / count;
     }
@@ -440,7 +440,7 @@ int vision_find_fence( int *fence_center,
     //srcImg = cvQueryFrame( cap );
     srcImg = cvQueryFrame( cap );
 
-    if ( !srcImg ) {
+    if( !srcImg ) {
         return 0;
     }
 
@@ -501,28 +501,28 @@ int vision_get_fence_bottom( IplImage *inputBinImg, int *center )
     int j = 0; /* columns */
 
     /* Initialize edge arrays, mset may be better. */
-    for ( i = 0; i < imHeight; i++ ) {
+    for( i = 0; i < imHeight; i++ ) {
         leftEdge[i] = 0;
         rightEdge[i] = imWidth;
     }
-    for ( i = 0; i < imHeight - 1; i++ ) {
+    for( i = 0; i < imHeight - 1; i++ ) {
         /* Scan through each line of image and look for first non zero pixel
          * then get the (i,j) pixel value. */
-        while ( (cvGet2D(inputBinImg, i, j).val[0] < 1) && (j < imWidth - 2) ) {
+        while( (cvGet2D(inputBinImg, i, j).val[0] < 1) && (j < imWidth - 2) ) {
             j++;
         }
         /* If we exit before getting to end of row, edge exists. */
-        if ( (j < imWidth) && (j > minPipeWidth) ) {
+        if( (j < imWidth) && (j > minPipeWidth) ) {
             leftEdge[k] = j;
             /* Countinue scanning to find bottom edge. */
-            while ( (cvGet2D(inputBinImg, i, j).val[0] > 0) && (j < imWidth - 2) ) {
+            while( (cvGet2D(inputBinImg, i, j).val[0] > 0) && (j < imWidth - 2) ) {
                 j++;
             }
-            if ( j < imWidth - 2) { /* Scan didn't get to end of image, bottom
+            if( j < imWidth - 2) { /* Scan didn't get to end of image, bottom
             						 * edge exists. */
                 rightEdge[k] = j;
             }
-            if ( rightEdge[k] - leftEdge[k] > minPipeWidth ) {
+            if( rightEdge[k] - leftEdge[k] > minPipeWidth ) {
             	y_max = i;
             	//printf( "FNC_BTM: ymax = %d\n", y_max );
 			}
@@ -532,8 +532,8 @@ int vision_get_fence_bottom( IplImage *inputBinImg, int *center )
     }
 
     /* We found a fence. */
-    if ( y_max > edgeThreshold ) {
-    	for ( i = 0; i < k; i++ ) {
+    if( y_max > edgeThreshold ) {
+    	for( i = 0; i < k; i++ ) {
         		c += rightEdge[i] - leftEdge[i];
 		}
 	}

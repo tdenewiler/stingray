@@ -35,14 +35,14 @@ void parse_line( CONF_VARS *config )
     int ii;
     int ip_octal[4];
 
-    for ( ii = 0; ii < 4; ii++ ) {
+    for( ii = 0; ii < 4; ii++ ) {
         memset( &( ip_octal[ii] ), -1, sizeof( ip_octal[ii] ) );
     }
 
     /* Check here to find out which variables to fill in. */
     /* Nav parameters */
-    if ( strncmp( tokens[0], "nav", STRING_SIZE ) == 0 ) {
-        if ( strncmp( tokens[1], "ip", STRING_SIZE ) == 0 ) {
+    if( strncmp( tokens[0], "nav", STRING_SIZE ) == 0 ) {
+        if( strncmp( tokens[1], "ip", STRING_SIZE ) == 0 ) {
             sscanf( tokens[2], "%d.%d.%d.%d"
                     , &( ip_octal[0] )
                     , &( ip_octal[1] )
@@ -51,21 +51,21 @@ void parse_line( CONF_VARS *config )
                   );
             strncpy( config->nav_IP, tokens[2], STRING_SIZE );
         }
-        else if ( strncmp( tokens[1], "port", STRING_SIZE ) == 0 ) {
+        else if( strncmp( tokens[1], "port", STRING_SIZE ) == 0 ) {
             sscanf( tokens[2], "%hd", &config->nav_port );
         }
     } /* end nav parameters */
 
 	/* Server parameters */
-    if ( strncmp( tokens[0], "server", STRING_SIZE ) == 0 ) {
-        if ( strncmp( tokens[1], "port", STRING_SIZE ) == 0 ) {
+    if( strncmp( tokens[0], "server", STRING_SIZE ) == 0 ) {
+        if( strncmp( tokens[1], "port", STRING_SIZE ) == 0 ) {
             sscanf( tokens[2], "%hd", &config->server_port );
         }
     } /* end server parameters */
 
     /* Vision parameters */
-    if ( strncmp( tokens[0], "vision", STRING_SIZE ) == 0 ) {
-        if ( strncmp( tokens[1], "ip", STRING_SIZE ) == 0 ) {
+    if( strncmp( tokens[0], "vision", STRING_SIZE ) == 0 ) {
+        if( strncmp( tokens[1], "ip", STRING_SIZE ) == 0 ) {
             sscanf( tokens[2], "%d.%d.%d.%d"
                     , &( ip_octal[0] )
                     , &( ip_octal[1] )
@@ -74,14 +74,14 @@ void parse_line( CONF_VARS *config )
                   );
             strncpy( config->vision_IP, tokens[2], STRING_SIZE );
         }
-        else if ( strncmp( tokens[1], "port", STRING_SIZE ) == 0 ) {
+        else if( strncmp( tokens[1], "port", STRING_SIZE ) == 0 ) {
             sscanf( tokens[2], "%hd", &config->vision_port );
         }
     } /* end vision parameters */
 
     /* Planner parameters */
-    if ( strncmp( tokens[0], "planner", STRING_SIZE ) == 0 ) {
-        if ( strncmp( tokens[1], "ip", STRING_SIZE ) == 0 ) {
+    if( strncmp( tokens[0], "planner", STRING_SIZE ) == 0 ) {
+        if( strncmp( tokens[1], "ip", STRING_SIZE ) == 0 ) {
             sscanf( tokens[2], "%d.%d.%d.%d"
                     , &( ip_octal[0] )
                     , &( ip_octal[1] )
@@ -90,38 +90,38 @@ void parse_line( CONF_VARS *config )
                   );
             strncpy( config->planner_IP, tokens[2], STRING_SIZE );
         }
-        else if ( strncmp( tokens[1], "port", STRING_SIZE ) == 0 ) {
+        else if( strncmp( tokens[1], "port", STRING_SIZE ) == 0 ) {
             sscanf( tokens[2], "%hd", &config->planner_port );
         }
     } /* end planner parameters */
 
     /* GUI parameters */
-    if ( strncmp( tokens[0], "window", STRING_SIZE ) == 0 ) {
-        if ( strncmp( tokens[1], "height", STRING_SIZE ) == 0 ) {
+    if( strncmp( tokens[0], "window", STRING_SIZE ) == 0 ) {
+        if( strncmp( tokens[1], "height", STRING_SIZE ) == 0 ) {
             sscanf( tokens[2], "%d", &config->window_height );
         }
-        else if ( strncmp( tokens[1], "width", STRING_SIZE ) == 0 ) {
+        else if( strncmp( tokens[1], "width", STRING_SIZE ) == 0 ) {
             sscanf( tokens[2], "%d", &config->window_width );
         }
     }
     /* end GUI parameters */
 
     /* net parameters */
-    if ( strncmp( tokens[0], "api", STRING_SIZE ) == 0 ) {
-        if ( strncmp( tokens[1], "clients", STRING_SIZE ) == 0 ) {
+    if( strncmp( tokens[0], "api", STRING_SIZE ) == 0 ) {
+        if( strncmp( tokens[1], "clients", STRING_SIZE ) == 0 ) {
             sscanf( tokens[2], "%d", &config->max_api_clients );
         }
     }
-    else if ( strncmp( tokens[0], "net", STRING_SIZE ) == 0 ) {
-        if ( strncmp( tokens[1], "mode", STRING_SIZE ) == 0 ) {
+    else if( strncmp( tokens[0], "net", STRING_SIZE ) == 0 ) {
+        if( strncmp( tokens[1], "mode", STRING_SIZE ) == 0 ) {
             sscanf( tokens[2], "%d", &config->net_mode );
         }
     }
-    else if ( strncmp( tokens[0], "vision", STRING_SIZE ) == 0 ) {
-        if ( strncmp( tokens[1], "port", STRING_SIZE ) == 0 ) {
+    else if( strncmp( tokens[0], "vision", STRING_SIZE ) == 0 ) {
+        if( strncmp( tokens[1], "port", STRING_SIZE ) == 0 ) {
             sscanf( tokens[2], "%hd", &config->vision_port );
         }
-        else if ( strncmp( tokens[1], "ip", STRING_SIZE ) == 0 ) {
+        else if( strncmp( tokens[1], "ip", STRING_SIZE ) == 0 ) {
             sscanf( tokens[2], "%d.%d.%d.%d"
                     , &( ip_octal[0] )
                     , &( ip_octal[1] )
@@ -130,89 +130,89 @@ void parse_line( CONF_VARS *config )
                   );
             strncpy( config->vision_IP, tokens[2], STRING_SIZE );
         }
-        else if ( strncmp( tokens[1], "window", STRING_SIZE ) == 0 ) {
+        else if( strncmp( tokens[1], "window", STRING_SIZE ) == 0 ) {
             sscanf( tokens[2], "%d", &config->vision_window );
         }
-        else if ( strncmp( tokens[1], "angle", STRING_SIZE ) == 0 ) {
+        else if( strncmp( tokens[1], "angle", STRING_SIZE ) == 0 ) {
             sscanf( tokens[2], "%d", &config->vision_angle );
         }
     }
     /* end net parameters */
 
     /* enable parameters */
-    else if ( strncmp( tokens[0], "enable", STRING_SIZE ) == 0 ) {
-        if ( strncmp( tokens[1], "imu", STRING_SIZE ) == 0 ) {
+    else if( strncmp( tokens[0], "enable", STRING_SIZE ) == 0 ) {
+        if( strncmp( tokens[1], "imu", STRING_SIZE ) == 0 ) {
             sscanf( tokens[2], "%d", &config->enable_imu );
         }
-        else if ( strncmp( tokens[1], "logs", STRING_SIZE ) == 0 ) {
+        else if( strncmp( tokens[1], "logs", STRING_SIZE ) == 0 ) {
             sscanf( tokens[2], "%d", &config->enable_log );
         }
-        else if ( strncmp( tokens[1], "gui", STRING_SIZE ) == 0 ) {
+        else if( strncmp( tokens[1], "gui", STRING_SIZE ) == 0 ) {
             sscanf( tokens[2], "%d", &config->enable_gui );
         }
-        else if ( strncmp( tokens[1], "gps", STRING_SIZE ) == 0 ) {
+        else if( strncmp( tokens[1], "gps", STRING_SIZE ) == 0 ) {
             sscanf( tokens[2], "%d", &config->enable_gps );
         }
-        else if ( strncmp( tokens[1], "relay", STRING_SIZE ) == 0 ) {
+        else if( strncmp( tokens[1], "relay", STRING_SIZE ) == 0 ) {
             sscanf( tokens[2], "%d", &config->enable_relay );
         }
-        else if ( strncmp( tokens[1], "pololu", STRING_SIZE ) == 0 ) {
+        else if( strncmp( tokens[1], "pololu", STRING_SIZE ) == 0 ) {
             sscanf( tokens[2], "%d", &config->enable_pololu );
         }
-        else if ( strncmp( tokens[1], "server", STRING_SIZE ) == 0 ) {
+        else if( strncmp( tokens[1], "server", STRING_SIZE ) == 0 ) {
             sscanf( tokens[2], "%d", &config->enable_server );
         }
-        else if ( strncmp( tokens[1], "labjack", STRING_SIZE ) == 0 ) {
+        else if( strncmp( tokens[1], "labjack", STRING_SIZE ) == 0 ) {
             sscanf( tokens[2], "%d", &config->enable_labjack );
         }
-        else if ( strncmp( tokens[1], "vision", STRING_SIZE ) == 0 ) {
+        else if( strncmp( tokens[1], "vision", STRING_SIZE ) == 0 ) {
             sscanf( tokens[2], "%d", &config->enable_vision );
         }
-        else if ( strncmp( tokens[1], "planner", STRING_SIZE ) == 0 ) {
+        else if( strncmp( tokens[1], "planner", STRING_SIZE ) == 0 ) {
             sscanf( tokens[2], "%d", &config->enable_planner );
         }
-        else if ( strncmp( tokens[1], "nav", STRING_SIZE ) == 0 ) {
+        else if( strncmp( tokens[1], "nav", STRING_SIZE ) == 0 ) {
             sscanf( tokens[2], "%d", &config->enable_nav );
         }
     }
     /* end enable parameters */
 
     /* imu parameters */
-    else if ( strncmp( tokens[0], "imu", STRING_SIZE ) == 0 ) {
-        if ( strncmp( tokens[1], "baud", STRING_SIZE ) == 0 ) {
+    else if( strncmp( tokens[0], "imu", STRING_SIZE ) == 0 ) {
+        if( strncmp( tokens[1], "baud", STRING_SIZE ) == 0 ) {
             sscanf( tokens[2], "%d", &config->imu_baud );
         }
-        else if ( strncmp( tokens[1], "port", STRING_SIZE ) == 0 ) {
+        else if( strncmp( tokens[1], "port", STRING_SIZE ) == 0 ) {
             strncpy( config->imu_port, tokens[2], STRING_SIZE );
         }
-        else if ( strncmp( tokens[1], "stab", STRING_SIZE ) == 0 ) {
+        else if( strncmp( tokens[1], "stab", STRING_SIZE ) == 0 ) {
             sscanf( tokens[2], "%d", &config->imu_stab );
         }
     }
     /* end imu parameters */
 
     /* pololu parameters */
-    else if ( strncmp( tokens[0], "pololu", STRING_SIZE ) == 0 ) {
-        if ( strncmp( tokens[1], "baud", STRING_SIZE ) == 0 ) {
+    else if( strncmp( tokens[0], "pololu", STRING_SIZE ) == 0 ) {
+        if( strncmp( tokens[1], "baud", STRING_SIZE ) == 0 ) {
             sscanf( tokens[2], "%d", &config->pololu_baud );
         }
-        else if ( strncmp( tokens[1], "port", STRING_SIZE ) == 0 ) {
+        else if( strncmp( tokens[1], "port", STRING_SIZE ) == 0 ) {
             strncpy( config->pololu_port, tokens[2], STRING_SIZE );
         }
     }
     /* end pololu parameters */
 
     /* operating mode parameters */
-    else if ( strncmp( tokens[0], "op", STRING_SIZE ) == 0 ) {
-        if ( strncmp( tokens[1], "mode", STRING_SIZE ) == 0 ) {
+    else if( strncmp( tokens[0], "op", STRING_SIZE ) == 0 ) {
+        if( strncmp( tokens[1], "mode", STRING_SIZE ) == 0 ) {
             sscanf( tokens[2], "%d", &config->op_mode );
         }
     }
     /* end operating mode parameters */
 
     /* labjackd parameters */
-    else if ( strncmp( tokens[0], "labjackd", STRING_SIZE ) == 0 ) {
-        if ( strncmp( tokens[1], "ip", STRING_SIZE ) == 0 ) {
+    else if( strncmp( tokens[0], "labjackd", STRING_SIZE ) == 0 ) {
+        if( strncmp( tokens[1], "ip", STRING_SIZE ) == 0 ) {
             sscanf( tokens[2], "%d.%d.%d.%d"
                     , &( ip_octal[0] )
                     , &( ip_octal[1] )
@@ -221,183 +221,183 @@ void parse_line( CONF_VARS *config )
                   );
             strncpy( config->labjackd_IP, tokens[2], STRING_SIZE );
         }
-        else if ( strncmp( tokens[1], "port", STRING_SIZE ) == 0 ) {
+        else if( strncmp( tokens[1], "port", STRING_SIZE ) == 0 ) {
             sscanf( tokens[2], "%hd", &config->labjackd_port );
         }
     }
     /* end labjackd parameters */
 
     /* GPS parameters */
-    else if ( strncmp( tokens[0], "gps", STRING_SIZE ) == 0 ) {
-        if ( strncmp( tokens[1], "baud", STRING_SIZE ) == 0 ) {
+    else if( strncmp( tokens[0], "gps", STRING_SIZE ) == 0 ) {
+        if( strncmp( tokens[1], "baud", STRING_SIZE ) == 0 ) {
             sscanf( tokens[2], "%d", &config->gps_baud );
         }
-        else if ( strncmp( tokens[1], "port", STRING_SIZE ) == 0 ) {
+        else if( strncmp( tokens[1], "port", STRING_SIZE ) == 0 ) {
             strncpy( config->gps_port, tokens[2], STRING_SIZE );
         }
     }
     /* end GPS parameters */
 
     /* USB relay board */
-    else if ( strncmp( tokens[0], "relay", STRING_SIZE ) == 0 ) {
-        if ( strncmp( tokens[1], "port", STRING_SIZE ) == 0 ) {
+    else if( strncmp( tokens[0], "relay", STRING_SIZE ) == 0 ) {
+        if( strncmp( tokens[1], "port", STRING_SIZE ) == 0 ) {
             strncpy( config->relay_port, tokens[2], STRING_SIZE );
         }
-        else if ( strncmp( tokens[1], "baud", STRING_SIZE ) == 0 ) {
+        else if( strncmp( tokens[1], "baud", STRING_SIZE ) == 0 ) {
             sscanf( tokens[2], "%d", &config->relay_baud );
         }
     }
     /* end USB relay board */
 
     /* Set the debug level. */
-    else if ( strncmp( tokens[0], "debug", STRING_SIZE ) == 0 ) {
-        if ( strncmp( tokens[1], "level", STRING_SIZE ) == 0 ) {
+    else if( strncmp( tokens[0], "debug", STRING_SIZE ) == 0 ) {
+        if( strncmp( tokens[1], "level", STRING_SIZE ) == 0 ) {
             sscanf( tokens[2], "%d", &config->debug_level );
         }
     }
     /* end debug level */
 
     /* PID parameters. */
-    else if ( strncmp( tokens[0], "kp", STRING_SIZE ) == 0 ) {
-        if ( strncmp( tokens[1], "yaw", STRING_SIZE ) == 0 ) {
+    else if( strncmp( tokens[0], "kp", STRING_SIZE ) == 0 ) {
+        if( strncmp( tokens[1], "yaw", STRING_SIZE ) == 0 ) {
             sscanf( tokens[2], "%lf", &config->kp_yaw );
         }
-        else if ( strncmp( tokens[1], "roll", STRING_SIZE ) == 0 ) {
+        else if( strncmp( tokens[1], "roll", STRING_SIZE ) == 0 ) {
             sscanf( tokens[2], "%lf", &config->kp_roll );
         }
-        else if ( strncmp( tokens[1], "pitch", STRING_SIZE ) == 0 ) {
+        else if( strncmp( tokens[1], "pitch", STRING_SIZE ) == 0 ) {
             sscanf( tokens[2], "%lf", &config->kp_pitch );
         }
-        else if ( strncmp( tokens[1], "ax", STRING_SIZE ) == 0 ) {
+        else if( strncmp( tokens[1], "ax", STRING_SIZE ) == 0 ) {
             sscanf( tokens[2], "%lf", &config->kp_ax );
         }
-        else if ( strncmp( tokens[1], "ay", STRING_SIZE ) == 0 ) {
+        else if( strncmp( tokens[1], "ay", STRING_SIZE ) == 0 ) {
             sscanf( tokens[2], "%lf", &config->kp_ay );
         }
-        else if ( strncmp( tokens[1], "az", STRING_SIZE ) == 0 ) {
+        else if( strncmp( tokens[1], "az", STRING_SIZE ) == 0 ) {
             sscanf( tokens[2], "%lf", &config->kp_az );
         }
-        else if ( strncmp( tokens[1], "depth", STRING_SIZE ) == 0 ) {
+        else if( strncmp( tokens[1], "depth", STRING_SIZE ) == 0 ) {
             sscanf( tokens[2], "%lf", &config->kp_depth );
         }
     }
 
-    else if ( strncmp( tokens[0], "ki", STRING_SIZE ) == 0 ) {
-        if ( strncmp( tokens[1], "yaw", STRING_SIZE ) == 0 ) {
+    else if( strncmp( tokens[0], "ki", STRING_SIZE ) == 0 ) {
+        if( strncmp( tokens[1], "yaw", STRING_SIZE ) == 0 ) {
             sscanf( tokens[2], "%lf", &config->ki_yaw );
         }
-        else if ( strncmp( tokens[1], "roll", STRING_SIZE ) == 0 ) {
+        else if( strncmp( tokens[1], "roll", STRING_SIZE ) == 0 ) {
             sscanf( tokens[2], "%lf", &config->ki_roll );
         }
-        else if ( strncmp( tokens[1], "pitch", STRING_SIZE ) == 0 ) {
+        else if( strncmp( tokens[1], "pitch", STRING_SIZE ) == 0 ) {
             sscanf( tokens[2], "%lf", &config->ki_pitch );
         }
-        else if ( strncmp( tokens[1], "ax", STRING_SIZE ) == 0 ) {
+        else if( strncmp( tokens[1], "ax", STRING_SIZE ) == 0 ) {
             sscanf( tokens[2], "%lf", &config->ki_ax );
         }
-        else if ( strncmp( tokens[1], "ay", STRING_SIZE ) == 0 ) {
+        else if( strncmp( tokens[1], "ay", STRING_SIZE ) == 0 ) {
             sscanf( tokens[2], "%lf", &config->ki_ay );
         }
-        else if ( strncmp( tokens[1], "az", STRING_SIZE ) == 0 ) {
+        else if( strncmp( tokens[1], "az", STRING_SIZE ) == 0 ) {
             sscanf( tokens[2], "%lf", &config->ki_az );
         }
-        else if ( strncmp( tokens[1], "depth", STRING_SIZE ) == 0 ) {
+        else if( strncmp( tokens[1], "depth", STRING_SIZE ) == 0 ) {
             sscanf( tokens[2], "%lf", &config->ki_depth );
         }
     }
 
-    else if ( strncmp( tokens[0], "kd", STRING_SIZE ) == 0 ) {
-        if ( strncmp( tokens[1], "yaw", STRING_SIZE ) == 0 ) {
+    else if( strncmp( tokens[0], "kd", STRING_SIZE ) == 0 ) {
+        if( strncmp( tokens[1], "yaw", STRING_SIZE ) == 0 ) {
             sscanf( tokens[2], "%lf", &config->kd_yaw );
         }
-        else if ( strncmp( tokens[1], "roll", STRING_SIZE ) == 0 ) {
+        else if( strncmp( tokens[1], "roll", STRING_SIZE ) == 0 ) {
             sscanf( tokens[2], "%lf", &config->kd_roll );
         }
-        else if ( strncmp( tokens[1], "pitch", STRING_SIZE ) == 0 ) {
+        else if( strncmp( tokens[1], "pitch", STRING_SIZE ) == 0 ) {
             sscanf( tokens[2], "%lf", &config->kd_pitch );
         }
-        else if ( strncmp( tokens[1], "ax", STRING_SIZE ) == 0 ) {
+        else if( strncmp( tokens[1], "ax", STRING_SIZE ) == 0 ) {
             sscanf( tokens[2], "%lf", &config->kd_ax );
         }
-        else if ( strncmp( tokens[1], "ay", STRING_SIZE ) == 0 ) {
+        else if( strncmp( tokens[1], "ay", STRING_SIZE ) == 0 ) {
             sscanf( tokens[2], "%lf", &config->kd_ay );
         }
-        else if ( strncmp( tokens[1], "az", STRING_SIZE ) == 0 ) {
+        else if( strncmp( tokens[1], "az", STRING_SIZE ) == 0 ) {
             sscanf( tokens[2], "%lf", &config->kd_az );
         }
-        else if ( strncmp( tokens[1], "depth", STRING_SIZE ) == 0 ) {
+        else if( strncmp( tokens[1], "depth", STRING_SIZE ) == 0 ) {
             sscanf( tokens[2], "%lf", &config->kd_depth );
         }
     }
-    else if ( strncmp( tokens[0], "period", STRING_SIZE ) == 0 ) {
-        if ( strncmp( tokens[1], "pitch", STRING_SIZE ) == 0 ) {
+    else if( strncmp( tokens[0], "period", STRING_SIZE ) == 0 ) {
+        if( strncmp( tokens[1], "pitch", STRING_SIZE ) == 0 ) {
             sscanf( tokens[2], "%d", &config->period_pitch );
         }
-        else if ( strncmp( tokens[1], "roll", STRING_SIZE ) == 0 ) {
+        else if( strncmp( tokens[1], "roll", STRING_SIZE ) == 0 ) {
             sscanf( tokens[2], "%d", &config->period_roll );
         }
-        else if ( strncmp( tokens[1], "yaw", STRING_SIZE ) == 0 ) {
+        else if( strncmp( tokens[1], "yaw", STRING_SIZE ) == 0 ) {
             sscanf( tokens[2], "%d", &config->period_yaw );
         }
-        else if ( strncmp( tokens[1], "depth", STRING_SIZE ) == 0 ) {
+        else if( strncmp( tokens[1], "depth", STRING_SIZE ) == 0 ) {
             sscanf( tokens[2], "%d", &config->period_depth );
         }
-        else if ( strncmp( tokens[1], "ax", STRING_SIZE ) == 0 ) {
+        else if( strncmp( tokens[1], "ax", STRING_SIZE ) == 0 ) {
             sscanf( tokens[2], "%d", &config->period_ax );
         }
-        else if ( strncmp( tokens[1], "ay", STRING_SIZE ) == 0 ) {
+        else if( strncmp( tokens[1], "ay", STRING_SIZE ) == 0 ) {
             sscanf( tokens[2], "%d", &config->period_ay );
         }
-        else if ( strncmp( tokens[1], "az", STRING_SIZE ) == 0 ) {
+        else if( strncmp( tokens[1], "az", STRING_SIZE ) == 0 ) {
             sscanf( tokens[2], "%d", &config->period_az );
         }
-        else if ( strncmp( tokens[1], "vision", STRING_SIZE ) == 0 ) {
+        else if( strncmp( tokens[1], "vision", STRING_SIZE ) == 0 ) {
             sscanf( tokens[2], "%d", &config->period_vision );
         }
-        else if ( strncmp( tokens[1], "planner", STRING_SIZE ) == 0 ) {
+        else if( strncmp( tokens[1], "planner", STRING_SIZE ) == 0 ) {
             sscanf( tokens[2], "%d", &config->period_planner );
         }
     }
     /* end PID parameters */
 
     /* target values */
-    else if ( strncmp( tokens[0], "target", STRING_SIZE ) == 0 ) {
-        if ( strncmp( tokens[1], "pitch", STRING_SIZE ) == 0 ) {
+    else if( strncmp( tokens[0], "target", STRING_SIZE ) == 0 ) {
+        if( strncmp( tokens[1], "pitch", STRING_SIZE ) == 0 ) {
             sscanf( tokens[2], "%f", &config->target_pitch );
         }
-        else if ( strncmp( tokens[1], "roll", STRING_SIZE ) == 0 ) {
+        else if( strncmp( tokens[1], "roll", STRING_SIZE ) == 0 ) {
             sscanf( tokens[2], "%f", &config->target_roll );
         }
-        else if ( strncmp( tokens[1], "yaw", STRING_SIZE ) == 0 ) {
+        else if( strncmp( tokens[1], "yaw", STRING_SIZE ) == 0 ) {
             sscanf( tokens[2], "%f", &config->target_yaw );
         }
-        else if ( strncmp( tokens[1], "depth", STRING_SIZE ) == 0 ) {
+        else if( strncmp( tokens[1], "depth", STRING_SIZE ) == 0 ) {
             sscanf( tokens[2], "%f", &config->target_depth );
         }
-        else if ( strncmp( tokens[1], "ax", STRING_SIZE ) == 0 ) {
+        else if( strncmp( tokens[1], "ax", STRING_SIZE ) == 0 ) {
             sscanf( tokens[2], "%f", &config->target_ax );
         }
-        else if ( strncmp( tokens[1], "ay", STRING_SIZE ) == 0 ) {
+        else if( strncmp( tokens[1], "ay", STRING_SIZE ) == 0 ) {
             sscanf( tokens[2], "%f", &config->target_ay );
         }
-        else if ( strncmp( tokens[1], "az", STRING_SIZE ) == 0 ) {
+        else if( strncmp( tokens[1], "az", STRING_SIZE ) == 0 ) {
             sscanf( tokens[2], "%f", &config->target_az );
         }
-        else if ( strncmp( tokens[1], "fx", STRING_SIZE ) == 0 ) {
+        else if( strncmp( tokens[1], "fx", STRING_SIZE ) == 0 ) {
             sscanf( tokens[2], "%f", &config->target_fx );
         }
-        else if ( strncmp( tokens[1], "fy", STRING_SIZE ) == 0 ) {
+        else if( strncmp( tokens[1], "fy", STRING_SIZE ) == 0 ) {
             sscanf( tokens[2], "%f", &config->target_fy );
         }
-        else if ( strncmp( tokens[1], "speed", STRING_SIZE ) == 0 ) {
+        else if( strncmp( tokens[1], "speed", STRING_SIZE ) == 0 ) {
             sscanf( tokens[2], "%f", &config->target_speed );
         }
     }
     /* end target values */
 
     /* Vision HSV values */
-    else if ( strncmp( tokens[0], "pipe", STRING_SIZE ) == 0 ) {
-        if ( strncmp( tokens[1], "hL", STRING_SIZE ) == 0 ) {
+    else if( strncmp( tokens[0], "pipe", STRING_SIZE ) == 0 ) {
+        if( strncmp( tokens[1], "hL", STRING_SIZE ) == 0 ) {
             sscanf( tokens[2], "%f", &config->pipe_hL );
         }
         else if( strncmp( tokens[1], "hH", STRING_SIZE ) == 0 ) {
@@ -416,8 +416,8 @@ void parse_line( CONF_VARS *config )
             sscanf( tokens[2], "%f", &config->pipe_vH );
         }
     }
-    else if ( strncmp( tokens[0], "buoy", STRING_SIZE ) == 0 ) {
-        if ( strncmp( tokens[1], "hL", STRING_SIZE ) == 0 ) {
+    else if( strncmp( tokens[0], "buoy", STRING_SIZE ) == 0 ) {
+        if( strncmp( tokens[1], "hL", STRING_SIZE ) == 0 ) {
             sscanf( tokens[2], "%f", &config->buoy_hL );
         }
         else if( strncmp( tokens[1], "hH", STRING_SIZE ) == 0 ) {
@@ -436,8 +436,8 @@ void parse_line( CONF_VARS *config )
             sscanf( tokens[2], "%f", &config->buoy_vH );
         }
     }
-    else if ( strncmp( tokens[0], "fence", STRING_SIZE ) == 0 ) {
-        if ( strncmp( tokens[1], "hL", STRING_SIZE ) == 0 ) {
+    else if( strncmp( tokens[0], "fence", STRING_SIZE ) == 0 ) {
+        if( strncmp( tokens[1], "hL", STRING_SIZE ) == 0 ) {
             sscanf( tokens[2], "%f", &config->fence_hL );
         }
         else if( strncmp( tokens[1], "hH", STRING_SIZE ) == 0 ) {
@@ -492,32 +492,32 @@ void parse_config( const char *filename,
     FILE *cfg_fd;
 
     cfg_fd = fopen( filename, "r" );
-    if ( cfg_fd == NULL ) {
+    if( cfg_fd == NULL ) {
         //printf( "PARSE_CONFIG: Error opening config file %s\n", filename );
         return;
     }
 
-    for ( ii = 0; ii < MAX_TOKENS; ii++ ) {
+    for( ii = 0; ii < MAX_TOKENS; ii++ ) {
         memset( &( tokens[ii] ), 0, sizeof( tokens[ii] ) );
     }
     memset( &( token_buf ), 0, sizeof( token_buf ) );
 
-    if ( fgets( token_buf, STRING_SIZE, cfg_fd ) == NULL ) {
+    if( fgets( token_buf, STRING_SIZE, cfg_fd ) == NULL ) {
         /* Do nothing. */
     }
 
-    while ( feof( cfg_fd ) == 0 ) {
+    while( feof( cfg_fd ) == 0 ) {
         line_number++;
-        for ( ii = 0; ii < sizeof( token_buf ); ii++ ) {
-            if ( filling_in_token == FALSE ) {
-                if ( token_buf[ii] == '\n' ) {
+        for( ii = 0; ii < sizeof( token_buf ); ii++ ) {
+            if( filling_in_token == FALSE ) {
+                if( token_buf[ii] == '\n' ) {
                     break;
                 }
-                else if ( token_buf[ii] == '#' ) {
+                else if( token_buf[ii] == '#' ) {
                     comment = TRUE;
                     /* Prevent whitespace betweeen last token and comment from
                      * increasing token count. */
-                    if ( last_value_space == TRUE ) {
+                    if( last_value_space == TRUE ) {
                         token_number--;
                         last_value_space = FALSE;
                     }
@@ -525,7 +525,7 @@ void parse_config( const char *filename,
                     jj = 0;
                     break;
                 }
-                else if ( isspace( token_buf[ii] ) ) {
+                else if( isspace( token_buf[ii] ) ) {
                     /* Do nothing. Still looking on current line. */
                 }
                 else {
@@ -534,21 +534,21 @@ void parse_config( const char *filename,
                 }
             }
             else {
-                if ( token_buf[ii] == '\n' ) {
+                if( token_buf[ii] == '\n' ) {
                     parse_line( config );
                     token_number++;
                     jj = 0;
                     filling_in_token = FALSE;
                     break;
                 }
-                else if ( token_buf[ii] == '#' ) {
+                else if( token_buf[ii] == '#' ) {
                     parse_line( config );
                     token_number++;
                     jj = 0;
                     filling_in_token = FALSE;
                     break;
                 }
-                else if ( isspace( token_buf[ii] ) ) {
+                else if( isspace( token_buf[ii] ) ) {
                     last_value_space = TRUE;
                     token_number++;
                     jj = 0;
@@ -563,11 +563,11 @@ void parse_config( const char *filename,
         jj = 0;
         token_number = 0;
 
-        for ( ii = 0; ii < MAX_TOKENS; ii++ ) {
+        for( ii = 0; ii < MAX_TOKENS; ii++ ) {
             memset( &( tokens[ii] ), 0, sizeof( tokens[ii] ) );
         }
         memset( &( token_buf ), 0, sizeof( token_buf ) );
-        if ( fgets( token_buf, STRING_SIZE, cfg_fd ) == NULL ) {
+        if( fgets( token_buf, STRING_SIZE, cfg_fd ) == NULL ) {
             /* Do nothing. */
         }
     }
@@ -612,7 +612,7 @@ int parse_cla( int argc,
     /* Parse the configuration file passed in on command line. */
     opterr = 0;
 
-    while ( ( cmd = getopt( argc, argv, "c:h" ) ) != -1 ) {
+    while( ( cmd = getopt( argc, argv, "c:h" ) ) != -1 ) {
         switch ( cmd ) {
 
             case 'c':
@@ -631,7 +631,7 @@ int parse_cla( int argc,
         }
     }
 
-    if ( cvalue != NULL ) {
+    if( cvalue != NULL ) {
         parse_config( cvalue, config );
     }
     else {

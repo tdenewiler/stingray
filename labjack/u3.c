@@ -32,7 +32,7 @@ uint8 normalChecksum8( uint8 *b, int n )
 	//remainder of 256 division.  Again, sums quotient and remainder of
 	//256 division.
 
-	for ( i = 1, a = 0; i < n; i++ )
+	for( i = 1, a = 0; i < n; i++ )
 		a += ( uint16 )b[i];
 
 	bb = a / 256;
@@ -52,7 +52,7 @@ uint16 extendedChecksum16( uint8 *b, int n )
 
 	//Sums bytes 6 to n-1 to a unsigned 2 byte value
 
-	for ( i = 6; i < n; i++ )
+	for( i = 6; i < n; i++ )
 		a += ( uint16 )b[i];
 
 	return a;
@@ -66,7 +66,7 @@ uint8 extendedChecksum8( uint8 *b )
 	//Sums bytes 1 to 5. Sums quotient and remainder of 256 division. Again, sums
 	//quotient and remainder of 256 division.
 
-	for ( i = 1, a = 0; i < 6; i++ )
+	for( i = 1, a = 0; i < 6; i++ )
 		a += ( uint16 )b[i];
 
 	bb = a / 256;
@@ -90,16 +90,16 @@ HANDLE openUSBConnection( int localID )
 
 	numDevices = LJUSB_GetDevCount( U3_PRODUCT_ID );
 
-	if ( numDevices == 0 ) {
+	if( numDevices == 0 ) {
 		//printf( "Open error: No U3 devices could be found\n" );
 		return NULL;
 	}
 
-	for ( dev = 1;  dev <= numDevices; dev++ ) {
+	for( dev = 1;  dev <= numDevices; dev++ ) {
 		hDevice = LJUSB_OpenDevice( dev, 0, U3_PRODUCT_ID );
 
-		if ( hDevice != NULL ) {
-			if ( localID < 0 ) {
+		if( hDevice != NULL ) {
+			if( localID < 0 ) {
 				return hDevice;
 			}
 			else {
@@ -110,36 +110,36 @@ HANDLE openUSBConnection( int localID )
 				sendBuffer[2] = ( uint8 )( 0x0A );
 				sendBuffer[3] = ( uint8 )( 0x08 );
 
-				for ( i = 6; i < 26; i++ )
+				for( i = 6; i < 26; i++ )
 					sendBuffer[i] = ( uint8 )( 0x00 );
 
 				extendedChecksum( sendBuffer, 26 );
 
-				if ( LJUSB_BulkWrite( hDevice, U3_PIPE_EP1_OUT, sendBuffer, 26 ) != 26 )
+				if( LJUSB_BulkWrite( hDevice, U3_PIPE_EP1_OUT, sendBuffer, 26 ) != 26 )
 					goto locid_error;
 
-				if ( LJUSB_BulkRead( hDevice, U3_PIPE_EP1_IN, recBuffer, 38 ) != 38 )
+				if( LJUSB_BulkRead( hDevice, U3_PIPE_EP1_IN, recBuffer, 38 ) != 38 )
 					goto locid_error;
 
 				checksumTotal = extendedChecksum16( recBuffer, 38 );
 
-				if ( ( uint8 )( ( checksumTotal / 256 ) & 0xff ) != recBuffer[5] )
+				if( ( uint8 )( ( checksumTotal / 256 ) & 0xff ) != recBuffer[5] )
 					goto locid_error;
 
-				if ( ( uint8 )( checksumTotal & 0xff ) != recBuffer[4] )
+				if( ( uint8 )( checksumTotal & 0xff ) != recBuffer[4] )
 					goto locid_error;
 
-				if ( extendedChecksum8( recBuffer ) != recBuffer[0] )
+				if( extendedChecksum8( recBuffer ) != recBuffer[0] )
 					goto locid_error;
 
-				if ( recBuffer[1] != ( uint8 )( 0xF8 ) || recBuffer[2] != ( uint8 )( 0x10 ) ||
+				if( recBuffer[1] != ( uint8 )( 0xF8 ) || recBuffer[2] != ( uint8 )( 0x10 ) ||
 				        recBuffer[3] != ( uint8 )( 0x08 ) )
 					goto locid_error;
 
-				if ( recBuffer[6] != 0 )
+				if( recBuffer[6] != 0 )
 					goto locid_error;
 
-				if ( ( int )recBuffer[21] == localID )
+				if( ( int )recBuffer[21] == localID )
 					return hDevice;
 				else
 					LJUSB_CloseDevice( hDevice );
@@ -178,10 +178,10 @@ long getTickCount()
 
 long isCalibrationInfoValid( u3CalibrationInfo *caliInfo )
 {
-	if ( caliInfo == NULL )
+	if( caliInfo == NULL )
 		goto invalid;
 
-	if ( caliInfo->prodID != 3 )
+	if( caliInfo->prodID != 3 )
 		goto invalid;
 
 	return 1;
@@ -195,10 +195,10 @@ invalid:
 
 long isLJTDACCalibrationInfoValid( u3LJTDACCalibrationInfo *caliInfo )
 {
-	if ( caliInfo == NULL )
+	if( caliInfo == NULL )
 		goto invalid;
 
-	if ( caliInfo->prodID != 3 )
+	if( caliInfo->prodID != 3 )
 		goto invalid;
 
 	return 1;
@@ -224,15 +224,15 @@ long getCalibrationInfo( HANDLE hDevice, u3CalibrationInfo *caliInfo )
 
 	//setting WriteMask0 and all other bytes to 0 since we only want to read the response
 
-	for ( i = 6; i < 26; i++ )
+	for( i = 6; i < 26; i++ )
 		cU3SendBuffer[i] = 0;
 
 	extendedChecksum( cU3SendBuffer, 26 );
 
 	sentRec = LJUSB_BulkWrite( hDevice, U3_PIPE_EP1_OUT, cU3SendBuffer, 26 );
 
-	if ( sentRec < 26 ) {
-		if ( sentRec == 0 )
+	if( sentRec < 26 ) {
+		if( sentRec == 0 )
 			goto writeError0;
 		else
 			goto writeError1;
@@ -240,14 +240,14 @@ long getCalibrationInfo( HANDLE hDevice, u3CalibrationInfo *caliInfo )
 
 	sentRec = LJUSB_BulkRead( hDevice, U3_PIPE_EP1_IN, cU3RecBuffer, 38 );
 
-	if ( sentRec < 38 ) {
-		if ( sentRec == 0 )
+	if( sentRec < 38 ) {
+		if( sentRec == 0 )
 			goto readError0;
 		else
 			goto readError1;
 	}
 
-	if ( cU3RecBuffer[1] != ( uint8 )( 0xF8 ) || cU3RecBuffer[2] != ( uint8 )( 0x10 ) || cU3RecBuffer[3] != ( uint8 )( 0x08 ) )
+	if( cU3RecBuffer[1] != ( uint8 )( 0xF8 ) || cU3RecBuffer[2] != ( uint8 )( 0x10 ) || cU3RecBuffer[3] != ( uint8 )( 0x08 ) )
 		goto commandByteError;
 
 	caliInfo->hardwareVersion = cU3RecBuffer[14] + cU3RecBuffer[13] / 100.0;
@@ -269,8 +269,8 @@ long getCalibrationInfo( HANDLE hDevice, u3CalibrationInfo *caliInfo )
 
 	sentRec = LJUSB_BulkWrite( hDevice, U3_PIPE_EP1_OUT, sendBuffer, 8 );
 
-	if ( sentRec < 8 ) {
-		if ( sentRec == 0 )
+	if( sentRec < 8 ) {
+		if( sentRec == 0 )
 			goto writeError0;
 		else
 			goto writeError1;
@@ -278,14 +278,14 @@ long getCalibrationInfo( HANDLE hDevice, u3CalibrationInfo *caliInfo )
 
 	sentRec = LJUSB_BulkRead( hDevice, U3_PIPE_EP1_IN, recBuffer, 40 );
 
-	if ( sentRec < 40 ) {
-		if ( sentRec == 0 )
+	if( sentRec < 40 ) {
+		if( sentRec == 0 )
 			goto readError0;
 		else
 			goto readError1;
 	}
 
-	if ( recBuffer[1] != ( uint8 )( 0xF8 ) || recBuffer[2] != ( uint8 )( 0x11 ) || recBuffer[3] != ( uint8 )( 0x2D ) )
+	if( recBuffer[1] != ( uint8 )( 0xF8 ) || recBuffer[2] != ( uint8 )( 0x11 ) || recBuffer[3] != ( uint8 )( 0x2D ) )
 		goto commandByteError;
 
 	//block data starts on byte 8 of the buffer
@@ -304,8 +304,8 @@ long getCalibrationInfo( HANDLE hDevice, u3CalibrationInfo *caliInfo )
 
 	sentRec = LJUSB_BulkWrite( hDevice, U3_PIPE_EP1_OUT, sendBuffer, 8 );
 
-	if ( sentRec < 8 ) {
-		if ( sentRec == 0 )
+	if( sentRec < 8 ) {
+		if( sentRec == 0 )
 			goto writeError0;
 		else
 			goto writeError1;
@@ -313,14 +313,14 @@ long getCalibrationInfo( HANDLE hDevice, u3CalibrationInfo *caliInfo )
 
 	sentRec = LJUSB_BulkRead( hDevice, U3_PIPE_EP1_IN, recBuffer, 40 );;
 
-	if ( sentRec < 40 ) {
-		if ( sentRec == 0 )
+	if( sentRec < 40 ) {
+		if( sentRec == 0 )
 			goto readError0;
 		else
 			goto readError1;
 	}
 
-	if ( recBuffer[1] != ( uint8 )( 0xF8 ) || recBuffer[2] != ( uint8 )( 0x11 ) || recBuffer[3] != ( uint8 )( 0x2D ) )
+	if( recBuffer[1] != ( uint8 )( 0xF8 ) || recBuffer[2] != ( uint8 )( 0x11 ) || recBuffer[3] != ( uint8 )( 0x2D ) )
 		goto commandByteError;
 
 	caliInfo->dacSlope[0] = FPuint8ArrayToFPDouble( recBuffer + 8, 0 );
@@ -338,8 +338,8 @@ long getCalibrationInfo( HANDLE hDevice, u3CalibrationInfo *caliInfo )
 
 	sentRec = LJUSB_BulkWrite( hDevice, U3_PIPE_EP1_OUT, sendBuffer, 8 );
 
-	if ( sentRec < 8 ) {
-		if ( sentRec == 0 )
+	if( sentRec < 8 ) {
+		if( sentRec == 0 )
 			goto writeError0;
 		else
 			goto writeError1;
@@ -347,14 +347,14 @@ long getCalibrationInfo( HANDLE hDevice, u3CalibrationInfo *caliInfo )
 
 	sentRec = LJUSB_BulkRead( hDevice, U3_PIPE_EP1_IN, recBuffer, 40 );
 
-	if ( sentRec < 40 ) {
-		if ( sentRec == 0 )
+	if( sentRec < 40 ) {
+		if( sentRec == 0 )
 			goto readError0;
 		else
 			goto readError1;
 	}
 
-	if ( recBuffer[1] != ( uint8 )( 0xF8 ) || recBuffer[2] != ( uint8 )( 0x11 ) || recBuffer[3] != ( uint8 )( 0x2D ) )
+	if( recBuffer[1] != ( uint8 )( 0xF8 ) || recBuffer[2] != ( uint8 )( 0x11 ) || recBuffer[3] != ( uint8 )( 0x2D ) )
 		goto commandByteError;
 
 	caliInfo->tempSlope = FPuint8ArrayToFPDouble( recBuffer + 8, 0 );
@@ -372,8 +372,8 @@ long getCalibrationInfo( HANDLE hDevice, u3CalibrationInfo *caliInfo )
 
 	sentRec = LJUSB_BulkWrite( hDevice, U3_PIPE_EP1_OUT, sendBuffer, 8 );
 
-	if ( sentRec < 8 ) {
-		if ( sentRec == 0 )
+	if( sentRec < 8 ) {
+		if( sentRec == 0 )
 			goto writeError0;
 		else
 			goto writeError1;
@@ -381,17 +381,17 @@ long getCalibrationInfo( HANDLE hDevice, u3CalibrationInfo *caliInfo )
 
 	sentRec = LJUSB_BulkRead( hDevice, U3_PIPE_EP1_IN, recBuffer, 40 );
 
-	if ( sentRec < 40 ) {
-		if ( sentRec == 0 )
+	if( sentRec < 40 ) {
+		if( sentRec == 0 )
 			goto readError0;
 		else
 			goto readError1;
 	}
 
-	if ( recBuffer[1] != ( uint8 )( 0xF8 ) || recBuffer[2] != ( uint8 )( 0x11 ) || recBuffer[3] != ( uint8 )( 0x2D ) )
+	if( recBuffer[1] != ( uint8 )( 0xF8 ) || recBuffer[2] != ( uint8 )( 0x11 ) || recBuffer[3] != ( uint8 )( 0x2D ) )
 		goto commandByteError;
 
-	for ( i = 0; i < 4; i++ )
+	for( i = 0; i < 4; i++ )
 		caliInfo->hvAINSlope[i] = FPuint8ArrayToFPDouble( recBuffer + 8, i * 8 );
 
 	/* reading block 4 from memory */
@@ -401,8 +401,8 @@ long getCalibrationInfo( HANDLE hDevice, u3CalibrationInfo *caliInfo )
 
 	sentRec = LJUSB_BulkWrite( hDevice, U3_PIPE_EP1_OUT, sendBuffer, 8 );
 
-	if ( sentRec < 8 ) {
-		if ( sentRec == 0 )
+	if( sentRec < 8 ) {
+		if( sentRec == 0 )
 			goto writeError0;
 		else
 			goto writeError1;
@@ -410,17 +410,17 @@ long getCalibrationInfo( HANDLE hDevice, u3CalibrationInfo *caliInfo )
 
 	sentRec = LJUSB_BulkRead( hDevice, U3_PIPE_EP1_IN, recBuffer, 40 );
 
-	if ( sentRec < 40 ) {
-		if ( sentRec == 0 )
+	if( sentRec < 40 ) {
+		if( sentRec == 0 )
 			goto readError0;
 		else
 			goto readError1;
 	}
 
-	if ( recBuffer[1] != ( uint8 )( 0xF8 ) || recBuffer[2] != ( uint8 )( 0x11 ) || recBuffer[3] != ( uint8 )( 0x2D ) )
+	if( recBuffer[1] != ( uint8 )( 0xF8 ) || recBuffer[2] != ( uint8 )( 0x11 ) || recBuffer[3] != ( uint8 )( 0x2D ) )
 		goto commandByteError;
 
-	for ( i = 0; i < 4; i++ )
+	for( i = 0; i < 4; i++ )
 		caliInfo->hvAINOffset[i] = FPuint8ArrayToFPDouble( recBuffer + 8, i * 8 );
 
 	caliInfo->prodID = 3;
@@ -478,12 +478,12 @@ long getLJTDACCalibrationInfo( HANDLE hDevice, u3LJTDACCalibrationInfo *caliInfo
 	//Performing I2C low-level call
 	err = I2C( hDevice, options, speedAdjust, sdaPinNum, sclPinNum, address, numByteToSend, numBytesToReceive, bytesCommand, &errorcode, ackArray, bytesResponse );
 
-	if ( errorcode != 0 ) {
+	if( errorcode != 0 ) {
 		printf( "Getting LJTDAC calibration info error : received errorcode %d in response\n", errorcode );
 		err = -1;
 	}
 
-	if ( err == -1 )
+	if( err == -1 )
 		return err;
 
 	caliInfo->DACSlopeA = FPuint8ArrayToFPDouble( bytesResponse, 0 );
@@ -506,7 +506,7 @@ double FPuint8ArrayToFPDouble( uint8 *buffer, int startIndex )
 	uint32 resultWh = 0;
 	int i;
 
-	for ( i = 0; i < 4; i++ ) {
+	for( i = 0; i < 4; i++ ) {
 		resultDec += ( uint32 )buffer[startIndex + i] * pow( 2, i * 8 );
 		resultWh += ( uint32 )buffer[startIndex + i + 4] * pow( 2, i * 8 );
 	}
@@ -517,11 +517,11 @@ double FPuint8ArrayToFPDouble( uint8 *buffer, int startIndex )
 
 long binaryToCalibratedAnalogVoltage( u3CalibrationInfo *caliInfo, int dacEnabled, uint8 negChannel, uint16 bytesVoltage, double *analogVoltage )
 {
-	if ( isCalibrationInfoValid( caliInfo ) == -1 )
+	if( isCalibrationInfoValid( caliInfo ) == -1 )
 		return -1;
 
-	if ( caliInfo->hardwareVersion >= 1.30 ) {
-		if ( caliInfo->highVoltage == 1 ) {
+	if( caliInfo->hardwareVersion >= 1.30 ) {
+		if( caliInfo->highVoltage == 1 ) {
 			printf( "binaryToCalibratedAnalogVoltage error: cannot handle U3-HV device.  Please use binaryToCalibratedAnalogVoltage_hw130 function.\n" );
 			return -1;
 		}
@@ -529,14 +529,14 @@ long binaryToCalibratedAnalogVoltage( u3CalibrationInfo *caliInfo, int dacEnable
 			return binaryToCalibratedAnalogVoltage_hw130( caliInfo, 0, negChannel, bytesVoltage, analogVoltage );
 	}
 
-	if ( ( negChannel >= 0 && negChannel <= 15 ) || negChannel == 30 ) {
-		if ( dacEnabled == 0 )
+	if( ( negChannel >= 0 && negChannel <= 15 ) || negChannel == 30 ) {
+		if( dacEnabled == 0 )
 			*analogVoltage = caliInfo->ainDiffSlope * ( ( double )bytesVoltage ) + caliInfo->ainDiffOffset;
 		else
 			*analogVoltage = ( bytesVoltage / 65536.0 ) * caliInfo->vreg * 2.0 - caliInfo->vreg;
 	}
-	else if ( negChannel == 31 ) {
-		if ( dacEnabled == 0 )
+	else if( negChannel == 31 ) {
+		if( dacEnabled == 0 )
 			*analogVoltage = caliInfo->ainSESlope * ( ( double )bytesVoltage ) + caliInfo->ainSEOffset;
 		else
 			*analogVoltage = ( bytesVoltage / 65536.0 ) * caliInfo->vreg;
@@ -552,31 +552,31 @@ long binaryToCalibratedAnalogVoltage( u3CalibrationInfo *caliInfo, int dacEnable
 
 long binaryToCalibratedAnalogVoltage_hw130( u3CalibrationInfo *caliInfo, uint8 positiveChannel, uint8 negChannel, uint16 bytesVoltage, double *analogVoltage )
 {
-	if ( isCalibrationInfoValid( caliInfo ) == -1 )
+	if( isCalibrationInfoValid( caliInfo ) == -1 )
 		return -1;
 
-	if ( caliInfo->hardwareVersion < 1.30 ) {
+	if( caliInfo->hardwareVersion < 1.30 ) {
 		printf( "binaryToCalibratedAnalogVoltage_hw130 error: cannot handle U3 hardware versions < 1.30 .  Please use binaryToCalibratedAnalogVoltage function.\n" );
 		return -1;
 	}
 
-	if ( ( negChannel >= 0 && negChannel <= 15 ) || negChannel == 30 ) {
-		if ( caliInfo->highVoltage == 0
+	if( ( negChannel >= 0 && negChannel <= 15 ) || negChannel == 30 ) {
+		if( caliInfo->highVoltage == 0
 		        || ( caliInfo->highVoltage == 1 && positiveChannel >= 4 && negChannel >= 4 ) )
 			*analogVoltage = caliInfo->ainDiffSlope * ( ( double )bytesVoltage ) + caliInfo->ainDiffOffset;
-		else if ( caliInfo->hardwareVersion >= 1.30 && caliInfo->highVoltage == 1 ) {
+		else if( caliInfo->hardwareVersion >= 1.30 && caliInfo->highVoltage == 1 ) {
 			printf( "binaryToCalibratedAnalogVoltage_hw130 error: invalid negative channel for U3-HV.\n" );
 			return -1;
 		}
 	}
-	else if ( negChannel == 31 ) {
-		if ( caliInfo->highVoltage == 1 && positiveChannel >= 0 && positiveChannel < 4 )
+	else if( negChannel == 31 ) {
+		if( caliInfo->highVoltage == 1 && positiveChannel >= 0 && positiveChannel < 4 )
 			*analogVoltage = caliInfo->hvAINSlope[positiveChannel] * ( ( double )bytesVoltage ) + caliInfo->hvAINOffset[positiveChannel];
 		else
 			*analogVoltage = caliInfo->ainSESlope * ( ( double )bytesVoltage ) + caliInfo->ainSEOffset;
 	}
-	else if ( negChannel == 32 ) {
-		if ( caliInfo->highVoltage == 1 && positiveChannel >= 0 && positiveChannel < 4 ) {
+	else if( negChannel == 32 ) {
+		if( caliInfo->highVoltage == 1 && positiveChannel >= 0 && positiveChannel < 4 ) {
 			*analogVoltage = ( ( ( ( double )bytesVoltage - 16464.0 ) * 0.000637 ) + 0.019 );
 			//*analogVoltage =
 			//	((bytesVoltage / 65536.0) * caliInfo->vref * 2.0) - caliInfo->vref;
@@ -621,7 +621,7 @@ long analogToCalibratedBinary8BitVoltage( u3CalibrationInfo *caliInfo, int DACNu
 {
 	double tempBytesVoltage;
 
-	if ( isCalibrationInfoValid( caliInfo ) == -1 )
+	if( isCalibrationInfoValid( caliInfo ) == -1 )
 		return -1;
 
 	switch ( DACNumber ) {
@@ -642,9 +642,9 @@ long analogToCalibratedBinary8BitVoltage( u3CalibrationInfo *caliInfo, int DACNu
 	//Checking to make sure bytesVoltage will be a value between 0 and 255.  Too
 	//high of an analogVoltage (about 4.95 and above volts) or too low (below 0
 	//volts) will cause a value not between 0 and 255.
-	if ( tempBytesVoltage < 0 )
+	if( tempBytesVoltage < 0 )
 		tempBytesVoltage = 0;
-	else if ( tempBytesVoltage > 255 && caliInfo->hardwareVersion < 1.30 )
+	else if( tempBytesVoltage > 255 && caliInfo->hardwareVersion < 1.30 )
 		tempBytesVoltage = 255;
 
 	*bytesVoltage8 = ( uint8 )tempBytesVoltage;
@@ -657,14 +657,14 @@ long analogToCalibratedBinary16BitVoltage( u3CalibrationInfo *caliInfo, int DACN
 {
 	double tempBytesVoltage;
 
-	if ( isCalibrationInfoValid( caliInfo ) == -1 )
+	if( isCalibrationInfoValid( caliInfo ) == -1 )
 		return -1;
 
 	switch ( DACNumber ) {
 
 		case 0:
 
-			if ( caliInfo->hardwareVersion < 1.30 )
+			if( caliInfo->hardwareVersion < 1.30 )
 				tempBytesVoltage = analogVoltage * caliInfo->dacSlope[0] + caliInfo->dacOffset[0];
 			else
 				tempBytesVoltage = analogVoltage * caliInfo->dacSlope[0] * 256 + caliInfo->dacOffset[0] * 256;
@@ -672,7 +672,7 @@ long analogToCalibratedBinary16BitVoltage( u3CalibrationInfo *caliInfo, int DACN
 			break;
 
 		case 1:
-			if ( caliInfo->hardwareVersion < 1.30 )
+			if( caliInfo->hardwareVersion < 1.30 )
 				tempBytesVoltage = analogVoltage * caliInfo->dacSlope[1] + caliInfo->dacOffset[1];
 			else
 				tempBytesVoltage = analogVoltage * caliInfo->dacSlope[1] * 256 + caliInfo->dacOffset[1] * 256;
@@ -688,12 +688,12 @@ long analogToCalibratedBinary16BitVoltage( u3CalibrationInfo *caliInfo, int DACN
 	//Checking to make sure bytesVoltage will be a value between 0 and 255/65535.  Too
 	//high of an analogVoltage (about 4.95 and above volts) or too low (below 0
 	//volts) will cause a value not between 0 and 255/65535.
-	if ( tempBytesVoltage < 0 )
+	if( tempBytesVoltage < 0 )
 		tempBytesVoltage = 0;
 
-	if ( tempBytesVoltage > 65535 && caliInfo->hardwareVersion >= 1.30 )
+	if( tempBytesVoltage > 65535 && caliInfo->hardwareVersion >= 1.30 )
 		tempBytesVoltage = 65535;
-	else if ( tempBytesVoltage > 255 && caliInfo->hardwareVersion < 1.30 )
+	else if( tempBytesVoltage > 255 && caliInfo->hardwareVersion < 1.30 )
 		tempBytesVoltage = 255;
 
 	*bytesVoltage16 = ( uint16 )tempBytesVoltage;
@@ -708,7 +708,7 @@ long LJTDACAnalogToCalibratedBinaryVoltage( u3LJTDACCalibrationInfo *caliInfo, i
 	double offset;
 	double tempBytesVoltage;
 
-	if ( isLJTDACCalibrationInfoValid( caliInfo ) == -1 )
+	if( isLJTDACCalibrationInfoValid( caliInfo ) == -1 )
 		return -1;
 
 	switch ( DACNumber ) {
@@ -734,10 +734,10 @@ long LJTDACAnalogToCalibratedBinaryVoltage( u3LJTDACCalibrationInfo *caliInfo, i
 	//too high analogVoltage (above 10 volts) or too low analogVoltage (below
 	//-10 volts) will create a value not between 0 and 65535.
 
-	if ( tempBytesVoltage < 0 )
+	if( tempBytesVoltage < 0 )
 		tempBytesVoltage = 0;
 
-	if ( tempBytesVoltage > 65535 )
+	if( tempBytesVoltage > 65535 )
 		tempBytesVoltage = 65535;
 
 	*bytesVoltage = ( uint16 )tempBytesVoltage;
@@ -748,7 +748,7 @@ long LJTDACAnalogToCalibratedBinaryVoltage( u3LJTDACCalibrationInfo *caliInfo, i
 
 long binaryToCalibratedAnalogTemperature( u3CalibrationInfo *caliInfo, uint16 bytesTemperature, double *analogTemperature )
 {
-	if ( isCalibrationInfoValid( caliInfo ) == -1 )
+	if( isCalibrationInfoValid( caliInfo ) == -1 )
 		return -1;
 
 	*analogTemperature = caliInfo->tempSlope * ( ( double )bytesTemperature );
@@ -759,14 +759,14 @@ long binaryToCalibratedAnalogTemperature( u3CalibrationInfo *caliInfo, uint16 by
 
 long binaryToUncalibratedAnalogVoltage( int dac1Enabled, uint8 negChannel, uint16 bytesVoltage, double *analogVoltage )
 {
-	if ( ( negChannel >= 0 && negChannel <= 15 ) || negChannel == 30 ) {
-		if ( dac1Enabled == 0 )
+	if( ( negChannel >= 0 && negChannel <= 15 ) || negChannel == 30 ) {
+		if( dac1Enabled == 0 )
 			*analogVoltage = ( double )bytesVoltage * 0.000074463 - 2.44;
 		else
 			*analogVoltage = ( bytesVoltage / 65536.0 ) * 6.6 - 3.3;
 	}
-	else if ( negChannel == 31 ) {
-		if ( dac1Enabled == 0 )
+	else if( negChannel == 31 ) {
+		if( dac1Enabled == 0 )
 			*analogVoltage = ( double )bytesVoltage * 0.000037231;
 		else
 			*analogVoltage = ( bytesVoltage / 65536.0 ) * 3.3;
@@ -782,17 +782,17 @@ long binaryToUncalibratedAnalogVoltage( int dac1Enabled, uint8 negChannel, uint1
 
 long binaryToUncalibratedAnalogVoltage_hw130( int highVoltage, uint8 positiveChannel, uint8 negChannel, uint16 bytesVoltage, double *analogVoltage )
 {
-	if ( ( negChannel >= 0 && negChannel <= 15 ) || negChannel == 30 ) {
-		if ( highVoltage == 0
+	if( ( negChannel >= 0 && negChannel <= 15 ) || negChannel == 30 ) {
+		if( highVoltage == 0
 		        || ( highVoltage == 1 && positiveChannel >= 4 && negChannel >= 4 ) )
 			*analogVoltage = ( double )bytesVoltage * 0.000074463 - 2.44;
-		else if ( highVoltage == 1 ) {
+		else if( highVoltage == 1 ) {
 			printf( "binaryToCalibratedAnalogVoltage_hw130 error: invalid negative channel for U3-HV.\n" );
 			return -1;
 		}
 	}
-	else if ( negChannel == 31 ) {
-		if ( highVoltage == 1 )
+	else if( negChannel == 31 ) {
+		if( highVoltage == 1 )
 			*analogVoltage = ( double )bytesVoltage * 0.000314 - 10.3;
 		else
 			*analogVoltage = ( double )bytesVoltage * 0.000037231;
@@ -822,9 +822,9 @@ long analogToUncalibratedBinary8BitVoltage( double analogVoltage, uint8 *bytesVo
 	//high of an analogVoltage (about 4.95 and above volts) or too low (below 0
 	//volts) will cause a value not between 0 and 255.
 
-	if ( tempBytesVoltage < 0 )
+	if( tempBytesVoltage < 0 )
 		tempBytesVoltage = 0;
-	else if ( tempBytesVoltage > 255 )
+	else if( tempBytesVoltage > 255 )
 		tempBytesVoltage = 255;
 
 	*bytesVoltage8 = ( uint8 )tempBytesVoltage;
@@ -843,10 +843,10 @@ long analogToUncalibratedBinary16BitVoltage( double analogVoltage, uint16 *bytes
 	//high of an analogVoltage (about 4.95 and above volts) or too low (below 0
 	//volts) will cause a value not between 0 and 65535.
 
-	if ( tempBytesVoltage < 0 )
+	if( tempBytesVoltage < 0 )
 		tempBytesVoltage = 0;
 
-	if ( tempBytesVoltage > 65535 )
+	if( tempBytesVoltage > 65535 )
 		tempBytesVoltage = 65535;
 
 	*bytesVoltage16 = ( uint16 )tempBytesVoltage;
@@ -893,7 +893,7 @@ long I2C( HANDLE hDevice, uint8 I2COptions, uint8 SpeedAdjust, uint8 SDAPinNum, 
 	sendBuff[12] = NumI2CBytesToSend;     //NumI2CByteToSend
 	sendBuff[13] = NumI2CBytesToReceive;  //NumI2CBytesToReceive
 
-	for ( i = 0; i < NumI2CBytesToSend; i++ )
+	for( i = 0; i < NumI2CBytesToSend; i++ )
 		sendBuff[14 + i] = I2CBytesCommand[i];  //I2CByte
 
 	extendedChecksum( sendBuff, sendSize );
@@ -901,8 +901,8 @@ long I2C( HANDLE hDevice, uint8 I2COptions, uint8 SpeedAdjust, uint8 SDAPinNum, 
 	//Sending command to U3
 	sendChars = LJUSB_BulkWrite( hDevice, U3_PIPE_EP1_OUT, sendBuff, sendSize );
 
-	if ( sendChars < sendSize ) {
-		if ( sendChars == 0 )
+	if( sendChars < sendSize ) {
+		if( sendChars == 0 )
 			printf( "I2C Error : write failed\n" );
 		else
 			printf( "I2C Error : did not write all of the buffer\n" );
@@ -915,13 +915,13 @@ long I2C( HANDLE hDevice, uint8 I2COptions, uint8 SpeedAdjust, uint8 SDAPinNum, 
 	//Reading response from U3
 	recChars = LJUSB_BulkRead( hDevice, U3_PIPE_EP1_IN, recBuff, recSize );
 
-	if ( recChars < recSize ) {
-		if ( recChars == 0 )
+	if( recChars < recSize ) {
+		if( recChars == 0 )
 			printf( "I2C Error : read failed\n" );
 		else {
 			printf( "I2C Error : did not read all of the buffer\n" );
 
-			if ( recChars >= 12 )
+			if( recChars >= 12 )
 				*Errorcode = recBuff[6];
 		}
 
@@ -937,32 +937,32 @@ long I2C( HANDLE hDevice, uint8 I2COptions, uint8 SpeedAdjust, uint8 SDAPinNum, 
 	AckArray[2] = recBuff[10];
 	AckArray[3] = recBuff[11];
 
-	for ( i = 0; i < NumI2CBytesToReceive; i++ )
+	for( i = 0; i < NumI2CBytesToReceive; i++ )
 		I2CBytesResponse[i] = recBuff[12 + i];
 
-	if ( ( uint8 )( extendedChecksum8( recBuff ) ) != recBuff[0] ) {
+	if( ( uint8 )( extendedChecksum8( recBuff ) ) != recBuff[0] ) {
 		printf( "I2C Error : read buffer has bad checksum (%d)\n", recBuff[0] );
 		ret = -1;
 	}
 
-	if ( recBuff[1] != ( uint8 )( 0xF8 ) ) {
+	if( recBuff[1] != ( uint8 )( 0xF8 ) ) {
 		printf( "I2C Error : read buffer has incorrect command byte (%d)\n", recBuff[1] );
 		ret = -1;
 	}
 
-	if ( recBuff[2] != ( uint8 )( ( recSize - 6 ) / 2 ) ) {
+	if( recBuff[2] != ( uint8 )( ( recSize - 6 ) / 2 ) ) {
 		printf( "I2C Error : read buffer has incorrect number of data words (%d)\n", recBuff[2] );
 		ret = -1;
 	}
 
-	if ( recBuff[3] != ( uint8 )( 0x3B ) ) {
+	if( recBuff[3] != ( uint8 )( 0x3B ) ) {
 		printf( "I2C Error : read buffer has incorrect extended command number (%d)\n", recBuff[3] );
 		ret = -1;
 	}
 
 	checksumTotal = extendedChecksum16( recBuff, recSize );
 
-	if ( ( uint8 )( ( checksumTotal / 256 ) & 0xff ) != recBuff[5] || ( uint8 )( checksumTotal & 255 ) != recBuff[4] ) {
+	if( ( uint8 )( ( checksumTotal / 256 ) & 0xff ) != recBuff[5] || ( uint8 )( checksumTotal & 255 ) != recBuff[4] ) {
 		printf( "I2C error : read buffer has bad checksum16 (%d)\n", checksumTotal );
 		ret = -1;
 	}
@@ -972,7 +972,7 @@ long I2C( HANDLE hDevice, uint8 I2COptions, uint8 SpeedAdjust, uint8 SDAPinNum, 
 
 	expectedAckArray = pow( 2.0,  NumI2CBytesToSend + 1 ) - 1;
 
-	if ( ackArrayTotal != expectedAckArray )
+	if( ackArrayTotal != expectedAckArray )
 		printf( "I2C error : expected an ack of %d, but received %d\n", expectedAckArray, ackArrayTotal );
 
 cleanmem:
@@ -999,7 +999,7 @@ long eAIN( HANDLE Handle, u3CalibrationInfo *CalibrationInfo, long ConfigIO, lon
 	double hwver;
 	int hv;
 
-	if ( isCalibrationInfoValid( CalibrationInfo ) != 1 ) {
+	if( isCalibrationInfoValid( CalibrationInfo ) != 1 ) {
 		printf( "eAIN error: calibration information is required" );
 		return -1;
 	}
@@ -1008,19 +1008,19 @@ long eAIN( HANDLE Handle, u3CalibrationInfo *CalibrationInfo, long ConfigIO, lon
 
 	hv = CalibrationInfo->highVoltage;
 
-	if ( ChannelP < 0 || ( ChannelP > 15 && ChannelP != 30 && ChannelP != 31 ) ) {
+	if( ChannelP < 0 || ( ChannelP > 15 && ChannelP != 30 && ChannelP != 31 ) ) {
 		printf( "eAIN error: Invalid positive channel\n" );
 		return -1;
 	}
 
-	if ( ChannelN < 0 || ( ChannelN > 15 && ChannelN != 30 && ChannelN != 31 )
+	if( ChannelN < 0 || ( ChannelN > 15 && ChannelN != 30 && ChannelN != 31 )
 	        || ( hwver >= 1.30 && hv == 1 && ( ( ChannelP < 4 && ChannelN != 31 )
 	                                           || ChannelN < 4 ) ) ) {
 		printf( "eAIN error: Invalid negative channel\n" );
 		return -1;
 	}
 
-	if ( hwver >= 1.30 && hv == 1 && ChannelP < 4 ) {} else if ( ConfigIO != 0 ) {
+	if( hwver >= 1.30 && hv == 1 && ChannelP < 4 ) {} else if( ConfigIO != 0 ) {
 
 		FIOAnalog = 0;
 		EIOAnalog = 0;
@@ -1028,30 +1028,30 @@ long eAIN( HANDLE Handle, u3CalibrationInfo *CalibrationInfo, long ConfigIO, lon
 		//Setting ChannelP and ChannelN channels to analog using
 		//FIOAnalog and EIOAnalog
 
-		if ( ChannelP <= 7 )
+		if( ChannelP <= 7 )
 			FIOAnalog = pow( 2, ChannelP );
-		else if ( ChannelP <= 15 )
+		else if( ChannelP <= 15 )
 			EIOAnalog = pow( 2, ( ChannelP - 8 ) );
 
-		if ( ChannelN <= 7 )
+		if( ChannelN <= 7 )
 			FIOAnalog = FIOAnalog | ( int )pow( 2, ChannelN );
-		else if ( ChannelN <= 15 )
+		else if( ChannelN <= 15 )
 			EIOAnalog = EIOAnalog | ( int )pow( 2, ( ChannelN - 8 ) );
 
 		//Using ConfigIO to get current FIOAnalog and EIOAnalog settings
-		if ( ( error = ehConfigIO( Handle, 0, 0, 0, 0, 0, &curTCConfig, &outDAC1Enable, &curFIOAnalog, &curEIOAnalog ) ) != 0 )
+		if( ( error = ehConfigIO( Handle, 0, 0, 0, 0, 0, &curTCConfig, &outDAC1Enable, &curFIOAnalog, &curEIOAnalog ) ) != 0 )
 			return error;
 
 		*DAC1Enable = outDAC1Enable;
 
-		if ( !( FIOAnalog == curFIOAnalog && EIOAnalog == curEIOAnalog ) ) {
+		if( !( FIOAnalog == curFIOAnalog && EIOAnalog == curEIOAnalog ) ) {
 			//Creating new FIOAnalog and EIOAnalog settings
 			FIOAnalog = FIOAnalog | curFIOAnalog;
 			EIOAnalog = EIOAnalog | curEIOAnalog;
 
 			//Using ConfigIO to set new FIOAnalog and EIOAnalog settings
 
-			if ( ( error = ehConfigIO( Handle, 12, curTCConfig, 0, FIOAnalog, EIOAnalog, NULL, NULL, &curFIOAnalog, &curEIOAnalog ) ) != 0 )
+			if( ( error = ehConfigIO( Handle, 12, curTCConfig, 0, FIOAnalog, EIOAnalog, NULL, NULL, &curFIOAnalog, &curEIOAnalog ) ) != 0 )
 				return error;
 		}
 	}
@@ -1068,29 +1068,29 @@ long eAIN( HANDLE Handle, u3CalibrationInfo *CalibrationInfo, long ConfigIO, lon
 	//QuickSample (bit 7)
 	sendDataBuff[2] = ( uint8 )ChannelN; //Negative channel
 
-	if ( ehFeedback( Handle, sendDataBuff, 3, &Errorcode, &ErrorFrame, recDataBuff, 2 ) < 0 )
+	if( ehFeedback( Handle, sendDataBuff, 3, &Errorcode, &ErrorFrame, recDataBuff, 2 ) < 0 )
 		return -1;
 
-	if ( Errorcode )
+	if( Errorcode )
 		return ( long )Errorcode;
 
 	bytesVT = recDataBuff[0] + recDataBuff[1] * 256;
 
-	if ( Binary != 0 ) {
+	if( Binary != 0 ) {
 		*Voltage = ( double )bytesVT;
 	}
 	else {
-		if ( ChannelP == 30 ) {
-			if ( binaryToCalibratedAnalogTemperature( CalibrationInfo, bytesVT, Voltage ) < 0 )
+		if( ChannelP == 30 ) {
+			if( binaryToCalibratedAnalogTemperature( CalibrationInfo, bytesVT, Voltage ) < 0 )
 				return -1;
 		}
 		else {
-			if ( hwver < 1.30 )
+			if( hwver < 1.30 )
 				error = binaryToCalibratedAnalogVoltage( CalibrationInfo, ( int )( *DAC1Enable ), ChannelN, bytesVT, Voltage );
 			else
 				error = binaryToCalibratedAnalogVoltage_hw130( CalibrationInfo, ChannelP, ChannelN, bytesVT, Voltage );
 
-			if ( error < 0 )
+			if( error < 0 )
 				return -1;
 		}
 	}
@@ -1106,31 +1106,31 @@ long eDAC( HANDLE Handle, u3CalibrationInfo *CalibrationInfo, long ConfigIO, lon
 	uint16 bytesV;
 	long error, sendSize;
 
-	if ( isCalibrationInfoValid( CalibrationInfo ) != 1 ) {
+	if( isCalibrationInfoValid( CalibrationInfo ) != 1 ) {
 		printf( "eDAC error: calibration information is required" );
 		return -1;
 	}
 
-	if ( Channel < 0 || Channel > 1 ) {
+	if( Channel < 0 || Channel > 1 ) {
 		printf( "eDAC error: Invalid DAC channel\n" );
 		return -1;
 	}
 
-	if ( ConfigIO != 0 && Channel == 1 && CalibrationInfo->hardwareVersion < 1.30 ) {
+	if( ConfigIO != 0 && Channel == 1 && CalibrationInfo->hardwareVersion < 1.30 ) {
 		//Using ConfigIO to enable DAC1
 		error = ehConfigIO( Handle, 2, 0, 1, 0, 0, NULL, &DAC1Enabled, NULL, NULL );
 
-		if ( error != 0 )
+		if( error != 0 )
 			return error;
 	}
 
 	/* Setting up Feedback command to set DAC */
-	if ( CalibrationInfo->hardwareVersion < 1.30 ) {
+	if( CalibrationInfo->hardwareVersion < 1.30 ) {
 		sendSize = 2;
 
 		sendDataBuff[0] = 34 + Channel;  //IOType is DAC0/1 (8 bit)
 
-		if ( analogToCalibratedBinary8BitVoltage( CalibrationInfo, ( int )Channel, Voltage, &byteV ) < 0 )
+		if( analogToCalibratedBinary8BitVoltage( CalibrationInfo, ( int )Channel, Voltage, &byteV ) < 0 )
 			return -1;
 
 		sendDataBuff[1] = byteV;      //Value
@@ -1140,7 +1140,7 @@ long eDAC( HANDLE Handle, u3CalibrationInfo *CalibrationInfo, long ConfigIO, lon
 
 		sendDataBuff[0] = 38 + Channel;  //IOType is DAC0/1 (16 bit)
 
-		if ( analogToCalibratedBinary16BitVoltage( CalibrationInfo, ( int )Channel, Voltage, &bytesV ) < 0 )
+		if( analogToCalibratedBinary16BitVoltage( CalibrationInfo, ( int )Channel, Voltage, &bytesV ) < 0 )
 			return -1;
 
 		sendDataBuff[1] = ( uint8 )( bytesV & 255 );    //Value LSB
@@ -1148,10 +1148,10 @@ long eDAC( HANDLE Handle, u3CalibrationInfo *CalibrationInfo, long ConfigIO, lon
 		sendDataBuff[2] = ( uint8 )( ( bytesV & 65280 ) / 256 ); //Value MSB
 	}
 
-	if ( ehFeedback( Handle, sendDataBuff, sendSize, &Errorcode, &ErrorFrame, NULL, 0 ) < 0 )
+	if( ehFeedback( Handle, sendDataBuff, sendSize, &Errorcode, &ErrorFrame, NULL, 0 ) < 0 )
 		return -1;
 
-	if ( Errorcode )
+	if( Errorcode )
 		return ( long )Errorcode;
 
 	return 0;
@@ -1166,18 +1166,18 @@ long eDI( HANDLE Handle, long ConfigIO, long Channel, long *State )
 	long error;
 
 
-	if ( Channel < 0 || Channel > 19 ) {
+	if( Channel < 0 || Channel > 19 ) {
 		printf( "eDI error: Invalid DI channel\n" );
 		return -1;
 	}
 
-	if ( ConfigIO != 0 && Channel <= 15 ) {
+	if( ConfigIO != 0 && Channel <= 15 ) {
 		FIOAnalog = 255;
 		EIOAnalog = 255;
 
 		//Setting Channel to digital using FIOAnalog and EIOAnalog
 
-		if ( Channel <= 7 )
+		if( Channel <= 7 )
 			FIOAnalog = 255 - pow( 2, Channel );
 		else
 			EIOAnalog = 255 - pow( 2, ( Channel - 8 ) );
@@ -1185,10 +1185,10 @@ long eDI( HANDLE Handle, long ConfigIO, long Channel, long *State )
 		//Using ConfigIO to get current FIOAnalog and EIOAnalog settings
 		error = ehConfigIO( Handle, 0, 0, 0, 0, 0, &curTCConfig, NULL, &curFIOAnalog, &curEIOAnalog );
 
-		if ( error != 0 )
+		if( error != 0 )
 			return error;
 
-		if ( !( FIOAnalog == curFIOAnalog && EIOAnalog == curEIOAnalog ) ) {
+		if( !( FIOAnalog == curFIOAnalog && EIOAnalog == curEIOAnalog ) ) {
 			//Creating new FIOAnalog and EIOAnalog settings
 			FIOAnalog = FIOAnalog & curFIOAnalog;
 			EIOAnalog = EIOAnalog & curEIOAnalog;
@@ -1196,7 +1196,7 @@ long eDI( HANDLE Handle, long ConfigIO, long Channel, long *State )
 			//Using ConfigIO to set new FIOAnalog and EIOAnalog settings
 			error = ehConfigIO( Handle, 12, curTCConfig, 0, FIOAnalog, EIOAnalog, NULL, NULL, &curFIOAnalog, &curEIOAnalog );
 
-			if ( error != 0 )
+			if( error != 0 )
 				return error;
 		}
 	}
@@ -1210,10 +1210,10 @@ long eDI( HANDLE Handle, long ConfigIO, long Channel, long *State )
 
 	sendDataBuff[3] = Channel;  //IONumber
 
-	if ( ehFeedback( Handle, sendDataBuff, 4, &Errorcode, &ErrorFrame, recDataBuff, 1 ) < 0 )
+	if( ehFeedback( Handle, sendDataBuff, 4, &Errorcode, &ErrorFrame, recDataBuff, 1 ) < 0 )
 		return -1;
 
-	if ( Errorcode )
+	if( Errorcode )
 		return ( long )Errorcode;
 
 	*State = recDataBuff[0];
@@ -1230,18 +1230,18 @@ long eDO( HANDLE Handle, long ConfigIO, long Channel, long State )
 	long error;
 
 
-	if ( Channel < 0 || Channel > 19 ) {
+	if( Channel < 0 || Channel > 19 ) {
 		printf( "eD0 error: Invalid DI channel\n" );
 		return -1;
 	}
 
-	if ( ConfigIO != 0 && Channel <= 15 ) {
+	if( ConfigIO != 0 && Channel <= 15 ) {
 		FIOAnalog = 255;
 		EIOAnalog = 255;
 
 		//Setting Channel to digital using FIOAnalog and EIOAnalog
 
-		if ( Channel <= 7 )
+		if( Channel <= 7 )
 			FIOAnalog = 255 - pow( 2, Channel );
 		else
 			EIOAnalog = 255 - pow( 2, ( Channel - 8 ) );
@@ -1249,10 +1249,10 @@ long eDO( HANDLE Handle, long ConfigIO, long Channel, long State )
 		//Using ConfigIO to get current FIOAnalog and EIOAnalog settings
 		error = ehConfigIO( Handle, 0, 0, 0, 0, 0, &curTCConfig, NULL, &curFIOAnalog, &curEIOAnalog );
 
-		if ( error != 0 )
+		if( error != 0 )
 			return error;
 
-		if ( !( FIOAnalog == curFIOAnalog && EIOAnalog == curEIOAnalog ) ) {
+		if( !( FIOAnalog == curFIOAnalog && EIOAnalog == curEIOAnalog ) ) {
 			//Using ConfigIO to get current FIOAnalog and EIOAnalog settings
 			FIOAnalog = FIOAnalog & curFIOAnalog;
 			EIOAnalog = EIOAnalog & curEIOAnalog;
@@ -1260,7 +1260,7 @@ long eDO( HANDLE Handle, long ConfigIO, long Channel, long State )
 			//Using ConfigIO to set new FIOAnalog and EIOAnalog settings
 			error = ehConfigIO( Handle, 12, curTCConfig, 0, FIOAnalog, EIOAnalog, NULL, NULL, &curFIOAnalog, &curEIOAnalog );
 
-			if ( error != 0 )
+			if( error != 0 )
 				return error;
 		}
 	}
@@ -1274,10 +1274,10 @@ long eDO( HANDLE Handle, long ConfigIO, long Channel, long State )
 
 	sendDataBuff[3] = Channel + 128 * ( ( State > 0 ) ? 1 : 0 ); //IONumber(bits 0-4) + State (bit 7)
 
-	if ( ehFeedback( Handle, sendDataBuff, 4, &Errorcode, &ErrorFrame, NULL, 0 ) < 0 )
+	if( ehFeedback( Handle, sendDataBuff, 4, &Errorcode, &ErrorFrame, NULL, 0 ) < 0 )
 		return -1;
 
-	if ( Errorcode )
+	if( Errorcode )
 		return ( long )Errorcode;
 
 	return 0;
@@ -1292,30 +1292,30 @@ long eTCConfig( HANDLE Handle, long *aEnableTimers, long *aEnableCounters, long 
 	int sendDataBuffSize, numTimers, numCounters, i;
 	long error;
 
-	if ( TCPinOffset < 0 && TCPinOffset > 8 ) {
+	if( TCPinOffset < 0 && TCPinOffset > 8 ) {
 		printf( "eTCConfig error: Invalid TimerCounterPinOffset\n" );
 		return -1;
 	}
 
 	/* ConfigTimerClock */
-	if ( TimerClockBaseIndex == LJ_tc2MHZ || TimerClockBaseIndex ==  LJ_tc6MHZ || TimerClockBaseIndex == LJ_tc24MHZ ||
+	if( TimerClockBaseIndex == LJ_tc2MHZ || TimerClockBaseIndex ==  LJ_tc6MHZ || TimerClockBaseIndex == LJ_tc24MHZ ||
 	        TimerClockBaseIndex == LJ_tc500KHZ_DIV || TimerClockBaseIndex == LJ_tc2MHZ_DIV || TimerClockBaseIndex == LJ_tc6MHZ_DIV ||
 	        TimerClockBaseIndex == LJ_tc24MHZ_DIV )
 		TimerClockBaseIndex = TimerClockBaseIndex - 10;
-	else if ( TimerClockBaseIndex == LJ_tc4MHZ || TimerClockBaseIndex ==  LJ_tc12MHZ || TimerClockBaseIndex == LJ_tc48MHZ ||
+	else if( TimerClockBaseIndex == LJ_tc4MHZ || TimerClockBaseIndex ==  LJ_tc12MHZ || TimerClockBaseIndex == LJ_tc48MHZ ||
 	          TimerClockBaseIndex == LJ_tc1MHZ_DIV || TimerClockBaseIndex == LJ_tc4MHZ_DIV || TimerClockBaseIndex == LJ_tc12MHZ_DIV ||
 	          TimerClockBaseIndex == LJ_tc48MHZ_DIV )
 		TimerClockBaseIndex = TimerClockBaseIndex - 20;
 
 	error = ehConfigTimerClock( Handle, ( uint8 )( TimerClockBaseIndex + 128 ), ( uint8 )TimerClockDivisor, NULL, NULL );
 
-	if ( error != 0 )
+	if( error != 0 )
 		return error;
 
 	//Using ConfigIO to get current FIOAnalog and curEIOAnalog settings
 	error = ehConfigIO( Handle, 0, 0, 0, 0, 0, NULL, NULL, &curFIOAnalog, &curEIOAnalog );
 
-	if ( error != 0 )
+	if( error != 0 )
 		return error;
 
 	numTimers = 0;
@@ -1328,15 +1328,15 @@ long eTCConfig( HANDLE Handle, long *aEnableTimers, long *aEnableCounters, long 
 
 	EIOAnalog = 255;
 
-	for ( i = 0; i < 2; i++ ) {
-		if ( aEnableTimers[i] != 0 )
+	for( i = 0; i < 2; i++ ) {
+		if( aEnableTimers[i] != 0 )
 			numTimers++;
 		else
 			i = 999;
 	}
 
-	for ( i = 0; i < 2; i++ ) {
-		if ( aEnableCounters[i] != 0 ) {
+	for( i = 0; i < 2; i++ ) {
+		if( aEnableCounters[i] != 0 ) {
 			numCounters++;
 			TimerCounterConfig += pow( 2, ( i + 2 ) );
 		}
@@ -1344,8 +1344,8 @@ long eTCConfig( HANDLE Handle, long *aEnableTimers, long *aEnableCounters, long 
 
 	TimerCounterConfig += numTimers + TCPinOffset * 16;
 
-	for ( i = 0; i < numCounters + numTimers; i++ ) {
-		if ( i + TCPinOffset < 8 )
+	for( i = 0; i < numCounters + numTimers; i++ ) {
+		if( i + TCPinOffset < 8 )
 			FIOAnalog = FIOAnalog - pow( 2, i + TCPinOffset );
 		else
 			EIOAnalog = EIOAnalog - pow( 2, ( i + TCPinOffset - 8 ) );
@@ -1356,15 +1356,15 @@ long eTCConfig( HANDLE Handle, long *aEnableTimers, long *aEnableCounters, long 
 	EIOAnalog = EIOAnalog & curEIOAnalog;
 	error = ehConfigIO( Handle, 13, TimerCounterConfig, 0, FIOAnalog, EIOAnalog, &curTimerCounterConfig, NULL, &curFIOAnalog, &curEIOAnalog );
 
-	if ( error != 0 )
+	if( error != 0 )
 		return error;
 
-	if ( numTimers > 0 ) {
+	if( numTimers > 0 ) {
 		/* Feedback */
-		for ( i = 0; i < 8; i++ )
+		for( i = 0; i < 8; i++ )
 			sendDataBuff[i] = 0;
 
-		for ( i = 0; i < numTimers; i++ ) {
+		for( i = 0; i < numTimers; i++ ) {
 			sendDataBuff[i*4] = 43 + i * 2;                                       //TimerConfig
 			sendDataBuff[1 + i*4] = ( uint8 )aTimerModes[i];                      //TimerMode
 			sendDataBuff[2 + i*4] = ( uint8 )( ( ( long )aTimerValues[i] ) & 0x00ff );    //Value LSB
@@ -1373,10 +1373,10 @@ long eTCConfig( HANDLE Handle, long *aEnableTimers, long *aEnableCounters, long 
 
 		sendDataBuffSize = 4 * numTimers;
 
-		if ( ehFeedback( Handle, sendDataBuff, sendDataBuffSize, &Errorcode, &ErrorFrame, NULL, 0 ) < 0 )
+		if( ehFeedback( Handle, sendDataBuff, sendDataBuffSize, &Errorcode, &ErrorFrame, NULL, 0 ) < 0 )
 			return -1;
 
-		if ( Errorcode )
+		if( Errorcode )
 			return ( long )Errorcode;
 	}
 
@@ -1399,8 +1399,8 @@ long eTCValues( HANDLE Handle, long *aReadTimers, long *aUpdateResetTimers, long
 	sendDataBuffSize = 0;
 	recDataBuffSize = 0;
 
-	for ( i = 0; i < 2; i++ ) {
-		if ( aReadTimers[i] != 0 || aUpdateResetTimers[i] != 0 ) {
+	for( i = 0; i < 2; i++ ) {
+		if( aReadTimers[i] != 0 || aUpdateResetTimers[i] != 0 ) {
 			sendDataBuff[sendDataBuffSize] = 42 + i * 2;                                        //Timer
 			sendDataBuff[1 + sendDataBuffSize] = ( ( aUpdateResetTimers[i] != 0 ) ? 1 : 0 );    //UpdateReset
 			sendDataBuff[2 + sendDataBuffSize] = ( uint8 )( ( ( long )aTimerValues[i] ) & 0x00ff );   //Value LSB
@@ -1411,8 +1411,8 @@ long eTCValues( HANDLE Handle, long *aReadTimers, long *aUpdateResetTimers, long
 		}
 	}
 
-	for ( i = 0; i < 2; i++ ) {
-		if ( aReadCounters[i] != 0 || aResetCounters[i] != 0 ) {
+	for( i = 0; i < 2; i++ ) {
+		if( aReadCounters[i] != 0 || aResetCounters[i] != 0 ) {
 			sendDataBuff[sendDataBuffSize] = 54 + i;                                 //Counter
 			sendDataBuff[1 + sendDataBuffSize] = ( ( aResetCounters[i] != 0 ) ? 1 : 0 ); //Reset
 			sendDataBuffSize += 2;
@@ -1420,31 +1420,31 @@ long eTCValues( HANDLE Handle, long *aReadTimers, long *aUpdateResetTimers, long
 		}
 	}
 
-	if ( ehFeedback( Handle, sendDataBuff, sendDataBuffSize, &Errorcode, &ErrorFrame, recDataBuff, recDataBuffSize ) < 0 )
+	if( ehFeedback( Handle, sendDataBuff, sendDataBuffSize, &Errorcode, &ErrorFrame, recDataBuff, recDataBuffSize ) < 0 )
 		return -1;
 
-	if ( Errorcode )
+	if( Errorcode )
 		return ( long )Errorcode;
 
-	for ( i = 0; i < 2; i++ ) {
+	for( i = 0; i < 2; i++ ) {
 		aTimerValues[i] = 0;
 
-		if ( aReadTimers[i] != 0 ) {
-			for ( j = 0; j < 4; j++ )
+		if( aReadTimers[i] != 0 ) {
+			for( j = 0; j < 4; j++ )
 				aTimerValues[i] += ( double )( ( long )recDataBuff[j + dataCountTimer*4] * pow( 2, 8 * j ) );
 		}
 
-		if ( aReadTimers[i] != 0 || aUpdateResetTimers[i] != 0 )
+		if( aReadTimers[i] != 0 || aUpdateResetTimers[i] != 0 )
 			dataCountTimer++;
 
 		aCounterValues[i] = 0;
 
-		if ( aReadCounters[i] != 0 ) {
-			for ( j = 0; j < 4; j++ )
+		if( aReadCounters[i] != 0 ) {
+			for( j = 0; j < 4; j++ )
 				aCounterValues[i] += ( double )( ( long )recDataBuff[j + numTimers*4 + dataCountCounter*4] * pow( 2, 8 * j ) );
 		}
 
-		if ( aReadCounters[i] != 0 || aResetCounters[i] != 0 )
+		if( aReadCounters[i] != 0 || aResetCounters[i] != 0 )
 			dataCountCounter++;
 	}
 
@@ -1473,8 +1473,8 @@ long ehConfigIO( HANDLE hDevice, uint8 inWriteMask, uint8 inTimerCounterConfig, 
 
 	//Sending command to U3
 
-	if ( ( sendChars = LJUSB_BulkWrite( hDevice, U3_PIPE_EP1_OUT, sendBuff, 12 ) ) < 12 ) {
-		if ( sendChars == 0 )
+	if( ( sendChars = LJUSB_BulkWrite( hDevice, U3_PIPE_EP1_OUT, sendBuff, 12 ) ) < 12 ) {
+		if( sendChars == 0 )
 			printf( "ehConfigIO error : write failed\n" );
 		else
 			printf( "ehConfigIO error : did not write all of the buffer\n" );
@@ -1483,8 +1483,8 @@ long ehConfigIO( HANDLE hDevice, uint8 inWriteMask, uint8 inTimerCounterConfig, 
 	}
 
 	//Reading response from U3
-	if ( ( recChars = LJUSB_BulkRead( hDevice, U3_PIPE_EP1_IN, recBuff, 12 ) ) < 12 ) {
-		if ( recChars == 0 )
+	if( ( recChars = LJUSB_BulkRead( hDevice, U3_PIPE_EP1_IN, recBuff, 12 ) ) < 12 ) {
+		if( recChars == 0 )
 			printf( "ehConfigIO error : read failed\n" );
 		else
 			printf( "ehConfigIO error : did not read all of the buffer\n" );
@@ -1494,41 +1494,41 @@ long ehConfigIO( HANDLE hDevice, uint8 inWriteMask, uint8 inTimerCounterConfig, 
 
 	checksumTotal = extendedChecksum16( recBuff, 12 );
 
-	if ( ( uint8 )( ( checksumTotal / 256 ) & 0xff ) != recBuff[5] ) {
+	if( ( uint8 )( ( checksumTotal / 256 ) & 0xff ) != recBuff[5] ) {
 		printf( "ehConfigIO error : read buffer has bad checksum16(MSB)\n" );
 		return -1;
 	}
 
-	if ( ( uint8 )( checksumTotal & 0xff ) != recBuff[4] ) {
+	if( ( uint8 )( checksumTotal & 0xff ) != recBuff[4] ) {
 		printf( "ehConfigIO error : read buffer has bad checksum16(LBS)\n" );
 		return -1;
 	}
 
-	if ( extendedChecksum8( recBuff ) != recBuff[0] ) {
+	if( extendedChecksum8( recBuff ) != recBuff[0] ) {
 		printf( "ehConfigIO error : read buffer has bad checksum8\n" );
 		return -1;
 	}
 
-	if ( recBuff[1] != ( uint8 )( 0xF8 ) || recBuff[2] != ( uint8 )( 0x03 ) || recBuff[3] != ( uint8 )( 0x0B ) ) {
+	if( recBuff[1] != ( uint8 )( 0xF8 ) || recBuff[2] != ( uint8 )( 0x03 ) || recBuff[3] != ( uint8 )( 0x0B ) ) {
 		printf( "ehConfigIO error : read buffer has wrong command bytes\n" );
 		return -1;
 	}
 
-	if ( recBuff[6] != 0 ) {
+	if( recBuff[6] != 0 ) {
 		printf( "ehConfigIO error : read buffer received errorcode %d\n", recBuff[6] );
 		return ( int )recBuff[6];
 	}
 
-	if ( outTimerCounterConfig != NULL )
+	if( outTimerCounterConfig != NULL )
 		*outTimerCounterConfig = recBuff[8];
 
-	if ( outDAC1Enable != NULL )
+	if( outDAC1Enable != NULL )
 		*outDAC1Enable = recBuff[9];
 
-	if ( outFIOAnalog != NULL )
+	if( outFIOAnalog != NULL )
 		*outFIOAnalog = recBuff[10];
 
-	if ( outEIOAnalog != NULL )
+	if( outEIOAnalog != NULL )
 		*outEIOAnalog = recBuff[11];
 
 	return 0;
@@ -1554,8 +1554,8 @@ long ehConfigTimerClock( HANDLE hDevice, uint8 inTimerClockConfig, uint8 inTimer
 
 	//Sending command to U3
 
-	if ( ( sendChars = LJUSB_BulkWrite( hDevice, U3_PIPE_EP1_OUT, sendBuff, 10 ) ) < 10 ) {
-		if ( sendChars == 0 )
+	if( ( sendChars = LJUSB_BulkWrite( hDevice, U3_PIPE_EP1_OUT, sendBuff, 10 ) ) < 10 ) {
+		if( sendChars == 0 )
 			printf( "ehConfigTimerClock error : write failed\n" );
 		else
 			printf( "ehConfigTimerClock error : did not write all of the buffer\n" );
@@ -1564,8 +1564,8 @@ long ehConfigTimerClock( HANDLE hDevice, uint8 inTimerClockConfig, uint8 inTimer
 	}
 
 	//Reading response from U3
-	if ( ( recChars = LJUSB_BulkRead( hDevice, U3_PIPE_EP1_IN, recBuff, 10 ) ) < 10 ) {
-		if ( recChars == 0 )
+	if( ( recChars = LJUSB_BulkRead( hDevice, U3_PIPE_EP1_IN, recBuff, 10 ) ) < 10 ) {
+		if( recChars == 0 )
 			printf( "ehConfigTimerClock error : read failed\n" );
 		else
 			printf( "ehConfigTimerClock error : did not read all of the buffer\n" );
@@ -1575,33 +1575,33 @@ long ehConfigTimerClock( HANDLE hDevice, uint8 inTimerClockConfig, uint8 inTimer
 
 	checksumTotal = extendedChecksum16( recBuff, 10 );
 
-	if ( ( uint8 )( ( checksumTotal / 256 ) & 0xff ) != recBuff[5] ) {
+	if( ( uint8 )( ( checksumTotal / 256 ) & 0xff ) != recBuff[5] ) {
 		printf( "ehConfigTimerClock error : read buffer has bad checksum16(MSB)\n" );
 		return -1;
 	}
 
-	if ( ( uint8 )( checksumTotal & 0xff ) != recBuff[4] ) {
+	if( ( uint8 )( checksumTotal & 0xff ) != recBuff[4] ) {
 		printf( "ehConfigTimerClock error : read buffer has bad checksum16(LBS)\n" );
 		return -1;
 	}
 
-	if ( extendedChecksum8( recBuff ) != recBuff[0] ) {
+	if( extendedChecksum8( recBuff ) != recBuff[0] ) {
 		printf( "ehConfigTimerClock error : read buffer has bad checksum8\n" );
 		return -1;
 	}
 
-	if ( recBuff[1] != ( uint8 )( 0xF8 ) || recBuff[2] != ( uint8 )( 0x02 ) || recBuff[3] != ( uint8 )( 0x0A ) ) {
+	if( recBuff[1] != ( uint8 )( 0xF8 ) || recBuff[2] != ( uint8 )( 0x02 ) || recBuff[3] != ( uint8 )( 0x0A ) ) {
 		printf( "ehConfigTimerClock error : read buffer has wrong command bytes\n" );
 		return -1;
 	}
 
-	if ( outTimerClockConfig != NULL )
+	if( outTimerClockConfig != NULL )
 		*outTimerClockConfig = recBuff[8];
 
-	if ( outTimerClockDivisor != NULL )
+	if( outTimerClockDivisor != NULL )
 		*outTimerClockDivisor = recBuff[9];
 
-	if ( recBuff[6] != 0 ) {
+	if( recBuff[6] != 0 ) {
 		printf( "ehConfigTimerClock error : read buffer received errorcode %d\n", recBuff[6] );
 		return recBuff[6];
 	}
@@ -1619,17 +1619,17 @@ long ehFeedback( HANDLE hDevice, uint8 *inIOTypesDataBuff, long inIOTypesDataSiz
 	ret = 0;
 	commandBytes = 6;
 
-	if ( ( ( sendDWSize = inIOTypesDataSize + 1 ) % 2 ) != 0 )
+	if( ( ( sendDWSize = inIOTypesDataSize + 1 ) % 2 ) != 0 )
 		sendDWSize++;
 
-	if ( ( ( recDWSize = outDataSize + 3 ) % 2 ) != 0 )
+	if( ( ( recDWSize = outDataSize + 3 ) % 2 ) != 0 )
 		recDWSize++;
 
 	sendBuff = ( uint8 * ) malloc( sizeof( uint8 ) * ( commandBytes + sendDWSize ) );
 
 	recBuff = ( uint8 * ) malloc( sizeof( uint8 ) * ( commandBytes + recDWSize ) );
 
-	if ( sendBuff == NULL || recBuff == NULL ) {
+	if( sendBuff == NULL || recBuff == NULL ) {
 		ret = -1;
 		goto cleanmem;
 	}
@@ -1644,14 +1644,14 @@ long ehFeedback( HANDLE hDevice, uint8 *inIOTypesDataBuff, long inIOTypesDataSiz
 
 	sendBuff[6] = 0;    //Echo
 
-	for ( i = 0; i < inIOTypesDataSize; i++ )
+	for( i = 0; i < inIOTypesDataSize; i++ )
 		sendBuff[i+commandBytes+1] = inIOTypesDataBuff[i];
 
 	extendedChecksum( sendBuff, ( sendDWSize + commandBytes ) );
 
 	//Sending command to U3
-	if ( ( sendChars = LJUSB_BulkWrite( hDevice, U3_PIPE_EP1_OUT, sendBuff, ( sendDWSize + commandBytes ) ) ) < sendDWSize + commandBytes ) {
-		if ( sendChars == 0 )
+	if( ( sendChars = LJUSB_BulkWrite( hDevice, U3_PIPE_EP1_OUT, sendBuff, ( sendDWSize + commandBytes ) ) ) < sendDWSize + commandBytes ) {
+		if( sendChars == 0 )
 			printf( "ehFeedback error : write failed\n" );
 		else
 			printf( "ehFeedback error : did not write all of the buffer\n" );
@@ -1662,13 +1662,13 @@ long ehFeedback( HANDLE hDevice, uint8 *inIOTypesDataBuff, long inIOTypesDataSiz
 	}
 
 	//Reading response from U3
-	if ( ( recChars = LJUSB_BulkRead( hDevice, U3_PIPE_EP1_IN, recBuff, ( commandBytes + recDWSize ) ) ) < commandBytes + recDWSize ) {
-		if ( recChars == -1 ) {
+	if( ( recChars = LJUSB_BulkRead( hDevice, U3_PIPE_EP1_IN, recBuff, ( commandBytes + recDWSize ) ) ) < commandBytes + recDWSize ) {
+		if( recChars == -1 ) {
 			printf( "ehFeedback error : read failed\n" );
 			ret = -1;
 			goto cleanmem;
 		}
-		else if ( recChars < 8 ) {
+		else if( recChars < 8 ) {
 			printf( "ehFeedback error : response buffer is too small\n" );
 			ret = -1;
 			goto cleanmem;
@@ -1679,25 +1679,25 @@ long ehFeedback( HANDLE hDevice, uint8 *inIOTypesDataBuff, long inIOTypesDataSiz
 
 	checksumTotal = extendedChecksum16( recBuff, recChars );
 
-	if ( ( uint8 )( ( checksumTotal / 256 ) & 0xff ) != recBuff[5] ) {
+	if( ( uint8 )( ( checksumTotal / 256 ) & 0xff ) != recBuff[5] ) {
 		printf( "ehFeedback error : read buffer has bad checksum16(MSB)\n" );
 		ret = -1;
 		goto cleanmem;
 	}
 
-	if ( ( uint8 )( checksumTotal & 0xff ) != recBuff[4] ) {
+	if( ( uint8 )( checksumTotal & 0xff ) != recBuff[4] ) {
 		printf( "ehFeedback error : read buffer has bad checksum16(LBS)\n" );
 		ret = -1;
 		goto cleanmem;
 	}
 
-	if ( extendedChecksum8( recBuff ) != recBuff[0] ) {
+	if( extendedChecksum8( recBuff ) != recBuff[0] ) {
 		printf( "ehFeedback error : read buffer has bad checksum8\n" );
 		ret = -1;
 		goto cleanmem;
 	}
 
-	if ( recBuff[1] != ( uint8 )( 0xF8 ) || recBuff[3] != ( uint8 )( 0x00 ) ) {
+	if( recBuff[1] != ( uint8 )( 0xF8 ) || recBuff[3] != ( uint8 )( 0x00 ) ) {
 		printf( "ehFeedback error : read buffer has wrong command bytes \n" );
 		ret = -1;
 		goto cleanmem;
@@ -1707,7 +1707,7 @@ long ehFeedback( HANDLE hDevice, uint8 *inIOTypesDataBuff, long inIOTypesDataSiz
 
 	*outErrorFrame = recBuff[7];
 
-	for ( i = 0; i + commandBytes + 3 < recChars && i < outDataSize; i++ )
+	for( i = 0; i + commandBytes + 3 < recChars && i < outDataSize; i++ )
 		outDataBuff[i] = recBuff[i+commandBytes+3];
 
 cleanmem:

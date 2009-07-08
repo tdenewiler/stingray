@@ -21,7 +21,7 @@
  *
  * Here's an example:
  *
- * if (axis[0] == 0 && axis[1] == 0) {
+ * if(axis[0] == 0 && axis[1] == 0) {
  * 	// left analog is centered
  * }
  */

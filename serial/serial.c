@@ -53,14 +53,14 @@ int recv_serial( int fd,
 
 	port_count = select( SERIAL_MAX_PORTS, &serial_fds, NULL, NULL, &timeout );
 
-	if ( (port_count == 0) || (!FD_ISSET(fd, &serial_fds)) ) {
+	if( (port_count == 0) || (!FD_ISSET(fd, &serial_fds)) ) {
 		status = -2;
 	}
 
 	status = read( fd, response, length );
 
 	#ifdef SERIAL_DEBUG
-	if ( status == -1 ) {
+	if( status == -1 ) {
 		perror( "read" );
 	}
 	#endif /* SERIAL_DEBUG */
@@ -95,7 +95,7 @@ int send_serial( int fd,
 	tcdrain( fd );
 
 	#ifdef SERIAL_DEBUG
-	if ( status < 0 ) {
+	if( status < 0 ) {
 		perror( "write" );
 	}
 	#endif /* SERIAL_DEBUG */
@@ -127,14 +127,14 @@ int setup_serial( char *port_name,
 	struct termios options;
 	fd = open( port_name, O_RDWR | O_NOCTTY | O_NONBLOCK );
 
-	if ( fd < 0 ) {
+	if( fd < 0 ) {
 		#ifdef SERIAL_DEBUG
 		perror( "open" );
 		#endif /* SERIAL_DEBUG */
 		return fd;
 	}
 
-	if ( fd > 0 ) {
+	if( fd > 0 ) {
 		tcgetattr( fd, &options );
 		tcflush( fd, TCIFLUSH );
 
@@ -228,7 +228,7 @@ int serial_bytes_available( int fd )
 
 	status = ioctl( fd, FIONREAD, &bytes_available );
 	#ifdef SERIAL_DEBUG
-	if ( status == -1 ) {
+	if( status == -1 ) {
 		perror( "ioctl" );
 	}
 	#endif /* SERIAL_DEBUG */

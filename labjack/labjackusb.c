@@ -29,7 +29,7 @@ int u3FdArray[U3_MAX_DEVICES] = { -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1
 int handleToFD( void * hDevice )
 {
 	//Check if the handle is with in the bounds of the fdArray to prevent a segfault
-	if ( ( ( int * )hDevice <= &ue9FdArray[UE9_MAX_DEVICES-1] && ( int * )hDevice >= &ue9FdArray[0] ) ||
+	if( ( ( int * )hDevice <= &ue9FdArray[UE9_MAX_DEVICES-1] && ( int * )hDevice >= &ue9FdArray[0] ) ||
 	        ( ( int * )hDevice <= &u3FdArray[U3_MAX_DEVICES-1] && ( int * )hDevice >= &u3FdArray[0] ) ) {
 		return *( int * )hDevice;
 	}
@@ -59,12 +59,12 @@ HANDLE LJUSB_OpenDevice( UINT DevNum, DWORD dwReserved, ULONG ProductID )
 	//Matching a product ID and setting the max devices and device file name
 	//prefix
 
-	if ( ProductID == UE9_PRODUCT_ID ) {
+	if( ProductID == UE9_PRODUCT_ID ) {
 		maxDevices = UE9_MAX_DEVICES;
 		sprintf( deviceFileName, "%s", ue9DeviceFileName );
 		fdArray = ue9FdArray;
 	}
-	else if ( ProductID == U3_PRODUCT_ID ) {
+	else if( ProductID == U3_PRODUCT_ID ) {
 		maxDevices = U3_MAX_DEVICES;
 		sprintf( deviceFileName, "%s", u3DeviceFileName );
 		fdArray = u3FdArray;
@@ -72,22 +72,22 @@ HANDLE LJUSB_OpenDevice( UINT DevNum, DWORD dwReserved, ULONG ProductID )
 	else
 		goto Invalid;
 
-	if ( DevNum > maxDevices || DevNum < 1 )
+	if( DevNum > maxDevices || DevNum < 1 )
 		goto Invalid;
 
 	//Finding device specified by devNum
-	for ( i = 0; i < ( int )maxDevices; i++ ) {
+	for( i = 0; i < ( int )maxDevices; i++ ) {
 		sprintf( fullDeviceFileName, "%s%d", deviceFileName, i );
 
-		if ( ( fd = open( fullDeviceFileName, O_RDWR ) ) != -1 ) {
-			if ( fdArray[i] != -1 && fdArray[i] != fd )
+		if( ( fd = open( fullDeviceFileName, O_RDWR ) ) != -1 ) {
+			if( fdArray[i] != -1 && fdArray[i] != fd )
 				close( fdArray[i] );
 
 			fdArray[i] = fd;
 
 			deviceCount++;
 
-			if ( deviceCount == DevNum )
+			if( deviceCount == DevNum )
 				return ( void * )&fdArray[i];
 		}
 		else
@@ -108,17 +108,17 @@ ULONG LJUSB_BulkRead( HANDLE hDevice, ULONG Pipe, BYTE *pBuff, ULONG Count )
 	ULONG ret = 0;
 	int fd = -1;
 
-	if ( ( fd = handleToFD( hDevice ) ) != -1 ) {
+	if( ( fd = handleToFD( hDevice ) ) != -1 ) {
 		//Checking endpoint pipe and performing the appropriate read
-		if ( Pipe == UE9_PIPE_EP1_IN || Pipe == U3_PIPE_EP1_IN )
+		if( Pipe == UE9_PIPE_EP1_IN || Pipe == U3_PIPE_EP1_IN )
 			bytesRead = read( fd, pBuff, Count );
-		else if ( Pipe == UE9_PIPE_EP2_IN || Pipe == U3_PIPE_EP2_IN )
+		else if( Pipe == UE9_PIPE_EP2_IN || Pipe == U3_PIPE_EP2_IN )
 			bytesRead = read( fd, pBuff, Count + 32768 );
 		else
 			errno = EINVAL;
 	}
 
-	if ( bytesRead <= -1 )
+	if( bytesRead <= -1 )
 		ret = 0;
 	else
 		ret = bytesRead;
@@ -133,15 +133,15 @@ ULONG LJUSB_BulkWrite( HANDLE hDevice, ULONG Pipe, BYTE *pBuff, ULONG Count )
 	ULONG ret = 0;
 	int fd = -1;
 
-	if ( ( fd = handleToFD( hDevice ) ) != -1 ) {
+	if( ( fd = handleToFD( hDevice ) ) != -1 ) {
 		//Checking endpoint pipe and performing the appropriate write
-		if ( Pipe == UE9_PIPE_EP1_OUT || Pipe == U3_PIPE_EP1_OUT )
+		if( Pipe == UE9_PIPE_EP1_OUT || Pipe == U3_PIPE_EP1_OUT )
 			bytesWrote = write( fd, pBuff, Count );
 		else
 			errno = EINVAL;
 	}
 
-	if ( bytesWrote <= -1 )
+	if( bytesWrote <= -1 )
 		ret = 0;
 	else
 		ret = bytesWrote;
@@ -154,7 +154,7 @@ void LJUSB_CloseDevice( HANDLE hDevice )
 {
 	int fd;
 
-	if ( ( fd = handleToFD( hDevice ) ) != -1 )
+	if( ( fd = handleToFD( hDevice ) ) != -1 )
 		close( fd );
 }
 
@@ -171,11 +171,11 @@ ULONG LJUSB_GetDevCount( ULONG ProductID )
 	//Matching a product ID and setting the max devices and device file name
 	//prefix
 
-	if ( ProductID == UE9_PRODUCT_ID ) {
+	if( ProductID == UE9_PRODUCT_ID ) {
 		maxDevices = UE9_MAX_DEVICES;
 		sprintf( deviceFileName, "%s", ue9DeviceFileName );
 	}
-	else if ( ProductID == U3_PRODUCT_ID ) {
+	else if( ProductID == U3_PRODUCT_ID ) {
 		maxDevices = U3_MAX_DEVICES;
 		sprintf( deviceFileName, "%s", u3DeviceFileName );
 	}
@@ -185,10 +185,10 @@ ULONG LJUSB_GetDevCount( ULONG ProductID )
 	}
 
 	//Finding devices that can be opened and incrementing device count
-	for ( i = 0; i < ( int )maxDevices; i++ ) {
+	for( i = 0; i < ( int )maxDevices; i++ ) {
 		sprintf( fullDeviceFileName, "%s%d", deviceFileName, i );
 
-		if ( ( fd = open( fullDeviceFileName, O_RDWR ) ) != -1 ) {
+		if( ( fd = open( fullDeviceFileName, O_RDWR ) ) != -1 ) {
 			count++;
 			close( fd );
 		}
