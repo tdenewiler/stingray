@@ -1271,7 +1271,6 @@ void events_target_current( GtkWidget *widget,
 	msg.target.data.depth = msg.status.data.depth;
 	msg.target.data.fx    = 0;
 	msg.target.data.fy    = 0;
-	msg.target.data.speed = 0;
 	
 	/* Set the button values to the current target values. */
 	gtk_spin_button_set_value( (GtkSpinButton *)button_target_pitch, msg.target.data.pitch);
