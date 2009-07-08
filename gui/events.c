@@ -16,6 +16,7 @@
 #include "pololu.h"
 #include "parser.h"
 #include "network.h"
+#include "task.h"
 
 
 /* Operation mode buttons. */

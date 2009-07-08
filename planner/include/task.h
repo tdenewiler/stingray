@@ -20,6 +20,24 @@
 #define FALSE 0
 #endif /* FALSE */
 
+/* Tasks. */
+#ifndef TASKS
+/** @name Tasks that are available for the planner. */
+//@{
+#define TASKS
+#define TASK_NONE		0
+#define TASK_BUOY   	1
+#define TASK_PIPE   	2
+#define TASK_GATE   	3
+#define TASK_SQUARE 	4
+#define TASK_FENCE		5
+#define TASK_BOXES		6
+#define TASK_SUITCASE	7
+#define TASK_COURSE		8
+#define TASK_BUOY_GAIN	0.25
+//@}
+#endif /* TASKS */
+
 
 /******************************
 **

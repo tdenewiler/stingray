@@ -26,6 +26,7 @@
 #include "messages.h"
 #include "microstrain.h"
 #include "labjack.h"
+#include "task.h"
 
 
 /* Global file descriptors. Only global so that vision_exit() can close them. */

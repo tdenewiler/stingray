@@ -326,8 +326,12 @@ int main( int argc, char *argv[] )
 			if( recv_bytes > 0 ) {
 				messages_decode( nav_fd, nav_buf, &msg, recv_bytes );
 			}
-			/* Add in check to send dropper servo value to nav here. Use
-			 * old_dropper variable to see if new value needs to be sent. */
+			/* Check to send dropper servo value to nav here. Use old_dropper
+			 * variable to see if new value needs to be sent. */
+			if( msg.client.data.dropper != old_dropper ) {
+				messages_send( nav_fd, CLIENT_MSGID, &msg );
+				old_dropper = msg.client.data.dropper;
+			}
 		}
 
 		/* Update Kalman filter. */
