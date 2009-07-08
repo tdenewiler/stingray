@@ -525,13 +525,13 @@ int mstrain_euler_vectors( int fd,
 		usleep( MSTRAIN_SERIAL_DELAY );
 		status = recv_serial( fd, response, response_length );
 		if( response[0] != IMU_GYRO_STAB_EULER_VECTORS ) {
-			printf("MSTRAIN_EULER_VECTORS: ***** HEADER *****\n");
+			//printf("MSTRAIN_EULER_VECTORS: ***** HEADER *****\n");
 			return IMU_ERROR_HEADER;
 		}
 	}
 
 	if( status != response_length ) {
-		printf("MSTRAIN_EULER_VECTORS: ***** LENGTH *****\n");
+		//printf("MSTRAIN_EULER_VECTORS: ***** LENGTH *****\n");
 		return IMU_ERROR_LENGTH;
 	}
 
@@ -552,13 +552,13 @@ int mstrain_euler_vectors( int fd,
 		cs_accel[1] + cs_accel[2] + cs_ang_rate[0] + cs_ang_rate[1] +
 		cs_ang_rate[2] + cs_timer_ticks;
 	if( cs_total != convert2short(&response[21]) ) {
-		printf("MSTRAIN_EULER_VECTORS: ***** CHECKSUM *****\n");
+		//printf("MSTRAIN_EULER_VECTORS: ***** CHECKSUM *****\n");
 		return IMU_ERROR_CHECKSUM;
 	}
 	
 	/* Try the checksum function. */
 	if( !mstrain_calc_checksum( response, response_length ) ) {
-		printf("MSTRAIN_EULER_VECTORS: ***** CHECKSUM FUNCTION *****\n");
+		//printf("MSTRAIN_EULER_VECTORS: ***** CHECKSUM FUNCTION *****\n");
 		//return IMU_ERROR_CHECKSUM;
 	}
 		
