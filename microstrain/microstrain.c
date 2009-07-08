@@ -678,6 +678,7 @@ int mstrain_remove_tare( int fd )
 	return 1;
 } /* end mstrain_remove_tare() */
 
+
 /******************************************************************************
  *
  * Title:       int mstrain_calc_checksum( char *buffer, int length )

@@ -239,6 +239,12 @@ int mstrain_orientation( int fd,
                          float *orient[3][3]
                        );
 
+//! Sets tare for the Microstrain.
+int mstrain_set_tare( int fd );
+
+//! Removes tare for the Microstrain.
+int mstrain_remove_tare( int fd );
+
 //! Gets vectors from IMU.
 //! \param fd A file descriptor for the IMU port.
 //! \param gyro_stab Whether to use gyro-stabilized values or not.
