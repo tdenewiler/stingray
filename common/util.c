@@ -157,7 +157,7 @@ void util_print_config_help( )
 
 float util_sign_value( float value )
 {
-	if ( value < 0.0 ) {
+	if( value < 0.0 ) {
 		return -1.0;
 	}
 	else {

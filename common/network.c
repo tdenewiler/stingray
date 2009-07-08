@@ -35,8 +35,6 @@ static struct hostent *hent;
  * message gets to GUI as well. This will send STATUS one time, LJ the next.
  * messages_decode() should fix this but it's not working yet. */
 static int hack_msg_num;
-static int hack_msg_num2;
-
 
 
 /******************************************************************************
@@ -150,36 +148,36 @@ int net_server( int fd, void *buf, MSG_DATA *msg, int mode )
 
     /* For each socket with data available read that data and then send UUV
      * IMU data to it. */
-    for ( ii = 0; ii <= fdmax; ii++ ) {
-        if ( FD_ISSET( ii, &read_fds ) ) { /* Check for data on sockets. */
-            if ( ii == fd ) { /* Check if it is remote connection. */
+    for( ii = 0; ii <= fdmax; ii++ ) {
+        if( FD_ISSET( ii, &read_fds ) ) { /* Check for data on sockets. */
+            if( ii == fd ) { /* Check if it is remote connection. */
                 new_fd = net_accept( fd ); /* Accept new connections. */
                 FD_SET( new_fd, &master );
             }
             else {
                 /* Get the data from the socket. */
                 recv_bytes = net_recv( ii, buf );
-                if ( recv_bytes == 0 ) {
+                if( recv_bytes == 0 ) {
 					/* Connection lost. Close socket. */
                     net_close( ii );
                     FD_CLR( ii, &master );
                 }
                 else {
                     /* Send data to clients. */
-                    if ( mode == MODE_STATUS ) {
+                    if( mode == MODE_STATUS ) {
                     	messages_send( ii, STATUS_MSGID, msg );
 					}
-                    else if ( mode == MODE_VISION ) {
+                    else if( mode == MODE_VISION ) {
                         messages_send( ii, VISION_MSGID, msg );
                     }
-                    else if ( mode == MODE_LJ ) {
+                    else if( mode == MODE_LJ ) {
                         messages_send( ii, LJ_MSGID, msg );
                     }
 					/* This is a hack. Both messages should be sent at once.
 					 * messages_decode() should fix this but it's not working
 					 * yet. */
-                    else if ( mode == MODE_PLANNER ) {
-						if ( hack_msg_num == 1 ) {
+                    else if( mode == MODE_PLANNER ) {
+						if( hack_msg_num == 1 ) {
 							messages_send( ii, LJ_MSGID, msg );
 							hack_msg_num = 2;
 						}
@@ -217,18 +215,18 @@ int net_client( int fd, void *buf, MSG_DATA *msg, int mode )
     int recv_bytes = 0;
 
     /* Send and receive data for connected socket. */
-    if ( mode == MODE_STATUS ) {
+    if( mode == MODE_STATUS ) {
         messages_send( fd, (int)STATUS_MSGID, msg );
     }
-    else if ( mode == MODE_JOY ) {
+    else if( mode == MODE_JOY ) {
         messages_send( fd, (int)TELEOP_MSGID, msg );
     }
-    else if ( mode == MODE_PLANNER ) {
+    else if( mode == MODE_PLANNER ) {
 		messages_send( fd, (int)GAIN_MSGID, msg );
 		messages_send( fd, (int)TARGET_MSGID, msg );
     	messages_send( fd, (int)LJ_MSGID, msg );
 	}
-	else if ( mode == MODE_OPEN ) {
+	else if( mode == MODE_OPEN ) {
 		messages_send( fd, (int)OPEN_MSGID, msg );
 	}
     recv_bytes = net_recv( fd, buf );
@@ -251,7 +249,7 @@ int net_client( int fd, void *buf, MSG_DATA *msg, int mode )
 
 void net_sigchld_handler( int socket )
 {
-    while ( waitpid( -1, NULL, WNOHANG ) > 0 );
+    while( waitpid( -1, NULL, WNOHANG ) > 0 );
 } /* end net_sigchld_handler() */
 
 
@@ -272,7 +270,7 @@ int net_socket( )
     int fd;
 
     /* Create a socket for network communications. */
-    if ( ( fd = socket( AF_INET,
+    if( ( fd = socket( AF_INET,
                         SOCK_STREAM,
                         0 ) )
             == -1 ) {
@@ -300,7 +298,7 @@ int net_setsockopt( int *fd )
     int yes = 1;
 
     /* Allow the socket to be reused for new connections. */
-    if ( setsockopt( *fd,
+    if( setsockopt( *fd,
                      SOL_SOCKET,
                      SO_REUSEADDR,
                      &yes,
@@ -374,7 +372,7 @@ void net_bind( int *fd, short port )
 
     /* Bind the socket with specific address and port. */
 
-    if ( bind( *fd,
+    if( bind( *fd,
                (struct sockaddr *)&my_addr,
                sizeof(struct sockaddr_in) )
             == -1 ) {
@@ -398,7 +396,7 @@ void net_bind( int *fd, short port )
 
 void net_listen( int *fd )
 {
-    if ( listen( *fd,
+    if( listen( *fd,
                  MAX_CLIENTS )
             == -1 ) {
         perror( "listen" );
@@ -433,7 +431,7 @@ void net_sigaction( )
     sigemptyset( &sa.sa_mask );
     sa.sa_flags = SA_RESTART;
 
-    if ( sigaction( SIGCHLD,
+    if( sigaction( SIGCHLD,
                     &sa,
                     NULL )
             == -1 ) {
@@ -462,14 +460,14 @@ int net_accept( int fd_orig )
     int fd_ret;
 
     addr_len = sizeof( struct sockaddr_in );
-    if ( ( fd_ret = accept( fd_orig,
+    if( ( fd_ret = accept( fd_orig,
                             ( struct sockaddr * ) & their_addr,
                             &addr_len ) )
             == -1 ) {
         perror( "accept" );
     }
     else {
-        if ( fd_ret > fdmax ) {
+        if( fd_ret > fdmax ) {
             fdmax = fd_ret;
         }
     }
@@ -515,7 +513,7 @@ int net_select( struct timeval tv )
 {
     int retval = 0;
 
-    if ( ( retval = select( fdmax + 1,
+    if( ( retval = select( fdmax + 1,
                             &read_fds,
                             NULL,
                             NULL,
@@ -542,7 +540,7 @@ int net_select( struct timeval tv )
 
 void net_gethostbyname( char *address )
 {
-    if ( ( hent = gethostbyname( address ) ) == NULL ) {
+    if( ( hent = gethostbyname( address ) ) == NULL ) {
         herror( "gethostbyname" );
     }
 } /* end net_gethostbyname() */
@@ -572,7 +570,7 @@ int net_connect( int fd, short port )
     their_addr.sin_addr = *((struct in_addr *)hent->h_addr);
     their_addr.sin_port = htons( port );
 
-    if ( connect( fd,
+    if( connect( fd,
                   (struct sockaddr *)&their_addr,
                   sizeof(struct sockaddr_in) )
             == -1 ) {
@@ -603,7 +601,7 @@ int net_send( int fd, const void *msg, int len )
 {
     int send_bytes = 0;
 
-    if ( ( send_bytes = send( fd,
+    if( ( send_bytes = send( fd,
                               msg,
                               len,
                               0 ) )
@@ -632,12 +630,12 @@ int net_recv( int fd, void *buf )
 {
     int recv_bytes;
 
-    if ( ( recv_bytes = recv( fd,
+    if( ( recv_bytes = recv( fd,
                               buf,
                               MAX_MSG_SIZE,
                               0 ) )
             == -1 ) {
-        if ( errno != EWOULDBLOCK ) {
+        if( errno != EWOULDBLOCK ) {
             perror( "recv" );
             return 0;
         }

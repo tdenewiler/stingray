@@ -16,6 +16,14 @@ CFLAGS    	+= -O2
 CFLAGS    	+= -g
 LINK		= -lcv
 
+# library directories
+PARSEDIR	= ../../libs/parser/lib
+SERDIR		= ../../libs/serial/lib
+MSDIR		= ../../libs/microstrain/lib
+LJDIR		= ../../libs/labjack/lib
+POLDIR		= ../../libs/pololu/lib
+KALDIR		= ../../libs/kalman/lib
+
 # libraries
 PARSELIB	= parser.a
 SERLIB		= serial.a
@@ -24,14 +32,14 @@ LJLIB		= labjack.a
 POLLIB		= pololu.a
 KALLIB		= kalman.a
 STDLIBS		= -lm
-
-# library directories
-PARSEDIR	= ../../libs/parser/lib
-SERDIR		= ../../libs/serial/lib
-MSDIR		= ../../libs/microstrain/lib
-LJDIR		= ../../libs/labjack/lib
-POLDIR		= ../../libs/pololu/lib
-KALDIR		= ../../libs/kalman/lib
+LIBS		= $(PARSEDIR)/$(PARSELIB)
+LIBS		+= $(MSDIR)/$(MSLIB)
+LIBS		+= $(LJDIR)/$(LJLIB)
+LIBS		+= $(POLDIR)/$(POLLIB)
+LIBS		+= $(SERDIR)/$(SERLIB)
+LIBS		+= $(KALDIR)/$(KALLIB)
+LIBS		+= $(LINK)
+LIBS		+= $(STDLIBS)
 
 # executables to build
 EXE 		= planner
@@ -47,15 +55,7 @@ OBJS += planner.o
 all: $(EXE)
 
 $(EXE): $(OBJS)
-	$(CC) $(CFLAGS) $(INCLUDES) $(DEFINES) $^ -o $@ \
-												$(PARSEDIR)/$(PARSELIB) \
-												$(MSDIR)/$(MSLIB) \
-												$(LJDIR)/$(LJLIB) \
-												$(POLDIR)/$(POLLIB) \
-												$(SERDIR)/$(SERLIB) \
-												$(KALDIR)/$(KALLIB) \
-												$(LINK) \
-												$(STDLIBS)
+	$(CC) $(CFLAGS) $(INCLUDES) $(DEFINES) $^ -o $@ $(LIBS)
 
 %.o: %.cpp
 	$(CC) $(CFLAGS) $(INCLUDES) $(DEFINES) -c $<

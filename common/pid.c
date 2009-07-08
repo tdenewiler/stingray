@@ -104,7 +104,7 @@ void pid_loop( int pololu_fd,
              )
 {
 	/* Check to see if the errors should be reset to zero. */
-	if ( msg->target.data.mode == ZERO_PID_ERRORS ) {
+	if( msg->target.data.mode == ZERO_PID_ERRORS ) {
 		pid->pitch.perr = 0;
 		pid->pitch.ierr = 0;
 		pid->pitch.derr = 0;
@@ -157,7 +157,7 @@ void pid_loop( int pololu_fd,
 							pid->pitch.kd * pid->pitch.derr;
 
 		/* Check bounds. */
-		if ( fabsf( pid->pitch_torque ) > PID_PITCH_TORQUE ) {
+		if( fabsf( pid->pitch_torque ) > PID_PITCH_TORQUE ) {
 			pid->pitch_torque = util_sign_value( pid->pitch_torque ) * PID_PITCH_TORQUE;
 		}
 
@@ -188,12 +188,12 @@ void pid_loop( int pololu_fd,
 						   pid->roll.kd * pid->roll.derr;
 
 		/* Check bounds. */
-		if ( fabsf( pid->roll_torque ) > PID_ROLL_TORQUE ) {
+		if( fabsf( pid->roll_torque ) > PID_ROLL_TORQUE ) {
 			pid->roll_torque = util_sign_value( pid->roll_torque ) * PID_ROLL_TORQUE;
 		}
 
 		/* Control motors. */
-		if ( motor_init ) {
+		if( motor_init ) {
 			r1 = pololuControlVertical( pololu_fd, pid->vertical_thrust, pid->roll_torque, pid->pitch_torque );
 		}
 
@@ -224,12 +224,12 @@ void pid_loop( int pololu_fd,
 						  pid->yaw.kd * pid->yaw.derr;
 
 		/* Check bounds. */
-		if ( fabsf( pid->yaw_torque ) > PID_YAW_TORQUE ) {
+		if( fabsf( pid->yaw_torque ) > PID_YAW_TORQUE ) {
 			pid->yaw_torque = util_sign_value( pid->yaw_torque ) * PID_YAW_TORQUE;
 		}
 
 		/* Control Voiths. */
-		if ( motor_init ) {
+		if( motor_init ) {
 			r2 = pololuControlVoiths( pololu_fd, pid->voith_speed, pid->voith_angle, pid->voith_thrust, pid->yaw_torque );
 		}
 
@@ -260,13 +260,13 @@ void pid_loop( int pololu_fd,
 							   pid->depth.kd * pid->depth.derr;
 
 		/* Check bounds. */
-		if ( ( fabsf( pid->vertical_thrust ) + fabsf( pid->roll_torque ) ) > PID_TOTAL_VERTICAL_THRUST ) {
+		if( ( fabsf( pid->vertical_thrust ) + fabsf( pid->roll_torque ) ) > PID_TOTAL_VERTICAL_THRUST ) {
 			pid->vertical_thrust = util_sign_value( pid->vertical_thrust ) * 
 				(PID_TOTAL_VERTICAL_THRUST - fabsf(pid->roll_torque) );
 		}
 
 		/* Control depth. */
-		if ( motor_init ) {
+		if( motor_init ) {
 			r1 = pololuControlVertical( pololu_fd, pid->vertical_thrust, pid->roll_torque, pid->pitch_torque );
 		}
 
@@ -292,11 +292,11 @@ float pid_subtract_angles( float ang1, float ang2 )
 {
 	float e = 0.0;
 
-	if (ang1 == ang2 ) {
+	if(ang1 == ang2 ) {
 		return e;
 	}
-	if ( ang1 < ang2 ) {
-		if ( (ang2 - ang1) < 180 ) {
+	if( ang1 < ang2 ) {
+		if( (ang2 - ang1) < 180 ) {
 			e = ang1 - ang2;
 		}
 		else {
@@ -304,7 +304,7 @@ float pid_subtract_angles( float ang1, float ang2 )
 		}
 	}
 	else {
-		if ( (ang1 - ang2) < 180 ) {
+		if( (ang1 - ang2) < 180 ) {
 			e = ang1 - ang2;
 		}
 		else {
@@ -332,7 +332,7 @@ float pid_subtract_angles( float ang1, float ang2 )
 
 float pid_bound_integral( float value, float gain, float bound )
 {
-	if ( fabsf( value * gain ) > bound ) {
+	if( fabsf( value * gain ) > bound ) {
 		return util_sign_value( value ) * fabsf( bound / gain );
 	}
 	else {

@@ -67,10 +67,10 @@ void joydrive_exit( )
     usleep( 200000 );
 
     /* Close the open file descriptors. */
-    if ( joy_fd > 0 ) {
+    if( joy_fd > 0 ) {
         close( joy_fd );
     }
-    if ( nav_fd > 0 ) {
+    if( nav_fd > 0 ) {
         close( nav_fd );
     }
 } /* end joydrive_exit() */
@@ -124,7 +124,7 @@ int main( int argc, char *argv[] )
 
     /* Set up nav client. */
     nav_fd = net_client_setup( cf.nav_IP, cf.nav_port );
-    if ( nav_fd > 0 ) {
+    if( nav_fd > 0 ) {
     	printf("MAIN: Nav client setup OK.\n");
     }
     else {
@@ -136,11 +136,11 @@ int main( int argc, char *argv[] )
     printf("MAIN: joy_fd = %d\n", joy_fd);
 
     /* Main loop. */
-    while ( 1 ) {
+    while( 1 ) {
         /* Get network data. */
-        if ( nav_fd > 0 ) {
+        if( nav_fd > 0 ) {
             recv_bytes = net_client( nav_fd, recv_buf, &msg, mode );
-            if ( recv_bytes > 0 ) {
+            if( recv_bytes > 0 ) {
                 recv_buf[recv_bytes] = '\0';
                 messages_decode( nav_fd, recv_buf, &msg, recv_bytes );
             }
@@ -155,79 +155,79 @@ int main( int argc, char *argv[] )
         msg.teleop.data.speed = 0;
 
         /* Get joystick data. */
-        if ( joy_fd > 0 ) {
+        if( joy_fd > 0 ) {
             status = joy_get_data( joy_fd, &joy );
         }
 
         /* Set target change values based on joystick input. */
-        if ( joy.joy_axis == JOY_A5 ) {
-            if ( joy.axis_value == -32767 ) {
+        if( joy.joy_axis == JOY_A5 ) {
+            if( joy.axis_value == -32767 ) {
                 msg.teleop.data.fy = 1;
                 printf("MAIN: fy + 1.\n");
             }
-            else if ( joy.axis_value == 32767 ) {
+            else if( joy.axis_value == 32767 ) {
                 msg.teleop.data.fy = -1;
                 printf("MAIN: fy - 1.\n");
             }
         }
-        if ( joy.joy_axis == JOY_A4 ) {
-            if ( joy.axis_value == 32767 ) {
+        if( joy.joy_axis == JOY_A4 ) {
+            if( joy.axis_value == 32767 ) {
                 msg.teleop.data.fx = 1;
                 printf("MAIN: fx + 1.\n");
             }
-            else if ( joy.axis_value == -32767 ) {
+            else if( joy.axis_value == -32767 ) {
                 msg.teleop.data.fx = -1;
                 printf("MAIN: fx - 1.\n");
             }
         }
-        if ( joy.joy_button == JOY_B0 ) {
+        if( joy.joy_button == JOY_B0 ) {
             msg.teleop.data.yaw = -1;
                 printf("MAIN: yaw - 1.\n");
         }
-        else if ( joy.joy_button == JOY_B2 ) {
+        else if( joy.joy_button == JOY_B2 ) {
             msg.teleop.data.yaw = 1;
                 printf("MAIN: yaw + 1.\n");
         }
-        if ( joy.joy_button == JOY_B1 ) {
+        if( joy.joy_button == JOY_B1 ) {
             msg.teleop.data.depth = -0.01;
                 printf("MAIN: depth - 0.01.\n");
         }
-       else if ( joy.joy_button == JOY_B3 ) {
+       else if( joy.joy_button == JOY_B3 ) {
             msg.teleop.data.depth = 0.01;
                 printf("MAIN: depth + 0.01.\n");
         }
-        if ( joy.joy_axis == JOY_A0 ) {
-            if ( joy.axis_value == 32767 ) {
+        if( joy.joy_axis == JOY_A0 ) {
+            if( joy.axis_value == 32767 ) {
                 msg.teleop.data.roll = 1;
                 printf("MAIN: roll + 1.\n");
             }
-            else if ( joy.axis_value == -32767 ) {
+            else if( joy.axis_value == -32767 ) {
                 msg.teleop.data.roll = -1;
                 printf("MAIN: roll - 1.\n");
             }
         }
-        if ( joy.joy_axis == JOY_A1 ) {
-            if ( joy.axis_value == -32767 ) {
+        if( joy.joy_axis == JOY_A1 ) {
+            if( joy.axis_value == -32767 ) {
                 msg.teleop.data.pitch = 1;
                 printf("MAIN: pitch + 1.\n");
             }
-            else if ( joy.axis_value == 32767 ) {
+            else if( joy.axis_value == 32767 ) {
                 msg.teleop.data.pitch = -1;
                 printf("MAIN: pitch - 1.\n");
             }
         }
-        if ( joy.joy_button == JOY_B4 ) {
+        if( joy.joy_button == JOY_B4 ) {
             msg.teleop.data.speed = -1;
                 printf("MAIN: speed - 1.\n");
         }
-        else if ( joy.joy_button == JOY_B5 ) {
+        else if( joy.joy_button == JOY_B5 ) {
             msg.teleop.data.speed = 1;
                 printf("MAIN: speed + 1.\n");
         }
-        if (joy.joy_button == JOY_B6 ) {
-            if ( joy.button_value == 1 ) {
-                if ( joy.joy_button == JOY_B7 ) {
-                    if ( joy.button_value == 1 ) {
+        if(joy.joy_button == JOY_B6 ) {
+            if( joy.button_value == 1 ) {
+                if( joy.joy_button == JOY_B7 ) {
+                    if( joy.button_value == 1 ) {
                         printf("MAIN: send estop\n");
                     }
                 }

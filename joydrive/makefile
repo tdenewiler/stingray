@@ -13,13 +13,15 @@ CFLAGS    	= -Wall
 CFLAGS    	+= -O2
 CFLAGS    	+= -g
 
-# libraries
-PARSELIB	= parser.a
-JOYLIB		= joy.a
-
 # library directories
 PARSEDIR	= ../../libs/parser/lib
 JOYDIR		= ../../libs/joy/lib
+
+# libraries
+PARSELIB	= parser.a
+JOYLIB		= joy.a
+LIBS		= $(PARSEDIR)/$(PARSELIB)
+LIBS		+= $(JOYDIR)/$(JOYLIB)
 
 # executables to build
 EXE 		= joydrive
@@ -33,9 +35,7 @@ OBJS		+= joydrive.o
 all: $(EXE)
 
 $(EXE): $(OBJS)
-	$(CC) $(CFLAGS) $(INCLUDES) $(DEFINES) $^ -o $@ \
-												$(PARSEDIR)/$(PARSELIB) \
-												$(JOYDIR)/$(JOYLIB) \
+	$(CC) $(CFLAGS) $(INCLUDES) $(DEFINES) $^ -o $@ $(LIBS)
 
 %.o: %.cpp
 	$(CC) $(CFLAGS) $(INCLUDES) $(DEFINES) -c $<

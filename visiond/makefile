@@ -17,17 +17,19 @@ LINK		= -L/usr/X11R6/lib
 LINK		+= -lcv
 LINK		+= -lX11
 LINK		+= -lhighgui
-#LINK		+= -lstdc++
-#LINK		+= -lm
+
+# library directories
+PARSEDIR	= ../../libs/parser/lib
+VISIONDIR	= ../../libs/vision/lib
 
 # libraries
 PARSELIB	= parser.a
 VISIONLIB	= vision.a
 STDLIBS		= -lm
-
-# library directories
-PARSEDIR	= ../../libs/parser/lib
-VISIONDIR	= ../../libs/vision/lib
+LIBS		= $(PARSEDIR)/$(PARSELIB)
+LIBS		+= $(VISIONDIR)/$(VISIONLIB)
+LIBS		+= $(LINK)
+LIBS		+= $(STDLIBS)
 
 # executables to build
 EXE 		= visiond
@@ -41,11 +43,7 @@ OBJS		+= visiond.o
 all: $(EXE)
 
 $(EXE): $(OBJS)
-	$(CC) $(CFLAGS) $(INCLUDES) $(DEFINES) $^ -o $@ \
-												$(PARSEDIR)/$(PARSELIB) \
-												$(VISIONDIR)/$(VISIONLIB) \
-												$(LINK) \
-												$(STDLIBS)
+	$(CC) $(CFLAGS) $(INCLUDES) $(DEFINES) $^ -o $@ $(LIBS)
 
 %.o: %.cpp
 	$(CC) $(CFLAGS) $(INCLUDES) $(DEFINES) -c $<

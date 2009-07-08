@@ -68,10 +68,10 @@ void labjackd_exit( )
 	usleep( 200000 );
 
 	/* Close the open file descriptors. */
-	if ( labjackd_fd > 0 ) {
+	if( labjackd_fd > 0 ) {
 		close( labjackd_fd );
 	}
-	if ( labjack_fd > 0 ) {
+	if( labjack_fd > 0 ) {
 		close( labjack_fd );
 	}
 
@@ -136,7 +136,7 @@ int main( int argc, char *argv[] )
 
 	/* Set up server. */
 	labjackd_fd = net_server_setup( cf.server_port );
-	if ( labjackd_fd > 0 ) {
+	if( labjackd_fd > 0 ) {
 		printf("MAIN: Server setup OK.\n");
 	}
 	else {
@@ -145,9 +145,9 @@ int main( int argc, char *argv[] )
 
 	/* Set up the labjack. */
 	labjack_fd = init_labjack( );
-	if ( labjack_fd ) {
+	if( labjack_fd ) {
 		status = query_labjack( );
-		printf("MAIN: Labjack setup OK.\n", status);
+		printf("MAIN: Labjack setup OK.\n");
 	}
 	else
 	{
@@ -163,20 +163,20 @@ int main( int argc, char *argv[] )
 	printf("MAIN: Labjack server running now.\n");
 
 	/* Main loop. */
-	while ( 1 ) {
+	while( 1 ) {
 		/* Get network data. */
-		if ( labjackd_fd > 0 ) {
+		if( labjackd_fd > 0 ) {
 			recv_bytes = net_server( labjackd_fd, recv_buf, &msg, MODE_LJ );
-			if ( recv_bytes > 0 ) {
+			if( recv_bytes > 0 ) {
 				recv_buf[recv_bytes] = '\0';
 				messages_decode( labjackd_fd, recv_buf, &msg, recv_bytes );
 			}
 		}
 
 		/* Get Labjack data and put it in network message. */
-		if ( labjack_fd > 0 ) {
+		if( labjack_fd > 0 ) {
 			status = query_labjack( );
-			if ( status > 0 ) {
+			if( status > 0 ) {
 				lj.battery1 = getBatteryVoltage( AIN_0 );
 				lj.battery2 = getBatteryVoltage( AIN_1 );
 				lj.pressure = getBatteryVoltage( AIN_2 );
@@ -195,7 +195,7 @@ int main( int argc, char *argv[] )
             time2s =    sim_start.tv_sec;
             time2ms =   sim_start.tv_usec;
             dt = util_calc_dt( &time1s, &time1ms, &time2s, &time2ms );
-			if ( dt > 100000 ) {
+			if( dt > 100000 ) {
 				msg.lj.data.battery1 = 10.0  + rand() / (float)RAND_MAX;
 				msg.lj.data.battery2 = 14.0  + rand() / (float)RAND_MAX;
 				msg.lj.data.pressure = 0.543 + rand() / (float)RAND_MAX;
@@ -206,10 +206,10 @@ int main( int argc, char *argv[] )
 
 		/* Check battery voltage. Make sure it is connected. If too low then
 		 * have the computer shut down so that the battery is not damaged. */
-		//if ( (lj.battery1 > BATT1_THRESH) && (lj.battery1 < BATT1_MIN) ) {
+		//if( (lj.battery1 > BATT1_THRESH) && (lj.battery1 < BATT1_MIN) ) {
 			//status = system("shutdown -h now \"Labjackd: Motor battery has low voltage.\"");
 		//}
-		if ( (lj.battery2 > BATT2_THRESH) && (lj.battery2 < BATT2_MIN) ) {
+		if( (lj.battery2 > BATT2_THRESH) && (lj.battery2 < BATT2_MIN) ) {
 			status = system("shutdown -h now \"Labjackd: Computer battery has low voltage.\"");
 		}
 

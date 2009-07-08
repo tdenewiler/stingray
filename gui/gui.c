@@ -145,26 +145,26 @@ gint gui_timer_200ms( gpointer data )
 	int recv_bytes;
 	
     /* Get network data from planner. */
-    if ( planner_fd > 0 ) {
+    if( planner_fd > 0 ) {
         recv_bytes = net_client( planner_fd, planner_buf, &msg, MODE_OPEN );
-		if ( recv_bytes > 0 ) {
+		if( recv_bytes > 0 ) {
         	bytes_left = messages_decode( planner_fd, planner_buf, &msg, recv_bytes );
     	}
     }
 
     /* Get network data from nav. */
-    if ( nav_fd > 0 ) {
+    if( nav_fd > 0 ) {
         recv_bytes = net_client( nav_fd, nav_buf, &msg, MODE_OPEN );
-		if ( recv_bytes > 0 ) {
+		if( recv_bytes > 0 ) {
         	bytes_left = messages_decode( nav_fd, nav_buf, &msg, recv_bytes );
     	}
     }
 
     /* Update GUI status. */
-    if ( planner_fd > 0 ) {
+    if( planner_fd > 0 ) {
 	    gui_update_status_text( );
 	}
-    if ( nav_fd > 0 ) {
+    if( nav_fd > 0 ) {
 	    gui_update_status_text( );
 	}
 

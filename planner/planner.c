@@ -78,26 +78,26 @@ void planner_exit( )
 	usleep( 200000 );
 
 	/* Close the open file descriptors. */
-	if ( server_fd > 0 ) {
+	if( server_fd > 0 ) {
 		close( server_fd );
 	}
-	if ( vision_fd > 0 ) {
+	if( vision_fd > 0 ) {
 		close( vision_fd );
 	}
-	if ( lj_fd > 0 ) {
+	if( lj_fd > 0 ) {
 		close( lj_fd );
 	}
-	if ( nav_fd > 0 ) {
+	if( nav_fd > 0 ) {
 		close( nav_fd );
 	}
 
 	/* Close the open file pointers. */
-	if ( f_log ) {
+	if( f_log ) {
 		fclose( f_log );
 	}
 
 	/* Close the Kalman filter. */
-	if ( bKF > 0 ) {
+	if( bKF > 0 ) {
 		close_kalman();
 	}
 
@@ -205,7 +205,7 @@ int main( int argc, char *argv[] )
 
     /* Set up Kalman filter. */
     bKF = init_kalman();
-    if ( bKF > 0 ) {
+    if( bKF > 0 ) {
 		printf("MAIN: Kalman filter setup OK.\n");
 		//kalman_print_test();
 	}
@@ -214,9 +214,9 @@ int main( int argc, char *argv[] )
 	}
 
 	/* Set up server. */
-	if ( cf.enable_server ) {
+	if( cf.enable_server ) {
 		server_fd = net_server_setup( cf.server_port );
-		if ( server_fd > 0 ) {
+		if( server_fd > 0 ) {
 			printf("MAIN: Server setup OK.\n");
 		}
 		else {
@@ -225,9 +225,9 @@ int main( int argc, char *argv[] )
 	}
 
 	/* Set up the vision network client. */
-	if ( cf.enable_vision ) {
+	if( cf.enable_vision ) {
 		vision_fd = net_client_setup( cf.vision_IP, cf.vision_port );
-		if ( vision_fd > 0 ) {
+		if( vision_fd > 0 ) {
 			printf("MAIN: Vision client setup OK.\n");
 		}
 		else {
@@ -236,9 +236,9 @@ int main( int argc, char *argv[] )
 	}
 
 	/* Connect to the labjack daemon. */
-    if ( cf.enable_labjack ) {
+    if( cf.enable_labjack ) {
         lj_fd = net_client_setup( cf.labjackd_IP, cf.labjackd_port );
-		if ( lj_fd > 0 ) {
+		if( lj_fd > 0 ) {
 			printf("MAIN: Labjack client setup OK.\n");
 		}
 		else {
@@ -247,9 +247,9 @@ int main( int argc, char *argv[] )
     }
 
     /* Set up the nav network client. */
-	if ( cf.enable_nav ) {
+	if( cf.enable_nav ) {
         nav_fd = net_client_setup( cf.nav_IP, cf.nav_port );
-		if ( nav_fd > 0 ) {
+		if( nav_fd > 0 ) {
 			printf("MAIN: Nav client setup OK.\n");
 		}
 		else {
@@ -258,9 +258,9 @@ int main( int argc, char *argv[] )
     }
 
     /* Open log file if flag set. */
-    if ( cf.enable_log ) {
+    if( cf.enable_log ) {
     	f_log = fopen( "planner_log.dat", "a+" );
-    	if ( f_log ) {
+    	if( f_log ) {
     		fprintf( f_log, "------------------------------\n" );
     		fprintf( f_log, "--  BEGIN NEW LOG SESSION   --\n" );
     		fprintf( f_log, "------------------------------\n" );
@@ -284,28 +284,28 @@ int main( int argc, char *argv[] )
 	printf( "\n" );
 
 	/* Main loop. */
-	while ( 1 ) {
+	while( 1 ) {
 		/* Get network data. */
-		if ( ( cf.enable_server ) && ( server_fd > 0 ) ) {
+		if( ( cf.enable_server ) && ( server_fd > 0 ) ) {
 			recv_bytes = net_server( server_fd, recv_buf, &msg, MODE_PLANNER );
-			if ( recv_bytes > 0 ) {
+			if( recv_bytes > 0 ) {
 				recv_buf[recv_bytes] = '\0';
 				messages_decode( server_fd, recv_buf, &msg, recv_bytes );
 			}
 		}
 
 		/* Get vision data. */
-		if ( ( cf.enable_vision ) && ( vision_fd > 0 ) ) {
+		if( ( cf.enable_vision ) && ( vision_fd > 0 ) ) {
 			time1s =    vision_time.tv_sec;
 			time1ms =   vision_time.tv_usec;
 			time2s =    vision_start.tv_sec;
 			time2ms =   vision_start.tv_usec;
 			dt = util_calc_dt( &time1s, &time1ms, &time2s, &time2ms );
 
-			if ( dt > cf.period_vision ) {
+			if( dt > cf.period_vision ) {
 				recv_bytes = net_client( vision_fd, vision_buf, &msg, MODE_OPEN );
 				vision_buf[recv_bytes] = '\0';
-				if ( recv_bytes > 0 ) {
+				if( recv_bytes > 0 ) {
 					messages_decode( vision_fd, vision_buf, &msg, recv_bytes );
 
                     gettimeofday( &vision_start, NULL );
@@ -313,23 +313,25 @@ int main( int argc, char *argv[] )
 			}
 
 			/* If there is a new task then send to vision. */
-			if ( old_task != msg.task.data.num ) {
+			if( old_task != msg.task.data.num ) {
 				messages_send( vision_fd, TASK_MSGID, &msg );
 				old_task = msg.task.data.num;
 			}
 		}
 
         /* Get nav data. */
-		if ( nav_fd > 0 ) {
+		if( nav_fd > 0 ) {
 			recv_bytes = net_client( nav_fd, nav_buf, &msg, MODE_PLANNER );
 			nav_buf[recv_bytes] = '\0';
-			if ( recv_bytes > 0 ) {
+			if( recv_bytes > 0 ) {
 				messages_decode( nav_fd, nav_buf, &msg, recv_bytes );
 			}
+			/* Add in check to send dropper servo value to nav here. Use
+			 * old_dropper variable to see if new value needs to be sent. */
 		}
 
 		/* Update Kalman filter. */
-		if ( bKF ) {
+		if( bKF ) {
 			time1s =    kalman_time.tv_sec;
 			time1ms =   kalman_time.tv_usec;
 			time2s =    kalman_start.tv_sec;
@@ -337,7 +339,7 @@ int main( int argc, char *argv[] )
 			dt = util_calc_dt( &time1s, &time1ms, &time2s, &time2ms );
 
 			/* If it has been long enough, update the filter. */
-			if ( dt > 0.1 * 1000000 ) {
+			if( dt > 0.1 * 1000000 ) {
 				STAT cs = msg.status.data;
 				float ang[] = { cs.pitch, cs.roll, cs.yaw };
 				float real_accel[] = { cs.accel[0], cs.accel[1], cs.accel[2] - 9.86326398 };
@@ -353,17 +355,17 @@ int main( int argc, char *argv[] )
 		}
 
 		/* Get labjack data. */
-        if ( (cf.enable_labjack) && (lj_fd > 0) ) {
+        if( (cf.enable_labjack) && (lj_fd > 0) ) {
             recv_bytes = net_client( lj_fd, lj_buf, &msg, MODE_OPEN );
             lj_buf[recv_bytes] = '\0';
-            if ( recv_bytes > 0 ) {
+            if( recv_bytes > 0 ) {
                 messages_decode( lj_fd, lj_buf, &msg, recv_bytes );
 				msg.status.data.depth = msg.lj.data.pressure;
             }
         }
 
         /* Log if flag is set. */
-        if ( cf.enable_log && f_log ) {
+        if( cf.enable_log && f_log ) {
         	time1s =    log_time.tv_sec;
 			time1ms =   log_time.tv_usec;
 			time2s =    log_start.tv_sec;
@@ -378,7 +380,7 @@ int main( int argc, char *argv[] )
             	//	strlen(write_time), ".%03ld", ctime.tv_usec );
 
 			/* Log every (enable_log) seconds. */
-			if ( dt > (cf.enable_log * 1000000) ) {
+			if( dt > (cf.enable_log * 1000000) ) {
 				STAT cs = msg.status.data;
 				fprintf( f_log, "%s, %.04f,%.04f,%.04f,%.04f,%.04f,%.04f,%.04f,%.04f,%.04f,%.04f\n",
 					write_time, cs.pitch, cs.roll, cs.yaw, msg.lj.data.pressure,

@@ -74,16 +74,16 @@ void visiond_exit( )
     usleep( 200000 );
 
     /* Close the open file descriptors. */
-    if ( server_fd > 0 ) {
+    if( server_fd > 0 ) {
         close( server_fd );
     }
 
     /* Close the cameras and windows. */
-    if ( f_cam ) {
+    if( f_cam ) {
         cvReleaseCapture( &f_cam );
     }
 
-    if ( b_cam ) {
+    if( b_cam ) {
         cvReleaseCapture( &b_cam );
     }
 
@@ -184,9 +184,9 @@ int main( int argc, char *argv[] )
     msg.vsetting.data.fence_hsv.vH = cf.fence_vH;
 
     /* Set up server. */
-    if ( cf.enable_server ) {
+    if( cf.enable_server ) {
         server_fd = net_server_setup( cf.server_port );
-		if ( server_fd > 0 ) {
+		if( server_fd > 0 ) {
 			printf("MAIN: Server setup OK.\n");
 		}
 		else {
@@ -195,14 +195,14 @@ int main( int argc, char *argv[] )
     }
 
     /* Need to have a config about what cameras if any to open */
-    if ( cf.op_mode == 99 ) {
+    if( cf.op_mode == 99 ) {
     	/* Special case for bad camera. */
     	printf("MAIN: Skipping camera opening because op mode = 99 in configuration file.\n");
 	}
 	else {
 		/* Open front camera. */
 		f_cam = cvCaptureFromCAM( camera );
-		if ( !f_cam ) {
+		if( !f_cam ) {
 			cvReleaseCapture( &f_cam );
 			printf("MAIN: Could not open f_cam.\n");
 		}
@@ -216,7 +216,7 @@ int main( int argc, char *argv[] )
 		/* Open bottom camera. */
 		camera = 1;
 		b_cam = cvCaptureFromCAM( camera );
-		if ( !b_cam ) {
+		if( !b_cam ) {
 			cvReleaseCapture( &b_cam );
 			printf("MAIN: Could not open b_cam.\n");
 		}
@@ -228,7 +228,7 @@ int main( int argc, char *argv[] )
 	}
 
     /* Create windows to display video if set in configuration file. */
-    if ( cf.vision_window ) {
+    if( cf.vision_window ) {
         cvNamedWindow( f_win, CV_WINDOW_AUTOSIZE );
         cvNamedWindow( b_win, CV_WINDOW_AUTOSIZE );
     }
@@ -236,8 +236,8 @@ int main( int argc, char *argv[] )
 
     /* Main loop. */
     int loop_counter = 0;
-    while ( 1 ) {
-    	if ( loop_counter == 1000 ) {
+    while( 1 ) {
+    	if( loop_counter == 1000 ) {
     		loop_counter = 0;
 		}
 		else {
@@ -245,14 +245,14 @@ int main( int argc, char *argv[] )
 		}
 
     	/* Do vision processing based on task */
-    	if ( msg.task.data.num == TASK_NONE ) {
+    	if( msg.task.data.num == TASK_NONE ) {
     		/* Do nothing and give cleared values. */
     		msg.vision.data.front_x = 0;
     		msg.vision.data.front_y = 0;
     		msg.vision.data.bottom_x = 0;
     		msg.vision.data.bottom_y = 0.0;
 		}
-        else if ( msg.task.data.num == TASK_BUOY && f_cam ) {
+        else if( msg.task.data.num == TASK_BUOY && f_cam ) {
 			/* Look for the buoy. */
 			status = vision_find_dot( &dotx, &doty, &width, &height,
 					cf.vision_angle, f_cam, f_img, f_bin_img,
@@ -263,7 +263,7 @@ int main( int argc, char *argv[] )
 					msg.vsetting.data.buoy_hsv.vL,
 					msg.vsetting.data.buoy_hsv.vH );
 
-			if ( status == 1 ) {
+			if( status == 1 ) {
 				msg.vision.data.front_x = (f_img->width / 2) - dotx;
 				msg.vision.data.front_y = (f_img->height / 2) - doty;
 				/* Rotate centroid to account for camera mounted at angle. */
@@ -274,15 +274,15 @@ int main( int argc, char *argv[] )
 				msg.vision.data.front_y = tmp_dotx * sin(cf.vision_angle) +
 					tmp_doty * cos(cf.vision_angle);
 
-				if ( cf.vision_window ) {
-					if ( cvWaitKey( 5 ) >= 0 );
+				if( cf.vision_window ) {
+					if( cvWaitKey( 5 ) >= 0 );
 					cvCircle( f_img, cvPoint(dotx, doty),
 						10, cvScalar(255, 0, 0), 5, 8 );
 					cvShowImage( f_win, f_img );
 				}
 			}
 		}
-		else if ( msg.task.data.num == TASK_PIPE && b_cam ) {
+		else if( msg.task.data.num == TASK_PIPE && b_cam ) {
 			/* Look for the pipe */
 			status = vision_find_pipe( &pipex, &bearing, b_cam, b_img, b_bin_img,
                     msg.vsetting.data.pipe_hsv.hL,
@@ -292,10 +292,10 @@ int main( int argc, char *argv[] )
                     msg.vsetting.data.pipe_hsv.vL,
                     msg.vsetting.data.pipe_hsv.vH );
 
-            if ( status == 1 ) {
-                if ( cf.vision_window ) {
-                    if ( cvWaitKey( 5 ) >= 0 );
-                        for ( ii = 0; ii < lineWidth; ii++ ) {
+            if( status == 1 ) {
+                if( cf.vision_window ) {
+                    if( cvWaitKey( 5 ) >= 0 );
+                        for( ii = 0; ii < lineWidth; ii++ ) {
                             if( bearing != 0 ) {
                                 cvCircle( b_img,
                                         cvPoint( b_img->width / 2 + ((int)(bearing * ii)),
@@ -316,7 +316,7 @@ int main( int argc, char *argv[] )
                 msg.vision.data.bottom_y = bearing;
             }
 		}
-		else if ( msg.task.data.num == TASK_FENCE && f_cam ) {
+		else if( msg.task.data.num == TASK_FENCE && f_cam ) {
 			/* Look for the fence. */
             status = vision_find_fence( &fence_center, &y_max, f_cam, f_img, f_bin_img,
                     msg.vsetting.data.fence_hsv.hL,
@@ -326,12 +326,12 @@ int main( int argc, char *argv[] )
                     msg.vsetting.data.fence_hsv.vL,
                     msg.vsetting.data.fence_hsv.vH );
 
-            if ( status == 1 ) {
-                if ( cf.vision_window ) {
-                    if ( cvWaitKey( 5 ) >= 0 );
+            if( status == 1 ) {
+                if( cf.vision_window ) {
+                    if( cvWaitKey( 5 ) >= 0 );
 					cvCircle( f_img, cvPoint(fence_center, f_img->height / 2),
 						10, cvScalar(0, 0, 255), 5, 8 );
-					for ( ii = 0; ii < lineWidth; ii++ ) {
+					for( ii = 0; ii < lineWidth; ii++ ) {
 						cvCircle( f_img, cvPoint(f_img->width / 2 + ii, y_max),
 								2, cvScalar(0, 255, 0), 2 );
 					}
@@ -339,29 +339,29 @@ int main( int argc, char *argv[] )
 				}
             }
         }
-        else if ( msg.task.data.num == TASK_GATE && f_cam ) {
+        else if( msg.task.data.num == TASK_GATE && f_cam ) {
         	/* Look for the gate */
 
 		}
 		else {
 			/* No mode or no valid cameras - Simulate. */
-			if ( loop_counter % 100 == 0 ) {
+			if( loop_counter % 100 == 0 ) {
 				msg.vision.data.front_x = loop_counter;
 				msg.vision.data.front_y = loop_counter;
 			}
 		}
 
         /* Get network data. */
-        if ( ( cf.enable_server ) && ( server_fd > 0 ) ) {
+        if( ( cf.enable_server ) && ( server_fd > 0 ) ) {
             recv_bytes = net_server( server_fd, recv_buf, &msg, MODE_VISION );
-            if ( recv_bytes > 0 ) {
+            if( recv_bytes > 0 ) {
                 recv_buf[recv_bytes] = '\0';
                 messages_decode( server_fd, recv_buf, &msg, recv_bytes );
             }
         }
 
         /* Check state of save frames and video messages. */
-        if ( msg.vsetting.data.save_fframe && f_cam ) {
+        if( msg.vsetting.data.save_fframe && f_cam ) {
             /* Get a timestamp and use for filename. */
             gettimeofday( &ctime, NULL );
             ct = *( localtime ((const time_t*) &ctime.tv_sec) );
@@ -371,7 +371,7 @@ int main( int argc, char *argv[] )
             cvSaveImage( write_time, f_img );
             msg.vsetting.data.save_fframe = FALSE;
         }
-        if ( msg.vsetting.data.save_bframe && b_cam ) {
+        if( msg.vsetting.data.save_bframe && b_cam ) {
             /* Get a timestamp and use for filename. */
             gettimeofday( &ctime, NULL );
             ct = *( localtime ((const time_t*) &ctime.tv_sec) );
@@ -381,7 +381,7 @@ int main( int argc, char *argv[] )
             cvSaveImage( write_time, b_img );
             msg.vsetting.data.save_bframe = FALSE;
         }
-        if ( msg.vsetting.data.save_fvideo && !saving_fvideo && f_cam ) {
+        if( msg.vsetting.data.save_fvideo && !saving_fvideo && f_cam ) {
             /* Get a timestamp and use for filename. */
             gettimeofday( &ctime, NULL );
             ct = *( localtime ((const time_t*) &ctime.tv_sec) );
@@ -393,14 +393,14 @@ int main( int argc, char *argv[] )
                 fps, cvGetSize( f_img ), is_color );
             saving_fvideo = TRUE;
         }
-        else if ( !msg.vsetting.data.save_fvideo && saving_fvideo ) {
+        else if( !msg.vsetting.data.save_fvideo && saving_fvideo ) {
             cvReleaseVideoWriter( &f_writer );
             saving_fvideo = FALSE;
         }
-		else if ( msg.vsetting.data.save_fvideo && saving_fvideo ) {
+		else if( msg.vsetting.data.save_fvideo && saving_fvideo ) {
 			cvWriteFrame( f_writer, f_img );
 		}
-        if ( msg.vsetting.data.save_bvideo && !saving_bvideo && b_cam ) {
+        if( msg.vsetting.data.save_bvideo && !saving_bvideo && b_cam ) {
             /* Get a timestamp and use for filename. */
             gettimeofday( &ctime, NULL );
             ct = *( localtime ((const time_t*) &ctime.tv_sec) );
@@ -412,11 +412,11 @@ int main( int argc, char *argv[] )
                 fps, cvGetSize( b_img ), is_color );
             saving_bvideo = TRUE;
         }
-        else if ( !msg.vsetting.data.save_bvideo && saving_bvideo ) {
+        else if( !msg.vsetting.data.save_bvideo && saving_bvideo ) {
             cvReleaseVideoWriter( &b_writer );
             saving_bvideo = FALSE;
         }
-		else if ( msg.vsetting.data.save_bvideo && saving_bvideo ) {
+		else if( msg.vsetting.data.save_bvideo && saving_bvideo ) {
 			cvWriteFrame( b_writer, b_img );
 		}
     }

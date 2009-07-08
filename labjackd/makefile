@@ -12,13 +12,15 @@ CFLAGS    	= -Wall
 CFLAGS    	+= -O2
 CFLAGS    	+= -g
 
-# libraries
-LJLIB		= labjack.a
-PARSELIB	= parser.a
-
 # library directories
 LJDIR		= ../../libs/labjack/lib
 PARSEDIR	= ../../libs/parser/lib
+
+# libraries
+LJLIB		= labjack.a
+PARSELIB	= parser.a
+LIBS		= $(LJDIR)/$(LJLIB)
+LIBS		+= $(PARSEDIR)/$(PARSELIB)
 
 # executables to build
 EXE 		= labjackd
@@ -32,8 +34,7 @@ OBJS += labjackd.o
 all: $(EXE)
 
 $(EXE): $(OBJS)
-	$(CC) $(CFLAGS) $(INCLUDES) $(DEFINES) $^ -o $@ $(LJDIR)/$(LJLIB) \
-													$(PARSEDIR)/$(PARSELIB)
+	$(CC) $(CFLAGS) $(INCLUDES) $(DEFINES) $^ -o $@ $(LIBS)
 
 %.o: %.cpp
 	$(CC) $(CFLAGS) $(INCLUDES) $(DEFINES) -c $<

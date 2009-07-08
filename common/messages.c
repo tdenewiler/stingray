@@ -232,18 +232,18 @@ int messages_decode( int fd, char *buf, MSG_DATA *msg, int bytes )
 	int num_footers = 0;
 
 	/* Decode messages in buffer. */
-	while ( bytes > 0 ) {
+	while( bytes > 0 ) {
 		/* Look for header. */
-		for ( ii = jj; ii < bytes; ii++ ) {
-			if ( buf[ii] == MSG_START ) {
+		for( ii = jj; ii < bytes; ii++ ) {
+			if( buf[ii] == MSG_START ) {
 				found_header = TRUE;
 				break;
 			}
 		}
 
 		/* Look for footer. */
-		for ( jj = ii; jj < bytes; jj++ ) {
-			if ( buf[jj] == MSG_END ) {
+		for( jj = ii; jj < bytes; jj++ ) {
+			if( buf[jj] == MSG_END ) {
 				found_footer = TRUE;
 				num_footers++;
 				break;
@@ -251,7 +251,7 @@ int messages_decode( int fd, char *buf, MSG_DATA *msg, int bytes )
 		}
 
 		/* Return if a header OR a footer are NOT found. */
-		if ( !found_header || !found_footer ) {
+		if( !found_header || !found_footer ) {
 			return bytes;
 		}
 

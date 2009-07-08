@@ -19,11 +19,13 @@ CFLAGS    	+= -g
 LLIBS = `pkg-config --libs gtk+-2.0`
 GTKFLAGS = `pkg-config --cflags gtk+-2.0`
 
-# libraries
-PARSELIB	= parser.a
-
 # library directories
 PARSEDIR	= ../../libs/parser/lib
+
+# libraries
+PARSELIB	= parser.a
+LIBS		= $(PARSEDIR)/$(PARSELIB)
+LIBS		+= $(STDLIBS)
 
 # executables to build
 EXE 		= gui
@@ -40,7 +42,7 @@ all: $(EXE)
 
 $(EXE): $(OBJS)
 	$(CC) $(CFLAGS) $(INCLUDES) $(DEFINES) $(LLIBS) $(GTKFLAGS) \
-	$(DEFINES) $^ -o $@ $(STDLIBS) $(PARSEDIR)/$(PARSELIB)
+	$(DEFINES) $^ -o $@ $(LIBS)
 
 %.o: %.cpp
 	$(CC) $(CFLAGS) $(INCLUDES) $(DEFINES) $(LLIBS) $(GTKFLAGS) $(DEFINES) -c $<

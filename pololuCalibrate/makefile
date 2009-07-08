@@ -9,15 +9,18 @@ CFLAGS		= -Wall
 CFLAGS		+= -O2
 CFLAGS		+= -g
 
-# libraries
-POLLIB		= pololu.a
-SERLIB      = serial.a
-LJLIB		= labjack.a
-
 # library directories
 POLDIR		= ../../libs/pololu/lib
 SERDIR      = ../../libs/serial/lib
 LJDIR		= ../../libs/labjack/lib
+
+# libraries
+POLLIB		= pololu.a
+SERLIB      = serial.a
+LJLIB		= labjack.a
+LIBS		= $(POLDIR)/$(POLLIB)
+LIBS		+= $(SERDIR)/$(SERLIB)
+LIBS		+= $(LJDIR)/$(LJLIB)
 
 # executables to build
 EXE			= pololuCalibrate
@@ -28,10 +31,7 @@ OBJS		= pololuCalibrate.o
 all: $(EXE)
 
 $(EXE): $(OBJS)
-	$(CC) $(CFLAGS) $(INCLUDES) $(DEFINES) $^ -o $@ \
-                                                $(POLDIR)/$(POLLIB) \
-                                                $(SERDIR)/$(SERLIB) \
-                                                $(LJDIR)/$(LJLIB)
+	$(CC) $(CFLAGS) $(INCLUDES) $(DEFINES) $^ -o $@ $(LIBS)
 
 %.o: %.cpp
 	$(CC) $(CFLAGS) $(INCLUDES) $(DEFINES) -c $<

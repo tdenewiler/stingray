@@ -134,28 +134,13 @@ extern CONF_VARS cf;
 void buttons_update_values( )
 {
     /* Activate correct operational mode button based on state data. */
-    switch ( msg.target.data.mode ) {
-        case HOLD_YAW:
-            gtk_toggle_button_set_active( ( GtkToggleButton * )button_hold_yaw, TRUE ) ;
-            break;
-        case HOLD_ROLL:
-            gtk_toggle_button_set_active( ( GtkToggleButton * )button_hold_roll, TRUE );
-            break;
-        case HOLD_PITCH:
-            gtk_toggle_button_set_active( ( GtkToggleButton * )button_hold_pitch, TRUE );
-            break;
-        case HOLD_ACCEL:
-            gtk_toggle_button_set_active( ( GtkToggleButton * )button_hold_accel, TRUE );
-            break;
-        case HOLD_ANG_RATE:
-            gtk_toggle_button_set_active( ( GtkToggleButton * )button_hold_ang_rate, TRUE );
-            break;
-        case MANUAL:
-            gtk_toggle_button_set_active( ( GtkToggleButton * )button_manual, TRUE );
-            break;
-        case AUTONOMOUS:
-            gtk_toggle_button_set_active( ( GtkToggleButton * )button_autonomous, TRUE );
-            break;
+    switch( msg.target.data.mode ) {
+	case MANUAL:
+		gtk_toggle_button_set_active( ( GtkToggleButton * )button_manual, TRUE );
+		break;
+	case AUTONOMOUS:
+		gtk_toggle_button_set_active( ( GtkToggleButton * )button_autonomous, TRUE );
+		break;
     }
 } /* end buttons_update_values() */
 
@@ -456,11 +441,6 @@ int buttons_opmode( GtkWidget *box )
         GTK_SIGNAL_FUNC( events_opmode ), opmode_group );
 
     /* Pack the boxes. */
-    //gtk_box_pack_start( GTK_BOX( hbox ), button_hold_yaw, FALSE, TRUE, 0 );
-    //gtk_box_pack_start( GTK_BOX( hbox ), button_hold_roll, FALSE, TRUE, 0 );
-    //gtk_box_pack_start( GTK_BOX( hbox ), button_hold_pitch, FALSE, TRUE, 0 );
-    //gtk_box_pack_start( GTK_BOX( hbox ), button_hold_accel, FALSE, TRUE, 0 );
-    //gtk_box_pack_start( GTK_BOX( hbox ), button_hold_ang_rate, FALSE, TRUE, 0 );
     gtk_box_pack_start( GTK_BOX( hbox ), button_autonomous, FALSE, TRUE, 0 );
     gtk_box_pack_start( GTK_BOX( hbox ), button_manual, FALSE, TRUE, 0 );
 
@@ -490,7 +470,6 @@ int buttons_opmode( GtkWidget *box )
 
 int buttons_tasks( GtkWidget *box )
 {
-    GtkAdjustment *adj;
     GtkWidget *vbox1;
     GtkWidget *vbox2;
     GtkWidget *vbox3;
@@ -515,9 +494,6 @@ int buttons_tasks( GtkWidget *box )
     hbox3 = gtk_hbox_new( TRUE, 0 );
     hbox4 = gtk_hbox_new( TRUE, 0 );
     hbox5 = gtk_hbox_new( TRUE, 0 );
-
-    /* Initialize the message value. */
-    //msg.task.data.num = TASK_SQUARE;
 
     /* Create a frame for the task buttons. */
     tasks_frame = buttons_make_frame( "Tasks" );
@@ -967,9 +943,7 @@ int buttons_options( GtkWidget *box )
     gtk_box_pack_start( GTK_BOX( box ), vbox1, TRUE, TRUE, 10 );
 
     /* Activate specific buttons by default. */
-    //gtk_toggle_button_set_active( (GtkToggleButton *)button_enable_servos, TRUE );
-    //gtk_toggle_button_set_active( (GtkToggleButton *)button_enable_imu, TRUE );
-    gtk_toggle_button_set_active( ( GtkToggleButton * )button_imu_stab, TRUE );
+    gtk_toggle_button_set_active( (GtkToggleButton *)button_imu_stab, TRUE );
 
     return TRUE;
 } /* end buttons_options() */

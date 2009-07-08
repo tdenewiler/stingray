@@ -16,6 +16,14 @@ CFLAGS      += -O2
 CFLAGS      += -g
 #DEFINES		= -DUSE_SSA
 
+# library directories
+PARSEDIR    = ../../libs/parser/lib
+SERDIR      = ../../libs/serial/lib
+MSDIR       = ../../libs/microstrain/lib
+LJDIR       = ../../libs/labjack/lib
+POLDIR      = ../../libs/pololu/lib
+SSADIR      = ../../libs/ssa/lib
+
 # libraries
 PARSELIB    = parser.a
 SERLIB      = serial.a
@@ -25,14 +33,12 @@ POLLIB      = pololu.a
 SSALIB      = ssa.a
 STDLIBS     = -lm
 STDLIBS		+= -lgnome-2
-
-# library directories
-PARSEDIR    = ../../libs/parser/lib
-SERDIR      = ../../libs/serial/lib
-MSDIR       = ../../libs/microstrain/lib
-LJDIR       = ../../libs/labjack/lib
-POLDIR      = ../../libs/pololu/lib
-SSADIR      = ../../libs/ssa/lib
+LIBS		= $(PARSEDIR)/$(PARSELIB)
+LIBS		+= $(MSDIR)/$(MSLIB)
+LIBS		+= $(LJDIR)/$(LJLIB)
+LIBS		+= $(POLDIR)/$(POLLIB)
+LIBS		+= $(SERDIR)/$(SERLIB)
+LIBS		+= $(STDLIBS)
 
 # executables to build
 EXE         = nav
@@ -47,14 +53,7 @@ OBJS += nav.o
 all: $(EXE)
 
 $(EXE): $(OBJS)
-	$(CC) $(CFLAGS) $(INCLUDES) $(DEFINES) $^ -o $@ \
-												$(PARSEDIR)/$(PARSELIB) \
-                                                $(MSDIR)/$(MSLIB) \
-                                                $(LJDIR)/$(LJLIB) \
-                                                $(POLDIR)/$(POLLIB) \
-                                                $(SERDIR)/$(SERLIB) \
-                                                $(SSADIR)/$(SSALIB) \
-                                                $(STDLIBS)
+	$(CC) $(CFLAGS) $(INCLUDES) $(DEFINES) $^ -o $@ $(LIBS)
 
 %.o: %.cpp
 	$(CC) $(CFLAGS) $(INCLUDES) $(DEFINES) -c $<

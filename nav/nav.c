@@ -87,7 +87,7 @@ static void ssa_update_telemetry(
     //**********
     // engineering telemetry
     //**********
-    if ( msg->stop.data.state == TRUE ) {
+    if( msg->stop.data.state == TRUE ) {
         s.nPlatformMode = MODE_PAUSE;
     }
     else {
@@ -152,19 +152,19 @@ void nav_exit( )
     usleep( 200000 );
 
     /* Close the open file descriptors. */
-    if ( pololu_fd > 0 ) {
+    if( pololu_fd > 0 ) {
         /* Set all the actuators to safe positions. */
         pololuInitializeChannels( pololu_fd );
         usleep( 200000 );
         close( pololu_fd );
     }
-    if ( imu_fd > 0 ) {
+    if( imu_fd > 0 ) {
         close( imu_fd );
     }
-    if ( server_fd > 0 ) {
+    if( server_fd > 0 ) {
         close( server_fd );
     }
-	if ( lj_fd > 0 ) {
+	if( lj_fd > 0 ) {
 		close( lj_fd );
 	}
 
@@ -249,9 +249,9 @@ int main( int argc, char *argv[] )
     status = pid_init( &pid, &cf );
 
     /* Set up server. */
-    if ( cf.enable_server ) {
+    if( cf.enable_server ) {
         server_fd = net_server_setup( cf.server_port );
-		if ( server_fd > 0 ) {
+		if( server_fd > 0 ) {
 			printf("MAIN: Nav server setup OK.\n");
 		}
 		else {
@@ -260,10 +260,10 @@ int main( int argc, char *argv[] )
     }
 
     /* Set up the Microstrain IMU. */
-    if ( cf.enable_imu ) {
+    if( cf.enable_imu ) {
         imu_fd = mstrain_setup( cf.imu_port , cf.imu_baud );
 		status = mstrain_serial_number( imu_fd, &mstrain_serial );
-		if ( mstrain_serial == MSTRAIN_SERIAL ) {
+		if( mstrain_serial == MSTRAIN_SERIAL ) {
 			printf("MAIN: IMU setup OK.\n");
 		}
 		else {
@@ -280,9 +280,9 @@ int main( int argc, char *argv[] )
 	}
 
     /* Set up the Pololu servo controller. */
-    if ( cf.enable_pololu ) {
+    if( cf.enable_pololu ) {
         pololu_fd = pololuSetup( cf.pololu_port, cf.pololu_baud );
-		if ( pololu_fd > 0 ) {
+		if( pololu_fd > 0 ) {
 			/* Initialize the pololu. */
 			pololuInitializeChannels( pololu_fd );
 			printf("MAIN: Pololu setup OK.\n");
@@ -293,9 +293,9 @@ int main( int argc, char *argv[] )
     }
 
 	/* Connect to the labjack daemon. */
-	if ( (cf.enable_labjack > 0) && (cf.enable_pololu > 0) ) {
+	if( (cf.enable_labjack > 0) && (cf.enable_pololu > 0) ) {
         lj_fd = net_client_setup( cf.labjackd_IP, cf.labjackd_port );
-		if ( lj_fd > 0 ) {
+		if( lj_fd > 0 ) {
 			printf("MAIN: Labjack client setup OK.\n");
 		}
 		else {
@@ -318,19 +318,19 @@ int main( int argc, char *argv[] )
 	printf("MAIN: Nav running now.\n");
 
     /* Main loop. */
-    while ( 1 ) {
+    while( 1 ) {
 		/* Check labjack data to see if kill switch has been closed. */
-		if ( (cf.enable_pololu > 0) && (cf.enable_labjack > 0) && (lj_fd > 0) ) {
+		if( (cf.enable_pololu > 0) && (cf.enable_labjack > 0) && (lj_fd > 0) ) {
 			recv_bytes = net_client( lj_fd, lj_buf, &msg, mode );
 			lj_buf[recv_bytes] = '\0';
-			if ( recv_bytes > 0 ) {
+			if( recv_bytes > 0 ) {
 				messages_decode( lj_fd, lj_buf, &msg, recv_bytes );
 				msg.status.data.depth = msg.lj.data.pressure;
 			}
-			if ( pololu_initialized == FALSE ) {
+			if( pololu_initialized == FALSE ) {
 				/* Get the state of the kill switch. */
-				if ( msg.lj.data.battery1 > BATT1_THRESH ) {
-					if ( pololu_starting == FALSE ) {
+				if( msg.lj.data.battery1 > BATT1_THRESH ) {
+					if( pololu_starting == FALSE ) {
 						pololuInitializeChannels( pololu_fd );
 						pololu_starting = TRUE;
 						/* Start the timer. */
@@ -342,7 +342,7 @@ int main( int argc, char *argv[] )
 					time2s =    pololu_start.tv_sec;
 					time2ms =   pololu_start.tv_usec;
 					dt = util_calc_dt( &time1s, &time1ms, &time2s, &time2ms );
-					if ( dt > POLOLU_INIT_TIME ) {
+					if( dt > POLOLU_INIT_TIME ) {
 						pololu_initialized = TRUE;
 						pololu_starting = FALSE;
 						printf("MAIN: Pololu initialized.\n");
@@ -355,7 +355,7 @@ int main( int argc, char *argv[] )
 			}
 			else {
 				/* Get the state of the kill switch. */
-				if ( msg.lj.data.battery1 > BATT1_THRESH ) {
+				if( msg.lj.data.battery1 > BATT1_THRESH ) {
 					pololu_initialized = TRUE;
 				}
 				else {
@@ -365,17 +365,16 @@ int main( int argc, char *argv[] )
 		}
 
         /* Get network data. */
-        if ( (cf.enable_server) && (server_fd > 0) ) {
-            //recv_bytes = net_server( server_fd, recv_buf, &msg, MODE_STATUS );
+        if( (cf.enable_server) && (server_fd > 0) ) {
             recv_bytes = net_server( server_fd, recv_buf, &msg, MODE_PLANNER );
-            if ( recv_bytes > 0 ) {
+            if( recv_bytes > 0 ) {
                 recv_buf[recv_bytes] = '\0';
                 messages_decode( server_fd, recv_buf, &msg, recv_bytes );
             }
         }
 
         /* Check state of emergency stop value. */
-        //if ( msg.stop.data.state == TRUE ) {
+        //if( msg.stop.data.state == TRUE ) {
             //printf("MAIN: EMERGENCY STOP received. Setting actuators to\n"
                     //"     safe positions!\n");
             ///* Set all the actuators to safe positions. */
@@ -383,13 +382,13 @@ int main( int argc, char *argv[] )
         //}
 
         /* Send dropper servo command. Check that Pololu is initialized. */
-        //if ( (pololu_fd > 0) && (pololu_initialized) ) {
+        //if( (pololu_fd > 0) && (pololu_initialized) ) {
             //status = pololuSetPosition7Bit( pololu_fd, POLOLU_DROPPER_SERVO, msg.client.data.dropper );
             //printf("MAIN: dropper = %d\n", msg.client.data.dropper);
         //}
 
         /* Check for assisted teleop commands. */
-        if ( msg.target.data.mode == MANUAL ) {
+        if( msg.target.data.mode == MANUAL ) {
             msg.target.data.pitch   += msg.teleop.data.pitch;
             msg.target.data.roll    += msg.teleop.data.roll;
             msg.target.data.yaw     += msg.teleop.data.yaw;
@@ -409,7 +408,7 @@ int main( int argc, char *argv[] )
         }
 
         /* Get Microstrain data. */
-        if ( (cf.enable_imu) && (imu_fd > 0) ) {
+        if( (cf.enable_imu) && (imu_fd > 0) ) {
             recv_bytes = mstrain_euler_vectors( imu_fd, &msg.mstrain.data.pitch,
 				&msg.mstrain.data.roll, &msg.mstrain.data.yaw, msg.mstrain.data.accel,
 				msg.mstrain.data.ang_rate );
@@ -436,14 +435,14 @@ int main( int argc, char *argv[] )
 		}
 
         /* Perform PID loops. */
-        if ( msg.stop.data.state == FALSE ) {
+        if( msg.stop.data.state == FALSE ) {
             /* Pitch. */
             time1s =    pitch_time.tv_sec;
             time1ms =   pitch_time.tv_usec;
             time2s =    pitch_start.tv_sec;
             time2ms =   pitch_start.tv_usec;
             dt = util_calc_dt( &time1s, &time1ms, &time2s, &time2ms );
-            if ( dt > pid.pitch.period ) {
+            if( dt > pid.pitch.period ) {
                 pid_loop( pololu_fd, &pid, &cf, &msg, dt, PID_PITCH, pololu_initialized );
                 msg.status.data.pitch_period = dt;
                 gettimeofday( &pitch_start, NULL );
@@ -455,7 +454,7 @@ int main( int argc, char *argv[] )
             time2s =    roll_start.tv_sec;
             time2ms =   roll_start.tv_usec;
             dt = util_calc_dt( &time1s, &time1ms, &time2s, &time2ms );
-            if ( dt > pid.roll.period ) {
+            if( dt > pid.roll.period ) {
                 pid_loop( pololu_fd, &pid, &cf, &msg, dt, PID_ROLL, pololu_initialized );
                 msg.status.data.roll_period = dt;
                 gettimeofday( &roll_start, NULL );
@@ -467,7 +466,7 @@ int main( int argc, char *argv[] )
             time2s =    yaw_start.tv_sec;
             time2ms =   yaw_start.tv_usec;
             dt = util_calc_dt( &time1s, &time1ms, &time2s, &time2ms );
-            if ( dt > pid.yaw.period ) {
+            if( dt > pid.yaw.period ) {
                 pid_loop( pololu_fd, &pid, &cf, &msg, dt, PID_YAW, pololu_initialized );
 				msg.status.data.yaw_period = dt;
 				gettimeofday( &yaw_start, NULL );
@@ -479,7 +478,7 @@ int main( int argc, char *argv[] )
             time2s =    depth_start.tv_sec;
             time2ms =   depth_start.tv_usec;
             dt = util_calc_dt( &time1s, &time1ms, &time2s, &time2ms );
-            if ( dt > pid.depth.period ) {
+            if( dt > pid.depth.period ) {
                 pid_loop( pololu_fd, &pid, &cf, &msg, dt, PID_DEPTH, pololu_initialized );
                 msg.status.data.depth_period = dt;
                 gettimeofday( &depth_start, NULL );

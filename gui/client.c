@@ -95,9 +95,9 @@ int main( int argc, char *argv[] )
     msg.vsetting.data.fence_hsv.vH = cf.fence_vH;
 
     /* Connect to the planner server. */
-    if ( cf.enable_planner ) {
+    if( cf.enable_planner ) {
         planner_fd = net_client_setup( cf.planner_IP, cf.planner_port );
-		if ( planner_fd > 0 ) {
+		if( planner_fd > 0 ) {
 			printf( "MAIN: Planner client setup OK.\n" );
 		}
 		else {
@@ -106,9 +106,9 @@ int main( int argc, char *argv[] )
     }
 
 	/* Connect to the vision server. */
-    if ( cf.enable_vision ) {
+    if( cf.enable_vision ) {
         vision_fd = net_client_setup( cf.vision_IP, cf.vision_port );
-		if ( vision_fd > 0 ) {
+		if( vision_fd > 0 ) {
 			printf( "MAIN: Vision client setup OK.\n" );
 		}
 		else {
@@ -117,9 +117,9 @@ int main( int argc, char *argv[] )
     }
 
 	/* Connect to the nav server. */
-    if ( cf.enable_nav ) {
+    if( cf.enable_nav ) {
         nav_fd = net_client_setup( cf.nav_IP, cf.nav_port );
-		if ( nav_fd > 0 ) {
+		if( nav_fd > 0 ) {
 			printf( "MAIN: Nav client setup OK.\n" );
 		}
 		else {
