@@ -7,9 +7,6 @@ INCLUDES	+= -I../../libs/microstrain/include
 INCLUDES	+= -I../../libs/labjack/include
 INCLUDES	+= -I../../libs/pololu/include
 
-# defines
-DEFINES		= -DUSE_CLIENT
-
 # compiler and flags
 CC        	= g++
 CFLAGS    	= -Wall
