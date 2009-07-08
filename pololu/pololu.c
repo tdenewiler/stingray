@@ -6,7 +6,6 @@
  *                Pololu 16-Channel USB servo controller.  The user's
  *                manual is available at: www.pololu.com
  *
- *
  *  NOTES:
  *    POLOLU_SLEEP may not be necessay now.  More experiments are needed.
  *
@@ -37,23 +36,22 @@ int pololuSetup( char *portname,
                  int baud
                )
 {
+	/* Set up variables. */
 	int fd = -1;
 	int result = 0;
-
+	
+	/* Open a serial port connection to the Pololu. */
 	if( portname != NULL ) {
 		fd = setup_serial( portname, baud );
 	}
 
-	// if fd<0 setup_serial failed
-	// NOTE THAT THIS IS FAILURE VALUE FROM setup_serial
+	/* Check that port opened correctly. Initialize the channels. */
 	if( fd < 0 ) {
 		return fd;
 	}
 	else {
-		// initialize channels
+		/* Initialize channels. */
 		result = pololuInitializeChannels( fd );
-		// if the channels don't initialize then failure
-
 		if( result < 0 ) {
 			close( fd );
 			return POLOLU_FAILURE;
@@ -93,47 +91,44 @@ int pololuSetParameters( int fd,
                          int range
                        )
 {
-	// sleep for a bit
-	// usleep( POLOLU_SLEEP );
-	// check ranges
+	/* Set up variables. */
 	int result = 0;
+	unsigned char msg[5];
+	unsigned char c = 0;
+	unsigned char r = 0;
 
+	/* Check range on the parameters. */
 	if( (fd >= 0) &&
 	        (channel >= 0) &&
 	        (channel <= 15) &&
 	        (range >= 0)
 	        && (range <= 15) ) {
 
-		// demote the ints to chars
-		unsigned char c = (unsigned char)channel;
-		unsigned char r = (unsigned char)range;
+		/* Typecast the ints to chars. */
+		c = (unsigned char)channel;
+		r = (unsigned char)range;
 
-		// set parameters
-		unsigned char msg[5];
-		msg[0] = POLOLU_START_BYTE; // start byte
-		msg[1] = POLOLU_DEVICE_ID;  // device ID
-		msg[2] = 0x00;  // command #
-		msg[3] = c; // channel number
+		/* Set the parameters. */
+		msg[0] = POLOLU_START_BYTE;
+		msg[1] = POLOLU_DEVICE_ID;
+		msg[2] = POLOLU_COMMAND_BYTE;
+		msg[3] = c;
 
-		// [128 64 32 16 8 4 2 1]
-
-		// setup some masks
-		unsigned char bit5 = 0; // 0 is default for forward in protocol
-
+		/* Set up masks. 0 is default for forward direction in Pololu protocol.
+		 * 0 is default for channel on. */
+		unsigned char bit5 = 0;
 		if( !direction ) {
-			bit5 = 32;  // 16 is reverse
+			bit5 = 32;
 		}
-
-		unsigned char bit6 = 0; // 0 is for off
+		unsigned char bit6 = 0;
 		if( channelOn ) {
-			bit6 = 64;  // 32 is for on
+			bit6 = 64;
 		}
 
-		/* This should do it. */
+		/* Set the bit mask. */
 		msg[4] = ( (r & 15) | (bit5 & 32) | (bit6 & 64) ) & 127;
 
-		// send the message
-		// printf( "sp: %x %x %x %x %x \n",msg[0],msg[1],msg[2],msg[3],msg[4] );
+		/* Send the parameters to the Pololu. */
 		result = send_serial( fd, &msg, 5 );
 	}
 
@@ -165,36 +160,34 @@ int pololuSetSpeed( int fd,
                     int speed
                   )
 {
-	// sleep for a bit
-	// usleep( POLOLU_SLEEP );
-
-	// set speed
+	/* Set up variables. */
 	int result = 0;
-	// check ranges
+	unsigned char msg[5];
+	unsigned char c = 0;
+	unsigned char s = 0;
 
+	/* Check bounds on speed and channel. */
 	if( (fd >= 0) &&
 	        (channel >= 0) &&
 	        (channel <= 15) &&
 	        (speed >= 0) &&
 	        (speed <= 127) ) {
 
-		// demote the ints to chars
-		unsigned char c = (unsigned char)channel;
-		unsigned char s = (unsigned char)speed;
+		/* Typecast the ints to chars. */
+		c = (unsigned char)channel;
+		s = (unsigned char)speed;
 
-		unsigned char msg[5];
-		msg[0] = POLOLU_START_BYTE; // start byte
-		msg[1] = POLOLU_DEVICE_ID;  // device ID
-		msg[2] = 0x01;  // command #
-		msg[3] = c; // channel number
+		/* Set the parameters. */
+		msg[0] = POLOLU_START_BYTE;
+		msg[1] = POLOLU_DEVICE_ID;
+		msg[2] = POLOLU_SPEED_BYTE;
+		msg[3] = c;
 
-		// [128 64 32 16 8 4 2 1]
+		/* Set the bit mask. */
 		msg[4] = s & 127;
 
-		// send the message
-		//printf( "sp: %x %x %x %x %x \n",msg[0],msg[1],msg[2],msg[3],msg[4] );
+		/* Send the command to the Pololu. */
 		result = send_serial( fd, &msg, 5 );
-		// result = bytes received
 	}
 
 	return result;
@@ -224,34 +217,33 @@ int pololuSetPosition7Bit( int fd,
                            int position
                          )
 {
-	// sleep for a bit
-	// usleep( POLOLU_SLEEP );
-
-	// check ranges
+	/* Set up variables. */
 	int result = 0;
+	unsigned char msg[5];
+	unsigned char c = 0;
+	unsigned char p = 0;
 
+	/* Check the bounds on the channel and position. */
 	if( (fd >= 0) &&
 	        (channel >= 0) &&
 	        (channel <= 15) &&
 	        (position >= 0) &&
 	        (position <= 127) ) {
 
-		// set position7bit
-		// demote the ints to chars
-		unsigned char c = (unsigned char)channel;
-		unsigned char p = (unsigned char)position;
+		/* Typecast the ints to chars. */
+		c = (unsigned char)channel;
+		p = (unsigned char)position;
 
-		unsigned char msg[5];
-		msg[0] = POLOLU_START_BYTE; // start byte
-		msg[1] = POLOLU_DEVICE_ID;  // device ID
-		msg[2] = 0x02;  // command #  result+=pololuSetPosition7Bit(fd,1,63);
-		msg[3] = c; // channel number
+		/* Set the parameters. */
+		msg[0] = POLOLU_START_BYTE;
+		msg[1] = POLOLU_DEVICE_ID;
+		msg[2] = POLOLU_SPEED_BYTE;
+		msg[3] = c;
 
-		// [128 64 32 16 8 4 2 1]
+		/* Set the bit mask. */
 		msg[4] = p & 127;
 
-		// send the message
-		//printf( "sp: %x %x %x %x %x \n",msg[0],msg[1],msg[2],msg[3],msg[4] );
+		/* Send the command to the Pololu. */
 		result = send_serial( fd, &msg, 5 );
 	}
 
@@ -282,43 +274,39 @@ int pololuSetPosition8Bit( int fd,
                            int position
                          )
 {
-	// sleep for a bit
-	// usleep( POLOLU_SLEEP );
-
-	// check ranges
+	/* Set up variables. */
 	int result = 0;
+	unsigned char msg[6];
+	unsigned char c = 0;
+	unsigned char p = 0;
 
+	/* Check the bounds on the channel and position. */
 	if( (fd >= 0) &&
 	        (channel >= 0) &&
 	        (channel <= 15) &&
 	        (position >= 0) &&
 	        (position <= 255) ) {
 
-		// set position8bit
-		// demote the ints to chars
-		unsigned char c = (unsigned char)channel;
-		unsigned char p = (unsigned char)position;
-		//printf( "sp8: p=%x\n",p );
-		unsigned char msg[6];
-		msg[0] = POLOLU_START_BYTE; // start byte
-		msg[1] = POLOLU_DEVICE_ID;  // device ID
-		msg[2] = 0x03;  // command #
-		msg[3] = c; // channel number
+		/* Typecast the ints to chars. */
+		c = (unsigned char)channel;
+		p = (unsigned char)position;
+		
+		/* Set the parameters. */
+		msg[0] = POLOLU_START_BYTE;
+		msg[1] = POLOLU_DEVICE_ID;
+		msg[2] = POLOLU_8BIT_POS_BYTE;
+		msg[3] = c;
 
-		// [128 64 32 16 8 4 2 1]
-		// 0th bit of msg[4] is 7th bit of position
-
+		/* Set the bit mask. */
 		if( p & 128 ) {
 			msg[4] = 1;
 		}
 		else {
 			msg[4] = 0;
 		}
-
 		msg[5] = ( p & 127 );
 
-		// send the message
-		//printf("sp8: %x %x %x %x %x %x \n",msg[0],msg[1],msg[2],msg[3],msg[4],msg[5]);
+		/* Send the command to the Pololu. */
 		result = send_serial( fd, &msg, 6 );
 	}
 
@@ -348,36 +336,34 @@ int pololuSetPositionAbsolute( int fd,
                                int position
                              )
 {
-	// sleep for a bit
-	// usleep( POLOLU_SLEEP );
-
-	// check ranges
+	/* Set up variables. */
 	int result = 0;
+	unsigned char msg[6];
+	unsigned char c = 0;
+	unsigned int p = 0;
 
+	/* Check the bounds on the channel and position. */
 	if( (fd >= 0) &&
 	        (channel >= 0) &&
 	        (channel <= 15) &&
 	        (position >= 500) &&
 	        (position <= 5500) ) {
 
-		// set positionAbsolute
-		// demote the ints to chars
-		unsigned char c = (unsigned char)channel;
-		unsigned int p = (unsigned int)position;
-		unsigned char msg[6];
-		//printf( "spA: %x\n",p );
-		msg[0] = POLOLU_START_BYTE; // start byte
-		msg[1] = POLOLU_DEVICE_ID;  // device ID
-		msg[2] = 0x04;  // command #
-		msg[3] = c; // channel number
+		/* Typecast the channel to char and position to int. */
+		c = (unsigned char)channel;
+		p = (unsigned int)position;
 
-		// [128 64 32 16 8 4 2 1]
-		// msg[4] is upper 7 bits of position
+		/* Set the parameters. */
+		msg[0] = POLOLU_START_BYTE;
+		msg[1] = POLOLU_DEVICE_ID;
+		msg[2] = POLOLU_ABS_POS_BYTE;
+		msg[3] = c;
+
+		/* Set the bit mask. */
 		msg[4] = ( p >> 7 ) & 127;
 		msg[5] = ( p & 127 );
 
-		// send the message
-		//printf("spA: %x %x %x %x %x %x \n",msg[0],msg[1],msg[2],msg[3],msg[4],msg[5]);
+		/* Send the command to the Pololu. */
 		result = send_serial( fd, &msg, 6 );
 	}
 
@@ -409,36 +395,34 @@ int pololuSetNeutral( int fd,
                       int position
                     )
 {
-	// sleep for a bit
-	// usleep( POLOLU_SLEEP );
-
-	// set neutral
-	// check ranges
+	/* Set up variables. */
 	int result = 0;
+	unsigned char msg[6];
+	unsigned char c = 0;
+	unsigned int p = 0;
 
+	/* Check the bounds on the channel and position. */
 	if( (fd >= 0) &&
 	        (channel >= 0) &&
 	        (channel <= 15) &&
 	        (position >= 500) &&
 	        (position <= 5500) ) {
 
-		// demote the ints to chars
-		unsigned char c = (unsigned char)channel;
-		unsigned int p = (unsigned int)position;
-		unsigned char msg[6];
-		//printf("spA: %x\n",p);
-		msg[0] = POLOLU_START_BYTE; // start byte
-		msg[1] = POLOLU_DEVICE_ID;  // device ID
-		msg[2] = 0x05;  // command #
-		msg[3] = c; // channel number
+		/* Typecast the channel to char and position to int. */
+		c = (unsigned char)channel;
+		p = (unsigned int)position;
 
-		// [128 64 32 16 8 4 2 1]
-		// msg[4] is upper 7 bits of position
+		/* Set the parameters. */
+		msg[0] = POLOLU_START_BYTE;
+		msg[1] = POLOLU_DEVICE_ID;
+		msg[2] = POLOLU_NEUTRAL_BYTE;
+		msg[3] = c;
+
+		/* Set the bit mask. */
 		msg[4] = ( p >> 7 ) & 127;
 		msg[5] = ( p & 127 );
 
-		// send the message
-		//printf("sp: %x %x %x %x %x %x \n",msg[0],msg[1],msg[2],msg[3],msg[4],msg[5]);
+		/* Send the command to the Pololu. */
 		result = send_serial( fd, &msg, 6 );
 	}
 
@@ -460,54 +444,55 @@ int pololuSetNeutral( int fd,
 
 int pololuInitializeChannels( int fd )
 {
+	/* Set up variables. */
 	int result = 0;
 
-	// if invalid fd return failure
+	/* Check for a valid file descriptor. */
 	if( fd < 0 ) {
 		return POLOLU_FAILURE;
 	}
 
-	// THIS IS OUR DEFAULT PROFILE
-	result += pololuSetParameters( fd, 0, 1, 1, 15 );
-	result += pololuSetParameters( fd, 3, 1, 1, 15 );
-	result += pololuSetSpeed( fd, 0, 10 );
-	result += pololuSetSpeed( fd, 3, 10 );
-	result += pololuSetPosition7Bit( fd, 0, 63 );
-	result += pololuSetPosition7Bit( fd, 3, 63 );
-	result += pololuSetParameters( fd, 7, 1, 1, 15 );
-	result += pololuSetParameters( fd, 8, 1, 1, 15 );
-	result += pololuSetParameters( fd, 10, 1, 1, 15 );
-	result += pololuSetSpeed( fd, 7, 0 );
-	result += pololuSetSpeed( fd, 8, 0 );
-	result += pololuSetSpeed( fd, 10, 0 );
-	result += pololuSetPosition7Bit( fd, 7, 63 );
-	result += pololuSetPosition7Bit( fd, 8, 63 );
-	result += pololuSetPosition7Bit( fd, 10, 63 );
-	result += pololuSetParameters( fd, 1, 1, 1, 15 ) ;
-	result += pololuSetNeutral( fd, 1, POLOLU_CH1_NEUTRAL );
-	result += pololuSetPosition7Bit( fd, 1, 63 );
-	result += pololuSetParameters( fd, 2, 1, 1, 15 );
-	result += pololuSetNeutral( fd, 2, POLOLU_CH2_NEUTRAL );
-	result += pololuSetPosition7Bit( fd, 2, 63 );
-	result += pololuSetParameters( fd, 4, 1, 1, 15 );
-	result += pololuSetNeutral( fd, 4, POLOLU_CH4_NEUTRAL );
-	result += pololuSetPosition7Bit( fd, 4, 63 );
-	result += pololuSetParameters( fd, 5, 1, 1, 15 );
-	result += pololuSetNeutral( fd, 5, POLOLU_CH5_NEUTRAL );
-	result += pololuSetPosition7Bit( fd, 5, 63 );
+	/* Set up the default profile as determined from testing servos and motors. */
+	result += pololuSetParameters(   fd, POLOLU_RIGHT_VOITH_MOTOR, POLOLU_CHANNEL_ON, POLOLU_DIR_FORWARD, POLOLU_RANGE );
+	result += pololuSetSpeed(        fd, POLOLU_RIGHT_VOITH_MOTOR, POLOLU_CH0_NEUTRAL );
+	result += pololuSetPosition7Bit( fd, POLOLU_RIGHT_VOITH_MOTOR, POLOLU_7BIT_NEUTRAL );
+	result += pololuSetParameters(   fd, POLOLU_LEFT_VOITH_MOTOR, POLOLU_CHANNEL_ON, POLOLU_DIR_FORWARD, POLOLU_RANGE );
+	result += pololuSetSpeed(        fd, POLOLU_LEFT_VOITH_MOTOR, POLOLU_CH3_NEUTRAL );
+	result += pololuSetPosition7Bit( fd, POLOLU_LEFT_VOITH_MOTOR, POLOLU_7BIT_NEUTRAL );
+	result += pololuSetParameters(   fd, POLOLU_LEFT_WING_MOTOR, POLOLU_CHANNEL_ON, POLOLU_DIR_FORWARD, POLOLU_RANGE );
+	result += pololuSetSpeed(        fd, POLOLU_LEFT_WING_MOTOR, POLOLU_LWING_NEUTRAL );
+	result += pololuSetPosition7Bit( fd, POLOLU_LEFT_WING_MOTOR, POLOLU_7BIT_NEUTRAL );
+	result += pololuSetParameters(   fd, POLOLU_RIGHT_WING_MOTOR, POLOLU_CHANNEL_ON, POLOLU_DIR_FORWARD, POLOLU_RANGE );
+	result += pololuSetSpeed(        fd, POLOLU_RIGHT_WING_MOTOR, POLOLU_RWING_NEUTRAL );
+	result += pololuSetPosition7Bit( fd, POLOLU_RIGHT_WING_MOTOR, POLOLU_7BIT_NEUTRAL );
+	result += pololuSetParameters(   fd, POLOLU_TAIL_MOTOR, POLOLU_CHANNEL_ON, POLOLU_DIR_FORWARD, POLOLU_RANGE );
+	result += pololuSetSpeed(        fd, POLOLU_TAIL_MOTOR, POLOLU_TAIL_NEUTRAL );
+	result += pololuSetPosition7Bit( fd, POLOLU_TAIL_MOTOR, POLOLU_7BIT_NEUTRAL );
+	result += pololuSetParameters(   fd, POLOLU_LEFT_SERVO1, POLOLU_CHANNEL_ON, POLOLU_DIR_FORWARD, POLOLU_RANGE );
+	result += pololuSetNeutral(      fd, POLOLU_LEFT_SERVO1, POLOLU_CH1_NEUTRAL );
+	result += pololuSetPosition7Bit( fd, POLOLU_LEFT_SERVO1, POLOLU_7BIT_NEUTRAL );
+	result += pololuSetParameters(   fd, POLOLU_LEFT_SERVO2, POLOLU_CHANNEL_ON, POLOLU_DIR_FORWARD, POLOLU_RANGE );
+	result += pololuSetNeutral(      fd, POLOLU_LEFT_SERVO2, POLOLU_CH2_NEUTRAL );
+	result += pololuSetPosition7Bit( fd, POLOLU_LEFT_SERVO2, POLOLU_7BIT_NEUTRAL );
+	result += pololuSetParameters(   fd, POLOLU_RIGHT_SERVO1, POLOLU_CHANNEL_ON, POLOLU_DIR_FORWARD, POLOLU_RANGE );
+	result += pololuSetNeutral(      fd, POLOLU_RIGHT_SERVO1, POLOLU_CH4_NEUTRAL );
+	result += pololuSetPosition7Bit( fd, POLOLU_RIGHT_SERVO1, POLOLU_7BIT_NEUTRAL );
+	result += pololuSetParameters(   fd, POLOLU_RIGHT_SERVO2, POLOLU_CHANNEL_ON, POLOLU_DIR_FORWARD, POLOLU_RANGE );
+	result += pololuSetNeutral(      fd, POLOLU_RIGHT_SERVO2, POLOLU_CH5_NEUTRAL );
+	result += pololuSetPosition7Bit( fd, POLOLU_RIGHT_SERVO2, POLOLU_7BIT_NEUTRAL );
+	result += pololuSetParameters(   fd, POLOLU_DROPPER_SERVO, POLOLU_CHANNEL_ON, POLOLU_DIR_FORWARD, POLOLU_RANGE );
+	result += pololuSetNeutral(      fd, POLOLU_DROPPER_SERVO, POLOLU_DROPPER_NEUTRAL );
+	result += pololuSetPosition7Bit( fd, POLOLU_DROPPER_SERVO, POLOLU_7BIT_NEUTRAL );
 
-	// the total number of bytes sent
-	// 5 for each normal command and 6 for each pololuSetNeutral command
+	/* Check the number of bytes sent and return success or failure. There are
+	 * 5 bytes for each command and 6 bytes for each neutral command:
+	 * --> 5 * 23 + 6 * 4 = 139. */
 	if( result == 139 ) {
 		result = POLOLU_SUCCESS;
 	}
 	else {
 		result = POLOLU_FAILURE;
 	}
-
-	// needs a little extra sleep in case this function is followed directly by
-	// close()
-	usleep( POLOLU_SLEEP );
 
 	return result;
 } /* end pololuInitializeChannels() */
