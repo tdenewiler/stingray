@@ -13,15 +13,16 @@ int main( )
 	int status = -1;
 	char port_name[15];
 	char *imu_port;
+	int baud = 38400;
 
-	//strncpy( port_name, "/dev/ttyS0", 15 );
-	strncpy( port_name, "/dev/ttyUSB0", 15 );
+	strncpy( port_name, "/dev/ttyS0", 15 );
+	//strncpy( port_name, "/dev/ttyUSB0", 15 );
 	imu_port = port_name;
 
 	/* Baud rate must be 38400 unless IMU is reconfigured. To reconfigure, use
 	 * the code that comes with the Microstrain software package. */
-	printf("Trying IMU at /dev/ttyS0 with 38400.\n");
-	imu_fd = mstrain_setup( imu_port, 38400 );
+	printf("Trying IMU at %s with %d baud.\n", imu_port, baud);
+	imu_fd = mstrain_setup( imu_port, baud );
 	printf("imu_fd = %d\n", imu_fd);
 	if ( imu_fd < 0 ) {
 		printf("No IMU, quitting...\n");
