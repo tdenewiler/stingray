@@ -95,7 +95,7 @@ void task_buoy( MSG_DATA *msg, int dt )
 {
 	/* Set target values based on current orientation and pixel error. */
 	//msg->target.data.yaw = msg->mstrain.data.yaw + (float)msg->vision.data.front_x / 10.;
-	msg->target.data.yaw = (float)msg->vision.data.front_x / 4.;
+	msg->target.data.yaw = msg->status.data.yaw + (float)msg->vision.data.front_x / 4.;
 	printf("TASK_BUOY: yaw target = %f\n", msg->target.data.yaw);
 } /* end task_buoy() */
 

@@ -292,12 +292,6 @@ int main( int argc, char *argv[] )
 				recv_buf[recv_bytes] = '\0';
 				messages_decode( server_fd, recv_buf, &msg, recv_bytes );
 			}
-			if( old_dropper != msg.client.data.dropper ) {
-				if ( nav_fd > 0 ) {
-					messages_send( nav_fd, CLIENT_MSGID, &msg );
-				}
-				old_dropper = msg.client.data.dropper;
-			}
 		}
 
 		/* Get vision data. */

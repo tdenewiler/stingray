@@ -331,15 +331,11 @@ int main( int argc, char *argv[] )
 				/* Get the state of the kill switch. */
 				if ( msg.lj.data.battery1 > BATT1_THRESH ) {
 					if ( pololu_starting == FALSE ) {
-						/* Make sure that the Voiths are set to zero. */
-						msg.target.data.speed = 0;
 						pololuInitializeChannels( pololu_fd );
 						pololu_starting = TRUE;
 						/* Start the timer. */
 						gettimeofday( &pololu_start, NULL );
 					}
-					/* Make sure that the Voiths are set to zero. */
-					msg.target.data.speed = 0;
 					/* Check that 7 seconds have elapsed since initializing Pololu. */
 		            time1s =    pololu_time.tv_sec;
 					time1ms =   pololu_time.tv_usec;
@@ -387,9 +383,10 @@ int main( int argc, char *argv[] )
         //}
 
         /* Send dropper servo command. Check that Pololu is initialized. */
-        if ( (pololu_fd > 0) && (pololu_initialized) ) {
-            status = pololuSetPosition7Bit( pololu_fd, POLOLU_DROPPER_SERVO, msg.client.data.dropper );
-        }
+        //if ( (pololu_fd > 0) && (pololu_initialized) ) {
+            //status = pololuSetPosition7Bit( pololu_fd, POLOLU_DROPPER_SERVO, msg.client.data.dropper );
+            //printf("MAIN: dropper = %d\n", msg.client.data.dropper);
+        //}
 
         /* Check for assisted teleop commands. */
         if ( msg.target.data.mode == MANUAL ) {
