@@ -120,7 +120,8 @@ void pid_loop( int pololu_fd,
 	}
 
 	/* These next three need to be set from vison, hydrophone, gui, etc. They
-	 * depend on the target values reported from those sensor systems. */
+	 * depend on the target values reported from those sensor systems.
+	 * Reference: float atan2f(float y, float x); */
 	pid->voith_angle = atan2f( msg->target.data.fx, msg->target.data.fy );
 	pid->voith_speed = msg->target.data.speed;
 	pid->voith_thrust = sqrt( msg->target.data.fx * msg->target.data.fx +
@@ -224,8 +225,8 @@ void pid_loop( int pololu_fd,
 						  pid->yaw.kd * pid->yaw.derr;
 
 		/* Check bounds. */
-		if( fabsf( pid->yaw_torque ) > PID_YAW_TORQUE ) {
-			pid->yaw_torque = util_sign_value( pid->yaw_torque ) * PID_YAW_TORQUE;
+		if( fabsf( pid->yaw_torque ) > POLOLU_MAX_YAW_TORQUE ) {
+			pid->yaw_torque = util_sign_value( pid->yaw_torque ) * POLOLU_MAX_YAW_TORQUE;
 		}
 
 		/* Control Voiths. */
@@ -284,7 +285,10 @@ void pid_loop( int pololu_fd,
  * Input:		ang1: Angle 1.
  * 				ang2: Angle 2.
  *
- * Output:      diff: Difference between angles.
+ * Output:      diff: Difference between angles. A positive output is
+ * 					  means the difference is a positive clockwise
+ * 					  offset. This implies the sub must turn left. A
+ * 					  negative output means the sub must turn right.
  *
  *****************************************************************************/
 
