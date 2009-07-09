@@ -53,7 +53,7 @@
 #define POLOLU_VOITH_NEUTRAL		63
 #define POLOLU_SERVO_BOUND			100
 #define POLOLU_MAX_YAW_TORQUE		80
-#DEFINE POLOLU_YAW_CORRECTION		45
+#define POLOLU_YAW_CORRECTION		45
 //@}
 
 /** @name The time (ms) it takes for the Pololu to initialize. */
