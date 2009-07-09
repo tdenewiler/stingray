@@ -145,6 +145,7 @@ int main( int argc, char *argv[] )
 	int old_task = 0;
 	int old_dropper = 0;
 	CvPoint3D32f loc;
+	int subtask = 0;
 
 	struct timeval vision_time = {0, 0};
 	struct timeval vision_start = {0, 0};
@@ -402,7 +403,7 @@ int main( int argc, char *argv[] )
 		dt = util_calc_dt( &time1s, &time1ms, &time2s, &time2ms );
 
 		/* Run the current task. */
-		task_run( &msg, dt );
+		task_run( &msg, dt, &subtask );
 
 		/* Update timers. */
 		gettimeofday( &vision_time, NULL );
