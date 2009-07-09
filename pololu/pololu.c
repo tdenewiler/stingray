@@ -528,8 +528,8 @@ int pololuInitializeChannels( int fd )
  *
  * Input:
  *	voithThrust: between 0 and 100
- *	thrustAngle: between 0 and 360
- *	thrust: between -100 and 100
+ *	thrustAngle: between -M_PI and M_PI
+ *	thrust: between 0 and 100
  *	yawTorque: between -100 and 100
  *
  * Output:      1 for success and -1 for failure
@@ -548,7 +548,7 @@ int pololuControlVoiths( int fd,
 	if( (fd < 0) ||
 	    (voithThrust < 0) ||
 	    (voithThrust > POLOLU_SERVO_BOUND) ||
-	    (thrust < -1 * POLOLU_SERVO_BOUND) ||
+	    (thrust < 0) ||
 	    (thrust > POLOLU_SERVO_BOUND) ||
 	    (yawTorque < -1 * POLOLU_SERVO_BOUND) ||
 	    (yawTorque > POLOLU_SERVO_BOUND) ) {
@@ -565,16 +565,22 @@ int pololuControlVoiths( int fd,
 	float rightAngleOffset = POLOLU_RIGHT_ANGLE_OFFSET * ( M_PI / 180 );
 
 	/* Calculate the radius values for where the Voith pins should be. */
-	int radius1 = yawTorque + thrust;
-	int radius2 = yawTorque - thrust;
+	int radius1 = yawTorque * cos( angle ) + thrust; // [MIN,MAX] [ -PID_YAW_TORQUE , PID_YAW_TORQUE + POLOLU_SERVO_BOUND ]
+	int radius2 = yawTorque * cos( angle ) - thrust; // [MIN,MAX] [ -PID_YAW_TORQUE - POLOLU_SERVO_BOUND , PID_YAW_TORQUE ]
 
+	/* Correction for yaw when adding thrust has a horizontal component
+	 * The yaw torque input is normalized by POLOLU_MAX_YAW_TORQUE and scaled
+	 * to POLOLU_YAW_CORRECTION. This result is modulated by the sin of the thrust angle. */
+	float yawAngleCorrection = yawTorque * ( POLOLU_YAW_CORRECTION / POLOLU_MAX_YAW_TORQUE ) * sin( angle ) * ( M_PI / 180 );
+	
 	/* Calculate the commands to send to the servos to control Voith direction. */
-	int leftCmd1  = (int)( POLOLU_SERVO_NEUTRAL + POLOLU_SERVO_GAIN * radius1 * cos(angle + leftAngleOffset) );
-	int leftCmd2  = (int)( POLOLU_SERVO_NEUTRAL + POLOLU_SERVO_GAIN * radius1 * sin(angle + leftAngleOffset) );
-	int rightCmd1 = (int)( POLOLU_SERVO_NEUTRAL - POLOLU_SERVO_GAIN * radius2 * cos(angle + rightAngleOffset) );
-	int rightCmd2 = (int)( POLOLU_SERVO_NEUTRAL - POLOLU_SERVO_GAIN * radius2 * sin(angle + rightAngleOffset) );
+	int leftCmd1  = (int)( POLOLU_SERVO_NEUTRAL + POLOLU_SERVO_GAIN * radius1 * cos(angle - yawAngleCorrection + leftAngleOffset) );
+	int leftCmd2  = (int)( POLOLU_SERVO_NEUTRAL + POLOLU_SERVO_GAIN * radius1 * sin(angle - yawAngleCorrection + leftAngleOffset) );
+	int rightCmd1 = (int)( POLOLU_SERVO_NEUTRAL - POLOLU_SERVO_GAIN * radius2 * cos(angle + yawAngleCorrection + rightAngleOffset) );
+	int rightCmd2 = (int)( POLOLU_SERVO_NEUTRAL - POLOLU_SERVO_GAIN * radius2 * sin(angle + yawAngleCorrection + rightAngleOffset) );
 
-	/* Scale the Voith thrust value. */
+	/* Scale the Voith thrust value. 
+	 * Bound Check? */
 	int scaledVoithThrust = voithThrust * POLOLU_VOITH_GAIN + POLOLU_VOITH_NEUTRAL;
 
 	/* Send the commands to the Pololu to control servo and motor positions. */
