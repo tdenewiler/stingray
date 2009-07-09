@@ -33,12 +33,6 @@
 #define POLOLU_DEFAULT_RANGE    15
 #define POLOLU_DEFAULT_NEUTRAL  3000
 #define POLOLU_SLEEP            10
-#define POLOLU_COMMAND_BYTE		0x00
-#define POLOLU_SPEED_BYTE		0x01
-#define POLOLU_7BIT_POS_BYTE	0x02
-#define POLOLU_8BIT_POS_BYTE	0x03
-#define POLOLU_ABS_POS_BYTE		0x04
-#define POLOLU_NEUTRAL_BYTE		0x05
 //@}
 
 /** @name Neutral positions for the Voith servos and motors. */
@@ -58,15 +52,6 @@
 #define POLOLU_VOITH_GAIN			0.64
 #define POLOLU_VOITH_NEUTRAL		63
 #define POLOLU_SERVO_BOUND			100
-#define POLOLU_7BIT_NEUTRAL			63
-#define POLOLU_DIR_FORWARD			1
-#define POLOLU_CHANNEL_ON			1
-#define POLOLU_RANGE				15
-#define POLOLU_CH3_NEUTRAL			10
-#define POLOLU_CH0_NEUTRAL			10
-#define POLOLU_LWING_NEUTRAL		0
-#define POLOLU_RWING_NEUTRAL		0
-#define POLOLU_TAIL_NEUTRAL			0
 //@}
 
 /** @name The time (ms) it takes for the Pololu to initialize. */
