@@ -105,5 +105,14 @@ int vision_find_fence( int *pipex,
                       float vL,
                       float vH
                     );
+//!Captures an image,calls findSquares4
+CvSeq* vision_find_boxes(CvCapture *cap,
+                         IplImage *srcImg);
+						 
+//!Helper function for finding boxes (angle calculations)
+double angle( CvPoint* pt1, CvPoint* pt2, CvPoint* pt0 );
+
+//!Finds rectangle centers from a camera
+CvSeq* findSquares4( IplImage* img, CvMemStorage* storage );
 
 #endif /* _VISION_H_ */
