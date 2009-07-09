@@ -344,6 +344,13 @@ int main( int argc, char *argv[] )
         	/* Look for the gate */
 
 		}
+		else if( msg.task.data.num == TASK_BOXES && b_cam ) {
+			status = vision_find_boxes( b_cam, b_img );
+			if( cf.vision_window ) {
+				if( cvWaitKey( 5 ) >= 0 );
+				cvShowImage( b_win, b_img );
+			}
+		}
 		else {
 			/* No mode or no valid cameras - Simulate. */
 			if( loop_counter % 100 == 0 ) {
