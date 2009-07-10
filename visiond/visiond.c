@@ -143,6 +143,7 @@ int main( int argc, char *argv[] )
     int saving_bvideo = FALSE;
     IplImage *f_img = NULL;
     IplImage *b_img = NULL;
+	IplImage *cpy_img = NULL;
     const char *f_win = "Front";
     const char *b_win = "Bottom";
     CvVideoWriter *f_writer = 0;
@@ -157,6 +158,10 @@ int main( int argc, char *argv[] )
 	CvMemStorage *storage = 0;
 	storage = cvCreateMemStorage(0);
 	CvSeq *boxes = cvCreateSeq( 0, sizeof(CvSeq), sizeof(CvPoint), storage );
+	CvSeqReader reader;
+	CvPoint pt[4];
+	CvPoint *rect = pt;
+	int count = 4;
 
     printf( "MAIN: Starting Vision daemon ...\n" );
 
@@ -352,6 +357,22 @@ int main( int argc, char *argv[] )
 		else if( msg.task.data.num == TASK_BOXES && b_cam ) {
 			status = vision_find_boxes( b_cam, b_img, boxes );
 			if( cf.vision_window ) {
+				if( status > 0 ) {
+					cpy_img = cvCloneImage( b_img );
+					/* Initialize the sequence reader. */
+					cvStartReadSeq( boxes, &reader, 0 );
+					/* Read four sequence elements at a time. */
+					for( ii = 0; ii < boxes->total; ii += 4 ) {
+						/* Read 4 vertices. */
+						CV_READ_SEQ_ELEM( pt[0], reader );
+						CV_READ_SEQ_ELEM( pt[1], reader );
+						CV_READ_SEQ_ELEM( pt[2], reader );
+						CV_READ_SEQ_ELEM( pt[3], reader );
+
+						/* Draw the square as a closed polyline. */
+						cvPolyLine( cpy_img, &rect, &count, 1, 1, CV_RGB(0,255,0), 3, CV_AA, 0 );
+					}
+				}
 				if( cvWaitKey( 5 ) >= 0 );
 				cvShowImage( b_win, b_img );
 			}
