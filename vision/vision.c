@@ -14,8 +14,8 @@
 #include <cxcore.h>
 #include <highgui.h>
 #include <math.h>
+#include <cvcompat.h>
 
-#include "cvcompat.h"
 #include "vision.h"
 
 
@@ -586,7 +586,6 @@ int vision_find_boxes( CvCapture *cap,
  
     /* Clear memory storage and reset free space position. */
     cvReleaseImage( &img );
-    cvReleaseImage( &srcImg );
     cvClearMemStorage( storage );
        
     return status;
@@ -746,3 +745,38 @@ int vision_find_squares4( IplImage *img, CvMemStorage *storage, CvSeq *box_cente
 
     return status;
 } /* end vision_find_squares4() */
+
+
+/*****************************************************************
+ the function draws all the squares in the image
+ * ***************************************************************/
+/*void drawSquares( IplImage* img, CvSeq* squares )
+{
+    CvSeqReader reader;
+    IplImage* cpy = cvCloneImage( img );
+    int i;
+
+    // initialize reader of the sequence
+    cvStartReadSeq( squares, &reader, 0 );
+
+    // read 4 sequence elements at a time (all vertices of a square)
+    for( i = 0; i < squares->total; i += 4 )
+    {
+        CvPoint pt[4], *rect = pt;
+        int count = 4;
+
+        // read 4 vertices
+        CV_READ_SEQ_ELEM( pt[0], reader );
+        CV_READ_SEQ_ELEM( pt[1], reader );
+        CV_READ_SEQ_ELEM( pt[2], reader );
+        CV_READ_SEQ_ELEM( pt[3], reader );
+
+        // draw the square as a closed polyline
+        cvPolyLine( cpy, &rect, &count, 1, 1, CV_RGB(0,255,0), 3, CV_AA, 0 );
+    }
+
+    // show the resultant image
+    cvShowImage( wndname, cpy );
+    cvReleaseImage( &cpy );
+}
+*/
