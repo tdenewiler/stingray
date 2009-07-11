@@ -62,6 +62,8 @@ extern GtkWidget *button_task_fence;
 extern GtkWidget *button_task_boxes;
 extern GtkWidget *button_task_suitcase;
 extern GtkWidget *button_task_course;
+extern GtkWidget *button_task_nod;
+extern GtkWidget *button_task_spin;
 extern GtkWidget *button_task_square_time1;
 extern GtkWidget *button_task_square_time2;
 extern GtkWidget *button_task_square_time3;
@@ -210,6 +212,12 @@ void events_tasks( GtkWidget *widget,
     }
     else if( widget == button_task_course ) {
         msg.task.data.num = TASK_COURSE;
+    }
+    else if( widget == button_task_nod ) {
+        msg.task.data.num = TASK_NOD;
+    }
+    else if( widget == button_task_spin ) {
+        msg.task.data.num = TASK_SPIN;
     }
 	
     if( planner_fd > 0 ) {

@@ -146,6 +146,7 @@ int main( int argc, char *argv[] )
 	int old_dropper = 0;
 	CvPoint3D32f loc;
 	int subtask = 0;
+	int status = 0;
 
 	struct timeval vision_time = {0, 0};
 	struct timeval vision_start = {0, 0};
@@ -157,6 +158,8 @@ int main( int argc, char *argv[] )
 	struct timeval log_start = {0, 0};
 	struct timeval kalman_time = {0, 0};
 	struct timeval kalman_start = {0,0};
+	struct timeval subtask_time = {0, 0};
+	struct timeval subtask_start = {0, 0};
 	int time1s = 0;
 	int time1ms = 0;
 	int time2s = 0;
@@ -317,6 +320,9 @@ int main( int argc, char *argv[] )
 			if( old_task != msg.task.data.num ) {
 				messages_send( vision_fd, TASK_MSGID, &msg );
 				old_task = msg.task.data.num;
+				/* Reset the task and subtask start timers. */
+				gettimeofday( &task_start, NULL );
+				gettimeofday( &subtask_start, NULL );
 			}
 		}
 
@@ -403,7 +409,12 @@ int main( int argc, char *argv[] )
 		dt = util_calc_dt( &time1s, &time1ms, &time2s, &time2ms );
 
 		/* Run the current task. */
-		task_run( &msg, dt, &subtask );
+		status = task_run( &msg, dt, &subtask );
+		if( status == TASK_SUCCESS || status == TASK_FAILURE ) {
+			/* Re-initialize the task timer and set the current task to be the
+			 * next in the list if the previous task succeeds or fails. */
+			gettimeofday( &task_start, NULL );
+		}
 
 		/* Update timers. */
 		gettimeofday( &vision_time, NULL );

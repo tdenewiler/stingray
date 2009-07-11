@@ -143,7 +143,6 @@ int main( int argc, char *argv[] )
     int saving_bvideo = FALSE;
     IplImage *f_img = NULL;
     IplImage *b_img = NULL;
-	IplImage *cpy_img = NULL;
     const char *f_win = "Front";
     const char *b_win = "Bottom";
     CvVideoWriter *f_writer = 0;
@@ -154,11 +153,16 @@ int main( int argc, char *argv[] )
     struct tm ct;
     char write_time[80] = {0};
 	
-	/* Variables to hold box centroid sequence. */
-	CvMemStorage *storage = 0;
-	storage = cvCreateMemStorage(0);
-	CvSeq *boxes = cvCreateSeq( 0, sizeof(CvSeq), sizeof(CvPoint), storage );
-	CvSeqReader reader;
+	/* Variables to hold box centroid sequence and vertex sequence. */
+	CvMemStorage *storage1 = 0;
+	storage1 = cvCreateMemStorage(0);
+	CvSeq *boxes = cvCreateSeq( 0, sizeof(CvSeq), sizeof(CvPoint), storage1 );
+	CvSeqReader reader1;
+	CvMemStorage *storage2 = 0;
+	storage2 = cvCreateMemStorage(0);
+	CvSeq *squares = cvCreateSeq( 0, sizeof(CvSeq), sizeof(CvPoint), storage2 );
+	CvSeqReader reader2;
+	CvPoint box_pt;
 	CvPoint pt[4];
 	CvPoint *rect = pt;
 	int count = 4;
@@ -354,27 +358,38 @@ int main( int argc, char *argv[] )
         	/* Look for the gate */
 
 		}
-		else if( msg.task.data.num == TASK_BOXES && b_cam ) {
-			status = vision_find_boxes( b_cam, b_img, boxes );
+		else if( msg.task.data.num == TASK_BOXES && f_cam ) {
+			status = vision_find_boxes( f_cam, f_img, boxes, squares );
 			if( cf.vision_window ) {
 				if( status > 0 ) {
-					cpy_img = cvCloneImage( b_img );
-					/* Initialize the sequence reader. */
-					cvStartReadSeq( boxes, &reader, 0 );
+					/* Initialize the centroid sequence reader. */
+					cvStartReadSeq( boxes, &reader1, 0 );
 					/* Read four sequence elements at a time. */
-					for( ii = 0; ii < boxes->total; ii += 4 ) {
-						/* Read 4 vertices. */
-						CV_READ_SEQ_ELEM( pt[0], reader );
-						CV_READ_SEQ_ELEM( pt[1], reader );
-						CV_READ_SEQ_ELEM( pt[2], reader );
-						CV_READ_SEQ_ELEM( pt[3], reader );
-
+					for( ii = 0; ii < boxes->total; ii += 2 ) {
+						/* Read centroid x and y coordinates. */
+						CV_READ_SEQ_ELEM( box_pt, reader1 );
+						/* Draw the centroid as a circle. */
+						cvCircle( f_img, box_pt,
+							10, cvScalar(0, 0, 255), 5, 8 );
+					}
+					/* Initialize the vertex sequence reader. */
+					cvStartReadSeq( squares, &reader2, 0 );
+					for( ii = 0; ii < squares->total; ii += 4 ) {
+						/* Read vertex x and y coordinates. */
+						CV_READ_SEQ_ELEM( pt[0], reader2 );
+						CV_READ_SEQ_ELEM( pt[1], reader2 );
+						CV_READ_SEQ_ELEM( pt[2], reader2 );
+						CV_READ_SEQ_ELEM( pt[3], reader2 );
 						/* Draw the square as a closed polyline. */
-						cvPolyLine( cpy_img, &rect, &count, 1, 1, CV_RGB(0,255,0), 3, CV_AA, 0 );
+						cvPolyLine( f_img, &rect, &count, 1, 1, CV_RGB(0,255,0), 3, CV_AA, 0 );
 					}
 				}
 				if( cvWaitKey( 5 ) >= 0 );
-				cvShowImage( b_win, b_img );
+				cvShowImage( f_win, f_img );
+				/* Clear out the sequences so that next time we only draw newly
+				 * found squares and centroids. */
+				cvClearSeq( boxes );
+				cvClearSeq( squares );
 			}
 		}
 		else {
