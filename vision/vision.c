@@ -563,7 +563,8 @@ int vision_get_fence_bottom( IplImage *inputBinImg, int *center )
 
 int vision_find_boxes( CvCapture *cap,
                        IplImage *srcImg,
-					   CvSeq *result )
+					   CvSeq *result,
+					   CvSeq *squares )
 {
 	/* Declare variables. */
 	IplImage *img = NULL;
@@ -582,7 +583,7 @@ int vision_find_boxes( CvCapture *cap,
 	/* Clone the source image so that we have an image we can write over. The
 	 * source image needs to be kept clean so that we can display it later. */
 	img = cvCloneImage( srcImg );
-    status = vision_find_squares4( img, storage, result );
+    status = vision_find_squares4( img, storage, result, squares );
  
     /* Clear memory storage and reset free space position. */
     cvReleaseImage( &img );
@@ -617,6 +618,16 @@ double vision_angle( CvPoint* pt1, CvPoint* pt2, CvPoint* pt0 )
     double dx2 = pt2->x - pt0->x;
     double dy2 = pt2->y - pt0->y;
 	
+	/* The find box code detects a box at the image boundary. To remove this we
+	 * are going to exclude boxes that are within a small band around the edge
+	 * of the image. There are magic numbers here for a 640x480 image that
+	 * should be changed to be a percentage of the actual image being
+	 * processed. That would involve passing the image size in as an extra
+	 * argument. */
+	if( (fabsf(dy1 - dy2) > 450.) || (fabsf(dx1 - dx2) > 610.) ) {
+		return 100000.;
+	}
+	
 	/* Return the cosine between the two points. */
     return( dx1*dx2 + dy1*dy2) / sqrt((dx1*dx1 + dy1*dy1)*(dx2*dx2 + dy2*dy2) + 1e-10 );
 } /* end vision_angle() */
@@ -626,7 +637,8 @@ double vision_angle( CvPoint* pt1, CvPoint* pt2, CvPoint* pt0 )
  *
  * Title:       int vision_find_squares4(  IplImage *img,
  * 										   CvMemStorage *storage,
- * 										   CvSeq *box_centers
+ * 										   CvSeq *box_centers,
+ * 										   CvSeq *squares
  *                                       )
  *
  * Description: Finds all the rectangles in an image.
@@ -639,7 +651,7 @@ double vision_angle( CvPoint* pt1, CvPoint* pt2, CvPoint* pt0 )
  *
  *****************************************************************************/
 
-int vision_find_squares4( IplImage *img, CvMemStorage *storage, CvSeq *box_centers )
+int vision_find_squares4( IplImage *img, CvMemStorage *storage, CvSeq *box_centers, CvSeq *squares )
 {
 	/* Declare variables. */
     CvSeq* contours;
@@ -655,9 +667,6 @@ int vision_find_squares4( IplImage *img, CvMemStorage *storage, CvSeq *box_cente
     double s, t;
 	int thresh = 50;
 	int status = 0;
-
-    /* Create empty sequence that will contain points - 4 points per rectangle. */
-    box_centers = cvCreateSeq( 0, sizeof(CvSeq), sizeof(CvPoint), storage );
 
     /* Select the maximum ROI in the image with the width and height divisible by 2. */
     cvSetImageROI( timg, cvRect( 0, 0, sz.width, sz.height ));
@@ -705,7 +714,7 @@ int vision_find_squares4( IplImage *img, CvMemStorage *storage, CvSeq *box_cente
                  * relatively large area (to filter out noisy contours) and be convex.
                  * Note: absolute value of an area is used because area may be
 				 * positive or negative in accordance with the contour orientation. */
-                if( result->total == 4 && fabs(cvContourArea(result,CV_WHOLE_SEQ)) > 1000 &&
+                if( result->total == 4 && fabs(cvContourArea(result, CV_WHOLE_SEQ)) > 1000 &&
                     cvCheckContourConvexity(result) ) {
                     s = 0;
                     for( i = 0; i < 5; i++ ) {
@@ -721,12 +730,13 @@ int vision_find_squares4( IplImage *img, CvMemStorage *storage, CvSeq *box_cente
 
                     /* If cosines of all angles are small (all angles are ~90 degree)
 					 * then write rectangle vertices to resultant sequence. */
-                    if( s < 0.3 ) {
+                    if( s < 0.16 ) {
                         for( i = 0; i < 4; i++ ) {
-                         	cvContourMoments(result,&moments);
+                         	cvContourMoments( result, &moments );
         				 	box_centroid.x = (int)(moments.m10 / moments.m00);
 						 	box_centroid.y = (int)(moments.m01 / moments.m00);
                          	cvSeqPush( box_centers, &box_centroid );
+                         	cvSeqPush( squares, (CvPoint *)cvGetSeqElem(result, i) );
 							status++;
                         }
 					}
