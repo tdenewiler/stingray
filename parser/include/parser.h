@@ -143,6 +143,16 @@ typedef struct _CONF_VARS {
     int         debug_level;
     int         op_mode;
     int         enable_log;
+	float		depth_gate;
+	float		depth_pipe;
+	float		depth_buoy;
+	float		depth_fence;
+	float		depth_boxes;
+	float		depth_suitcase_search;
+	float		depth_suitcase_pickup;
+	float		depth_octagon;
+	float		depth_surface;
+	float		fence_min;
 } CONF_VARS;
 
 #endif /* _CONF_VARS_ */

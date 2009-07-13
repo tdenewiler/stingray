@@ -455,9 +455,45 @@ void parse_line( CONF_VARS *config )
         else if( strncmp( tokens[1], "vH", STRING_SIZE ) == 0 ) {
             sscanf( tokens[2], "%f", &config->fence_vH );
         }
+        else if( strncmp( tokens[1], "min", STRING_SIZE ) == 0 ) {
+            sscanf( tokens[2], "%f", &config->fence_min );
+        }
     }
     /* end vision HSV values */
-
+	
+	/* depth values */
+	else if( strncmp( tokens[0], "depth", STRING_SIZE ) == 0 ) {
+		if( strncmp( tokens[1], "gate", STRING_SIZE ) == 0 ) {
+			sscanf( tokens[2], "%f", &config->depth_gate );
+		}
+		else if( strncmp( tokens[1], "pipe", STRING_SIZE ) == 0 ) {
+			sscanf( tokens[2], "%f", &config->depth_pipe );
+		}
+		else if( strncmp( tokens[1], "buoy", STRING_SIZE ) == 0 ) {
+			sscanf( tokens[2], "%f", &config->depth_buoy );
+		}
+		else if( strncmp( tokens[1], "fence", STRING_SIZE ) == 0 ) {
+			sscanf( tokens[2], "%f", &config->depth_fence );
+		}
+		else if( strncmp( tokens[1], "boxes", STRING_SIZE ) == 0 ) {
+			sscanf( tokens[2], "%f", &config->depth_boxes );
+		}
+		else if( strncmp( tokens[1], "suitcase", STRING_SIZE ) == 0 ) {
+			if( strncmp( tokens[2], "search", STRING_SIZE ) == 0 ) {
+				sscanf( tokens[3], "%f", &config->depth_suitcase_search );
+			}
+			else if( strncmp( tokens[2], "pickup", STRING_SIZE ) == 0 ) {
+				sscanf( tokens[3], "%f", &config->depth_suitcase_pickup );
+			}
+		}
+		else if( strncmp( tokens[1], "octagon", STRING_SIZE ) == 0 ) {
+			sscanf( tokens[2], "%f", &config->depth_octagon );
+		}
+		else if( strncmp( tokens[1], "surface", STRING_SIZE ) == 0 ) {
+			sscanf( tokens[2], "%f", &config->depth_surface );
+		}
+	}
+	/* end depth values */
 } /* end parse_line() */
 
 
@@ -733,6 +769,17 @@ void parse_default_config( CONF_VARS *config )
     config->fence_sH = 0.0;
     config->fence_vL = 0.0;
     config->fence_vH = 0.0;
+	
+	/* depths */
+	config->depth_boxes = 0.600;
+	config->depth_buoy = 0.600;
+	config->depth_fence = 0.600;
+	config->depth_gate = 0.600;
+	config->depth_octagon = 0.600;
+	config->depth_suitcase_pickup = 0.600;
+	config->depth_suitcase_search = 0.600;
+	config->depth_surface = 0.600;
+	config->fence_min = 0.600;
 
     /* servos */
     config->enable_pololu = TRUE;

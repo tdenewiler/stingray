@@ -54,6 +54,10 @@
 #define POLOLU_SERVO_BOUND			100
 #define POLOLU_MAX_YAW_TORQUE		80
 #define POLOLU_YAW_CORRECTION		45
+#define POLOLU_MOVE_FORWARD			50
+#define POLOLU_MOVE_REVERSE			-50
+#define POLOLU_MOVE_LEFT			-50
+#define POLOLU_MOVE_RIGHT			50
 //@}
 
 /** @name The time (ms) it takes for the Pololu to initialize. */
