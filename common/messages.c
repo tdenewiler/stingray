@@ -149,6 +149,14 @@ void messages_send( int fd,
             msg->vision.data.front_x    = htonl( msg->vision.data.front_x );
             msg->vision.data.front_y    = htonl( msg->vision.data.front_y );
             msg->vision.data.bottom_x   = htonl( msg->vision.data.bottom_x );
+			msg->vision.data.fence_x	= htonl( msg->vision.data.fence_x );
+			msg->vision.data.fence_y	= htonl( msg->vision.data.fence_y );
+			msg->vision.data.box1_x		= htonl( msg->vision.data.box1_x );
+			msg->vision.data.box1_y		= htonl( msg->vision.data.box1_y );
+			msg->vision.data.box2_x		= htonl( msg->vision.data.box2_x );
+			msg->vision.data.box2_y		= htonl( msg->vision.data.box2_y );
+			msg->vision.data.suitcase_x	= htonl( msg->vision.data.suitcase_x );
+			msg->vision.data.suitcase_y	= htonl( msg->vision.data.suitcase_y );
 
             /* Actually send message here. */
             net_send( fd, &msg->vision, sizeof(VISION_MSG) );
@@ -157,6 +165,14 @@ void messages_send( int fd,
             msg->vision.data.front_x    = ntohl( msg->vision.data.front_x );
             msg->vision.data.front_y    = ntohl( msg->vision.data.front_y );
             msg->vision.data.bottom_x   = ntohl( msg->vision.data.bottom_x );
+			msg->vision.data.fence_x	= ntohl( msg->vision.data.fence_x );
+			msg->vision.data.fence_y	= ntohl( msg->vision.data.fence_y );
+			msg->vision.data.box1_x		= ntohl( msg->vision.data.box1_x );
+			msg->vision.data.box1_y		= ntohl( msg->vision.data.box1_y );
+			msg->vision.data.box2_x		= ntohl( msg->vision.data.box2_x );
+			msg->vision.data.box2_y		= ntohl( msg->vision.data.box2_y );
+			msg->vision.data.suitcase_x	= ntohl( msg->vision.data.suitcase_x );
+			msg->vision.data.suitcase_y	= ntohl( msg->vision.data.suitcase_y );
             break;
 
         case TASK_MSGID:
@@ -344,6 +360,14 @@ int messages_decode( int fd, char *buf, MSG_DATA *msg, int bytes )
 			msg->vision.data.front_x    = ntohl( msg->vision.data.front_x );
 			msg->vision.data.front_y    = ntohl( msg->vision.data.front_y );
 			msg->vision.data.bottom_x   = ntohl( msg->vision.data.bottom_x );
+			msg->vision.data.fence_x	= ntohl( msg->vision.data.fence_x );
+			msg->vision.data.fence_y	= ntohl( msg->vision.data.fence_y );
+			msg->vision.data.box1_x		= ntohl( msg->vision.data.box1_x );
+			msg->vision.data.box1_y		= ntohl( msg->vision.data.box1_y );
+			msg->vision.data.box2_x		= ntohl( msg->vision.data.box2_x );
+			msg->vision.data.box2_y		= ntohl( msg->vision.data.box2_y );
+			msg->vision.data.suitcase_x	= ntohl( msg->vision.data.suitcase_x );
+			msg->vision.data.suitcase_y	= ntohl( msg->vision.data.suitcase_y );
 
 			bytes -= sizeof(VISION_MSG);
 			memmove( msg, msg, sizeof(VISION_MSG) );

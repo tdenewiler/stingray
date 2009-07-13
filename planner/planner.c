@@ -431,7 +431,7 @@ int main( int argc, char *argv[] )
 			if( status == TASK_SUCCESS || status == TASK_FAILURE ) {
 				/* Move on to the next task. Initialize the subtask. */
 				task++;
-				subtask = 0;
+				subtask = SUBTASK_SEARCH_DEPTH;
 				/* Re-initialize the task and subtask timers. */
 				gettimeofday( &task_start, NULL );
 				gettimeofday( &subtask_start, NULL );

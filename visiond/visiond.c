@@ -327,6 +327,7 @@ int main( int argc, char *argv[] )
                             cvShowImage( b_win, b_img );
                         }
                 }
+				/* Set target offsets in network message. */
                 bearing = atan(bearing) * 180 / M_PI;
                 msg.vision.data.bottom_x = pipex;
                 msg.vision.data.bottom_y = bearing;
@@ -353,6 +354,10 @@ int main( int argc, char *argv[] )
 					}
                 	cvShowImage( f_win, f_img );
 				}
+				/* Set target offsets in network message. */
+				/* !!!!!!!!!!! Fix these !!!!!!!!!!! */
+				msg.vision.data.fence_x = 0;
+				msg.vision.data.fence_y = 0;
             }
         }
         else if( task == TASK_GATE && f_cam ) {
@@ -360,9 +365,10 @@ int main( int argc, char *argv[] )
 
 		}
 		else if( task == TASK_BOXES && f_cam ) {
+			/* Look for the boxes. */
 			status = vision_find_boxes( f_cam, f_img, boxes, squares );
-			if( cf.vision_window ) {
-				if( status > 0 ) {
+			if( status > 0 ) {
+				if( cf.vision_window ) {
 					/* Initialize the centroid sequence reader. */
 					cvStartReadSeq( boxes, &reader1, 0 );
 					/* Read four sequence elements at a time. */
@@ -391,10 +397,35 @@ int main( int argc, char *argv[] )
 				 * found squares and centroids. */
 				cvClearSeq( boxes );
 				cvClearSeq( squares );
+				/* Set target offsets in network message. */
+				/* !!!!!!!!!!! Fix these !!!!!!!!!!! */
+				msg.vision.data.box1_x = 0;
+				msg.vision.data.box1_y = 0;
+				msg.vision.data.box2_x = 0;
+				msg.vision.data.box2_y = 0;
+			}
+		}
+		else if( task == TASK_SUITCASE && b_cam ) {
+			/* Look for the suitcase. */
+				/* !!!!!!!!!!! Fix these !!!!!!!!!!! */
+			status = vision_find_dot( &dotx, &doty, &width, &height,
+					cf.vision_angle, b_cam, b_img, b_bin_img,
+					msg.vsetting.data.buoy_hsv.hL,
+					msg.vsetting.data.buoy_hsv.hH,
+					msg.vsetting.data.buoy_hsv.sL,
+					msg.vsetting.data.buoy_hsv.sH,
+					msg.vsetting.data.buoy_hsv.vL,
+					msg.vsetting.data.buoy_hsv.vH );
+
+			if( status == 1 ) {
+				/* Set target offsets in network message. */
+				/* !!!!!!!!!!! Fix these !!!!!!!!!!! */
+				msg.vision.data.suitcase_x = 0;
+				msg.vision.data.suitcase_y = 0;
 			}
 		}
 		else {
-			/* No mode or no valid cameras - Simulate. */
+			/* No mode or no valid cameras -- Simulate. */
 			if( loop_counter % 100 == 0 ) {
 				msg.vision.data.front_x = loop_counter;
 				msg.vision.data.front_y = loop_counter;
