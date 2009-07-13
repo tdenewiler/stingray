@@ -152,6 +152,7 @@ int main( int argc, char *argv[] )
     struct timeval ctime;
     struct tm ct;
     char write_time[80] = {0};
+	int task = TASK_NONE;
 	
 	/* Variables to hold box centroid sequence and vertex sequence. */
 	CvMemStorage *storage1 = 0;
@@ -260,14 +261,14 @@ int main( int argc, char *argv[] )
 		}
 
     	/* Do vision processing based on task */
-    	if( msg.task.data.num == TASK_NONE ) {
+    	if( task == TASK_NONE ) {
     		/* Do nothing and give cleared values. */
     		msg.vision.data.front_x = 0;
     		msg.vision.data.front_y = 0;
     		msg.vision.data.bottom_x = 0;
     		msg.vision.data.bottom_y = 0.0;
 		}
-        else if( msg.task.data.num == TASK_BUOY && f_cam ) {
+        else if( task == TASK_BUOY && f_cam ) {
 			/* Look for the buoy. */
 			status = vision_find_dot( &dotx, &doty, &width, &height,
 					cf.vision_angle, f_cam, f_img, f_bin_img,
@@ -297,7 +298,7 @@ int main( int argc, char *argv[] )
 				}
 			}
 		}
-		else if( msg.task.data.num == TASK_PIPE && b_cam ) {
+		else if( task == TASK_PIPE && b_cam ) {
 			/* Look for the pipe */
 			status = vision_find_pipe( &pipex, &bearing, b_cam, b_img, b_bin_img,
                     msg.vsetting.data.pipe_hsv.hL,
@@ -331,7 +332,7 @@ int main( int argc, char *argv[] )
                 msg.vision.data.bottom_y = bearing;
             }
 		}
-		else if( msg.task.data.num == TASK_FENCE && f_cam ) {
+		else if( task == TASK_FENCE && f_cam ) {
 			/* Look for the fence. */
             status = vision_find_fence( &fence_center, &y_max, f_cam, f_img, f_bin_img,
                     msg.vsetting.data.fence_hsv.hL,
@@ -354,11 +355,11 @@ int main( int argc, char *argv[] )
 				}
             }
         }
-        else if( msg.task.data.num == TASK_GATE && f_cam ) {
+        else if( task == TASK_GATE && f_cam ) {
         	/* Look for the gate */
 
 		}
-		else if( msg.task.data.num == TASK_BOXES && f_cam ) {
+		else if( task == TASK_BOXES && f_cam ) {
 			status = vision_find_boxes( f_cam, f_img, boxes, squares );
 			if( cf.vision_window ) {
 				if( status > 0 ) {
@@ -406,6 +407,15 @@ int main( int argc, char *argv[] )
             if( recv_bytes > 0 ) {
                 recv_buf[recv_bytes] = '\0';
                 messages_decode( server_fd, recv_buf, &msg, recv_bytes );
+				/* Check to see if we are trying to complete the course. If yes,
+				 * then set the task to be the subtask of the course that we are
+				 * currently attempting. Otherwise, just attempt the main task. */
+				if( msg.task.data.num == TASK_COURSE ) {
+					task = msg.task.data.subtask;
+				}
+				else {
+					task = msg.task.data.num;
+				}
             }
         }
 

@@ -538,9 +538,9 @@ int buttons_tasks( GtkWidget *box )
 		GTK_SIGNAL_FUNC( events_tasks ), tasks_group );
     button_task_course = buttons_make_radio( "Course",
 		GTK_SIGNAL_FUNC( events_tasks ), tasks_group );
-    button_task_course = buttons_make_radio( "Nod",
+    button_task_nod = buttons_make_radio( "Nod",
 		GTK_SIGNAL_FUNC( events_tasks ), tasks_group );
-    button_task_course = buttons_make_radio( "Spin",
+    button_task_spin = buttons_make_radio( "Spin",
 		GTK_SIGNAL_FUNC( events_tasks ), tasks_group );
 
     /* Create the spin buttons. */

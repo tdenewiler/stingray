@@ -161,9 +161,17 @@ void messages_send( int fd,
 
         case TASK_MSGID:
             msg->task.hdr.msgid = TASK_MSGID;
+			
+			/* Use network byte order. */
+			msg->task.data.num = htonl( msg->task.data.num );
+			msg->task.data.subtask = htonl( msg->task.data.subtask );
 
             /* Actually send message here. */
             net_send( fd, &msg->task, sizeof(TASK_MSG) );
+			
+			/* Convert the values back to host byte order. */
+			msg->task.data.num = ntohl( msg->task.data.num );
+			msg->task.data.subtask = ntohl( msg->task.data.subtask );
             break;
 
         case LJ_MSGID:
@@ -344,6 +352,10 @@ int messages_decode( int fd, char *buf, MSG_DATA *msg, int bytes )
 		case TASK_MSGID:
 			msg->task.data = ((TASK_MSG *)buf)->data;
 
+			/* Convert from network to host byte order. */
+			msg->task.data.num = ntohl( msg->task.data.num);
+			msg->task.data.subtask = ntohl( msg->task.data.subtask);
+			
 			bytes -= sizeof(TASK_MSG);
 			memmove( msg, msg, sizeof(TASK_MSG) );
 			break;

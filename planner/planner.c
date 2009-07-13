@@ -144,9 +144,11 @@ int main( int argc, char *argv[] )
 	//float accel_inc = 0.1;
 	int old_task = 0;
 	int old_dropper = 0;
+	int old_subtask = 0;
 	CvPoint3D32f loc;
-	int subtask = 0;
-	int status = 0;
+	int subtask = SUBTASK_GATE_MOVE;
+	int status = TASK_CONTINUING;
+	int task = TASK_GATE;
 
 	struct timeval vision_time = {0, 0};
 	struct timeval vision_start = {0, 0};
@@ -164,6 +166,8 @@ int main( int argc, char *argv[] )
 	int time1ms = 0;
 	int time2s = 0;
 	int time2ms = 0;
+	int task_dt = 0;
+	int subtask_dt = 0;
 	int dt = 0;
 
 	/* Declare timestamp variables. */
@@ -279,6 +283,8 @@ int main( int argc, char *argv[] )
 	gettimeofday( &plan_start, NULL );
 	gettimeofday( &task_time, NULL );
 	gettimeofday( &task_start, NULL );
+	gettimeofday( &subtask_time, NULL );
+	gettimeofday( &subtask_start, NULL );
 	gettimeofday( &log_time, NULL );
 	gettimeofday( &log_start, NULL );
 	gettimeofday( &kalman_time, NULL );
@@ -323,6 +329,10 @@ int main( int argc, char *argv[] )
 				/* Reset the task and subtask start timers. */
 				gettimeofday( &task_start, NULL );
 				gettimeofday( &subtask_start, NULL );
+			}
+			else if( old_subtask != msg.task.data.subtask ) {
+				messages_send( vision_fd, TASK_MSGID, &msg );
+				old_subtask = msg.task.data.subtask;
 			}
 		}
 
@@ -406,20 +416,39 @@ int main( int argc, char *argv[] )
 		time1ms =   task_time.tv_usec;
 		time2s =    task_start.tv_sec;
 		time2ms =   task_start.tv_usec;
-		dt = util_calc_dt( &time1s, &time1ms, &time2s, &time2ms );
+		task_dt = util_calc_dt( &time1s, &time1ms, &time2s, &time2ms );
+
+		/* Update the subtask dt. */
+		time1s =    subtask_time.tv_sec;
+		time1ms =   subtask_time.tv_usec;
+		time2s =    subtask_start.tv_sec;
+		time2ms =   subtask_start.tv_usec;
+		subtask_dt = util_calc_dt( &time1s, &time1ms, &time2s, &time2ms );
 
 		/* Run the current task. */
-		status = task_run( &msg, dt, &subtask );
-		if( status == TASK_SUCCESS || status == TASK_FAILURE ) {
-			/* Re-initialize the task timer and set the current task to be the
-			 * next in the list if the previous task succeeds or fails. */
-			gettimeofday( &task_start, NULL );
+		status = task_run( &msg, task_dt, subtask, subtask_dt );
+		if( msg.task.data.num == TASK_COURSE ) {
+			if( status == TASK_SUCCESS || status == TASK_FAILURE ) {
+				/* Move on to the next task. Initialize the subtask. */
+				task++;
+				subtask = 0;
+				/* Re-initialize the task and subtask timers. */
+				gettimeofday( &task_start, NULL );
+				gettimeofday( &subtask_start, NULL );
+			}
+			else if( status == SUBTASK_SUCCESS || status == SUBTASK_FAILURE ) {
+				/* Move on to the next subtask. */
+				subtask++;
+				/* Re-initialize the subtask timer. */
+				gettimeofday( &subtask_start, NULL);
+			}
 		}
 
 		/* Update timers. */
 		gettimeofday( &vision_time, NULL );
 		gettimeofday( &plan_time, NULL );
 		gettimeofday( &task_time, NULL );
+		gettimeofday( &subtask_time, NULL );
 		gettimeofday( &log_time, NULL );
 		gettimeofday( &kalman_time, NULL );
 	}
