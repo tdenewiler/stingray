@@ -153,6 +153,7 @@ typedef struct _CONF_VARS {
 	float		depth_octagon;
 	float		depth_surface;
 	float		fence_min;
+	float		heading_buoy;
 } CONF_VARS;
 
 #endif /* _CONF_VARS_ */

@@ -494,6 +494,13 @@ void parse_line( CONF_VARS *config )
 		}
 	}
 	/* end depth values */
+	
+	/* heading values */
+	else if( strncmp( tokens[0], "heading", STRING_SIZE ) == 0 ) {
+		if( strncmp( tokens[1], "buoy", STRING_SIZE ) == 0 ) {
+			sscanf( tokens[2], "%f", &config->heading_buoy );
+		}
+	}
 } /* end parse_line() */
 
 
@@ -780,6 +787,7 @@ void parse_default_config( CONF_VARS *config )
 	config->depth_suitcase_search = 0.600;
 	config->depth_surface = 0.600;
 	config->fence_min = 0.600;
+	config->heading_buoy = 0.0;
 
     /* servos */
     config->enable_pololu = TRUE;

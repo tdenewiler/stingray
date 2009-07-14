@@ -58,6 +58,7 @@
 #define POLOLU_MOVE_REVERSE			-50
 #define POLOLU_MOVE_LEFT			-50
 #define POLOLU_MOVE_RIGHT			50
+#define POLOLU_MOVE_STOP			0
 //@}
 
 /** @name The time (ms) it takes for the Pololu to initialize. */
