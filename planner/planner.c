@@ -426,7 +426,7 @@ int main( int argc, char *argv[] )
 		subtask_dt = util_calc_dt( &time1s, &time1ms, &time2s, &time2ms );
 
 		/* Run the current task. */
-		status = task_run( &msg, task_dt, subtask, subtask_dt );
+		status = task_run( &msg, &cf, task_dt, subtask, subtask_dt );
 		if( msg.task.data.num == TASK_COURSE ) {
 			if( status == TASK_SUCCESS || status == TASK_FAILURE ) {
 				/* Move on to the next task. Initialize the subtask. */
