@@ -146,9 +146,9 @@ int main( int argc, char *argv[] )
 	int old_dropper = 0;
 	int old_subtask = 0;
 	CvPoint3D32f loc;
-	int subtask = SUBTASK_GATE_MOVE;
+	int subtask = cf.subtask_start;
 	int status = TASK_CONTINUING;
-	int task = TASK_GATE;
+	int task = cf.task_start;
 
 	struct timeval vision_time = {0, 0};
 	struct timeval vision_start = {0, 0};
@@ -188,6 +188,8 @@ int main( int argc, char *argv[] )
 	memset( &pid, 0, sizeof(PID) );
 	memset( &lj,  0, sizeof(LABJACK_DATA) );
 	messages_init( &msg );
+	msg.task.data.num = task;
+	msg.task.data.subtask = cf.course_start;
 
 	/* Parse command line arguments. */
 	parse_default_config( &cf );
@@ -426,7 +428,7 @@ int main( int argc, char *argv[] )
 		subtask_dt = util_calc_dt( &time1s, &time1ms, &time2s, &time2ms );
 
 		/* Run the current task. */
-		status = task_run( &msg, &cf, task_dt, subtask, subtask_dt );
+		status = task_run( &msg, &cf, task, task_dt, subtask, subtask_dt );
 		if( msg.task.data.num == TASK_COURSE ) {
 			/* Set the subtask in the network message. */
 			msg.task.data.subtask = subtask;
