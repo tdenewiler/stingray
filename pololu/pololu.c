@@ -579,17 +579,23 @@ int pololuControlVoiths( int fd,
 	int rightCmd1 = (int)( POLOLU_SERVO_NEUTRAL - POLOLU_SERVO_GAIN * radius2 * cos(angle + yawAngleCorrection + rightAngleOffset) );
 	int rightCmd2 = (int)( POLOLU_SERVO_NEUTRAL - POLOLU_SERVO_GAIN * radius2 * sin(angle + yawAngleCorrection + rightAngleOffset) );
 
-	/* Scale the Voith thrust value. 
-	 * Bound Check? */
-	int scaledVoithThrust = voithThrust * POLOLU_VOITH_GAIN + POLOLU_VOITH_NEUTRAL;
+	/* There is differential thrust in the voiths 
+	 * The left and right scaling done here tries to account for this */
+	int voithThrustLeft   = voithThrust * POLOLU_VOITH_LEFT_SCALE;
+	int voithThrustRight  = voithThrust * POLOLU_VOITH_RIGHT_SCALE;
+	
+	/* Scale the Voith thrust value. */
+	int scaledVoithThrustLeft  = voithThrustLeft * POLOLU_VOITH_GAIN + POLOLU_VOITH_NEUTRAL;
+	int scaledVoithThrustRight = voithThrustRight * POLOLU_VOITH_GAIN + POLOLU_VOITH_NEUTRAL;
+	
 
 	/* Send the commands to the Pololu to control servo and motor positions. */
 	bytes += pololuSetPosition7Bit( fd, POLOLU_LEFT_SERVO1, leftCmd1 );
 	bytes += pololuSetPosition7Bit( fd, POLOLU_LEFT_SERVO2, leftCmd2 );
 	bytes += pololuSetPosition7Bit( fd, POLOLU_RIGHT_SERVO1, rightCmd1 );
 	bytes += pololuSetPosition7Bit( fd, POLOLU_RIGHT_SERVO2, rightCmd2 );
-	bytes += pololuSetPosition7Bit( fd, POLOLU_LEFT_VOITH_MOTOR, scaledVoithThrust );
-	bytes += pololuSetPosition7Bit( fd, POLOLU_RIGHT_VOITH_MOTOR, scaledVoithThrust );
+	bytes += pololuSetPosition7Bit( fd, POLOLU_LEFT_VOITH_MOTOR, scaledVoithThrustLeft );
+	bytes += pololuSetPosition7Bit( fd, POLOLU_RIGHT_VOITH_MOTOR, scaledVoithThrustRight );
 
 	/* Check the number of bytes sent and return success or failure. There are
 	 * 5 bytes for each command --> 5 * 6 = 30. */
