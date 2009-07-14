@@ -428,6 +428,8 @@ int main( int argc, char *argv[] )
 		/* Run the current task. */
 		status = task_run( &msg, &cf, task_dt, subtask, subtask_dt );
 		if( msg.task.data.num == TASK_COURSE ) {
+			/* Set the subtask in the network message. */
+			msg.task.data.subtask = subtask;
 			if( status == TASK_SUCCESS || status == TASK_FAILURE ) {
 				/* Move on to the next task. Initialize the subtask. */
 				task++;

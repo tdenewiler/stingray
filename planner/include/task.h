@@ -44,6 +44,7 @@
 #define TASK_BUOY_GAIN					0.25
 #define TASK_BUOY_DEPTH					0.690
 #define TASK_BUOY_HEADING				0.0
+#define TASK_FENCE_GAIN					0.25
 #define TASK_MAX_TIME					300
 #define TASK_PIPE_GAIN					0.5
 #define TASK_SUCCESS					1
@@ -59,7 +60,7 @@
 #define SUBTASK_SEARCH_DEPTH			1
 #define SUBTASK_SEARCH					2
 #define SUBTASK_CORRECT					3
-#define SUBTASK_GATE_MOVE				4
+#define SUBTASK_GATE_MOVE				2
 #define SUBTASK_PIPE_END				4
 #define SUBTASK_BOXES_DROP_DEPTH		4
 #define SUBTASK_BOXES_DROP				5

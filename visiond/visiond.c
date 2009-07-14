@@ -355,7 +355,7 @@ int main( int argc, char *argv[] )
                 	cvShowImage( f_win, f_img );
 				}
 				/* Set target offsets in network message. */
-				/* !!!!!!!!!!! Fix these !!!!!!!!!!! */
+				/* !!!!!!!!!!! TODO: Fix these !!!!!!!!!!! */
 				msg.vision.data.fence_x = 0;
 				msg.vision.data.fence_y = 0;
             }
@@ -398,7 +398,7 @@ int main( int argc, char *argv[] )
 				cvClearSeq( boxes );
 				cvClearSeq( squares );
 				/* Set target offsets in network message. */
-				/* !!!!!!!!!!! Fix these !!!!!!!!!!! */
+				/* !!!!!!!!!!! TODO: Fix these !!!!!!!!!!! */
 				msg.vision.data.box1_x = 0;
 				msg.vision.data.box1_y = 0;
 				msg.vision.data.box2_x = 0;
@@ -443,6 +443,12 @@ int main( int argc, char *argv[] )
 				 * currently attempting. Otherwise, just attempt the main task. */
 				if( msg.task.data.num == TASK_COURSE ) {
 					task = msg.task.data.subtask;
+					/* Force vision to look for the pipe no matter which pipe
+					 * subtask we are currently searching for. */
+					if( task == TASK_PIPE1 || task == TASK_PIPE2 ||
+						task == TASK_PIPE3 || task == TASK_PIPE4 ) {
+						task = TASK_PIPE;
+					}
 				}
 				else {
 					task = msg.task.data.num;
