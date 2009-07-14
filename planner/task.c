@@ -28,7 +28,7 @@
 
 /******************************************************************************
  *
- * Title:       int task_run( MSG_DATA *msg, CONF_VARS *cf, int dt, int subtask, int subtask_dt )
+ * Title:       int task_run( MSG_DATA *msg, CONF_VARS *cf, int task, int dt, int subtask, int subtask_dt )
  *
  * Description: Switch to the current task.
  *
@@ -48,69 +48,69 @@ int task_run( MSG_DATA *msg, CONF_VARS *cf, int task, int dt, int subtask, int s
 {
 	int status = TASK_CONTINUING;
 
-	switch ( msg->task.data.num ) {
+	switch ( task ) {
 	case TASK_BUOY:
-		status = task_buoy( msg, cf, task, dt, subtask, subtask_dt );
+		status = task_buoy( msg, cf, dt, subtask, subtask_dt );
 		break;
 
 	case TASK_GATE:
-		status = task_gate( msg, cf, task, dt, subtask, subtask_dt );
+		status = task_gate( msg, cf, dt, subtask, subtask_dt );
 		break;
 
 	case TASK_PIPE:
-		status = task_pipe( msg, cf, task, dt, subtask, subtask_dt );
+		status = task_pipe( msg, cf, dt, subtask, subtask_dt );
 		break;
 
 	case TASK_PIPE1:
-		status = task_pipe( msg, cf, task, dt, subtask, subtask_dt );
+		status = task_pipe( msg, cf, dt, subtask, subtask_dt );
 		break;
 
 	case TASK_PIPE2:
-		status = task_pipe( msg, cf, task, dt, subtask, subtask_dt );
+		status = task_pipe( msg, cf, dt, subtask, subtask_dt );
 		break;
 
 	case TASK_PIPE3:
-		status = task_pipe( msg, cf, task, dt, subtask, subtask_dt );
+		status = task_pipe( msg, cf, dt, subtask, subtask_dt );
 		break;
 
 	case TASK_PIPE4:
-		status = task_pipe( msg, cf, task, dt, subtask, subtask_dt );
+		status = task_pipe( msg, cf, dt, subtask, subtask_dt );
 		break;
 
 	case TASK_SQUARE:
-		status = task_square( msg, cf, task, dt, subtask, subtask_dt );
+		status = task_square( msg, cf, dt, subtask, subtask_dt );
 		break;
 
 	case TASK_NONE:
-		status = task_none( msg, cf, task, dt, subtask, subtask_dt );
+		status = task_none( msg, cf, dt, subtask, subtask_dt );
 		break;
 
 	case TASK_BOXES:
-		status = task_boxes( msg, cf, task, dt, subtask, subtask_dt );
+		status = task_boxes( msg, cf, dt, subtask, subtask_dt );
 		break;
 
 	case TASK_FENCE:
-		status = task_fence( msg, cf, task, dt, subtask, subtask_dt );
+		status = task_fence( msg, cf, dt, subtask, subtask_dt );
 		break;
 
 	case TASK_SURFACE:
-		status = task_surface( msg, cf, task, dt, subtask, subtask_dt );
+		status = task_surface( msg, cf, dt, subtask, subtask_dt );
 		break;
 
 	case TASK_SUITCASE:
-		status = task_suitcase( msg, cf, task, dt, subtask, subtask_dt );
+		status = task_suitcase( msg, cf, dt, subtask, subtask_dt );
 		break;
 
 	case TASK_NOD:
-		status = task_nod( msg, cf, task, dt, subtask, subtask_dt );
+		status = task_nod( msg, cf, dt, subtask, subtask_dt );
 		break;
 
 	case TASK_SPIN:
-		status = task_spin( msg, cf, task, dt, subtask, subtask_dt );
+		status = task_spin( msg, cf, dt, subtask, subtask_dt );
 		break;
 
 	case TASK_COURSE:
-		status = task_course( msg, cf, task, dt, subtask, subtask_dt );
+		status = task_course( msg, cf, dt, subtask, subtask_dt );
 		break;
 	}
 
@@ -120,13 +120,12 @@ int task_run( MSG_DATA *msg, CONF_VARS *cf, int task, int dt, int subtask, int s
 
 /******************************************************************************
  *
- * Title:       int task_buoy( MSG_DATA *msg, CONF_VARS *cf, int task, int dt, int subtask, int subtask_dt )
+ * Title:       int task_buoy( MSG_DATA *msg, CONF_VARS *cf, int dt, int subtask, int subtask_dt )
  *
  * Description: Find and follow the buoy.
  *
  * Input:       msg: Current message data.
  * 				cf: Configuration variables.
- * 				task: The current task to be attempted.
  *              dt: The task time.
  *				subtask: Used to set which part of the task is to be run. Modify
  * 				upon success or failure.
@@ -136,7 +135,7 @@ int task_run( MSG_DATA *msg, CONF_VARS *cf, int task, int dt, int subtask, int s
  *
  *****************************************************************************/
 
-int task_buoy( MSG_DATA *msg, CONF_VARS *cf, int task, int dt, int subtask, int subtask_dt )
+int task_buoy( MSG_DATA *msg, CONF_VARS *cf, int dt, int subtask, int subtask_dt )
 {
 	if( msg->task.data.num == TASK_COURSE ) {
 		switch( subtask ) {
@@ -196,13 +195,12 @@ int task_buoy( MSG_DATA *msg, CONF_VARS *cf, int task, int dt, int subtask, int 
 
 /******************************************************************************
  *
- * Title:       int task_gate( MSG_DATA *msg, CONF_VARS *cf, int task, int dt, int subtask, int subtask_dt )
+ * Title:       int task_gate( MSG_DATA *msg, CONF_VARS *cf, int dt, int subtask, int subtask_dt )
  *
  * Description: Use dead reckoning to hold a heading and go straight.
  *
  * Input:       msg: Current message data.
  * 				cf: Configuration variables.
- * 				task: The current task to be attempted.
  *              dt: The task time.
  *				subtask: Used to set which part of the task is to be run. Modify
  * 				upon success or failure.
@@ -212,7 +210,7 @@ int task_buoy( MSG_DATA *msg, CONF_VARS *cf, int task, int dt, int subtask, int 
  *
  *****************************************************************************/
 
-int task_gate( MSG_DATA *msg, CONF_VARS *cf, int task, int dt, int subtask, int subtask_dt )
+int task_gate( MSG_DATA *msg, CONF_VARS *cf, int dt, int subtask, int subtask_dt )
 {
 	if( msg->task.data.num == TASK_COURSE ) {
 		switch( subtask ) {
@@ -254,13 +252,12 @@ int task_gate( MSG_DATA *msg, CONF_VARS *cf, int task, int dt, int subtask, int 
 
 /******************************************************************************
  *
- * Title:       int task_pipe( MSG_DATA *msg, CONF_VARS *cf, int task, int dt, int subtask, int subtask_dt )
+ * Title:       int task_pipe( MSG_DATA *msg, CONF_VARS *cf, int dt, int subtask, int subtask_dt )
  *
  * Description: Find and follow the pipe.
  *
  * Input:       msg: Current message data.
  * 				cf: Configuration variables.
- * 				task: The current task to be attempted.
  *              dt: The task time.
  *				subtask: Used to set which part of the task is to be run. Modify
  * 				upon success or failure.
@@ -270,7 +267,7 @@ int task_gate( MSG_DATA *msg, CONF_VARS *cf, int task, int dt, int subtask, int 
  *
  *****************************************************************************/
 
-int task_pipe( MSG_DATA *msg, CONF_VARS *cf, int task, int dt, int subtask, int subtask_dt )
+int task_pipe( MSG_DATA *msg, CONF_VARS *cf, int dt, int subtask, int subtask_dt )
 {
 	if( msg->task.data.num == TASK_COURSE ) {
 		switch( subtask ) {
@@ -328,14 +325,13 @@ int task_pipe( MSG_DATA *msg, CONF_VARS *cf, int task, int dt, int subtask, int 
 
 /******************************************************************************
  *
- * Title:       int task_square( MSG_DATA *msg, CONF_VARS *cf, int task, int dt, int subtask, int subtask_dt )
+ * Title:       int task_square( MSG_DATA *msg, CONF_VARS *cf, int dt, int subtask, int subtask_dt )
  *
  * Description: Move in a square. Use the times in msg for the duration of
  *              motion in each direction.
  *
  * Input:       msg: Current message data.
  * 				cf: Configuration variables.
- * 				task: The current task to be attempted.
  *              dt: The task time.
  *				subtask: Used to set which part of the task is to be run. Modify
  * 				upon success or failure.
@@ -345,7 +341,7 @@ int task_pipe( MSG_DATA *msg, CONF_VARS *cf, int task, int dt, int subtask, int 
  *
  *****************************************************************************/
 
-int task_square( MSG_DATA *msg, CONF_VARS *cf, int task, int dt, int subtask, int subtask_dt )
+int task_square( MSG_DATA *msg, CONF_VARS *cf, int dt, int subtask, int subtask_dt )
 {
 	msg->target.data.pitch = 0;
 	msg->target.data.roll = 0;
@@ -357,13 +353,12 @@ int task_square( MSG_DATA *msg, CONF_VARS *cf, int task, int dt, int subtask, in
 
 /******************************************************************************
  *
- * Title:       int task_none( MSG_DATA *msg, CONF_VARS *cf, int task, int dt, int subtask, int subtask_dt )
+ * Title:       int task_none( MSG_DATA *msg, CONF_VARS *cf, int dt, int subtask, int subtask_dt )
  *
  * Description: Hold the current position.
  *
  * Input:       msg: Current message data.
  * 				cf: Configuration variables.
- * 				task: The current task to be attempted.
  *              dt: The task time.
  *				subtask: Used to set which part of the task is to be run. Modify
  * 				upon success or failure.
@@ -373,7 +368,7 @@ int task_square( MSG_DATA *msg, CONF_VARS *cf, int task, int dt, int subtask, in
  *
  *****************************************************************************/
 
-int task_none( MSG_DATA *msg, CONF_VARS *cf, int task, int dt, int subtask, int subtask_dt )
+int task_none( MSG_DATA *msg, CONF_VARS *cf, int dt, int subtask, int subtask_dt )
 {
 
 	return TASK_CONTINUING;
@@ -382,13 +377,12 @@ int task_none( MSG_DATA *msg, CONF_VARS *cf, int task, int dt, int subtask, int 
 
 /******************************************************************************
  *
- * Title:       int task_boxes( MSG_DATA *msg, CONF_VARS *cf, int task, int dt, int subtask, int subtask_dt )
+ * Title:       int task_boxes( MSG_DATA *msg, CONF_VARS *cf, int dt, int subtask, int subtask_dt )
  *
  * Description: Find and go to the boxes. Drop marbles over the correct boxes.
  *
  * Input:       msg: Current message data.
  * 				cf: Configuration variables.
- * 				task: The current task to be attempted.
  *              dt: The task time.
  *				subtask: Used to set which part of the task is to be run. Modify
  * 				upon success or failure.
@@ -398,7 +392,7 @@ int task_none( MSG_DATA *msg, CONF_VARS *cf, int task, int dt, int subtask, int 
  *
  *****************************************************************************/
 
-int task_boxes( MSG_DATA *msg, CONF_VARS *cf, int task, int dt, int subtask, int subtask_dt )
+int task_boxes( MSG_DATA *msg, CONF_VARS *cf, int dt, int subtask, int subtask_dt )
 {
 	/* TODO: Fill this function in like task_buoy() and task_pipe(). */
 	if( msg->task.data.num == TASK_COURSE ) {
@@ -462,14 +456,13 @@ int task_boxes( MSG_DATA *msg, CONF_VARS *cf, int task, int dt, int subtask, int
 
 /******************************************************************************
  *
- * Title:       int task_fence( MSG_DATA *msg, CONF_VARS *cf, int task, int dt, int subtask, int subtask_dt )
+ * Title:       int task_fence( MSG_DATA *msg, CONF_VARS *cf, int dt, int subtask, int subtask_dt )
  *
  * Description: Find and go under the two fence pieces. Stay below the
  * 				horizontal fence members but above a minimum depth.
  *
  * Input:       msg: Current message data.
  * 				cf: Configuration variables.
- * 				task: The current task to be attempted.
  *              dt: The task time.
  *				subtask: Used to set which part of the task is to be run. Modify
  * 				upon success or failure.
@@ -479,7 +472,7 @@ int task_boxes( MSG_DATA *msg, CONF_VARS *cf, int task, int dt, int subtask, int
  *
  *****************************************************************************/
 
-int task_fence( MSG_DATA *msg, CONF_VARS *cf, int task, int dt, int subtask, int subtask_dt )
+int task_fence( MSG_DATA *msg, CONF_VARS *cf, int dt, int subtask, int subtask_dt )
 {
 	/* TODO: Fill this function in like task_buoy() and task_pipe(). */
 	if( msg->task.data.num == TASK_COURSE ) {
@@ -535,7 +528,7 @@ int task_fence( MSG_DATA *msg, CONF_VARS *cf, int task, int dt, int subtask, int
 
 /******************************************************************************
  *
- * Title:       int task_suitcase( MSG_DATA *msg, CONF_VARS *cf, int task, int dt, int subtask, int subtask_dt )
+ * Title:       int task_suitcase( MSG_DATA *msg, CONF_VARS *cf, int dt, int subtask, int subtask_dt )
  *
  * Description: Find and retrieve the suitcase. First center vehicle above the
  * 				suitcase and then lower depth until the suitcase is picked up
@@ -543,7 +536,6 @@ int task_fence( MSG_DATA *msg, CONF_VARS *cf, int task, int dt, int subtask, int
  *
  * Input:       msg: Current message data.
  * 				cf: Configuration variables.
- * 				task: The current task to be attempted.
  *              dt: The task time.
  *				subtask: Used to set which part of the task is to be run. Modify
  * 				upon success or failure.
@@ -553,7 +545,7 @@ int task_fence( MSG_DATA *msg, CONF_VARS *cf, int task, int dt, int subtask, int
  *
  *****************************************************************************/
 
-int task_suitcase( MSG_DATA *msg, CONF_VARS *cf, int task, int dt, int subtask, int subtask_dt )
+int task_suitcase( MSG_DATA *msg, CONF_VARS *cf, int dt, int subtask, int subtask_dt )
 {
 	/* TODO: Fill this function in like task_buoy() and task_pipe(). */
 
@@ -563,13 +555,12 @@ int task_suitcase( MSG_DATA *msg, CONF_VARS *cf, int task, int dt, int subtask, 
 
 /******************************************************************************
  *
- * Title:       int task_surface( MSG_DATA *msg, CONF_VARS *cf, int task, int dt, int subtask, int subtask_dt )
+ * Title:       int task_surface( MSG_DATA *msg, CONF_VARS *cf, int dt, int subtask, int subtask_dt )
  *
  * Description: Surface within the octagon.
  *
  * Input:       msg: Current message data.
  * 				cf: Configuration variables.
- * 				task: The current task to be attempted.
  *              dt: The task time.
  *				subtask: Used to set which part of the task is to be run. Modify
  * 				upon success or failure.
@@ -579,7 +570,7 @@ int task_suitcase( MSG_DATA *msg, CONF_VARS *cf, int task, int dt, int subtask, 
  *
  *****************************************************************************/
 
-int task_surface( MSG_DATA *msg, CONF_VARS *cf, int task, int dt, int subtask, int subtask_dt )
+int task_surface( MSG_DATA *msg, CONF_VARS *cf, int dt, int subtask, int subtask_dt )
 {
 	/* Make sure fx and fy are zero. */
 	msg->target.data.fx = 0;
@@ -594,13 +585,12 @@ int task_surface( MSG_DATA *msg, CONF_VARS *cf, int task, int dt, int subtask, i
 
 /******************************************************************************
  *
- * Title:       int task_course( MSG_DATA *msg, CONF_VARS *cf, int task, int dt, int subtask, int subtask_dt )
+ * Title:       int task_course( MSG_DATA *msg, CONF_VARS *cf, int dt, int subtask, int subtask_dt )
  *
  * Description: Run the entire course.
  *
  * Input:       msg: Current message data.
  * 				cf: Configuration variables.
- * 				task: The current task to be attempted.
  *              dt: The task time.
  *				subtask: Used to set which part of the task is to be run. Modify
  * 				upon success or failure.
@@ -610,7 +600,7 @@ int task_surface( MSG_DATA *msg, CONF_VARS *cf, int task, int dt, int subtask, i
  *
  *****************************************************************************/
 
-int task_course( MSG_DATA *msg, CONF_VARS *cf, int task, int dt, int subtask, int subtask_dt )
+int task_course( MSG_DATA *msg, CONF_VARS *cf, int dt, int subtask, int subtask_dt )
 {
 
 	return TASK_CONTINUING;
@@ -619,13 +609,12 @@ int task_course( MSG_DATA *msg, CONF_VARS *cf, int task, int dt, int subtask, in
 
 /******************************************************************************
  *
- * Title:       int task_nod( MSG_DATA *msg, CONF_VARS *cf, int task, int dt, int subtask, int subtask_dt )
+ * Title:       int task_nod( MSG_DATA *msg, CONF_VARS *cf, int dt, int subtask, int subtask_dt )
  *
  * Description: Make the sub nod its head.
  *
  * Input:       msg: Current message data.
  * 				cf: Configuration variables.
- * 				task: The current task to be attempted.
  *              dt: The task time.
  *				subtask: Used to set which part of the task is to be run. Modify
  * 				upon success or failure.
@@ -635,7 +624,7 @@ int task_course( MSG_DATA *msg, CONF_VARS *cf, int task, int dt, int subtask, in
  *
  *****************************************************************************/
 
-int task_nod( MSG_DATA *msg, CONF_VARS *cf, int task, int dt, int subtask, int subtask_dt )
+int task_nod( MSG_DATA *msg, CONF_VARS *cf, int dt, int subtask, int subtask_dt )
 {
 
 	return TASK_CONTINUING;
@@ -644,13 +633,12 @@ int task_nod( MSG_DATA *msg, CONF_VARS *cf, int task, int dt, int subtask, int s
 
 /******************************************************************************
  *
- * Title:       int task_spin( MSG_DATA *msg, CONF_VARS *cf, int task, int dt, int subtask, int subtask_dt )
+ * Title:       int task_spin( MSG_DATA *msg, CONF_VARS *cf, int dt, int subtask, int subtask_dt )
  *
  * Description: Make the sub spin in place.
  *
  * Input:       msg: Current message data.
  * 				cf: Configuration variables.
- * 				task: The current task to be attempted.
  *              dt: The task time.
  *				subtask: Used to set which part of the task is to be run. Modify
  * 				upon success or failure.
@@ -660,7 +648,7 @@ int task_nod( MSG_DATA *msg, CONF_VARS *cf, int task, int dt, int subtask, int s
  *
  *****************************************************************************/
 
-int task_spin( MSG_DATA *msg, CONF_VARS *cf, int task, int dt, int subtask, int subtask_dt )
+int task_spin( MSG_DATA *msg, CONF_VARS *cf, int dt, int subtask, int subtask_dt )
 {
 	/* Continuously add 1 degree to yaw every time through this loop. It might
 	 * be better to only add the 1 degree if enough time has elapsed by using
