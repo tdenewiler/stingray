@@ -500,7 +500,25 @@ void parse_line( CONF_VARS *config )
 		if( strncmp( tokens[1], "buoy", STRING_SIZE ) == 0 ) {
 			sscanf( tokens[2], "%f", &config->heading_buoy );
 		}
+		else if( strncmp( tokens[1], "gate", STRING_SIZE ) == 0 ) {
+			sscanf( tokens[2], "%f", &config->heading_gate );
+		}
 	}
+	/* end heading values */
+	
+	/* task start values */
+	else if( strncmp( tokens[0], "start", STRING_SIZE ) == 0 ) {
+		if( strncmp( tokens[1], "task", STRING_SIZE ) == 0 ) {
+			sscanf( tokens[2], "%d", &config->task_start );
+		}
+		else if( strncmp( tokens[1], "subtask", STRING_SIZE ) == 0 ) {
+			sscanf( tokens[2], "%d", &config->subtask_start );
+		}
+		else if( strncmp( tokens[1], "course", STRING_SIZE ) == 0 ) {
+			sscanf( tokens[2], "%d", &config->course_start );
+		}
+	}
+	/* end task start values */
 } /* end parse_line() */
 
 
@@ -787,7 +805,15 @@ void parse_default_config( CONF_VARS *config )
 	config->depth_suitcase_search = 0.600;
 	config->depth_surface = 0.600;
 	config->fence_min = 0.600;
+	
+	/* headings */
 	config->heading_buoy = 0.0;
+	config->heading_gate = 0.0;
+	
+	/* task starts */
+	config->task_start = 1;
+	config->subtask_start = 2;
+	config->course_start = 0;
 
     /* servos */
     config->enable_pololu = TRUE;

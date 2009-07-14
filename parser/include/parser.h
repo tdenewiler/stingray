@@ -154,6 +154,10 @@ typedef struct _CONF_VARS {
 	float		depth_surface;
 	float		fence_min;
 	float		heading_buoy;
+	float		heading_gate;
+	int			task_start;
+	int			subtask_start;
+	int			course_start;
 } CONF_VARS;
 
 #endif /* _CONF_VARS_ */
