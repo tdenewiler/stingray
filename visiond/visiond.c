@@ -153,7 +153,7 @@ int main( int argc, char *argv[] )
     struct tm ct;
     char write_time[80] = {0};
 	int task = TASK_NONE;
-	
+
 	/* Variables to hold box centroid sequence and vertex sequence. */
 	CvMemStorage *storage1 = 0;
 	storage1 = cvCreateMemStorage(0);
@@ -260,6 +260,7 @@ int main( int argc, char *argv[] )
 			loop_counter++;
 		}
 
+		//printf("MAIN: task = %d\n", task);
     	/* Do vision processing based on task */
     	if( task == TASK_NONE ) {
     		/* Do nothing and give cleared values. */
@@ -364,9 +365,9 @@ int main( int argc, char *argv[] )
         	/* Look for the gate */
 
 		}
-		else if( task == TASK_BOXES && f_cam ) {
+		else if( task == TASK_BOXES && b_cam ) {
 			/* Look for the boxes. */
-			status = vision_find_boxes( f_cam, f_img, boxes, squares );
+			status = vision_find_boxes( b_cam, b_img, boxes, squares );
 			if( status > 0 ) {
 				if( cf.vision_window ) {
 					/* Initialize the centroid sequence reader. */
@@ -376,7 +377,7 @@ int main( int argc, char *argv[] )
 						/* Read centroid x and y coordinates. */
 						CV_READ_SEQ_ELEM( box_pt, reader1 );
 						/* Draw the centroid as a circle. */
-						cvCircle( f_img, box_pt,
+						cvCircle( b_img, box_pt,
 							10, cvScalar(0, 0, 255), 5, 8 );
 					}
 					/* Initialize the vertex sequence reader. */
@@ -388,11 +389,11 @@ int main( int argc, char *argv[] )
 						CV_READ_SEQ_ELEM( pt[2], reader2 );
 						CV_READ_SEQ_ELEM( pt[3], reader2 );
 						/* Draw the square as a closed polyline. */
-						cvPolyLine( f_img, &rect, &count, 1, 1, CV_RGB(0,255,0), 3, CV_AA, 0 );
+						cvPolyLine( b_img, &rect, &count, 1, 1, CV_RGB(0,255,0), 3, CV_AA, 0 );
 					}
 				}
 				if( cvWaitKey( 5 ) >= 0 );
-				cvShowImage( f_win, f_img );
+				cvShowImage( b_win, b_img );
 				/* Clear out the sequences so that next time we only draw newly
 				 * found squares and centroids. */
 				cvClearSeq( boxes );
@@ -433,7 +434,7 @@ int main( int argc, char *argv[] )
 		}
 
         /* Get network data. */
-        if( ( cf.enable_server ) && ( server_fd > 0 ) ) {
+        if( (cf.enable_server) && (server_fd > 0) ) {
             recv_bytes = net_server( server_fd, recv_buf, &msg, MODE_VISION );
             if( recv_bytes > 0 ) {
                 recv_buf[recv_bytes] = '\0';
