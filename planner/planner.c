@@ -146,11 +146,8 @@ int main( int argc, char *argv[] )
 	int old_dropper = 0;
 	int old_subtask = 0;
 	CvPoint3D32f loc;
-	int subtask = cf.subtask_start;
-	int task = cf.task_start;
-	//int subtask = SUBTASK_GATE_MOVE;
-	//int task = TASK_NONE;
-	//printf("MAIN: %d    %d    %d\n", cf.task_start, cf.subtask_start, cf.course_start);
+	int subtask = 0;
+	int task = 0;
 	int status = TASK_CONTINUING;
 
 	struct timeval vision_time = {0, 0};
@@ -197,8 +194,9 @@ int main( int argc, char *argv[] )
 	/* Parse command line arguments. */
 	parse_default_config( &cf );
 	parse_cla( argc, argv, &cf, STINGRAY, ( const char * )PLANNER_FILENAME );
+	//parse_print_config( &cf );
 
-	/* Set up the default values for the target. */
+	/* Set up default values for the targets, gains and tasks. */
     msg.target.data.pitch   = cf.target_pitch;
     msg.target.data.roll    = cf.target_roll;
     msg.target.data.yaw     = cf.target_yaw;
@@ -215,6 +213,8 @@ int main( int argc, char *argv[] )
     msg.gain.data.kp_depth  = cf.kp_depth;
     msg.gain.data.ki_depth  = cf.ki_depth;
     msg.gain.data.kd_depth  = cf.kd_depth;
+	subtask = cf.subtask_start;
+	task = cf.task_start;
 
     /* Set up Kalman filter. */
     bKF = init_kalman();
@@ -322,7 +322,6 @@ int main( int argc, char *argv[] )
 				vision_buf[recv_bytes] = '\0';
 				if( recv_bytes > 0 ) {
 					messages_decode( vision_fd, vision_buf, &msg, recv_bytes );
-
                     gettimeofday( &vision_start, NULL );
 				}
 			}
