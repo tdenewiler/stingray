@@ -739,6 +739,11 @@ void parse_default_config( CONF_VARS *config )
     config->nav_port = 2000;
     strncpy( config->nav_IP, "127.0.0.1", STRING_SIZE );
     config->max_api_clients = 5;
+	
+	/* planner */
+	config->enable_planner = FALSE;
+	config->planner_port = 2002;
+	strncpy( config->planner_IP, "127.0.0.1", STRING_SIZE );
 
     /* pid */
     config->kp_yaw = 1;
@@ -834,9 +839,140 @@ void parse_default_config( CONF_VARS *config )
     config->enable_relay = FALSE;
     strncpy( config->relay_port, "/dev/ttyUSB7", STRING_SIZE );
     config->relay_baud = 9600;
+	
+	/* vision */
+	config->vision_window = FALSE;
+	config->vision_angle = 0;
 
     /* other */
     config->debug_level = 5;
     config->op_mode = 1;
     config->enable_log = FALSE;
+} /* end parse_default_config() */
+
+
+/******************************************************************************
+ *
+ * Title:       void parse_print_config( CONF_VARS *config )
+ *
+ * Description: Prints out the values of all the configuration file variables.
+ *
+ * Input:       config: An array of initialization variables.
+ *
+ * Output:      None.
+ *
+ *****************************************************************************/
+
+void parse_print_config( CONF_VARS *config )
+{
+    printf("PARSE_PRINT_CONFIG: enable_labjack = %d\n", config->enable_labjack);
+    printf("PARSE_PRINT_CONFIG: enable_imu = %d\n", config->enable_imu);
+    printf("PARSE_PRINT_CONFIG: imu_baud = %d\n", config->imu_baud);
+    printf("PARSE_PRINT_CONFIG: imu_stab = %d\n", config->imu_stab);
+    printf("PARSE_PRINT_CONFIG: imu_port[STRING_SIZE] = %s\n", config->imu_port);
+    printf("PARSE_PRINT_CONFIG: enable_server = %d\n", config->enable_server);
+	printf("PARSE_PRINT_CONFIG: enable_nav = %d\n", config->enable_nav);
+    printf("PARSE_PRINT_CONFIG: net_mode = %d\n", config->net_mode);
+    printf("PARSE_PRINT_CONFIG: nav_port = %hd\n", config->nav_port);
+	printf("PARSE_PRINT_CONFIG: server_port = %hd\n", config->server_port);
+    printf("PARSE_PRINT_CONFIG: nav_IP[STRING_SIZE] = %s\n", config->nav_IP);
+    printf("PARSE_PRINT_CONFIG: vision_IP[STRING_SIZE] = %s\n", config->vision_IP);
+    printf("PARSE_PRINT_CONFIG: enable_vision = %d\n", config->enable_vision);
+    printf("PARSE_PRINT_CONFIG: vision_port = %hd\n", config->vision_port);
+    printf("PARSE_PRINT_CONFIG: vision_window = %d\n", config->vision_window);
+    printf("PARSE_PRINT_CONFIG: vision_angle = %d\n", config->vision_angle);
+    printf("PARSE_PRINT_CONFIG: planner_IP[STRING_SIZE] = %s\n", config->planner_IP);
+    printf("PARSE_PRINT_CONFIG: enable_planner = %d\n", config->enable_planner);
+    printf("PARSE_PRINT_CONFIG: planner_port = %hd\n", config->planner_port);
+    printf("PARSE_PRINT_CONFIG: labjackd_IP[STRING_SIZE] = %s\n", config->labjackd_IP);
+    printf("PARSE_PRINT_CONFIG: labjackd_port = %hd\n", config->labjackd_port);
+    printf("PARSE_PRINT_CONFIG: max_api_clients = %d\n", config->max_api_clients);
+    printf("PARSE_PRINT_CONFIG: kp_yaw = %lf\n", config->kp_yaw);
+    printf("PARSE_PRINT_CONFIG: ki_yaw = %lf\n", config->ki_yaw);
+    printf("PARSE_PRINT_CONFIG: kd_yaw = %lf\n", config->kd_yaw);
+    printf("PARSE_PRINT_CONFIG: kp_roll = %lf\n", config->kp_roll);
+    printf("PARSE_PRINT_CONFIG: ki_roll = %lf\n", config->ki_roll);
+    printf("PARSE_PRINT_CONFIG: kd_roll = %lf\n", config->kd_roll);
+    printf("PARSE_PRINT_CONFIG: kp_pitch = %lf\n", config->kp_pitch);
+    printf("PARSE_PRINT_CONFIG: ki_pitch = %lf\n", config->ki_pitch);
+    printf("PARSE_PRINT_CONFIG: kd_pitch = %lf\n", config->kd_pitch);
+    printf("PARSE_PRINT_CONFIG: kp_depth = %lf\n", config->kp_depth);
+    printf("PARSE_PRINT_CONFIG: ki_depth = %lf\n", config->ki_depth);
+    printf("PARSE_PRINT_CONFIG: kd_depth = %lf\n", config->kd_depth);
+    printf("PARSE_PRINT_CONFIG: kp_ax = %lf\n", config->kp_ax);
+    printf("PARSE_PRINT_CONFIG: ki_ax = %lf\n", config->ki_ax);
+    printf("PARSE_PRINT_CONFIG: kd_ax = %lf\n", config->kd_ax);
+    printf("PARSE_PRINT_CONFIG: kp_ay = %lf\n", config->kp_ay);
+    printf("PARSE_PRINT_CONFIG: ki_ay = %lf\n", config->ki_ay);
+    printf("PARSE_PRINT_CONFIG: kd_ay = %lf\n", config->kd_ay);
+    printf("PARSE_PRINT_CONFIG: kp_az = %lf\n", config->kp_az);
+    printf("PARSE_PRINT_CONFIG: ki_az = %lf\n", config->ki_az);
+    printf("PARSE_PRINT_CONFIG: kd_az = %lf\n", config->kd_az);
+    printf("PARSE_PRINT_CONFIG: target_pitch = %f\n", config->target_pitch);
+    printf("PARSE_PRINT_CONFIG: target_roll = %f\n", config->target_roll);
+    printf("PARSE_PRINT_CONFIG: target_yaw = %f\n", config->target_yaw);
+    printf("PARSE_PRINT_CONFIG: target_depth = %f\n", config->target_depth);
+    printf("PARSE_PRINT_CONFIG: target_ax = %f\n", config->target_ax);
+    printf("PARSE_PRINT_CONFIG: target_ay = %f\n", config->target_ay);
+    printf("PARSE_PRINT_CONFIG: target_az = %f\n", config->target_az);
+    printf("PARSE_PRINT_CONFIG: target_fx = %f\n", config->target_fx);
+    printf("PARSE_PRINT_CONFIG: target_fy = %f\n", config->target_fy);
+    printf("PARSE_PRINT_CONFIG: target_speed = %f\n", config->target_speed);
+    printf("PARSE_PRINT_CONFIG: period_pitch = %d\n", config->period_pitch);
+    printf("PARSE_PRINT_CONFIG: period_roll = %d\n", config->period_roll);
+    printf("PARSE_PRINT_CONFIG: period_yaw = %d\n", config->period_yaw);
+    printf("PARSE_PRINT_CONFIG: period_depth = %d\n", config->period_depth);
+    printf("PARSE_PRINT_CONFIG: period_ax = %d\n", config->period_ax);
+    printf("PARSE_PRINT_CONFIG: period_ay = %d\n", config->period_ay);
+    printf("PARSE_PRINT_CONFIG: period_az = %d\n", config->period_az);
+    printf("PARSE_PRINT_CONFIG: period_vision = %d\n", config->period_vision);
+    printf("PARSE_PRINT_CONFIG: period_planner = %d\n", config->period_planner);
+    printf("PARSE_PRINT_CONFIG: enable_pololu = %d\n", config->enable_pololu);
+    printf("PARSE_PRINT_CONFIG: pololu_baud = %d\n", config->pololu_baud);
+    printf("PARSE_PRINT_CONFIG: pololu_port[STRING_SIZE] = %s\n", config->pololu_port);
+    printf("PARSE_PRINT_CONFIG: pipe_hL = %f\n", config->pipe_hL);
+    printf("PARSE_PRINT_CONFIG: pipe_hH = %f\n", config->pipe_hH);
+    printf("PARSE_PRINT_CONFIG: pipe_sL = %f\n", config->pipe_sL);
+    printf("PARSE_PRINT_CONFIG: pipe_sH = %f\n", config->pipe_sH);
+    printf("PARSE_PRINT_CONFIG: pipe_vL = %f\n", config->pipe_vL);
+    printf("PARSE_PRINT_CONFIG: pipe_vH = %f\n", config->pipe_vH);
+    printf("PARSE_PRINT_CONFIG: buoy_hL = %f\n", config->buoy_hL);
+    printf("PARSE_PRINT_CONFIG: buoy_hH = %f\n", config->buoy_hH);
+    printf("PARSE_PRINT_CONFIG: buoy_sL = %f\n", config->buoy_sL);
+    printf("PARSE_PRINT_CONFIG: buoy_sH = %f\n", config->buoy_sH);
+    printf("PARSE_PRINT_CONFIG: buoy_vL = %f\n", config->buoy_vL);
+    printf("PARSE_PRINT_CONFIG: buoy_vH = %f\n", config->buoy_vH);
+    printf("PARSE_PRINT_CONFIG: fence_hL = %f\n", config->fence_hL);
+    printf("PARSE_PRINT_CONFIG: fence_hH = %f\n", config->fence_hH);
+    printf("PARSE_PRINT_CONFIG: fence_sL = %f\n", config->fence_sL);
+    printf("PARSE_PRINT_CONFIG: fence_sH = %f\n", config->fence_sH);
+    printf("PARSE_PRINT_CONFIG: fence_vL = %f\n", config->fence_vL);
+    printf("PARSE_PRINT_CONFIG: fence_vH = %f\n", config->fence_vH);
+    printf("PARSE_PRINT_CONFIG: enable_gui = %d\n", config->enable_gui);
+    printf("PARSE_PRINT_CONFIG: window_height = %d\n", config->window_height);
+    printf("PARSE_PRINT_CONFIG: window_width = %d\n", config->window_width);
+    printf("PARSE_PRINT_CONFIG: enable_gps = %d\n", config->enable_gps);
+    printf("PARSE_PRINT_CONFIG: gps_port[STRING_SIZE] = %s\n", config->gps_port);
+    printf("PARSE_PRINT_CONFIG: gps_baud = %d\n", config->gps_baud);
+    printf("PARSE_PRINT_CONFIG: enable_relay = %d\n", config->enable_relay);
+    printf("PARSE_PRINT_CONFIG: relay_port[STRING_SIZE] = %s\n", config->relay_port);
+    printf("PARSE_PRINT_CONFIG: relay_baud = %d\n", config->relay_baud);
+    printf("PARSE_PRINT_CONFIG: debug_level = %d\n", config->debug_level);
+    printf("PARSE_PRINT_CONFIG: op_mode = %d\n", config->op_mode);
+    printf("PARSE_PRINT_CONFIG: enable_log = %d\n", config->enable_log);
+	printf("PARSE_PRINT_CONFIG: depth_gate = %f\n", config->depth_gate);
+	printf("PARSE_PRINT_CONFIG: depth_pipe = %f\n", config->depth_pipe);
+	printf("PARSE_PRINT_CONFIG: depth_buoy = %f\n", config->depth_buoy);
+	printf("PARSE_PRINT_CONFIG: depth_fence = %f\n", config->depth_fence);
+	printf("PARSE_PRINT_CONFIG: depth_boxes = %f\n", config->depth_boxes);
+	printf("PARSE_PRINT_CONFIG: depth_suitcase_search = %f\n", config->depth_suitcase_search);
+	printf("PARSE_PRINT_CONFIG: depth_suitcase_pickup = %f\n", config->depth_suitcase_pickup);
+	printf("PARSE_PRINT_CONFIG: depth_octagon = %f\n", config->depth_octagon);
+	printf("PARSE_PRINT_CONFIG: depth_surface = %f\n", config->depth_surface);
+	printf("PARSE_PRINT_CONFIG: fence_min = %f\n", config->fence_min);
+	printf("PARSE_PRINT_CONFIG: heading_buoy = %f\n", config->heading_buoy);
+	printf("PARSE_PRINT_CONFIG: heading_gate = %f\n", config->heading_gate);
+	printf("PARSE_PRINT_CONFIG: task_start = %d\n", config->task_start);
+	printf("PARSE_PRINT_CONFIG: subtask_start = %d\n", config->subtask_start);
+	printf("PARSE_PRINT_CONFIG: course_start = %d\n", config->course_start);
 } /* end parse_default_config() */

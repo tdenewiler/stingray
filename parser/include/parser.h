@@ -200,6 +200,10 @@ int parse_cla( int argc,
 //! \param config An array of initialization variables.
 void parse_default_config( CONF_VARS *config );
 
+//! Prints out the values of the configuration file variables.
+//! \param config An array of initialization variables.
+void parse_print_config( CONF_VARS *config );
+
 
 #endif /* _PARSER_H_ */
 
