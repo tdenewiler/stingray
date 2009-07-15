@@ -146,10 +146,10 @@ int main( int argc, char *argv[] )
 	int old_dropper = 0;
 	int old_subtask = 0;
 	CvPoint3D32f loc;
-	//int subtask = cf.subtask_start;
-	//int task = cf.task_start;
-	int subtask = SUBTASK_GATE_MOVE;
-	int task = TASK_NONE;
+	int subtask = cf.subtask_start;
+	int task = cf.task_start;
+	//int subtask = SUBTASK_GATE_MOVE;
+	//int task = TASK_NONE;
 	//printf("MAIN: %d    %d    %d\n", cf.task_start, cf.subtask_start, cf.course_start);
 	int status = TASK_CONTINUING;
 

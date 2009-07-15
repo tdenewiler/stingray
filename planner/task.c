@@ -215,10 +215,13 @@ int task_gate( MSG_DATA *msg, CONF_VARS *cf, int dt, int subtask, int subtask_dt
 	if( msg->task.data.num == TASK_COURSE ) {
 		switch( subtask ) {
 		case SUBTASK_SEARCH_DEPTH:
-			msg->target.data.depth = cf->depth_gate;
+			msg->target.data.depth = cf->depth_pipe;
+			msg->target.data.depth = cf->heading_gate;
 			/* Check to see if we have reached the target depth. */
 			if( fabsf(msg->status.data.depth - msg->target.data.depth) < SUBTASK_DEPTH_MARGIN ) {
-				return TASK_SUCCESS;
+				if( fabsf(msg->status.data.yaw - msg->target.data.yaw) < SUBTASK_YAW_MARGIN ) {
+					return TASK_SUCCESS;
+				}
 			}
 			/* Check to see if too much time has elapsed. */
 			else if( subtask_dt > SUBTASK_MAX_SEARCH_TIME ) {

@@ -412,14 +412,6 @@ int main( int argc, char *argv[] )
             recv_bytes = mstrain_euler_vectors( imu_fd, &msg.mstrain.data.pitch,
 				&msg.mstrain.data.roll, &msg.mstrain.data.yaw, msg.mstrain.data.accel,
 				msg.mstrain.data.ang_rate );
-			//printf("MAIN:       %f        %f        %f\n",
-				//msg.mstrain.data.pitch, msg.mstrain.data.roll, msg.mstrain.data.yaw);
-			//printf("Mag Vector: %f %f %f\n",
-				//msg.mstrain.data.mag[0], msg.mstrain.data.mag[1], msg.mstrain.data.mag[2]);
-			//printf("Accel Vector: %f %f %f\n",
-				//msg.mstrain.data.accel[0], msg.mstrain.data.accel[1], msg.mstrain.data.accel[2]);
-			//printf("Ang Rate Vector: %f %f %f\n\n",
-				//msg.mstrain.data.ang_rate[0], msg.mstrain.data.ang_rate[1], msg.mstrain.data.ang_rate[2]);
         }
 		else {
 			/* Simulation Mode. This is where the simulated data is generated. */
