@@ -432,23 +432,23 @@ int vision_find_fence( int *fence_center,
                       float vH
                     )
 {
+	int center = 0;
     IplImage *hsv_image = NULL;
     IplImage *outImg = NULL;
-    IplConvKernel *wE = cvCreateStructuringElementEx( 2, 2,
+    IplConvKernel *wE = cvCreateStructuringElementEx( 3, 3,
             (int)floor( ( 3.0 ) / 2 ), (int)floor( ( 3.0 ) / 2 ), CV_SHAPE_RECT );
     IplConvKernel *wD = cvCreateStructuringElementEx( 3, 3,
             (int)floor( ( 3.0 ) / 2 ), (int)floor( ( 3.0 ) / 2 ), CV_SHAPE_RECT );
 
-    //srcImg = cvQueryFrame( cap );
     srcImg = cvQueryFrame( cap );
 
     if( !srcImg ) {
         return 0;
     }
 
-    /* Flip the source image if find dot didnt */
+    /* Flip the source image. */
   	cvFlip( srcImg, srcImg );
-    int center = srcImg->width / 2;
+    center = srcImg->width / 2;
 
     hsv_image = cvCreateImage( cvGetSize( srcImg ), IPL_DEPTH_8U, 3 );
     outImg = cvCreateImage( cvGetSize( srcImg ), IPL_DEPTH_8U, 1 );
@@ -491,7 +491,8 @@ int vision_get_fence_bottom( IplImage *inputBinImg, int *center )
     int y_max = 0;
     int imHeight = inputBinImg->height;
     int imWidth = inputBinImg->width;
-    int minPipeWidth = 20;
+    //int minPipeWidth = 20;
+    int minPipeWidth = 10;
     int edgeThreshold = 2;
     int c= 0;
     int k=0;
@@ -502,11 +503,13 @@ int vision_get_fence_bottom( IplImage *inputBinImg, int *center )
     int i = 0; /* rows */
     int j = 0; /* columns */
 
-    /* Initialize edge arrays, mset may be better. */
-    for( i = 0; i < imHeight; i++ ) {
-        leftEdge[i] = 0;
-        rightEdge[i] = imWidth;
-    }
+    /* Initialize edge arrays, memset may be better. */
+    memset( &leftEdge, 0, sizeof(leftEdge) );
+    memset( &rightEdge, 0, sizeof(rightEdge) );
+    //for( i = 0; i < imHeight; i++ ) {
+        //leftEdge[i] = 0;
+        //rightEdge[i] = imWidth;
+    //}
     for( i = 0; i < imHeight - 1; i++ ) {
         /* Scan through each line of image and look for first non zero pixel
          * then get the (i,j) pixel value. */
@@ -520,13 +523,12 @@ int vision_get_fence_bottom( IplImage *inputBinImg, int *center )
             while( (cvGet2D(inputBinImg, i, j).val[0] > 0) && (j < imWidth - 2) ) {
                 j++;
             }
-            if( j < imWidth - 2) { /* Scan didn't get to end of image, bottom
-            						 * edge exists. */
+            if( j < imWidth - 2) {
+            	/* Scan didn't get to end of image, bottom edge exists. */
                 rightEdge[k] = j;
             }
             if( rightEdge[k] - leftEdge[k] > minPipeWidth ) {
             	y_max = i;
-            	//printf( "FNC_BTM: ymax = %d\n", y_max );
 			}
         }
         k++;
@@ -539,7 +541,7 @@ int vision_get_fence_bottom( IplImage *inputBinImg, int *center )
         		c += rightEdge[i] - leftEdge[i];
 		}
 	}
-	*center = c/k;
+	*center = c / k;
 
     return y_max;
 } /* end vision_get_fence_bottom() */
@@ -570,10 +572,10 @@ int vision_find_boxes( CvCapture *cap,
 	IplImage *img = NULL;
 	CvMemStorage *storage = 0;
 	int status = -1;
-	
+
 	/* Initialize variables. */
 	storage = cvCreateMemStorage(0);
-   
+
     /* Capture a new source image. */
     srcImg = cvQueryFrame( cap );
     if ( !srcImg ) {
@@ -584,11 +586,11 @@ int vision_find_boxes( CvCapture *cap,
 	 * source image needs to be kept clean so that we can display it later. */
 	img = cvCloneImage( srcImg );
     status = vision_find_squares4( img, storage, result, squares );
- 
+
     /* Clear memory storage and reset free space position. */
     cvReleaseImage( &img );
     cvClearMemStorage( storage );
-       
+
     return status;
 } /* end vision_find_boxes() */
 
@@ -617,7 +619,7 @@ double vision_angle( CvPoint* pt1, CvPoint* pt2, CvPoint* pt0 )
     double dy1 = pt1->y - pt0->y;
     double dx2 = pt2->x - pt0->x;
     double dy2 = pt2->y - pt0->y;
-	
+
 	/* The find box code detects a box at the image boundary. To remove this we
 	 * are going to exclude boxes that are within a small band around the edge
 	 * of the image. There are magic numbers here for a 640x480 image that
@@ -627,7 +629,7 @@ double vision_angle( CvPoint* pt1, CvPoint* pt2, CvPoint* pt0 )
 	if( (fabsf(dy1 - dy2) > 450.) || (fabsf(dx1 - dx2) > 610.) ) {
 		return 100000.;
 	}
-	
+
 	/* Return the cosine between the two points. */
     return( dx1*dx2 + dy1*dy2) / sqrt((dx1*dx1 + dy1*dy1)*(dx2*dx2 + dy2*dy2) + 1e-10 );
 } /* end vision_angle() */
@@ -674,7 +676,7 @@ int vision_find_squares4( IplImage *img, CvMemStorage *storage, CvSeq *box_cente
     /* Down-scale and upscale the image to filter out the noise. */
     cvPyrDown( timg, pyr, 7 );
     cvPyrUp( pyr, timg, 7 );
-	
+
 	/* Create a grayscale image. */
     tgray = cvCreateImage( sz, 8, 1 );
 
