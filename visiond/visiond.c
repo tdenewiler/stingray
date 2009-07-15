@@ -284,12 +284,12 @@ int main( int argc, char *argv[] )
 				msg.vision.data.front_x = (f_img->width / 2) - dotx;
 				msg.vision.data.front_y = (f_img->height / 2) - doty;
 				/* Rotate centroid to account for camera mounted at angle. */
-				tmp_dotx = msg.vision.data.front_x;
-				tmp_doty = msg.vision.data.front_y;
-				msg.vision.data.front_x = tmp_dotx * cos(cf.vision_angle) +
-					tmp_doty * sin(cf.vision_angle);
-				msg.vision.data.front_y = tmp_dotx * sin(cf.vision_angle) +
-					tmp_doty * cos(cf.vision_angle);
+				//tmp_dotx = msg.vision.data.front_x;
+				//tmp_doty = msg.vision.data.front_y;
+				//msg.vision.data.front_x = tmp_dotx * cos(cf.vision_angle) +
+					//tmp_doty * sin(cf.vision_angle);
+				//msg.vision.data.front_y = tmp_dotx * sin(cf.vision_angle) +
+					//tmp_doty * cos(cf.vision_angle);
 
 				if( cf.vision_window ) {
 					if( cvWaitKey( 5 ) >= 0 );
