@@ -307,7 +307,7 @@ int main( int argc, char *argv[] )
 		}
 
 		/* Get vision data. */
-		if( ( cf.enable_vision ) && ( vision_fd > 0 ) ) {
+		if( (cf.enable_vision) && (vision_fd > 0) ) {
 			time1s =    vision_time.tv_sec;
 			time1ms =   vision_time.tv_usec;
 			time2s =    vision_start.tv_sec;
@@ -323,19 +323,23 @@ int main( int argc, char *argv[] )
                     gettimeofday( &vision_start, NULL );
 				}
 			}
+		}
 
-			/* If there is a new task then send to vision. */
-			if( old_task != msg.task.data.num ) {
+		/* If there is a new task then send to vision. */
+		if( old_task != msg.task.data.num ) {
+			if( (cf.enable_vision) && (vision_fd > 0) ) {
 				messages_send( vision_fd, TASK_MSGID, &msg );
-				old_task = msg.task.data.num;
-				/* Reset the task and subtask start timers. */
-				gettimeofday( &task_start, NULL );
-				gettimeofday( &subtask_start, NULL );
 			}
-			else if( old_subtask != msg.task.data.subtask ) {
+			old_task = msg.task.data.num;
+			/* Reset the task and subtask start timers. */
+			gettimeofday( &task_start, NULL );
+			gettimeofday( &subtask_start, NULL );
+		}
+		else if( old_subtask != msg.task.data.subtask ) {
+			if( (cf.enable_vision) && (vision_fd > 0) ) {
 				messages_send( vision_fd, TASK_MSGID, &msg );
-				old_subtask = msg.task.data.subtask;
 			}
+			old_subtask = msg.task.data.subtask;
 		}
 
         /* Get nav data. */

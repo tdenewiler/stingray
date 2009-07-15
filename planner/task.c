@@ -228,10 +228,15 @@ int task_gate( MSG_DATA *msg, CONF_VARS *cf, int dt, int subtask, int subtask_dt
 				return SUBTASK_CONTINUING;
 			}
 		case SUBTASK_GATE_MOVE:
-			/* TODO: Add in details for this case -- need to move forward for a
-			 * small amount of time. Be careful to not move too high for search
-			 * depth for the next pipe until we have gone through the gate. */
-			break;
+			if( subtask_dt < SUBTASK_GATE_MOVE_TIME ) {
+				msg->target.data.fy = POLOLU_MOVE_FORWARD;
+			}
+			else if( dt > SUBTASK_MAX_SEARCH_TIME ) {
+				return TASK_FAILURE;
+			}
+			else {
+				return TASK_SUCCESS;
+			}
 		}
 	}
 	else {
