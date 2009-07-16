@@ -110,6 +110,10 @@ int vision_find_dot( int *dotx,
     cvReleaseImage( &outImg );
     cvReleaseImage( &rotateImg );
 
+	/* Check that the values of dotx & doty are not negative */
+	if( dotx < 0 || doty < 0 )
+		return 0;
+	
     return 1;
 } /* end vision_find_dot() */
 
@@ -217,6 +221,7 @@ double vision_get_bearing( IplImage *inputBinImg )
     CvMemStorage *storage;
     CvMat *LError;
     CvMat *RError;
+    CvPoint2D32f point;
 
     /* Slope (m) and b for left, right and combined estimate. */
     double mL = 0.0;
@@ -274,7 +279,8 @@ double vision_get_bearing( IplImage *inputBinImg )
 
     if( leftEdgeCount > edgeThreshold ) {
         for( i = 0; i < leftEdgeCount; i++ ) {
-            cvSeqPush( point_seq, &cvPoint2D32f(leftEdge[i][1],leftEdge[i][2]) );
+        	point = cvPoint2D32f(leftEdge[i][1],leftEdge[i][2]);
+            cvSeqPush( point_seq, &point );
         }
         cvFitLine( point_seq, CV_DIST_L2, 0, 0.01, 0.01, left_line );
         mL = left_line[1] / left_line[0];
@@ -291,7 +297,8 @@ double vision_get_bearing( IplImage *inputBinImg )
 
     if( rightEdgeCount > edgeThreshold ) {
         for( i = 0; i < rightEdgeCount; i++ ) {
-            cvSeqPush( point_seq, &cvPoint2D32f(rightEdge[i][1],rightEdge[i][2]) );
+        	point = cvPoint2D32f(leftEdge[i][1],leftEdge[i][2]);
+            cvSeqPush( point_seq, &point );
         }
         cvFitLine( point_seq, CV_DIST_L2, 0, 0.01, 0.01, right_line );
         mR = right_line[1] / right_line[0];
@@ -387,11 +394,13 @@ CvPoint vision_find_centroid( IplImage *binImage, int thresh )
     /* Check if an object is detected. */
     if( count > thresh )
         detected = true;
+        
+    /* If the centroid was detected convert it */
     if( detected ) {
         centroid.x = (int)colTotal / count;
         centroid.y = (int)rowTotal / count;
     }
-    else {
+    else { /* Send back negatives if we do not have a positive detection */
         centroid.x = -1;
         centroid.y = -1;
     }
