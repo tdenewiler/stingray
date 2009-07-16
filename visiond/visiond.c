@@ -281,16 +281,15 @@ int main( int argc, char *argv[] )
 					msg.vsetting.data.buoy_hsv.vH );
 
 			if( status == 1 ) {
-				
 				/* Set the detection status of vision */
 				msg.vision.data.status = TASK_BOUY_DETECTED;
-				
+
 				/* The subtractions are opposite of each other on purpose. This
 				 * is so that they match the way the depth sensor and yaw sensor
 				 * work. */
 				msg.vision.data.front_x = dotx - (f_img->width / 2);
 				msg.vision.data.front_y = (f_img->height / 2) - doty;
-				
+
 				/* Rotate centroid to account for camera mounted at angle. */
 				tmp_dotx = msg.vision.data.front_x;
 				tmp_doty = msg.vision.data.front_y;
@@ -370,11 +369,11 @@ int main( int argc, char *argv[] )
                 	cvShowImage( f_win, f_img );
 				}
 				/* Set target offsets in network message. */
-				/* !!!!!!!!!!! TODO: Fix these !!!!!!!!!!! */
 				/* The subtractions are opposite of each other on purpose. This
 				 * is so that they match the way the depth sensor and yaw sensor
 				 * work. */
-				printf("MAIN: y_max = %d\n", y_max);
+				//printf("MAIN:     %d     %d\n", msg.vision.data.front_x,
+					//msg.vision.data.front_y);
 				msg.vision.data.front_x = fence_center - (f_img->width / 2);
 				msg.vision.data.front_y = y_max - (f_img->height / 4);
             }
