@@ -170,8 +170,8 @@ int task_buoy( MSG_DATA *msg, CONF_VARS *cf, int dt, int subtask, int subtask_dt
 			}
 		case SUBTASK_CORRECT:
 			/* Set target values based on current orientation and pixel error. */
-			msg->target.data.yaw = msg->status.data.yaw + (float)msg->vision.data.front_x * TASK_BUOY_GAIN;
-			msg->target.data.depth = msg->status.data.depth + (float)msg->vision.data.front_y * TASK_BUOY_GAIN / 100.;
+			msg->target.data.yaw = msg->status.data.yaw + (float)msg->vision.data.front_x * TASK_BUOY_YAW_GAIN;
+			msg->target.data.depth = msg->status.data.depth + (float)msg->vision.data.front_y * TASK_BUOY_DEPTH_GAIN;
 
 			/* TODO: Need a way to check for SUCCESS or FAILURE in this case. */
 			return SUBTASK_CONTINUING;
@@ -179,12 +179,12 @@ int task_buoy( MSG_DATA *msg, CONF_VARS *cf, int dt, int subtask, int subtask_dt
 	}
 	else {
 		/* Set target values based on current orientation and pixel error. */
-		msg->target.data.yaw = msg->status.data.yaw + (float)msg->vision.data.front_x * TASK_BUOY_GAIN;
+		msg->target.data.yaw = msg->status.data.yaw + (float)msg->vision.data.front_x * TASK_BUOY_YAW_GAIN;
 
 		/* Need to divide the depth target by a largish number because the gain works
 		 * for yaw in degrees but not for depth in volts. The pixel error needs to
 		 * be converted so that it is meaningful for volts as well. */
-		msg->target.data.depth = msg->status.data.depth + (float)msg->vision.data.front_y * TASK_BUOY_GAIN / 100.;
+		msg->target.data.depth = msg->status.data.depth + (float)msg->vision.data.front_y * TASK_BUOY_DEPTH_GAIN;
 
 		return TASK_CONTINUING;
 	}
@@ -515,8 +515,8 @@ int task_fence( MSG_DATA *msg, CONF_VARS *cf, int dt, int subtask, int subtask_d
 			}
 		case SUBTASK_CORRECT:
 			/* Set target values based on current orientation and pixel error. */
-			msg->target.data.yaw   = msg->status.data.yaw + (float)msg->vision.data.fence_x * TASK_FENCE_GAIN;
-			msg->target.data.depth = msg->status.data.depth + (float)msg->vision.data.fence_y * TASK_FENCE_GAIN;
+			msg->target.data.yaw   = msg->status.data.yaw + (float)msg->vision.data.fence_x * TASK_FENCE_YAW_GAIN;
+			msg->target.data.depth = msg->status.data.depth + (float)msg->vision.data.fence_y * TASK_FENCE_DEPTH_GAIN;
 
 			/* TODO: Need a way to check for SUCCESS or FAILURE in this case. */
 			return SUBTASK_CONTINUING;
@@ -524,8 +524,8 @@ int task_fence( MSG_DATA *msg, CONF_VARS *cf, int dt, int subtask, int subtask_d
 	}
 	else {
 		/* Set the values based on current orientation and pixel error. */
-		msg->target.data.yaw   = msg->status.data.yaw + (float)msg->vision.data.fence_x * TASK_FENCE_GAIN;
-		msg->target.data.depth = msg->status.data.depth + (float)msg->vision.data.fence_y * TASK_FENCE_GAIN;
+		msg->target.data.yaw   = msg->status.data.yaw + (float)msg->vision.data.fence_x * TASK_FENCE_YAW_GAIN;
+		msg->target.data.depth = msg->status.data.depth + (float)msg->vision.data.fence_y * TASK_FENCE_DEPTH_GAIN;
 
 		return TASK_CONTINUING;
 	}
