@@ -39,7 +39,7 @@
  *				subtask: Used to set which part of the task is to be run. Modify
  * 				upon success or failure.
  * 				subtask_dt: The subtask time.
- * 
+ *
  * Output:      Task status: Success, failure, continuing.
  *
  *****************************************************************************/
@@ -172,7 +172,7 @@ int task_buoy( MSG_DATA *msg, CONF_VARS *cf, int dt, int subtask, int subtask_dt
 			/* Set target values based on current orientation and pixel error. */
 			msg->target.data.yaw = msg->status.data.yaw + (float)msg->vision.data.front_x * TASK_BUOY_GAIN;
 			msg->target.data.depth = msg->status.data.depth + (float)msg->vision.data.front_y * TASK_BUOY_GAIN / 100.;
-			
+
 			/* TODO: Need a way to check for SUCCESS or FAILURE in this case. */
 			return SUBTASK_CONTINUING;
 		}
@@ -180,7 +180,7 @@ int task_buoy( MSG_DATA *msg, CONF_VARS *cf, int dt, int subtask, int subtask_dt
 	else {
 		/* Set target values based on current orientation and pixel error. */
 		msg->target.data.yaw = msg->status.data.yaw + (float)msg->vision.data.front_x * TASK_BUOY_GAIN;
-		
+
 		/* Need to divide the depth target by a largish number because the gain works
 		 * for yaw in degrees but not for depth in volts. The pixel error needs to
 		 * be converted so that it is meaningful for volts as well. */
@@ -188,7 +188,7 @@ int task_buoy( MSG_DATA *msg, CONF_VARS *cf, int dt, int subtask, int subtask_dt
 
 		return TASK_CONTINUING;
 	}
-	
+
 	return TASK_CONTINUING;
 } /* end task_buoy() */
 
@@ -250,7 +250,7 @@ int task_gate( MSG_DATA *msg, CONF_VARS *cf, int dt, int subtask, int subtask_dt
 		 * probably be equal to the depth of the buoy so that we can start looking
 		 * for the buoy right away. */
 		msg->target.data.depth = cf->depth_gate;
-		
+
 		return TASK_CONTINUING;
 	}
 
@@ -311,7 +311,7 @@ int task_pipe( MSG_DATA *msg, CONF_VARS *cf, int dt, int subtask, int subtask_dt
 			/* Set target values based on current orientation and pixel error. */
 			msg->target.data.yaw    = msg->status.data.yaw + (float)msg->vision.data.bottom_y * TASK_PIPE_GAIN;
 			//msg->target.data.fx     = msg->vision.data.bottom_x;
-			
+
 			/* TODO: Need a way to check for SUCCESS or FAILURE in this case. */
 			return SUBTASK_CONTINUING;
 		case SUBTASK_PIPE_END:
@@ -323,7 +323,7 @@ int task_pipe( MSG_DATA *msg, CONF_VARS *cf, int dt, int subtask, int subtask_dt
 		/* Set the values based on current orientation and pixel error. */
 		msg->target.data.yaw    = msg->status.data.yaw + (float)msg->vision.data.bottom_y * TASK_PIPE_GAIN;
 		//msg->target.data.fx     = msg->vision.data.bottom_x;
-		
+
 		return TASK_CONTINUING;
 	}
 
@@ -439,7 +439,7 @@ int task_boxes( MSG_DATA *msg, CONF_VARS *cf, int dt, int subtask, int subtask_d
 			/* Set target values based on current orientation and pixel error. */
 			msg->target.data.yaw    = msg->status.data.yaw + (float)msg->vision.data.bottom_y * TASK_PIPE_GAIN;
 			//msg->target.data.fx     = msg->vision.data.bottom_x;
-			
+
 			/* TODO: Need a way to check for SUCCESS or FAILURE in this case. */
 			return SUBTASK_CONTINUING;
 		case SUBTASK_BOXES_DROP_DEPTH:
@@ -454,7 +454,7 @@ int task_boxes( MSG_DATA *msg, CONF_VARS *cf, int dt, int subtask, int subtask_d
 		/* Set the values based on current orientation and pixel error. */
 		msg->target.data.yaw    = msg->status.data.yaw + (float)msg->vision.data.bottom_y * TASK_PIPE_GAIN;
 		//msg->target.data.fx     = msg->vision.data.bottom_x;
-		
+
 		return TASK_CONTINUING;
 	}
 
@@ -517,7 +517,7 @@ int task_fence( MSG_DATA *msg, CONF_VARS *cf, int dt, int subtask, int subtask_d
 			/* Set target values based on current orientation and pixel error. */
 			msg->target.data.yaw   = msg->status.data.yaw + (float)msg->vision.data.fence_x * TASK_FENCE_GAIN;
 			msg->target.data.depth = msg->status.data.depth + (float)msg->vision.data.fence_y * TASK_FENCE_GAIN;
-			
+
 			/* TODO: Need a way to check for SUCCESS or FAILURE in this case. */
 			return SUBTASK_CONTINUING;
 		}
@@ -526,7 +526,7 @@ int task_fence( MSG_DATA *msg, CONF_VARS *cf, int dt, int subtask, int subtask_d
 		/* Set the values based on current orientation and pixel error. */
 		msg->target.data.yaw   = msg->status.data.yaw + (float)msg->vision.data.fence_x * TASK_FENCE_GAIN;
 		msg->target.data.depth = msg->status.data.depth + (float)msg->vision.data.fence_y * TASK_FENCE_GAIN;
-		
+
 		return TASK_CONTINUING;
 	}
 
@@ -583,7 +583,7 @@ int task_surface( MSG_DATA *msg, CONF_VARS *cf, int dt, int subtask, int subtask
 	/* Make sure fx and fy are zero. */
 	msg->target.data.fx = 0;
 	msg->target.data.fy = 0;
-	
+
 	/* Set the target depth to the configuration file depth for surfacing. */
 	msg->target.data.depth =  cf->depth_surface;
 

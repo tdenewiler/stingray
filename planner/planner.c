@@ -301,7 +301,7 @@ int main( int argc, char *argv[] )
 	/* Main loop. */
 	while( 1 ) {
 		/* Get network data. */
-		if( ( cf.enable_server ) && ( server_fd > 0 ) ) {
+		if( (cf.enable_server) && (server_fd > 0) ) {
 			recv_bytes = net_server( server_fd, recv_buf, &msg, MODE_PLANNER );
 			if( recv_bytes > 0 ) {
 				recv_buf[recv_bytes] = '\0';
@@ -328,6 +328,8 @@ int main( int argc, char *argv[] )
 		}
 
 		/* If there is a new task then send to vision. */
+		task = msg.task.data.num;
+		subtask = msg.task.data.subtask;
 		if( old_task != msg.task.data.num ) {
 			if( (cf.enable_vision) && (vision_fd > 0) ) {
 				messages_send( vision_fd, TASK_MSGID, &msg );
