@@ -137,6 +137,9 @@ int task_run( MSG_DATA *msg, CONF_VARS *cf, int task, int dt, int subtask, int s
 
 int task_buoy( MSG_DATA *msg, CONF_VARS *cf, int dt, int subtask, int subtask_dt )
 {
+	/* TO BE REMOVED */
+	printf("Plan - front_x: %d , front_y: %d\n" , msg->vision.data.front_x , msg->vision.data.front_y );
+	
 	if( msg->task.data.num == TASK_COURSE ) {
 		switch( subtask ) {
 		case SUBTASK_SEARCH_DEPTH:
@@ -158,8 +161,10 @@ int task_buoy( MSG_DATA *msg, CONF_VARS *cf, int dt, int subtask, int subtask_dt
 			msg->task.data.subtask = TASK_BUOY;
 			/* Start moving forward. */
 			msg->target.data.fy = POLOLU_MOVE_FORWARD;
-			/* TODO: Fix this magic number. */
-			if( msg->vision.data.front_x < -1000 ) {
+			
+			/* If the bouy has been detected, front_x will be different
+			 * than BOUY_NOT_DETECTED */
+			if( msg->vision.data.status == TASK_BOUY_DETECTED ) { 
 				return SUBTASK_SUCCESS;
 			}
 			else if( subtask_dt > SUBTASK_MAX_SEARCH_TIME ) {
@@ -316,6 +321,11 @@ int task_pipe( MSG_DATA *msg, CONF_VARS *cf, int dt, int subtask, int subtask_dt
 			return SUBTASK_CONTINUING;
 		case SUBTASK_PIPE_END:
 			/* TODO: Add in details for this case. */
+			/* To implement this correctly, the interface between having
+			 * control in this method vs the next method needs to be worked out
+			 * for each transition */
+			/* A return value in this case to allow transition (ie success or failure)
+			 * must be added here*/
 			break;
 		}
 	}

@@ -72,12 +72,23 @@
 #define SUBTASK_YAW_MARGIN				3.0
 #define SUBTASK_MAX_SEARCH_TIME			180
 #define SUBTASK_GATE_MOVE_TIME			10
-#define SUBTASK_SUCCESS					1
-#define SUBTASK_FAILURE					-1
+#define SUBTASK_SUCCESS					2
+#define SUBTASK_FAILURE					-2
 #define SUBTASK_CONTINUING				0
 //@}
 #endif /* SUBTASKS */
 
+#ifndef TASK_STATUS
+#define TASK_STATUS
+/** @Vision status messages. */
+//@{
+#define TASK_NOT_DETECTED 	0
+#define TASK_BOUY_DETECTED	1
+#define TASK_PIPE_DETECTED	2
+#define TASK_FENCE_DETECTED	3
+#define	TASK_BOXES_DETECTED	4
+//@}
+#endif /* TASK_STATUS */
 
 
 /******************************

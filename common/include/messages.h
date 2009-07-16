@@ -310,6 +310,7 @@ typedef struct _VISION {
 	int box2_y;		//!< The y component of the second box found.
 	int suitcase_x; //!< The x component of the suitcase.
 	int suitcase_y; //!< The y component of the suitcase.
+	int status;    	//!< The status of the vision detection. 
 } VISION;
 
 typedef struct _VISION_MSG {

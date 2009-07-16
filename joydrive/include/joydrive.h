@@ -39,6 +39,10 @@
 #define MAX_PORT_LEN 8
 #endif /* MAX_PORT_LEN */
 
+/* Joy axis defines */
+#define JOYDRIVE_AXIS_MOVE_1 0x7FFF /* +fx , -fy */
+#define JOYDRIVE_AXIS_MOVE_2 0x8001 /* -fx , +fy */
+
 
 /******************************
 **

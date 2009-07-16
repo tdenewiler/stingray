@@ -161,21 +161,21 @@ int main( int argc, char *argv[] )
 
         /* Set target change values based on joystick input. */
         if( joy.joy_axis == JOY_A5 ) {
-            if( joy.axis_value == -32767 ) {
+            if( joy.axis_value == JOYDRIVE_AXIS_MOVE_2 ) {
                 msg.teleop.data.fy = 1;
                 printf("MAIN: fy + 1.\n");
             }
-            else if( joy.axis_value == 32767 ) {
+            else if( joy.axis_value == JOYDRIVE_AXIS_MOVE_1 ) {
                 msg.teleop.data.fy = -1;
                 printf("MAIN: fy - 1.\n");
             }
         }
         if( joy.joy_axis == JOY_A4 ) {
-            if( joy.axis_value == 32767 ) {
+            if( joy.axis_value == JOYDRIVE_AXIS_MOVE_1 ) {
                 msg.teleop.data.fx = 1;
                 printf("MAIN: fx + 1.\n");
             }
-            else if( joy.axis_value == -32767 ) {
+            else if( joy.axis_value == JOYDRIVE_AXIS_MOVE_2 ) {
                 msg.teleop.data.fx = -1;
                 printf("MAIN: fx - 1.\n");
             }
@@ -197,21 +197,21 @@ int main( int argc, char *argv[] )
                 printf("MAIN: depth + 0.01.\n");
         }
         if( joy.joy_axis == JOY_A0 ) {
-            if( joy.axis_value == 32767 ) {
+            if( joy.axis_value == JOYDRIVE_AXIS_MOVE_1 ) {
                 msg.teleop.data.roll = 1;
                 printf("MAIN: roll + 1.\n");
             }
-            else if( joy.axis_value == -32767 ) {
+            else if( joy.axis_value == JOYDRIVE_AXIS_MOVE_2 ) {
                 msg.teleop.data.roll = -1;
                 printf("MAIN: roll - 1.\n");
             }
         }
         if( joy.joy_axis == JOY_A1 ) {
-            if( joy.axis_value == -32767 ) {
+            if( joy.axis_value == JOYDRIVE_AXIS_MOVE_2 ) {
                 msg.teleop.data.pitch = 1;
                 printf("MAIN: pitch + 1.\n");
             }
-            else if( joy.axis_value == 32767 ) {
+            else if( joy.axis_value == JOYDRIVE_AXIS_MOVE_1 ) {
                 msg.teleop.data.pitch = -1;
                 printf("MAIN: pitch - 1.\n");
             }

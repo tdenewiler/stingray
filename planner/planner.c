@@ -420,19 +420,19 @@ int main( int argc, char *argv[] )
 			}
 		}
 
-		/* Update the task dt. */
+		/* Update the task dt. dt value is in seconds */
 		time1s =    task_time.tv_sec;
 		time1ms =   task_time.tv_usec;
 		time2s =    task_start.tv_sec;
 		time2ms =   task_start.tv_usec;
-		task_dt = util_calc_dt( &time1s, &time1ms, &time2s, &time2ms );
+		task_dt = util_calc_dt( &time1s, &time1ms, &time2s, &time2ms ) / 1000000;
 
-		/* Update the subtask dt. */
+		/* Update the subtask dt. dt value is in seconds */
 		time1s =    subtask_time.tv_sec;
 		time1ms =   subtask_time.tv_usec;
 		time2s =    subtask_start.tv_sec;
 		time2ms =   subtask_start.tv_usec;
-		subtask_dt = util_calc_dt( &time1s, &time1ms, &time2s, &time2ms );
+		subtask_dt = util_calc_dt( &time1s, &time1ms, &time2s, &time2ms ) / 1000000;
 
 		/* Run the current task. */
 		status = task_run( &msg, &cf, task, task_dt, subtask, subtask_dt );
