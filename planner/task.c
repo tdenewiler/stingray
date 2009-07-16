@@ -137,8 +137,6 @@ int task_run( MSG_DATA *msg, CONF_VARS *cf, int task, int dt, int subtask, int s
 
 int task_buoy( MSG_DATA *msg, CONF_VARS *cf, int dt, int subtask, int subtask_dt )
 {
-	/* TO BE REMOVED */
-	printf("Plan - front_x: %d , front_y: %d\n" , msg->vision.data.front_x , msg->vision.data.front_y );
 	
 	if( msg->task.data.num == TASK_COURSE ) {
 		switch( subtask ) {

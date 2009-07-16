@@ -310,8 +310,6 @@ int main( int argc, char *argv[] )
 			else { /* No positive detection */
 				msg.vision.data.status = TASK_NOT_DETECTED;
 			}
-			/* TO BE REMOVED */
-			printf("VisD - front_x: %d , front_y: %d\n" , msg.vision.data.front_x , msg.vision.data.front_y );
 		}
 		else if( task == TASK_PIPE && b_cam ) {
 			/* Look for the pipe */
