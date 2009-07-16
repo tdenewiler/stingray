@@ -194,7 +194,6 @@ int main( int argc, char *argv[] )
 	/* Parse command line arguments. */
 	parse_default_config( &cf );
 	parse_cla( argc, argv, &cf, STINGRAY, ( const char * )PLANNER_FILENAME );
-	//parse_print_config( &cf );
 
 	/* Set up default values for the targets, gains and tasks. */
     msg.target.data.pitch   = cf.target_pitch;
