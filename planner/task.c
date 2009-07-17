@@ -188,6 +188,7 @@ int task_buoy( MSG_DATA *msg, CONF_VARS *cf, int dt, int subtask, int subtask_dt
 		 * for yaw in degrees but not for depth in volts. The pixel error needs to
 		 * be converted so that it is meaningful for volts as well. */
 		msg->target.data.depth = msg->status.data.depth + (float)msg->vision.data.front_y * TASK_BUOY_DEPTH_GAIN;
+		//printf("TASK_BUOY: %f\n", msg->target.data.depth);
 
 		return TASK_CONTINUING;
 	}
@@ -330,8 +331,8 @@ int task_pipe( MSG_DATA *msg, CONF_VARS *cf, int dt, int subtask, int subtask_dt
 	else {
 		/* Set the values based on current orientation and pixel error. */
 		msg->target.data.yaw    = msg->status.data.yaw + (float)msg->vision.data.bottom_y * TASK_PIPE_GAIN;
-		msg->target.data.fx     = msg->vision.data.bottom_x;
-		printf("TASK_PIPE: fx = %d\n", msg->target.data.fx);
+		//msg->target.data.fx     = msg->vision.data.bottom_x;
+		//printf("TASK_PIPE: fx = %d\n", msg->target.data.fx);
 
 		return TASK_CONTINUING;
 	}

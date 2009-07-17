@@ -366,7 +366,7 @@ int main( int argc, char *argv[] )
 						cvCircle( f_img, cvPoint(f_img->width / 2 + ii, y_max),
 								2, cvScalar(0, 255, 0), 2 );
 					}
-                	cvShowImage( f_win, f_img );
+                	cvShowImage( f_win, f_bin_img );
 				}
 				/* Set target offsets in network message. */
 				/* The subtractions are opposite of each other on purpose. This
