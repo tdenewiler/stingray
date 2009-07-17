@@ -188,7 +188,8 @@ int task_buoy( MSG_DATA *msg, CONF_VARS *cf, int dt, int subtask, int subtask_dt
 		 * for yaw in degrees but not for depth in volts. The pixel error needs to
 		 * be converted so that it is meaningful for volts as well. */
 		msg->target.data.depth = msg->status.data.depth + (float)msg->vision.data.front_y * TASK_BUOY_DEPTH_GAIN;
-		//printf("TASK_BUOY: %f\n", msg->target.data.depth);
+		//printf("TASK_BUOY:     %f    %f\n", msg->target.data.depth,
+			//(float)msg->vision.data.front_y * TASK_BUOY_DEPTH_GAIN);
 
 		return TASK_CONTINUING;
 	}
@@ -313,8 +314,8 @@ int task_pipe( MSG_DATA *msg, CONF_VARS *cf, int dt, int subtask, int subtask_dt
 			}
 		case SUBTASK_CORRECT:
 			/* Set target values based on current orientation and pixel error. */
-			msg->target.data.yaw    = msg->status.data.yaw + (float)msg->vision.data.bottom_y * TASK_PIPE_GAIN;
-			//msg->target.data.fx     = msg->vision.data.bottom_x;
+			msg->target.data.yaw    = msg->status.data.yaw + (float)msg->vision.data.bottom_y * TASK_PIPE_YAW_GAIN;
+			//msg->target.data.fx     = msg->vision.data.bottom_x * TASK_PIPE_FX_GAIN;
 
 			/* TODO: Need a way to check for SUCCESS or FAILURE in this case. */
 			return SUBTASK_CONTINUING;
@@ -330,9 +331,9 @@ int task_pipe( MSG_DATA *msg, CONF_VARS *cf, int dt, int subtask, int subtask_dt
 	}
 	else {
 		/* Set the values based on current orientation and pixel error. */
-		msg->target.data.yaw    = msg->status.data.yaw + (float)msg->vision.data.bottom_y * TASK_PIPE_GAIN;
-		//msg->target.data.fx     = msg->vision.data.bottom_x;
-		//printf("TASK_PIPE: fx = %d\n", msg->target.data.fx);
+		msg->target.data.yaw    = msg->status.data.yaw + (float)msg->vision.data.bottom_y * TASK_PIPE_YAW_GAIN;
+		msg->target.data.fx     = msg->vision.data.bottom_x * TASK_PIPE_FX_GAIN;
+		//printf("TASK_PIPE: fx = %f\n", msg->target.data.fx);
 
 		return TASK_CONTINUING;
 	}
@@ -433,8 +434,8 @@ int task_boxes( MSG_DATA *msg, CONF_VARS *cf, int dt, int subtask, int subtask_d
 			msg->task.data.subtask = TASK_BOXES;
 			/* TODO: Start moving forward and sideways to get centered over the box.
 			 * Also check here to see if we should be working on box1 or box2. */
-			//msg->target.data.fx = msg->vision.data.box1_x;
-			//msg->target.data.fy = msg->vision.data.box1_y;
+			//msg->target.data.fx = msg->vision.data.box1_x * TASK_BOXES_FX_GAIN;
+			//msg->target.data.fy = msg->vision.data.box1_y * TASK_BOXES_FY_GAIN;
 			/* TODO: Fix this magic number. */
 			if( msg->vision.data.box1_x < -1000 ) {
 				return SUBTASK_SUCCESS;
@@ -447,8 +448,8 @@ int task_boxes( MSG_DATA *msg, CONF_VARS *cf, int dt, int subtask, int subtask_d
 			}
 		case SUBTASK_CORRECT:
 			/* Set target values based on current orientation and pixel error. */
-			msg->target.data.yaw    = msg->status.data.yaw + (float)msg->vision.data.bottom_y * TASK_PIPE_GAIN;
-			//msg->target.data.fx     = msg->vision.data.bottom_x;
+			msg->target.data.fx = msg->vision.data.box1_x * TASK_BOXES_FX_GAIN;
+			msg->target.data.fy = msg->vision.data.box1_y * TASK_BOXES_FY_GAIN;
 
 			/* TODO: Need a way to check for SUCCESS or FAILURE in this case. */
 			return SUBTASK_CONTINUING;
@@ -462,8 +463,8 @@ int task_boxes( MSG_DATA *msg, CONF_VARS *cf, int dt, int subtask, int subtask_d
 	}
 	else {
 		/* Set the values based on current orientation and pixel error. */
-		msg->target.data.yaw    = msg->status.data.yaw + (float)msg->vision.data.bottom_y * TASK_PIPE_GAIN;
-		//msg->target.data.fx     = msg->vision.data.bottom_x;
+		msg->target.data.fx = msg->vision.data.box1_x * TASK_BOXES_FX_GAIN;
+		msg->target.data.fy = msg->vision.data.box1_y * TASK_BOXES_FY_GAIN;
 
 		return TASK_CONTINUING;
 	}
