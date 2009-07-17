@@ -113,7 +113,7 @@ int vision_find_dot( int *dotx,
 	/* Check that the values of dotx & doty are not negative */
 	if( dotx < 0 || doty < 0 )
 		return 0;
-	
+
     return 1;
 } /* end vision_find_dot() */
 
@@ -394,7 +394,7 @@ CvPoint vision_find_centroid( IplImage *binImage, int thresh )
     /* Check if an object is detected. */
     if( count > thresh )
         detected = true;
-        
+
     /* If the centroid was detected convert it */
     if( detected ) {
         centroid.x = (int)colTotal / count;
@@ -442,12 +442,17 @@ int vision_find_fence( int *fence_center,
                     )
 {
 	int center = 0;
+	int sum_x = 0;
+    int ii = 0;
+    int jj = 0;
+    int kk = 0;
+
     IplImage *hsv_image = NULL;
     IplImage *outImg = NULL;
-    IplConvKernel *wE = cvCreateStructuringElementEx( 3, 3,
-            (int)floor( ( 3.0 ) / 2 ), (int)floor( ( 3.0 ) / 2 ), CV_SHAPE_RECT );
-    IplConvKernel *wD = cvCreateStructuringElementEx( 3, 3,
-            (int)floor( ( 3.0 ) / 2 ), (int)floor( ( 3.0 ) / 2 ), CV_SHAPE_RECT );
+    IplConvKernel *wE = cvCreateStructuringElementEx( 2, 2,
+            1, 1, CV_SHAPE_RECT );
+    IplConvKernel *wD = cvCreateStructuringElementEx( 9, 9,
+            (int)floor( ( 9.0 ) / 2 ), (int)floor( ( 9.0 ) / 2 ), CV_SHAPE_RECT );
 
     srcImg = cvQueryFrame( cap );
 
@@ -473,7 +478,17 @@ int vision_find_fence( int *fence_center,
 
     /* Process the image. */
     *y_max = vision_get_fence_bottom( outImg, &center );
-    *fence_center = center;
+
+    /* Compute Centroid. */
+    for( ii = 0; ii < binImg->height; ii++ ) {
+        for( jj = 0; jj < binImg->width; jj++ ) {
+        	if( cvGet2D(binImg, ii, jj).val[0] != 0 ) {
+        		sum_x += jj;
+        		kk++;
+			}
+		}
+	}
+    *fence_center = floor(sum_x / kk);
 
     /* Clear variables to free memory. */
     cvReleaseImage( &hsv_image );
