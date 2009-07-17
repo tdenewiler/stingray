@@ -118,6 +118,7 @@ int main( int argc, char *argv[] )
     int time2s = 0;
     int time2ms = 0;
     int dt = 0;
+    float depth;
 
 	printf("MAIN: Starting Labjack daemon ...\n");
 
@@ -177,11 +178,14 @@ int main( int argc, char *argv[] )
 		if( labjack_fd > 0 ) {
 			status = query_labjack( );
 			if( status > 0 ) {
+				
+				depth = getBatteryVoltage( AIN_2 ) * PRESSURE_SLOPE + PRESSURE_BIAS;
+				
 				lj.battery1 = getBatteryVoltage( AIN_0 );
 				lj.battery2 = getBatteryVoltage( AIN_1 );
-				lj.pressure = getBatteryVoltage( AIN_2 );
+				lj.pressure = depth; 					 	/* AIN_2, converted */
 				lj.water    = getBatteryVoltage( AIN_3 );
-
+			
 				msg.lj.data.battery1 = lj.battery1;
 				msg.lj.data.battery2 = lj.battery2;
 				msg.lj.data.pressure = lj.pressure;

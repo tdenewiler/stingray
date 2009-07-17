@@ -121,8 +121,8 @@ void pid_loop( int pololu_fd,
 
 	/* These next three need to be set from vison, hydrophone, gui, etc. They
 	 * depend on the target values reported from those sensor systems.
-	 * Reference: float atan2f(float y, float x); */
-	pid->voith_angle = atan2f( msg->target.data.fx, msg->target.data.fy );
+	 * Reference: float atan2f(float y, float x); theta = atan( y / x ) */
+	pid->voith_angle = pid_compute_sub_angle( msg->target.data.fx, msg->target.data.fy );
 	pid->voith_speed = msg->target.data.speed;
 	pid->voith_thrust = sqrt( msg->target.data.fx * msg->target.data.fx +
 	                          msg->target.data.fy * msg->target.data.fy );
@@ -342,4 +342,30 @@ float pid_bound_integral( float value, float gain, float bound )
 	else {
 		return value;
 	}
+} /* end pid_bound_integral() */
+
+
+/******************************************************************************
+ *
+ * Title:       float pid_compute_sub_angle( float fx, float fy )
+ *
+ * Description: Computes the bounds via atan2f with some additional logic.
+ *
+ * Input:       fx: The lateral force.
+ * 				fy: The forward force.
+ *
+ * Output:      Submarine heading in radians.
+ *
+ *****************************************************************************/
+
+float pid_compute_sub_angle( float fx, float fy )
+{
+	/* There are a number of special cases in atan2f.
+	 * Since we are repeatedly passing in zero, the angle we return
+	 * should be carefully computed */
+	
+	if( fabsf( fx ) < PID_SUB_ANGLE_EPSILON && fabsf( fy ) < PID_SUB_ANGLE_EPSILON )
+		return 0;
+	
+	return atan2f( fx , fy );
 } /* end pid_bound_integral() */

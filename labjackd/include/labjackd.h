@@ -47,6 +47,12 @@
 #define BATT2_MIN		13.7
 #endif /* BATT_LIMITS */
 
+#ifndef PRESSURE_CALIBRATION
+#define PRESSURE_CALIBRATION
+#define PRESSURE_SLOPE			1.0
+#define PRESSURE_BIAS			0.0
+#endif /* PRESSURE_CALIBRATION */
+
 
 /******************************
 **

@@ -35,6 +35,7 @@
 #define PID_PITCH_INTEGRAL 50
 #define PID_YAW_INTEGRAL 40
 #define PID_DEPTH_INTEGRAL 75
+#define PID_SUB_ANGLE_EPSILON 0.01
 #endif /* PID_BOUNDS */
 
 #ifndef PID_MODE
@@ -125,6 +126,12 @@ float pid_subtract_angles( float ang1, float ang2 );
 //! \param bound Bound to check against.
 //! \return Value or the bound limit.
 float pid_bound_integral( float value, float gain, float bound );
+
+//! Based on fy & fx, this function computes the subs angle.
+//! \param fx the x-direction (lateral) force.
+//! \param fy the y-direction (forward) force.
+//! \return The correct heading based on force input [radians].
+float pid_compute_sub_angle( float fx, float fy );
 
 
 #endif /* _PID_H_ */
