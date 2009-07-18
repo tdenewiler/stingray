@@ -177,12 +177,12 @@ int vision_find_pipe( int *pipex,
     /* Perform erosion, dilation, and conversion. */
     cvErode( binImg, binImg, wE );
     cvDilate( binImg, binImg, wD );
-    cvConvertScale( binImg, outImg, 255.0 );
+    cvConvertScale( binImg, outImg, 0.0 );
 
     /* Process the image. */
     *bearing = vision_get_bearing( outImg );
     center = vision_find_centroid( outImg, 0 );
-    *pipex = center.y;
+    *pipex = center.x;
 
     /* Clear variables to free memory. */
     cvReleaseImage( &hsv_image );
