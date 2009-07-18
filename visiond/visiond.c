@@ -343,7 +343,7 @@ int main( int argc, char *argv[] )
 				 * negative of bearing for the y offset due to the way yaw is
 				 * calculated on the IMU. */
                 bearing = atan(bearing) * 180 / M_PI;
-                msg.vision.data.bottom_x = pipex;
+                msg.vision.data.bottom_x = pipex - (b_img->width / 2);
                 msg.vision.data.bottom_y = -1 * bearing;
             }
 		}
@@ -366,7 +366,7 @@ int main( int argc, char *argv[] )
 						cvCircle( f_img, cvPoint(f_img->width / 2 + ii, y_max),
 								2, cvScalar(0, 255, 0), 2 );
 					}
-                	cvShowImage( f_win, f_bin_img );
+                	cvShowImage( f_win, f_img );
 				}
 				/* Set target offsets in network message. */
 				/* The subtractions are opposite of each other on purpose. This

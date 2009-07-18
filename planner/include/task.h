@@ -49,7 +49,8 @@
 #define TASK_FENCE_DEPTH_GAIN			0.001
 #define TASK_MAX_TIME					300
 #define TASK_PIPE_YAW_GAIN				0.5
-#define TASK_PIPE_FX_GAIN				0.05
+#define TASK_PIPE_FX_GAIN				0.25
+#define TASK_PIPE_FX_MAX				75
 #define TASK_BOXES_FX_GAIN				0.05
 #define TASK_BOXES_FY_GAIN				0.05
 #define TASK_SUCCESS					1

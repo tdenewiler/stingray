@@ -117,6 +117,7 @@ void pid_loop( int pololu_fd,
 		pid->depth.perr = 0;
 		pid->depth.ierr = 0;
 		pid->depth.derr = 0;
+		msg->target.data.mode = AUTONOMOUS;
 	}
 
 	/* These next three need to be set from vison, hydrophone, gui, etc. They
@@ -262,7 +263,7 @@ void pid_loop( int pololu_fd,
 
 		/* Check bounds. */
 		if( ( fabsf( pid->vertical_thrust ) + fabsf( pid->roll_torque ) ) > PID_TOTAL_VERTICAL_THRUST ) {
-			pid->vertical_thrust = util_sign_value( pid->vertical_thrust ) * 
+			pid->vertical_thrust = util_sign_value( pid->vertical_thrust ) *
 				(PID_TOTAL_VERTICAL_THRUST - fabsf(pid->roll_torque) );
 		}
 
@@ -363,9 +364,9 @@ float pid_compute_sub_angle( float fx, float fy )
 	/* There are a number of special cases in atan2f.
 	 * Since we are repeatedly passing in zero, the angle we return
 	 * should be carefully computed */
-	
+
 	if( fabsf( fx ) < PID_SUB_ANGLE_EPSILON && fabsf( fy ) < PID_SUB_ANGLE_EPSILON )
 		return 0;
-	
+
 	return atan2f( fx , fy );
 } /* end pid_bound_integral() */

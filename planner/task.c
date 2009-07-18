@@ -315,7 +315,13 @@ int task_pipe( MSG_DATA *msg, CONF_VARS *cf, int dt, int subtask, int subtask_dt
 		case SUBTASK_CORRECT:
 			/* Set target values based on current orientation and pixel error. */
 			msg->target.data.yaw    = msg->status.data.yaw + (float)msg->vision.data.bottom_y * TASK_PIPE_YAW_GAIN;
-			//msg->target.data.fx     = msg->vision.data.bottom_x * TASK_PIPE_FX_GAIN;
+			msg->target.data.fx     = msg->vision.data.bottom_x * TASK_PIPE_FX_GAIN;
+			if( msg->target.data.fx > TASK_PIPE_FX_MAX ) {
+				msg->target.data.fx = TASK_PIPE_FX_MAX;
+			}
+			else if( msg->target.data.fx < -1 * TASK_PIPE_FX_MAX ) {
+				msg->target.data.fx = -1 * TASK_PIPE_FX_MAX;
+			}
 
 			/* TODO: Need a way to check for SUCCESS or FAILURE in this case. */
 			return SUBTASK_CONTINUING;
@@ -333,6 +339,12 @@ int task_pipe( MSG_DATA *msg, CONF_VARS *cf, int dt, int subtask, int subtask_dt
 		/* Set the values based on current orientation and pixel error. */
 		msg->target.data.yaw    = msg->status.data.yaw + (float)msg->vision.data.bottom_y * TASK_PIPE_YAW_GAIN;
 		msg->target.data.fx     = msg->vision.data.bottom_x * TASK_PIPE_FX_GAIN;
+		if( msg->target.data.fx > TASK_PIPE_FX_MAX ) {
+			msg->target.data.fx = TASK_PIPE_FX_MAX;
+		}
+		else if( msg->target.data.fx < -1 * TASK_PIPE_FX_MAX ) {
+			msg->target.data.fx = -1 * TASK_PIPE_FX_MAX;
+		}
 		//printf("TASK_PIPE: fx = %f\n", msg->target.data.fx);
 
 		return TASK_CONTINUING;
