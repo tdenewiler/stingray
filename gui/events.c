@@ -168,6 +168,11 @@ void events_tasks( GtkWidget *widget,
                    gpointer data
                  )
 {
+    
+    /* Set the course to off. If the course button is selected,
+     * this will be turned back on. */
+    msg.task.data.course = TASK_COURSE_OFF;
+    
     /* Check the state of the buttons. */
     if( widget == button_task_square ||
 		widget == button_task_square_time1 ||
@@ -211,7 +216,8 @@ void events_tasks( GtkWidget *widget,
         msg.task.data.task = TASK_SUITCASE;
     }
     else if( widget == button_task_course ) {
-        msg.task.data.task = TASK_COURSE;
+        msg.task.data.task = TASK_GATE;
+        msg.task.data.course = TASK_COURSE_ON;
     }
     else if( widget == button_task_nod ) {
         msg.task.data.task = TASK_NOD;

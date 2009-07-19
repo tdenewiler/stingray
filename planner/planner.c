@@ -448,15 +448,15 @@ int main( int argc, char *argv[] )
 			msg.task.data.subtask = subtask;
 			if( status == TASK_SUCCESS || status == TASK_FAILURE ) {
 				/* Move on to the next task. Initialize the subtask. */
-				task++;
-				subtask = SUBTASK_SEARCH_DEPTH;
+				msg.task.data.task++;
+				msg.task.data.subtask = SUBTASK_SEARCH_DEPTH;
 				/* Re-initialize the task and subtask timers. */
 				gettimeofday( &task_start, NULL );
 				gettimeofday( &subtask_start, NULL );
 			}
 			else if( status == SUBTASK_SUCCESS || status == SUBTASK_FAILURE ) {
 				/* Move on to the next subtask. */
-				subtask++;
+				msg.task.data.subtask++;
 				/* Re-initialize the subtask timer. */
 				gettimeofday( &subtask_start, NULL);
 			}
