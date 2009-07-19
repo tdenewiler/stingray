@@ -146,8 +146,8 @@ int main( int argc, char *argv[] )
 	int old_dropper = 0;
 	int old_subtask = 0;
 	CvPoint3D32f loc;
-	int subtask = 0;
-	int task = 0;
+	int task = TASK_NONE;
+	int subtask = SUBTASK_CONTINUING;
 	int status = TASK_CONTINUING;
 
 	struct timeval vision_time = {0, 0};
@@ -188,8 +188,7 @@ int main( int argc, char *argv[] )
 	memset( &pid, 0, sizeof(PID) );
 	memset( &lj,  0, sizeof(LABJACK_DATA) );
 	messages_init( &msg );
-	msg.task.data.num = task;
-	msg.task.data.subtask = cf.course_start;
+
 
 	/* Parse command line arguments. */
 	parse_default_config( &cf );
@@ -212,8 +211,15 @@ int main( int argc, char *argv[] )
     msg.gain.data.kp_depth  = cf.kp_depth;
     msg.gain.data.ki_depth  = cf.ki_depth;
     msg.gain.data.kd_depth  = cf.kd_depth;
-	subtask = cf.subtask_start;
-	task = cf.task_start;
+    
+    /* Initialize tasks */
+    /* Never used because of lines ~332  -- FIX ME */
+    task = cf.task_start;
+    subtask = cf.subtask_start;
+	
+	msg.task.data.task = task;
+	msg.task.data.subtask = subtask;
+	msg.task.data.course = TASK_COURSE_OFF;
 
     /* Set up Kalman filter. */
     bKF = init_kalman();
@@ -327,13 +333,14 @@ int main( int argc, char *argv[] )
 		}
 
 		/* If there is a new task then send to vision. */
-		task = msg.task.data.num;
+		/* This will break the algorithm below */
+		task = msg.task.data.task;
 		subtask = msg.task.data.subtask;
-		if( old_task != msg.task.data.num ) {
+		if( old_task != msg.task.data.task ) {
 			if( (cf.enable_vision) && (vision_fd > 0) ) {
 				messages_send( vision_fd, TASK_MSGID, &msg );
 			}
-			old_task = msg.task.data.num;
+			old_task = msg.task.data.task;
 			/* Reset the task and subtask start timers. */
 			gettimeofday( &task_start, NULL );
 			gettimeofday( &subtask_start, NULL );
@@ -435,8 +442,8 @@ int main( int argc, char *argv[] )
 		subtask_dt = util_calc_dt( &time1s, &time1ms, &time2s, &time2ms ) / 1000000;
 
 		/* Run the current task. */
-		status = task_run( &msg, &cf, task, task_dt, subtask, subtask_dt );
-		if( msg.task.data.num == TASK_COURSE ) {
+		status = task_run( &msg, &cf, task_dt, subtask_dt );
+		if( msg.task.data.course == TASK_COURSE_ON ) {
 			/* Set the subtask in the network message. */
 			msg.task.data.subtask = subtask;
 			if( status == TASK_SUCCESS || status == TASK_FAILURE ) {

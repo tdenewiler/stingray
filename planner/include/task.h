@@ -37,6 +37,8 @@
 #define TASK_SUITCASE					9
 #define TASK_SURFACE					10
 #define TASK_COURSE						100
+#define TASK_COURSE_ON					TRUE
+#define TASK_COURSE_OFF					FALSE
 #define TASK_SQUARE 					20
 #define TASK_PIPE						21
 #define TASK_NOD						30
@@ -86,11 +88,12 @@
 #define TASK_STATUS
 /** @Vision status messages. */
 //@{
-#define TASK_NOT_DETECTED 	0
-#define TASK_BOUY_DETECTED	1
-#define TASK_PIPE_DETECTED	2
-#define TASK_FENCE_DETECTED	3
-#define	TASK_BOXES_DETECTED	4
+#define TASK_NOT_DETECTED 		0
+#define TASK_BOUY_DETECTED		1
+#define TASK_PIPE_DETECTED		2
+#define TASK_FENCE_DETECTED		3
+#define	TASK_BOXES_DETECTED		4
+#define	TASK_SUITCASE_DETECTED	5
 //@}
 #endif /* TASK_STATUS */
 
@@ -119,7 +122,7 @@
 //! success or continuing of that part of a task.
 //! \param subtask_dt The subtask time.
 //! \return Task status: Success, failure, continuing.
-int task_run( MSG_DATA *msg, CONF_VARS *cf, int task, int dt, int subtask, int subtask_dt );
+int task_run( MSG_DATA *msg, CONF_VARS *cf, int dt, int subtask_dt );
 
 //! Find and follow the buoy.
 //! \param msg The current message data.

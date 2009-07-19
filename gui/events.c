@@ -175,7 +175,7 @@ void events_tasks( GtkWidget *widget,
 		widget == button_task_square_time3 ||
 		widget == button_task_square_time4 ) {
         if( gtk_toggle_button_get_active( ( GtkToggleButton * )button_task_square ) ) {
-            msg.task.data.num = TASK_SQUARE;
+            msg.task.data.task = TASK_SQUARE;
             msg.task.data.time_forward  = gtk_spin_button_get_value_as_float(
 				GTK_SPIN_BUTTON( button_task_square_time1 ) );
             msg.task.data.time_left = gtk_spin_button_get_value_as_float(
@@ -187,37 +187,37 @@ void events_tasks( GtkWidget *widget,
         }
     }
     else if( widget == button_task_buoy ) {
-        msg.task.data.num = TASK_BUOY;
+        msg.task.data.task = TASK_BUOY;
     }
     else if( widget == button_task_pipe ) {
-        msg.task.data.num = TASK_PIPE;
+        msg.task.data.task = TASK_PIPE;
     }
     else if( widget == button_task_gate ) {
-        msg.task.data.num = TASK_GATE;
+        msg.task.data.task = TASK_GATE;
     }
     else if( widget == button_task_none ) {
-        msg.task.data.num     = TASK_NONE;
+        msg.task.data.task     = TASK_NONE;
 		msg.target.data.pitch = msg.status.data.pitch;
 		msg.target.data.roll  = msg.status.data.roll;
 		msg.target.data.yaw   = msg.status.data.yaw;
     }
     else if( widget == button_task_fence ) {
-        msg.task.data.num = TASK_FENCE;
+        msg.task.data.task = TASK_FENCE;
     }
     else if( widget == button_task_boxes ) {
-        msg.task.data.num = TASK_BOXES;
+        msg.task.data.task = TASK_BOXES;
     }
     else if( widget == button_task_suitcase ) {
-        msg.task.data.num = TASK_SUITCASE;
+        msg.task.data.task = TASK_SUITCASE;
     }
     else if( widget == button_task_course ) {
-        msg.task.data.num = TASK_COURSE;
+        msg.task.data.task = TASK_COURSE;
     }
     else if( widget == button_task_nod ) {
-        msg.task.data.num = TASK_NOD;
+        msg.task.data.task = TASK_NOD;
     }
     else if( widget == button_task_spin ) {
-        msg.task.data.num = TASK_SPIN;
+        msg.task.data.task = TASK_SPIN;
     }
 	
     if( planner_fd > 0 ) {

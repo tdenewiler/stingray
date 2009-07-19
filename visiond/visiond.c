@@ -321,6 +321,9 @@ int main( int argc, char *argv[] )
                     msg.vsetting.data.pipe_hsv.vH );
 
             if( status == 1 ) {
+            	/* Set the detection status of vision */
+				msg.vision.data.status = TASK_PIPE_DETECTED;
+				
                 if( cf.vision_window ) {
                     if( cvWaitKey( 5 ) >= 0 );
                         for( ii = 0; ii < lineWidth; ii++ ) {
@@ -346,6 +349,9 @@ int main( int argc, char *argv[] )
                 msg.vision.data.bottom_x = pipex - (b_img->width / 2);
                 msg.vision.data.bottom_y = -1 * bearing;
             }
+            else { /* No positive detection */
+				msg.vision.data.status = TASK_NOT_DETECTED;
+			}
 		}
 		else if( task == TASK_FENCE && f_cam ) {
 			/* Look for the fence. */
@@ -358,6 +364,9 @@ int main( int argc, char *argv[] )
                     msg.vsetting.data.fence_hsv.vH );
 
             if( status == 1 ) {
+            	/* Set the detection status of vision */
+				msg.vision.data.status = TASK_FENCE_DETECTED;
+            	
                 if( cf.vision_window ) {
                     if( cvWaitKey( 5 ) >= 0 );
 					cvCircle( f_img, cvPoint(fence_center, f_img->height / 2),
@@ -377,15 +386,25 @@ int main( int argc, char *argv[] )
 				msg.vision.data.front_x = fence_center - (f_img->width / 2);
 				msg.vision.data.front_y = y_max - (f_img->height / 4);
             }
+            else { /* No positive detection */
+				msg.vision.data.status = TASK_NOT_DETECTED;
+			}
         }
         else if( task == TASK_GATE && f_cam ) {
         	/* Look for the gate */
+        	
+        	/* Default to fail detection until code is written */
+        	msg.vision.data.status = TASK_NOT_DETECTED;
 
 		}
 		else if( task == TASK_BOXES && b_cam ) {
+			
 			/* Look for the boxes. */
 			status = vision_find_boxes( b_cam, b_img, boxes, squares );
 			if( status > 0 ) {
+				/* Set the detection status of vision */
+		    	msg.vision.data.status = TASK_BOXES_DETECTED;
+				
 				if( cf.vision_window ) {
 					/* Initialize the centroid sequence reader. */
 					cvStartReadSeq( boxes, &reader1, 0 );
@@ -422,6 +441,9 @@ int main( int argc, char *argv[] )
 				msg.vision.data.box2_x = 0;
 				msg.vision.data.box2_y = 0;
 			}
+			else { /* No positive detection */
+				msg.vision.data.status = TASK_NOT_DETECTED;
+			}
 		}
 		else if( task == TASK_SUITCASE && b_cam ) {
 			/* Look for the suitcase. */
@@ -436,10 +458,16 @@ int main( int argc, char *argv[] )
 					msg.vsetting.data.buoy_hsv.vH );
 
 			if( status == 1 ) {
+				/* Set the detection status of vision */
+		    	msg.vision.data.status = TASK_SUITCASE_DETECTED;
+				
 				/* Set target offsets in network message. */
 				/* !!!!!!!!!!! Fix these !!!!!!!!!!! */
 				msg.vision.data.suitcase_x = 0;
 				msg.vision.data.suitcase_y = 0;
+			}
+			else { /* No positive detection */
+				msg.vision.data.status = TASK_NOT_DETECTED;
 			}
 		}
 		else {
@@ -456,20 +484,14 @@ int main( int argc, char *argv[] )
             if( recv_bytes > 0 ) {
                 recv_buf[recv_bytes] = '\0';
                 messages_decode( server_fd, recv_buf, &msg, recv_bytes );
-				/* Check to see if we are trying to complete the course. If yes,
-				 * then set the task to be the subtask of the course that we are
-				 * currently attempting. Otherwise, just attempt the main task. */
-				if( msg.task.data.num == TASK_COURSE ) {
-					task = msg.task.data.subtask;
-					/* Force vision to look for the pipe no matter which pipe
-					 * subtask we are currently searching for. */
-					if( task == TASK_PIPE1 || task == TASK_PIPE2 ||
-						task == TASK_PIPE3 || task == TASK_PIPE4 ) {
-						task = TASK_PIPE;
-					}
-				}
-				else {
-					task = msg.task.data.num;
+                
+                task = msg.task.data.task;
+                
+                /* Force vision to look for the pipe no matter which pipe
+			     * subtask we are currently searching for. */
+				if( task == TASK_PIPE1 || task == TASK_PIPE2 ||
+					task == TASK_PIPE3 || task == TASK_PIPE4 ) {
+					task = TASK_PIPE;
 				}
             }
         }

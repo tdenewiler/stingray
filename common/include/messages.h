@@ -323,9 +323,11 @@ typedef struct _VISION_MSG {
 #ifndef _TASK_MSG_
 #define _TASK_MSG_
 typedef struct _TASK {
-    int num;	        //!< The task to attempt.
+    /*int num;	        //!< The task to attempt.*/
+    int task;			//!< The task to attempt.
 	int subtask;		//!< The subtask to attempt. Used when the main task is
 						//!< to complete the entire course.
+    int course;			//!< Flag to indicate that th stingray is in course mode
     float time_forward; //!< The time to go forward in the square task.
     float time_left;    //!< The time to go left in the square task.
     float time_reverse; //!< The time to go reverse in the square task.

@@ -44,73 +44,73 @@
  *
  *****************************************************************************/
 
-int task_run( MSG_DATA *msg, CONF_VARS *cf, int task, int dt, int subtask, int subtask_dt )
+int task_run( MSG_DATA *msg, CONF_VARS *cf, int dt, int subtask_dt )
 {
 	int status = TASK_CONTINUING;
 
-	switch ( task ) {
+	switch ( msg->task.data.task ) {
 	case TASK_BUOY:
-		status = task_buoy( msg, cf, dt, subtask, subtask_dt );
+		status = task_buoy( msg, cf, dt, msg->task.data.subtask, subtask_dt );
 		break;
 
 	case TASK_GATE:
-		status = task_gate( msg, cf, dt, subtask, subtask_dt );
+		status = task_gate( msg, cf, dt, msg->task.data.subtask, subtask_dt );
 		break;
 
 	case TASK_PIPE:
-		status = task_pipe( msg, cf, dt, subtask, subtask_dt );
+		status = task_pipe( msg, cf, dt, msg->task.data.subtask, subtask_dt );
 		break;
 
 	case TASK_PIPE1:
-		status = task_pipe( msg, cf, dt, subtask, subtask_dt );
+		status = task_pipe( msg, cf, dt, msg->task.data.subtask, subtask_dt );
 		break;
 
 	case TASK_PIPE2:
-		status = task_pipe( msg, cf, dt, subtask, subtask_dt );
+		status = task_pipe( msg, cf, dt, msg->task.data.subtask, subtask_dt );
 		break;
 
 	case TASK_PIPE3:
-		status = task_pipe( msg, cf, dt, subtask, subtask_dt );
+		status = task_pipe( msg, cf, dt, msg->task.data.subtask, subtask_dt );
 		break;
 
 	case TASK_PIPE4:
-		status = task_pipe( msg, cf, dt, subtask, subtask_dt );
+		status = task_pipe( msg, cf, dt, msg->task.data.subtask, subtask_dt );
 		break;
 
 	case TASK_SQUARE:
-		status = task_square( msg, cf, dt, subtask, subtask_dt );
+		status = task_square( msg, cf, dt, msg->task.data.subtask, subtask_dt );
 		break;
 
 	case TASK_NONE:
-		status = task_none( msg, cf, dt, subtask, subtask_dt );
+		status = task_none( msg, cf, dt, msg->task.data.subtask, subtask_dt );
 		break;
 
 	case TASK_BOXES:
-		status = task_boxes( msg, cf, dt, subtask, subtask_dt );
+		status = task_boxes( msg, cf, dt, msg->task.data.subtask, subtask_dt );
 		break;
 
 	case TASK_FENCE:
-		status = task_fence( msg, cf, dt, subtask, subtask_dt );
+		status = task_fence( msg, cf, dt, msg->task.data.subtask, subtask_dt );
 		break;
 
 	case TASK_SURFACE:
-		status = task_surface( msg, cf, dt, subtask, subtask_dt );
+		status = task_surface( msg, cf, dt, msg->task.data.subtask, subtask_dt );
 		break;
 
 	case TASK_SUITCASE:
-		status = task_suitcase( msg, cf, dt, subtask, subtask_dt );
+		status = task_suitcase( msg, cf, dt, msg->task.data.subtask, subtask_dt );
 		break;
 
 	case TASK_NOD:
-		status = task_nod( msg, cf, dt, subtask, subtask_dt );
+		status = task_nod( msg, cf, dt, msg->task.data.subtask, subtask_dt );
 		break;
 
 	case TASK_SPIN:
-		status = task_spin( msg, cf, dt, subtask, subtask_dt );
+		status = task_spin( msg, cf, dt, msg->task.data.subtask, subtask_dt );
 		break;
 
 	case TASK_COURSE:
-		status = task_course( msg, cf, dt, subtask, subtask_dt );
+		status = task_course( msg, cf, dt, msg->task.data.subtask, subtask_dt );
 		break;
 	}
 
@@ -138,8 +138,10 @@ int task_run( MSG_DATA *msg, CONF_VARS *cf, int task, int dt, int subtask, int s
 int task_buoy( MSG_DATA *msg, CONF_VARS *cf, int dt, int subtask, int subtask_dt )
 {
 
-	if( msg->task.data.num == TASK_COURSE ) {
+	if( msg->task.data.course == TASK_COURSE_ON ) {
+		
 		switch( subtask ) {
+			
 		case SUBTASK_SEARCH_DEPTH:
 			msg->target.data.depth = cf->depth_buoy;
 			/* Check to see if we have reached the target depth. */
@@ -155,8 +157,6 @@ int task_buoy( MSG_DATA *msg, CONF_VARS *cf, int dt, int subtask, int subtask_dt
 				return SUBTASK_CONTINUING;
 			}
 		case SUBTASK_SEARCH:
-			/* Now set the vision server to look for the buoy. */
-			msg->task.data.subtask = TASK_BUOY;
 			/* Start moving forward. */
 			msg->target.data.fy = POLOLU_MOVE_FORWARD;
 
@@ -217,11 +217,14 @@ int task_buoy( MSG_DATA *msg, CONF_VARS *cf, int dt, int subtask, int subtask_dt
 
 int task_gate( MSG_DATA *msg, CONF_VARS *cf, int dt, int subtask, int subtask_dt )
 {
-	if( msg->task.data.num == TASK_COURSE ) {
+	if( msg->task.data.course == TASK_COURSE_ON ) {
+		
 		switch( subtask ) {
+			
 		case SUBTASK_SEARCH_DEPTH:
 			msg->target.data.depth = cf->depth_pipe;
 			msg->target.data.depth = cf->heading_gate;
+			
 			/* Check to see if we have reached the target depth. */
 			if( fabsf(msg->status.data.depth - msg->target.data.depth) < SUBTASK_DEPTH_MARGIN ) {
 				if( fabsf(msg->status.data.yaw - msg->target.data.yaw) < SUBTASK_YAW_MARGIN ) {
@@ -282,7 +285,7 @@ int task_gate( MSG_DATA *msg, CONF_VARS *cf, int dt, int subtask, int subtask_dt
 
 int task_pipe( MSG_DATA *msg, CONF_VARS *cf, int dt, int subtask, int subtask_dt )
 {
-	if( msg->task.data.num == TASK_COURSE ) {
+	if( msg->task.data.course == TASK_COURSE_ON ) {
 		switch( subtask ) {
 		case SUBTASK_SEARCH_DEPTH:
 			msg->target.data.depth = cf->depth_pipe;
@@ -298,12 +301,10 @@ int task_pipe( MSG_DATA *msg, CONF_VARS *cf, int dt, int subtask, int subtask_dt
 				return SUBTASK_CONTINUING;
 			}
 		case SUBTASK_SEARCH:
-			/* Now set the vision server to look for the pipe. */
-			msg->task.data.subtask = TASK_PIPE;
 			/* Start moving forward. */
 			msg->target.data.fy = POLOLU_MOVE_FORWARD;
-			/* TODO: Fix this magic number. */
-			if( msg->vision.data.bottom_x < -1000 ) {
+			
+			if( msg->vision.data.status == TASK_PIPE_DETECTED ) {
 				return SUBTASK_SUCCESS;
 			}
 			else if( subtask_dt > SUBTASK_MAX_SEARCH_TIME ) {
@@ -426,7 +427,7 @@ int task_none( MSG_DATA *msg, CONF_VARS *cf, int dt, int subtask, int subtask_dt
 int task_boxes( MSG_DATA *msg, CONF_VARS *cf, int dt, int subtask, int subtask_dt )
 {
 	/* TODO: Fill this function in like task_buoy() and task_pipe(). */
-	if( msg->task.data.num == TASK_COURSE ) {
+	if( msg->task.data.course == TASK_COURSE_ON ) {
 		switch( subtask ) {
 		case SUBTASK_SEARCH_DEPTH:
 			msg->target.data.depth = cf->depth_boxes;
@@ -442,14 +443,13 @@ int task_boxes( MSG_DATA *msg, CONF_VARS *cf, int dt, int subtask, int subtask_d
 				return SUBTASK_CONTINUING;
 			}
 		case SUBTASK_SEARCH:
-			/* Now set the vision server to look for the boxes. */
-			msg->task.data.subtask = TASK_BOXES;
+			
 			/* TODO: Start moving forward and sideways to get centered over the box.
 			 * Also check here to see if we should be working on box1 or box2. */
 			//msg->target.data.fx = msg->vision.data.box1_x * TASK_BOXES_FX_GAIN;
 			//msg->target.data.fy = msg->vision.data.box1_y * TASK_BOXES_FY_GAIN;
 			/* TODO: Fix this magic number. */
-			if( msg->vision.data.box1_x < -1000 ) {
+			if( msg->vision.data.status == TASK_BOXES_DETECTED ) {
 				return SUBTASK_SUCCESS;
 			}
 			else if( subtask_dt > SUBTASK_MAX_SEARCH_TIME ) {
@@ -506,7 +506,7 @@ int task_boxes( MSG_DATA *msg, CONF_VARS *cf, int dt, int subtask, int subtask_d
 int task_fence( MSG_DATA *msg, CONF_VARS *cf, int dt, int subtask, int subtask_dt )
 {
 	/* TODO: Fill this function in like task_buoy() and task_pipe(). */
-	if( msg->task.data.num == TASK_COURSE ) {
+	if( msg->task.data.course == TASK_COURSE_ON ) {
 		switch( subtask ) {
 		case SUBTASK_SEARCH_DEPTH:
 			msg->target.data.depth = cf->depth_fence;
@@ -522,8 +522,7 @@ int task_fence( MSG_DATA *msg, CONF_VARS *cf, int dt, int subtask, int subtask_d
 				return SUBTASK_CONTINUING;
 			}
 		case SUBTASK_SEARCH:
-			/* Now set the vision server to look for the fence. */
-			msg->task.data.subtask = TASK_FENCE;
+
 			/* Start moving forward. */
 			msg->target.data.fy = POLOLU_MOVE_FORWARD;
 			/* TODO: Fix this magic number. */
