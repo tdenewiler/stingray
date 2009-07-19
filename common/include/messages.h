@@ -311,6 +311,7 @@ typedef struct _VISION {
 	int suitcase_x; //!< The x component of the suitcase.
 	int suitcase_y; //!< The y component of the suitcase.
 	int status;    	//!< The status of the vision detection. 
+	int mode;		//!< Which window to display video in and the video type.
 } VISION;
 
 typedef struct _VISION_MSG {

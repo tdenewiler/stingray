@@ -442,7 +442,7 @@ int main( int argc, char *argv[] )
 		subtask_dt = util_calc_dt( &time1s, &time1ms, &time2s, &time2ms ) / 1000000;
 
 		/* Run the current task. */
-		status = task_run( &msg, &cf, task_dt, subtask_dt );
+		//status = task_run( &msg, &cf, task_dt, subtask_dt );
 		if( msg.task.data.course == TASK_COURSE_ON ) {
 			/* Set the subtask in the network message. */
 			msg.task.data.subtask = subtask;

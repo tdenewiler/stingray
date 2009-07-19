@@ -179,6 +179,15 @@ void events_zero_pid( GtkWidget *widget,
                           gpointer data
                         );
 
+//! Sets the mode for which image will be displayed.
+//! \param widget A pointer to the button widget.
+//! \param event A pointer to the event that triggered the callback.
+//! \param data A pointer to data that can be manipulated.
+void events_images( GtkWidget *widget,
+                    GdkEvent *event,
+                    gpointer data
+                  );
+
 //! Event associated with the Gains button.
 //! \param widget A pointer to the button widget.
 //! \param event A pointer to the event that triggered the callback.

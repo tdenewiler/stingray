@@ -158,6 +158,7 @@ void messages_send( int fd,
 			msg->vision.data.suitcase_x	= htonl( msg->vision.data.suitcase_x );
 			msg->vision.data.suitcase_y	= htonl( msg->vision.data.suitcase_y );
 			msg->vision.data.status		= htonl( msg->vision.data.status );
+			msg->vision.data.mode		= htonl( msg->vision.data.mode );
 
             /* Actually send message here. */
             net_send( fd, &msg->vision, sizeof(VISION_MSG) );
@@ -175,6 +176,7 @@ void messages_send( int fd,
 			msg->vision.data.suitcase_x	= ntohl( msg->vision.data.suitcase_x );
 			msg->vision.data.suitcase_y	= ntohl( msg->vision.data.suitcase_y );
 			msg->vision.data.status		= ntohl( msg->vision.data.status );
+			msg->vision.data.mode		= ntohl( msg->vision.data.mode );
             break;
 
         case TASK_MSGID:
@@ -375,6 +377,7 @@ int messages_decode( int fd, char *buf, MSG_DATA *msg, int bytes )
 			msg->vision.data.suitcase_x	= ntohl( msg->vision.data.suitcase_x );
 			msg->vision.data.suitcase_y	= ntohl( msg->vision.data.suitcase_y );
 			msg->vision.data.status		= ntohl( msg->vision.data.status );
+			msg->vision.data.mode		= ntohl( msg->vision.data.mode );
 
 			bytes -= sizeof(VISION_MSG);
 			memmove( msg, msg, sizeof(VISION_MSG) );

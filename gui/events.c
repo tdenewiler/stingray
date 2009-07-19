@@ -17,6 +17,7 @@
 #include "parser.h"
 #include "network.h"
 #include "task.h"
+#include "visiond.h"
 
 
 /* Operation mode buttons. */
@@ -101,6 +102,13 @@ extern GtkWidget *button_target_fx;
 extern GtkWidget *button_target_fy;
 extern GtkWidget *button_target_speed;
 extern GtkWidget *button_target_current;
+
+/* Image option buttons. */
+extern GtkWidget *button_image_fcolor;
+extern GtkWidget *button_image_fbinary;
+extern GtkWidget *button_image_bcolor;
+extern GtkWidget *button_image_bbinary;
+extern GtkWidget *button_image_none;
 
 /* Network API messages. */
 extern MSG_DATA msg;
@@ -980,6 +988,61 @@ void events_opmode( GtkWidget *widget,
         }
     }
 } /* end events_opmode() */
+
+
+/******************************************************************************
+ *
+ * Title:       void events_images( GtkWidget *widget,
+ *                                  GdkEvent *event,
+ *                                  gpointer data )
+ *
+ * Description: Called when image mode value changes.
+ *
+ * Input:       widget: A pointer to the button widget.
+ *              event: A pointer to the event that triggered the callback.
+ *              data: A pointer to data that can be manipulated.
+ *
+ * Output:      None.
+ *
+ *****************************************************************************/
+
+void events_images( GtkWidget *widget,
+                    GdkEvent *event,
+                    gpointer data
+                  )
+{
+    /* Check the state of the buttons and send message. */
+    if( gtk_toggle_button_get_active( (GtkToggleButton *)button_image_fcolor ) ) {
+        msg.vision.data.mode = VISIOND_FCOLOR;
+        if( vision_fd > 0 ) {
+            messages_send( vision_fd, VISION_MSGID, &msg );
+        }
+    }
+    else if( gtk_toggle_button_get_active( ( GtkToggleButton * )button_image_fbinary ) ) {
+        msg.vision.data.mode = VISIOND_FBINARY;
+        if( vision_fd > 0 ) {
+            messages_send( vision_fd, VISION_MSGID, &msg );
+        }
+    }
+    else if( gtk_toggle_button_get_active( ( GtkToggleButton * )button_image_bcolor ) ) {
+        msg.vision.data.mode = VISIOND_BCOLOR;
+        if( vision_fd > 0 ) {
+            messages_send( vision_fd, VISION_MSGID, &msg );
+        }
+    }
+    else if( gtk_toggle_button_get_active( ( GtkToggleButton * )button_image_bbinary ) ) {
+        msg.vision.data.mode = VISIOND_BBINARY;
+        if( vision_fd > 0 ) {
+            messages_send( vision_fd, VISION_MSGID, &msg );
+        }
+    }
+    else if( gtk_toggle_button_get_active( ( GtkToggleButton * )button_image_none ) ) {
+        msg.vision.data.mode = VISIOND_NONE;
+        if( vision_fd > 0 ) {
+            messages_send( vision_fd, VISION_MSGID, &msg );
+        }
+    }
+} /* end events_images() */
 
 
 /******************************************************************************

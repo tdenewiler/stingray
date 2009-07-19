@@ -143,8 +143,11 @@ int main( int argc, char *argv[] )
     int saving_bvideo = FALSE;
     IplImage *f_img = NULL;
     IplImage *b_img = NULL;
-    const char *f_win = "Front";
-    const char *b_win = "Bottom";
+    //const char *f_win = "Front Color";
+    //const char *b_win = "Bottom Color";
+	//const char *f_bin_win = "Front Binary";
+	//const char *b_bin_win = "Bottom Binary";
+	const char *win = "Image";
     CvVideoWriter *f_writer = 0;
     CvVideoWriter *b_writer = 0;
     int is_color = TRUE;
@@ -152,6 +155,7 @@ int main( int argc, char *argv[] )
     struct timeval ctime;
     struct tm ct;
     char write_time[80] = {0};
+	int vision_mode = VISIOND_NONE;
 	int task = TASK_NONE;
 
 	/* Variables to hold box centroid sequence and vertex sequence. */
@@ -244,10 +248,13 @@ int main( int argc, char *argv[] )
 	}
 
     /* Create windows to display video if set in configuration file. */
-    if( cf.vision_window ) {
-        cvNamedWindow( f_win, CV_WINDOW_AUTOSIZE );
-        cvNamedWindow( b_win, CV_WINDOW_AUTOSIZE );
-    }
+	if( cf.vision_window ) {
+		//cvNamedWindow( f_win, CV_WINDOW_AUTOSIZE );
+		//cvNamedWindow( f_bin_win, CV_WINDOW_AUTOSIZE );
+		//cvNamedWindow( b_win, CV_WINDOW_AUTOSIZE );
+		//cvNamedWindow( b_bin_win, CV_WINDOW_AUTOSIZE );
+		cvNamedWindow( win, CV_WINDOW_AUTOSIZE );
+	}
     printf("MAIN: Vision server running now.\n");
 
     /* Main loop. */
@@ -299,14 +306,12 @@ int main( int argc, char *argv[] )
 				msg.vision.data.front_y = tmp_dotx * sin(cf.vision_angle) +
 					tmp_doty * cos(cf.vision_angle);
 
-				if( cf.vision_window ) {
-					if( cvWaitKey( 5 ) >= 0 );
-					cvCircle( f_img, cvPoint(dotx, doty),
-						10, cvScalar(255, 0, 0), 5, 8 );
-					cvShowImage( f_win, f_img );
-				}
+				/* Draw a circle at the centroid location. */
+				cvCircle( f_img, cvPoint(dotx, doty),
+					10, cvScalar(255, 0, 0), 5, 8 );
 			}
-			else { /* No positive detection */
+			else {
+				/* No positive detection */
 				msg.vision.data.status = TASK_NOT_DETECTED;
 			}
 		}
@@ -324,24 +329,22 @@ int main( int argc, char *argv[] )
             	/* Set the detection status of vision */
 				msg.vision.data.status = TASK_PIPE_DETECTED;
 				
-                if( cf.vision_window ) {
-                    if( cvWaitKey( 5 ) >= 0 );
-                        for( ii = 0; ii < lineWidth; ii++ ) {
-                            if( bearing != 0 ) {
-                                cvCircle( b_img,
-                                        cvPoint( b_img->width / 2 + ((int)(bearing * ii)),
-											(b_img->width / 2) + ii ),
-											2, cvScalar(255, 255, 0), 2 );
-                            }
-                            else {
-                                cvCircle( b_img,
-                                        cvPoint( b_img->width / 2 + ((int)(bearing * ii)),
-                                            (b_img->width / 2) + ii ),
-											2, cvScalar(0, 0, 255), 2 );
-                            }
-                            cvShowImage( b_win, b_img );
-                        }
-                }
+				for( ii = 0; ii < lineWidth; ii++ ) {
+					if( bearing != 0 ) {
+						/* Draw a line indicating the bearing. */
+						cvCircle( b_img,
+								cvPoint( b_img->width / 2 + ((int)(bearing * ii)),
+									(b_img->width / 2) + ii ),
+									2, cvScalar(255, 255, 0), 2 );
+					}
+					else {
+						/* Draw a red line to indicate no detection. */
+						cvCircle( b_img,
+							cvPoint( b_img->width / 2 + ((int)(bearing * ii)),
+								(b_img->width / 2) + ii ),
+								2, cvScalar(0, 0, 255), 2 );
+					}
+				}
 				/* Set target offsets in network message. We are taking the
 				 * negative of bearing for the y offset due to the way yaw is
 				 * calculated on the IMU. */
@@ -367,15 +370,14 @@ int main( int argc, char *argv[] )
             	/* Set the detection status of vision */
 				msg.vision.data.status = TASK_FENCE_DETECTED;
             	
-                if( cf.vision_window ) {
-                    if( cvWaitKey( 5 ) >= 0 );
-					cvCircle( f_img, cvPoint(fence_center, f_img->height / 2),
-						10, cvScalar(0, 0, 255), 5, 8 );
-					for( ii = 0; ii < lineWidth; ii++ ) {
-						cvCircle( f_img, cvPoint(f_img->width / 2 + ii, y_max),
-								2, cvScalar(0, 255, 0), 2 );
-					}
-                	cvShowImage( f_win, f_img );
+				/* Draw a circle at the centroid. */
+				cvCircle( f_img, cvPoint(fence_center, f_img->height / 2),
+					10, cvScalar(0, 0, 255), 5, 8 );
+				/* Draw a horizontal line indicating the lowest point of the
+				 * fence. */
+				for( ii = 0; ii < lineWidth; ii++ ) {
+					cvCircle( f_img, cvPoint(f_img->width / 2 + ii, y_max),
+							2, cvScalar(0, 255, 0), 2 );
 				}
 				/* Set target offsets in network message. */
 				/* The subtractions are opposite of each other on purpose. This
@@ -386,7 +388,8 @@ int main( int argc, char *argv[] )
 				msg.vision.data.front_x = fence_center - (f_img->width / 2);
 				msg.vision.data.front_y = y_max - (f_img->height / 4);
             }
-            else { /* No positive detection */
+            else {
+				/* No positive detection */
 				msg.vision.data.status = TASK_NOT_DETECTED;
 			}
         }
@@ -405,31 +408,27 @@ int main( int argc, char *argv[] )
 				/* Set the detection status of vision */
 		    	msg.vision.data.status = TASK_BOXES_DETECTED;
 				
-				if( cf.vision_window ) {
-					/* Initialize the centroid sequence reader. */
-					cvStartReadSeq( boxes, &reader1, 0 );
-					/* Read four sequence elements at a time. */
-					for( ii = 0; ii < boxes->total; ii += 2 ) {
-						/* Read centroid x and y coordinates. */
-						CV_READ_SEQ_ELEM( box_pt, reader1 );
-						/* Draw the centroid as a circle. */
-						cvCircle( b_img, box_pt,
-							10, cvScalar(0, 0, 255), 5, 8 );
-					}
-					/* Initialize the vertex sequence reader. */
-					cvStartReadSeq( squares, &reader2, 0 );
-					for( ii = 0; ii < squares->total; ii += 4 ) {
-						/* Read vertex x and y coordinates. */
-						CV_READ_SEQ_ELEM( pt[0], reader2 );
-						CV_READ_SEQ_ELEM( pt[1], reader2 );
-						CV_READ_SEQ_ELEM( pt[2], reader2 );
-						CV_READ_SEQ_ELEM( pt[3], reader2 );
-						/* Draw the square as a closed polyline. */
-						cvPolyLine( b_img, &rect, &count, 1, 1, CV_RGB(0,255,0), 3, CV_AA, 0 );
-					}
+				/* Initialize the centroid sequence reader. */
+				cvStartReadSeq( boxes, &reader1, 0 );
+				/* Read four sequence elements at a time. */
+				for( ii = 0; ii < boxes->total; ii += 2 ) {
+					/* Read centroid x and y coordinates. */
+					CV_READ_SEQ_ELEM( box_pt, reader1 );
+					/* Draw the centroid as a circle. */
+					cvCircle( b_img, box_pt,
+						10, cvScalar(0, 0, 255), 5, 8 );
 				}
-				if( cvWaitKey( 5 ) >= 0 );
-				cvShowImage( b_win, b_img );
+				/* Initialize the vertex sequence reader. */
+				cvStartReadSeq( squares, &reader2, 0 );
+				for( ii = 0; ii < squares->total; ii += 4 ) {
+					/* Read vertex x and y coordinates. */
+					CV_READ_SEQ_ELEM( pt[0], reader2 );
+					CV_READ_SEQ_ELEM( pt[1], reader2 );
+					CV_READ_SEQ_ELEM( pt[2], reader2 );
+					CV_READ_SEQ_ELEM( pt[3], reader2 );
+					/* Draw the square as a closed polyline. */
+					cvPolyLine( b_img, &rect, &count, 1, 1, CV_RGB(0,255,0), 3, CV_AA, 0 );
+				}
 				/* Clear out the sequences so that next time we only draw newly
 				 * found squares and centroids. */
 				cvClearSeq( boxes );
@@ -495,6 +494,30 @@ int main( int argc, char *argv[] )
 				}
             }
         }
+
+		/* Show the image in a window. */
+		if( cf.vision_window ) {
+			vision_mode = msg.vision.data.mode;
+			/* OpenCV needs a little pause here. */
+			if( cvWaitKey( 5 ) >= 0 );
+			/* Determine which image to show in which window. */
+			switch( vision_mode ) {
+			case VISIOND_FCOLOR:
+				cvShowImage( win, f_img );
+				break;
+			case VISIOND_FBINARY:
+				cvShowImage( win, f_bin_img );
+				break;
+			case VISIOND_BCOLOR:
+				cvShowImage( win, b_img );
+				break;
+			case VISIOND_BBINARY:
+				cvShowImage( win, b_bin_img );
+				break;
+			case VISIOND_NONE:
+				break;
+			}
+		}
 
         /* Check state of save frames and video messages. */
         if( msg.vsetting.data.save_fframe && f_cam ) {

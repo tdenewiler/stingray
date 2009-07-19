@@ -39,6 +39,15 @@
 #define MAX_PORT_LEN 8
 #endif /* MAX_PORT_LEN */
 
+#ifndef VISIOND_MODES
+#define VISIOND_MODES	1
+#define VISIOND_FBINARY	2
+#define VISIOND_FCOLOR	3
+#define VISIOND_BBINARY	4
+#define VISIOND_BCOLOR	5
+#define VISIOND_NONE	6
+#endif /* VISIOND_MODES */
+
 
 /******************************
 **

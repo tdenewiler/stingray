@@ -2,6 +2,7 @@
 INCLUDES  	= -Iinclude
 INCLUDES	+= -I../common/include
 INCLUDES	+= -I../planner/include
+INCLUDES	+= -I../visiond/include
 INCLUDES	+= -I../../libs/parser/include
 INCLUDES	+= -I../../libs/microstrain/include
 INCLUDES	+= -I../../libs/labjack/include
