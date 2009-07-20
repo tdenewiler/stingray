@@ -374,6 +374,7 @@ int gui_pack_boxes( GtkWidget *top_level_window )
     buttons_options( hbox4 );
     buttons_gains( vbox4 );
     buttons_tasks( vbox6 );
+	buttons_images( vbox6 );
     buttons_vision( vbox5 );
 
     return TRUE;

@@ -153,6 +153,12 @@ int buttons_opmode( GtkWidget *box );
 //! \return TRUE. No error checking implemented.
 int buttons_targets( GtkWidget *box );
 
+//! Makes buttons related to images.
+//! Returns TRUE.
+//! \param box The box to pack the Images buttons into.
+//! \return TRUE. No error checking implemented.
+int buttons_images( GtkWidget *box );
+
 //! Makes buttons to set the tasks for the UUV.
 //! Returns TRUE.
 //! \param box The box to pack the Tasks buttons into.

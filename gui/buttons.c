@@ -908,8 +908,6 @@ int buttons_options( GtkWidget *box )
 	GtkWidget *vbox3;
 	GtkWidget *vbox4;
     GtkWidget *options_frame;
-	GtkWidget *image_frame;
-	GtkWidget *image_group;
     GtkAdjustment *adj;
 
     /* Initialize values. */
@@ -926,25 +924,18 @@ int buttons_options( GtkWidget *box )
     vbox3 = gtk_vbox_new( TRUE, 0 );
     vbox4 = gtk_vbox_new( TRUE, 0 );
 
-    /* Create image radio group. */
-    image_group = buttons_make_radio_group( );
-
     /* Create a frame for the check buttons. */
     options_frame = buttons_make_frame( "UUV Options" );
-    image_frame = buttons_make_frame( "Image Display Options" );
 	
 	/* Add a box to the main box. */
     gtk_container_add( GTK_CONTAINER( box ), hbox1 );
     gtk_container_add( GTK_CONTAINER( hbox1 ), vbox1 );
-    gtk_container_add( GTK_CONTAINER( hbox1 ), vbox2 );
 
     /* Add the frames to a box. */
     gtk_container_add( GTK_CONTAINER( vbox1 ), options_frame );
-    gtk_container_add( GTK_CONTAINER( vbox2 ), image_frame );
 
     /* Add boxes to the frames. */
     gtk_container_add( GTK_CONTAINER( options_frame ), vbox3 );
-    gtk_container_add( GTK_CONTAINER( image_frame ), vbox4 );
 
     /* Create the enable check buttons. */
     button_enable_servos = buttons_make_check( "Enable servos",
@@ -956,28 +947,11 @@ int buttons_options( GtkWidget *box )
     button_imu_stab = buttons_make_check( "IMU Stabilization",
 		GTK_SIGNAL_FUNC( events_imu_stab ) );
 	
-	/* Create the image radio buttons. */
-    button_image_fcolor = buttons_make_radio( "Front Color",
-		GTK_SIGNAL_FUNC( events_images ), image_group );
-    button_image_fbinary = buttons_make_radio( "Front Binary",
-		GTK_SIGNAL_FUNC( events_images ), image_group );
-    button_image_bcolor = buttons_make_radio( "Bottom Color",
-		GTK_SIGNAL_FUNC( events_images ), image_group );
-    button_image_bbinary = buttons_make_radio( "Bottom Binary",
-		GTK_SIGNAL_FUNC( events_images ), image_group );
-    button_image_none = buttons_make_radio( "None",
-		GTK_SIGNAL_FUNC( events_images ), image_group );
-
     /* Pack the buttons into frames. */
     gtk_box_pack_start( GTK_BOX( vbox3 ), button_enable_servos, TRUE, TRUE, 0 );
     gtk_box_pack_start( GTK_BOX( vbox3 ), button_enable_imu, TRUE, TRUE, 0 );
     gtk_box_pack_start( GTK_BOX( vbox3 ), button_enable_log, TRUE, TRUE, 0 );
     gtk_box_pack_start( GTK_BOX( vbox3 ), button_imu_stab, TRUE, TRUE, 0 );
-    gtk_box_pack_start( GTK_BOX( vbox4 ), button_image_fcolor, TRUE, TRUE, 0 );
-    gtk_box_pack_start( GTK_BOX( vbox4 ), button_image_fbinary, TRUE, TRUE, 0 );
-    gtk_box_pack_start( GTK_BOX( vbox4 ), button_image_bcolor, TRUE, TRUE, 0 );
-    gtk_box_pack_start( GTK_BOX( vbox4 ), button_image_bbinary, TRUE, TRUE, 0 );
-    gtk_box_pack_start( GTK_BOX( vbox4 ), button_image_none, TRUE, TRUE, 0 );
 
     /* Create the spin buttons. */
     adj = ( GtkAdjustment * )gtk_adjustment_new( msg.client.data.debug_level,
@@ -992,10 +966,76 @@ int buttons_options( GtkWidget *box )
 
     /* Activate specific buttons by default. */
     gtk_toggle_button_set_active( (GtkToggleButton *)button_imu_stab, TRUE );
-    gtk_toggle_button_set_active( (GtkToggleButton *)button_image_none, TRUE );
 
     return TRUE;
 } /* end buttons_options() */
+
+
+/******************************************************************************
+ *
+ * Title:       int buttons_images( GtkWidget *box )
+ *
+ * Description: Sets up a box for the Images buttons to be packed into.
+ *
+ * Input:       box: The box to pack the Images buttons into.
+ *
+ * Output:      TRUE: No error checking implemented.
+ *
+ *****************************************************************************/
+
+int buttons_images( GtkWidget *box )
+{
+	GtkWidget *hbox1;
+	GtkWidget *hbox2;
+	GtkWidget *image_frame;
+	GtkWidget *image_group;
+
+    /* Initialize values. */
+    msg.vision.data.mode = 0;
+
+    /* Create new boxes. */
+    hbox1 = gtk_hbox_new( TRUE, 0 );
+    hbox2 = gtk_hbox_new( TRUE, 0 );
+
+    /* Create image radio group. */
+    image_group = buttons_make_radio_group( );
+
+    /* Create a frame for the check buttons. */
+    image_frame = buttons_make_frame( "Image Display Options" );
+	
+	/* Add a box to the main box. */
+    gtk_container_add( GTK_CONTAINER( box ), hbox1 );
+
+    /* Add the frames to a box. */
+    gtk_container_add( GTK_CONTAINER( hbox1 ), image_frame );
+
+    /* Add boxes to the frames. */
+    gtk_container_add( GTK_CONTAINER( image_frame ), hbox2 );
+
+	/* Create the image radio buttons. */
+    button_image_fcolor = buttons_make_radio( "Front Color",
+		GTK_SIGNAL_FUNC( events_images ), image_group );
+    button_image_fbinary = buttons_make_radio( "Front Binary",
+		GTK_SIGNAL_FUNC( events_images ), image_group );
+    button_image_bcolor = buttons_make_radio( "Bottom Color",
+		GTK_SIGNAL_FUNC( events_images ), image_group );
+    button_image_bbinary = buttons_make_radio( "Bottom Binary",
+		GTK_SIGNAL_FUNC( events_images ), image_group );
+    button_image_none = buttons_make_radio( "None",
+		GTK_SIGNAL_FUNC( events_images ), image_group );
+
+    /* Pack the buttons into frames. */
+    gtk_box_pack_start( GTK_BOX( hbox2 ), button_image_fcolor, TRUE, TRUE, 0 );
+    gtk_box_pack_start( GTK_BOX( hbox2 ), button_image_fbinary, TRUE, TRUE, 0 );
+    gtk_box_pack_start( GTK_BOX( hbox2 ), button_image_bcolor, TRUE, TRUE, 0 );
+    gtk_box_pack_start( GTK_BOX( hbox2 ), button_image_bbinary, TRUE, TRUE, 0 );
+    gtk_box_pack_start( GTK_BOX( hbox2 ), button_image_none, TRUE, TRUE, 0 );
+
+    /* Activate specific buttons by default. */
+    gtk_toggle_button_set_active( (GtkToggleButton *)button_image_none, TRUE );
+
+    return TRUE;
+} /* end buttons_images() */
 
 
 /******************************************************************************
