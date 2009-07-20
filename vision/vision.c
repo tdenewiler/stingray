@@ -525,6 +525,13 @@ int vision_find_fence( int *fence_center,
     IplImage *tgrayH = NULL;
     IplImage *tgrayS = NULL;
     IplImage *tgrayV = NULL;
+    IplImage *filterImg = NULL;
+    CvMat *filter;
+    int kernelCols = 7;
+    int kernelRows = 3;
+    double kernel[] = {1, 0, 0, 0, 0, 0, 0,
+    					0, 1, 0, 0, 0, 0, 0,
+    					0, 0, 1, 0, 0, 0, 0};
 
 	/* Capture a new source image. */
     srcImg = cvQueryFrame( cap );
@@ -539,6 +546,7 @@ int vision_find_fence( int *fence_center,
 	/* Create intermediate images. */
     hsv_image = cvCreateImage( cvGetSize( srcImg ), IPL_DEPTH_8U, 3 );
     outImg = cvCreateImage( cvGetSize( srcImg ), IPL_DEPTH_8U, 1 );
+    filterImg = cvCreateImage( cvGetSize( srcImg ), IPL_DEPTH_8U, 1 );
 
     /* Segment the image into a binary image. */
     cvCvtColor( srcImg, hsv_image, CV_RGB2HSV );
@@ -573,6 +581,11 @@ int vision_find_fence( int *fence_center,
     cvDilate( binImg, binImg, wD );
     cvConvertScale( binImg, outImg, 255.0 );
 
+    /* Filter the image using convolution. */
+    filter = cvCreateMatHeader( kernelRows, kernelCols, CV_64FC1 );
+    cvSetData( filter, kernel, kernelCols * 8 );
+    cvFilter2D( outImg, filterImg, filter, cvPoint(-1,-1) );
+
     /* Process the image. */
     *y_max = vision_get_fence_bottom( outImg, &center );
 
@@ -594,6 +607,7 @@ int vision_find_fence( int *fence_center,
     cvReleaseImage( &tgrayH );
     cvReleaseImage( &tgrayS );
     cvReleaseImage( &tgrayV );
+    cvReleaseImage( &filterImg );
 
     return 1;
 } /* end vision_find_pipe() */
