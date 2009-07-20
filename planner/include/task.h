@@ -43,10 +43,17 @@
 #define TASK_PIPE						21
 #define TASK_NOD						30
 #define TASK_SPIN						31
+#define TASK_YAW_PREVIOUS_NOT_SET		(-999)
+#define TASK_YAW_DETECTED_NOT_SET		(-999)
+#define TASK_SWEEP_YAW_ANGLE			2.5
+#define TASK_SWEEP_YAW_TIMEOUT			180
+#define TASK_SWEEP_YAW_PERIOD			4
 #define TASK_BUOY_YAW_GAIN				0.25
 #define TASK_BUOY_DEPTH_GAIN			0.00025
 #define TASK_BUOY_DEPTH					0.690
 #define TASK_BUOY_HEADING				0.0
+#define TASK_BOUY_MAX_SEARCH_TIME		15
+#define TASK_PIPE2_YAW					0
 #define TASK_FENCE_YAW_GAIN				0.25
 #define TASK_FENCE_DEPTH_GAIN			0.001
 #define TASK_MAX_TIME					300
@@ -94,6 +101,10 @@
 #define TASK_FENCE_DETECTED		3
 #define	TASK_BOXES_DETECTED		4
 #define	TASK_SUITCASE_DETECTED	5
+#define TASK_BOUY_TOUCHED       101
+#define TASK_FENCE_CLEARED		103
+#define TASK_BOXES_DROPPED		104
+#define TASK_SUITCASE_ACQUIRED  105
 //@}
 #endif /* TASK_STATUS */
 
@@ -115,11 +126,7 @@
 //! Switch to the current task.
 //! \param msg The current message data.
 //! \param cf Configuration file variables.
-//! \param task The current task to be attempted.
 //! \param dt The task time.
-//! \param subtask A pointer to which part of a task we are working on. This
-//! value should be modified within the individual task functions to reflect
-//! success or continuing of that part of a task.
 //! \param subtask_dt The subtask time.
 //! \return Task status: Success, failure, continuing.
 int task_run( MSG_DATA *msg, CONF_VARS *cf, int dt, int subtask_dt );
@@ -128,65 +135,58 @@ int task_run( MSG_DATA *msg, CONF_VARS *cf, int dt, int subtask_dt );
 //! \param msg The current message data.
 //! \param cf Configuration file variables.
 //! \param dt The task time.
-//! \param subtask Used to set which part of the task is to be run.
 //! \param subtask_dt The subtask time.
 //! \return Task status: Success, failure, continuing.
-int task_buoy( MSG_DATA *msg, CONF_VARS *cf, int dt, int subtask, int subtask_dt );
+int task_buoy( MSG_DATA *msg, CONF_VARS *cf, int dt, int subtask_dt );
 
 //! Use dead reckoning to go straight through the gate.
 //! \param msg The current message data.
 //! \param cf Configuration file variables.
-//! \param dt The task time.
-//! \param subtask Used to set which part of the task is to be run.
+//! \param dt The task time. run.
 //! \param subtask_dt The subtask time.
 //! \return Task status: Success, failure, continuing.
-int task_gate( MSG_DATA *msg, CONF_VARS *cf, int dt, int subtask, int subtask_dt );
+int task_gate( MSG_DATA *msg, CONF_VARS *cf, int dt, int subtask_dt );
 
 //! Find and follow the pipe.
 //! \param msg The current message data.
 //! \param dt The task time.
-//! \param subtask Used to set which part of the task is to be run.
 //! \param subtask_dt The subtask time.
 //! \return Task status: Success, failure, continuing.
-int task_pipe( MSG_DATA *msg, CONF_VARS *cf, int dt, int subtask, int subtask_dt );
+int task_pipe( MSG_DATA *msg, CONF_VARS *cf, int dt, int subtask_dt );
 
 //! Move in a square. Use the times in msg for the duration of motion in each
 //! direction.
 //! \param msg The current message data.
 //! \param cf Configuration file variables.
 //! \param dt The task time.
-//! \param subtask Used to set which part of the task is to be run.
 //! \param subtask_dt The subtask time.
 //! \return Task status: Success, failure, continuing.
-int task_square( MSG_DATA *msg, CONF_VARS *cf, int dt, int subtask, int subtask_dt );
+int task_square( MSG_DATA *msg, CONF_VARS *cf, int dt, int subtask_dt );
 
 //! Hold the current position.
 //! \param msg The current message data.
 //! \param cf Configuration file variables.
 //! \param dt The task time.
-//! \param subtask Used to set which part of the task is to be run.
 //! \param subtask_dt The subtask time.
 //! \return Task status: Success, failure, continuing.
-int task_none( MSG_DATA *msg, CONF_VARS *cf, int dt, int subtask, int subtask_dt );
+int task_none( MSG_DATA *msg, CONF_VARS *cf, int dt, int subtask_dt );
 
 //! Find and go to the boxes. Drop marbles over the correct boxes.
 //! \param msg The current message data.
 //! \param cf Configuration file variables.
 //! \param dt The task time.
-//! \param subtask Used to set which part of the task is to be run.
 //! \param subtask_dt The subtask time.
 //! \return Task status: Success, failure, continuing.
-int task_boxes( MSG_DATA *msg, CONF_VARS *cf, int dt, int subtask, int subtask_dt );
+int task_boxes( MSG_DATA *msg, CONF_VARS *cf, int dt, int subtask_dt );
 
 //! Find and go under the two fence pieces. Stay below the horizontal fence
 //! members but above a minimum depth.
 //! \param msg The current message data.
 //! \param cf Configuration file variables.
 //! \param dt The task time.
-//! \param subtask Used to set which part of the task is to be run.
 //! \param subtask_dt The subtask time.
 //! \return Task status: Success, failure, continuing.
-int task_fence( MSG_DATA *msg, CONF_VARS *cf, int dt, int subtask, int subtask_dt );
+int task_fence( MSG_DATA *msg, CONF_VARS *cf, int dt, int subtask_dt );
 
 //! Find and retrieve the suitcase. First center vehicle above the suitcase and
 //! then lower depth until the suitcase is picked up using the caribiners on
@@ -194,46 +194,48 @@ int task_fence( MSG_DATA *msg, CONF_VARS *cf, int dt, int subtask, int subtask_d
 //! \param msg The current message data.
 //! \param cf Configuration file variables.
 //! \param dt The task time.
-//! \param subtask Used to set which part of the task is to be run.
 //! \param subtask_dt The subtask time.
 //! \return Task status: Success, failure, continuing.
-int task_suitcase( MSG_DATA *msg, CONF_VARS *cf, int dt, int subtask, int subtask_dt );
+int task_suitcase( MSG_DATA *msg, CONF_VARS *cf, int dt, int subtask_dt );
 
 //! Surface within the octagon.
 //! \param msg The current message data.
 //! \param cf Configuration file variables.
 //! \param dt The task time.
-//! \param subtask Used to set which part of the task is to be run.
 //! \param subtask_dt The subtask time.
 //! \return Task status: Success, failure, continuing.
-int task_surface( MSG_DATA *msg, CONF_VARS *cf, int dt, int subtask, int subtask_dt );
+int task_surface( MSG_DATA *msg, CONF_VARS *cf, int dt, int subtask_dt );
 
 //! Run the entire course.
 //! \param msg The current message data.
 //! \param cf Configuration file variables.
 //! \param dt The task time.
-//! \param subtask Used to set which part of the task is to be run.
 //! \param subtask_dt The subtask time.
 //! \return Task status: Success, failure, continuing.
-int task_course( MSG_DATA *msg, CONF_VARS *cf, int dt, int subtask, int subtask_dt );
+int task_course( MSG_DATA *msg, CONF_VARS *cf, int dt, int subtask_dt );
 
 //! Make the sub nod its head.
 //! \param msg The current message data.
 //! \param cf Configuration file variables.
 //! \param dt The task time.
-//! \param subtask Used to set which part of the task is to be run.
 //! \param subtask_dt The subtask time.
 //! \return Task status: Success, failure, continuing.
-int task_nod( MSG_DATA *msg, CONF_VARS *cf, int dt, int subtask, int subtask_dt );
+int task_nod( MSG_DATA *msg, CONF_VARS *cf, int dt, int subtask_dt );
 
 //! Make the sub spin in place.
 //! \param msg The current message data.
 //! \param cf Configuration file variables.
 //! \param dt The task time.
-//! \param subtask Used to set which part of the task is to be run.
 //! \param subtask_dt The subtask time.
 //! \return Task status: Success, failure, continuing.
-int task_spin( MSG_DATA *msg, CONF_VARS *cf, int dt, int subtask, int subtask_dt );
+int task_spin( MSG_DATA *msg, CONF_VARS *cf, int dt, int subtask_dt );
 
+//! Make the sub sweep side to side looking for obstacles
+//! \param msg The current message data.
+//! \param cf Configuration file variables.
+//! \param dt The task time.
+//! \param subtask_dt The subtask time.
+//! \return Task status: Success, failure, continuing.
+int task_sweep( MSG_DATA *msg, CONF_VARS *cf, int dt, int subtask_dt );
 
 #endif /* _TASK_H_ */

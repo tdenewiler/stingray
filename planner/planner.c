@@ -195,22 +195,24 @@ int main( int argc, char *argv[] )
 	parse_cla( argc, argv, &cf, STINGRAY, ( const char * )PLANNER_FILENAME );
 
 	/* Set up default values for the targets, gains and tasks. */
-    msg.target.data.pitch   = cf.target_pitch;
-    msg.target.data.roll    = cf.target_roll;
-    msg.target.data.yaw     = cf.target_yaw;
-    msg.target.data.depth   = cf.target_depth;
-    msg.gain.data.kp_pitch  = cf.kp_pitch;
-    msg.gain.data.ki_pitch  = cf.ki_pitch;
-    msg.gain.data.kd_pitch  = cf.kd_pitch;
-    msg.gain.data.kp_roll   = cf.kp_roll;
-    msg.gain.data.ki_roll   = cf.ki_roll;
-    msg.gain.data.kd_roll   = cf.kd_roll;
-    msg.gain.data.kp_yaw    = cf.kp_yaw;
-    msg.gain.data.ki_yaw    = cf.ki_yaw;
-    msg.gain.data.kd_yaw    = cf.kd_yaw;
-    msg.gain.data.kp_depth  = cf.kp_depth;
-    msg.gain.data.ki_depth  = cf.ki_depth;
-    msg.gain.data.kd_depth  = cf.kd_depth;
+    msg.target.data.pitch   	 = cf.target_pitch;
+    msg.target.data.roll    	 = cf.target_roll;
+    msg.target.data.yaw     	 = cf.target_yaw;
+    msg.target.data.yaw_previous = TASK_YAW_PREVIOUS_NOT_SET;
+    msg.target.data.yaw_detected = TASK_YAW_DETECTED_NOT_SET;
+    msg.target.data.depth   	 = cf.target_depth;
+    msg.gain.data.kp_pitch  	 = cf.kp_pitch;
+    msg.gain.data.ki_pitch  	 = cf.ki_pitch;
+    msg.gain.data.kd_pitch  	 = cf.kd_pitch;
+    msg.gain.data.kp_roll    	 = cf.kp_roll;
+    msg.gain.data.ki_roll   	 = cf.ki_roll;
+    msg.gain.data.kd_roll   	 = cf.kd_roll;
+    msg.gain.data.kp_yaw    	 = cf.kp_yaw;
+    msg.gain.data.ki_yaw    	 = cf.ki_yaw;
+    msg.gain.data.kd_yaw    	 = cf.kd_yaw;
+    msg.gain.data.kp_depth  	 = cf.kp_depth;
+    msg.gain.data.ki_depth  	 = cf.ki_depth;
+    msg.gain.data.kd_depth  	 = cf.kd_depth;
     
     /* Initialize tasks */
     /* Never used because of lines ~332  -- FIX ME */
@@ -442,7 +444,7 @@ int main( int argc, char *argv[] )
 		subtask_dt = util_calc_dt( &time1s, &time1ms, &time2s, &time2ms ) / 1000000;
 
 		/* Run the current task. */
-		//status = task_run( &msg, &cf, task_dt, subtask_dt );
+		status = task_run( &msg, &cf, task_dt, subtask_dt );
 		if( msg.task.data.course == TASK_COURSE_ON ) {
 			/* Set the subtask in the network message. */
 			msg.task.data.subtask = subtask;

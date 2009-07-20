@@ -309,6 +309,8 @@ int main( int argc, char *argv[] )
 				/* Draw a circle at the centroid location. */
 				cvCircle( f_img, cvPoint(dotx, doty),
 					10, cvScalar(255, 0, 0), 5, 8 );
+					
+				/* Requires some sore of exit criteria */
 			}
 			else {
 				/* No positive detection */
@@ -325,9 +327,15 @@ int main( int argc, char *argv[] )
                     msg.vsetting.data.pipe_hsv.vL,
                     msg.vsetting.data.pipe_hsv.vH );
 
-            if( status == 1 ) {
+            if( status ) {
             	/* Set the detection status of vision */
-				msg.vision.data.status = TASK_PIPE_DETECTED;
+            	if( status != 2 ) {
+					msg.vision.data.status = TASK_PIPE_DETECTED;
+				}
+				else {
+					/* No positive detection */
+					msg.vision.data.status = TASK_NOT_DETECTED;
+				}
 
 				for( ii = 0; ii < lineWidth; ii++ ) {
 					if( bearing != 0 ) {

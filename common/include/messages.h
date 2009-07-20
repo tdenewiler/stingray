@@ -205,14 +205,16 @@ typedef struct _TELEOP_MSG {
 #define _TARGET_MSG_
 /*! Operational mode and target pose and motion values. */
 typedef struct _TARGET {
-    int mode;       //!< Operational mode
-    float pitch;    //!< Desired pitch angle
-    float roll;     //!< Desired roll angle
-    float yaw;      //!< Desired yaw angle
-    float depth;    //!< Desired depth
-    float fx;       //!< Desired force in x direction
-    float fy;       //!< Desired force in y direction
-    float speed;    //!< Desired speed.
+    int mode;       	//!< Operational mode
+    float pitch;    	//!< Desired pitch angle
+    float roll;     	//!< Desired roll angle
+    float yaw;      	//!< Desired yaw angle
+    float yaw_previous; //!< Desired yaw angle from previous pipe event
+    float yaw_detected; //!< Yaw angle from previous event detection
+    float depth;    	//!< Desired depth
+    float fx;       	//!< Desired force in x direction
+    float fy;       	//!< Desired force in y direction
+    float speed;    	//!< Desired speed.
 } TARGET;
 
 /*! API message to change the uuv operational mode. */

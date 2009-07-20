@@ -25,6 +25,9 @@
 #include "task.h"
 #include "pololu.h"
 
+#define PIPE_MODE_PIPE  		 0
+#define PIPE_MODE_LOOK_AHEAD	 1
+
 
 /******************************************************************************
  *
@@ -50,67 +53,67 @@ int task_run( MSG_DATA *msg, CONF_VARS *cf, int dt, int subtask_dt )
 
 	switch ( msg->task.data.task ) {
 	case TASK_BUOY:
-		status = task_buoy( msg, cf, dt, msg->task.data.subtask, subtask_dt );
+		status = task_buoy( msg, cf, dt, subtask_dt );
 		break;
 
 	case TASK_GATE:
-		status = task_gate( msg, cf, dt, msg->task.data.subtask, subtask_dt );
+		status = task_gate( msg, cf, dt, subtask_dt );
 		break;
 
 	case TASK_PIPE:
-		status = task_pipe( msg, cf, dt, msg->task.data.subtask, subtask_dt );
+		status = task_pipe( msg, cf, dt, subtask_dt );
 		break;
 
 	case TASK_PIPE1:
-		status = task_pipe( msg, cf, dt, msg->task.data.subtask, subtask_dt );
+		status = task_pipe( msg, cf, dt, subtask_dt );
 		break;
 
 	case TASK_PIPE2:
-		status = task_pipe( msg, cf, dt, msg->task.data.subtask, subtask_dt );
+		status = task_pipe( msg, cf, dt, subtask_dt );
 		break;
 
 	case TASK_PIPE3:
-		status = task_pipe( msg, cf, dt, msg->task.data.subtask, subtask_dt );
+		status = task_pipe( msg, cf, dt, subtask_dt );
 		break;
 
 	case TASK_PIPE4:
-		status = task_pipe( msg, cf, dt, msg->task.data.subtask, subtask_dt );
+		status = task_pipe( msg, cf, dt, subtask_dt );
 		break;
 
 	case TASK_SQUARE:
-		status = task_square( msg, cf, dt, msg->task.data.subtask, subtask_dt );
+		status = task_square( msg, cf, dt, subtask_dt );
 		break;
 
 	case TASK_NONE:
-		status = task_none( msg, cf, dt, msg->task.data.subtask, subtask_dt );
+		status = task_none( msg, cf, dt, subtask_dt );
 		break;
 
 	case TASK_BOXES:
-		status = task_boxes( msg, cf, dt, msg->task.data.subtask, subtask_dt );
+		status = task_boxes( msg, cf, dt, subtask_dt );
 		break;
 
 	case TASK_FENCE:
-		status = task_fence( msg, cf, dt, msg->task.data.subtask, subtask_dt );
+		status = task_fence( msg, cf, dt, subtask_dt );
 		break;
 
 	case TASK_SURFACE:
-		status = task_surface( msg, cf, dt, msg->task.data.subtask, subtask_dt );
+		status = task_surface( msg, cf, dt, subtask_dt );
 		break;
 
 	case TASK_SUITCASE:
-		status = task_suitcase( msg, cf, dt, msg->task.data.subtask, subtask_dt );
+		status = task_suitcase( msg, cf, dt, subtask_dt );
 		break;
 
 	case TASK_NOD:
-		status = task_nod( msg, cf, dt, msg->task.data.subtask, subtask_dt );
+		status = task_nod( msg, cf, dt, subtask_dt );
 		break;
 
 	case TASK_SPIN:
-		status = task_spin( msg, cf, dt, msg->task.data.subtask, subtask_dt );
+		status = task_spin( msg, cf, dt, subtask_dt );
 		break;
 
 	case TASK_COURSE:
-		status = task_course( msg, cf, dt, msg->task.data.subtask, subtask_dt );
+		status = task_course( msg, cf, dt, subtask_dt );
 		break;
 	}
 
@@ -120,27 +123,25 @@ int task_run( MSG_DATA *msg, CONF_VARS *cf, int dt, int subtask_dt )
 
 /******************************************************************************
  *
- * Title:       int task_buoy( MSG_DATA *msg, CONF_VARS *cf, int dt, int subtask, int subtask_dt )
+ * Title:       int task_buoy( MSG_DATA *msg, CONF_VARS *cf, int dt, int subtask_dt )
  *
  * Description: Find and follow the buoy.
  *
  * Input:       msg: Current message data.
  * 				cf: Configuration variables.
  *              dt: The task time.
- *				subtask: Used to set which part of the task is to be run. Modify
- * 				upon success or failure.
  * 				subtask_dt: The subtask time.
  *
  * Output:      Task status: Success, failure, continuing.
  *
  *****************************************************************************/
 
-int task_buoy( MSG_DATA *msg, CONF_VARS *cf, int dt, int subtask, int subtask_dt )
+int task_buoy( MSG_DATA *msg, CONF_VARS *cf, int dt, int subtask_dt )
 {
-
+	
 	if( msg->task.data.course == TASK_COURSE_ON ) {
 		
-		switch( subtask ) {
+		switch( msg->task.data.subtask ) {
 			
 		case SUBTASK_SEARCH_DEPTH:
 			msg->target.data.depth = cf->depth_buoy;
@@ -180,19 +181,91 @@ int task_buoy( MSG_DATA *msg, CONF_VARS *cf, int dt, int subtask, int subtask_dt
 			return SUBTASK_CONTINUING;
 		}
 	}
-	else {
-		/* Set target values based on current orientation and pixel error. */
-		msg->target.data.yaw = msg->status.data.yaw + (float)msg->vision.data.front_x * TASK_BUOY_YAW_GAIN;
-
-		/* Need to divide the depth target by a largish number because the gain works
-		 * for yaw in degrees but not for depth in volts. The pixel error needs to
-		 * be converted so that it is meaningful for volts as well. */
-		msg->target.data.depth = msg->status.data.depth + (float)msg->vision.data.front_y * TASK_BUOY_DEPTH_GAIN;
-		//printf("TASK_BUOY:     %f    %f\n", msg->target.data.depth,
-			//(float)msg->vision.data.front_y * TASK_BUOY_DEPTH_GAIN);
+	else { /* Non-Course Mode */
+		
+		/* Check to see if we have a previous value from the pipe routine */
+		if( msg->target.data.yaw_previous == TASK_YAW_PREVIOUS_NOT_SET ) {
+			msg->target.data.yaw_previous = msg->status.data.yaw;
+		}
+		
+		/* Check for timeout */
+		if( dt > TASK_BOUY_MAX_SEARCH_TIME ) {
+			
+			/* Reset yaw to our initial yaw if we have a timeout */
+			msg->target.data.yaw = msg->target.data.yaw_previous;
+			
+			/* Set yaw detect to undetected value */
+			msg->target.data.yaw_detected = TASK_YAW_DETECTED_NOT_SET;
+			
+			/* We have failed... */
+			return TASK_FAILURE;
+		}
+		
+		/*  If the bouy was detected ..*/
+		if( msg->vision.data.status == TASK_BOUY_DETECTED ) {
+			
+			/* Set target values based on current orientation and pixel error. */
+			msg->target.data.yaw = msg->status.data.yaw + (float)msg->vision.data.front_x * TASK_BUOY_YAW_GAIN;
+			msg->target.data.yaw_detected = msg->target.data.yaw;
+			
+			
+			/* Need to divide the depth target by a largish number because the gain works
+			 * for yaw in degrees but not for depth in volts. The pixel error needs to
+			 * be converted so that it is meaningful for volts as well. */
+			msg->target.data.depth = msg->status.data.depth + (float)msg->vision.data.front_y * TASK_BUOY_DEPTH_GAIN;
+			
+			
+			//printf("TASK_BUOY:     %f    %f\n", msg->target.data.depth,
+				//(float)msg->vision.data.front_y * TASK_BUOY_DEPTH_GAIN);
+			
+			/* Success Criteria */
+			if( msg->vision.data.status == TASK_BOUY_TOUCHED ) {
+				
+				/* Set the target yaw to the anticipated pipe2 yaw */
+				msg->target.data.yaw = TASK_PIPE2_YAW;
+				
+				/* Set yaw detect to undetected value */
+				msg->target.data.yaw_detected = TASK_YAW_DETECTED_NOT_SET;
+				return TASK_SUCCESS;
+			}
+			
+			/* If we are still trying to touch the bouy, return continuing */
+			return TASK_CONTINUING;
+		}
+		else { /* If the bouy is not detected */
+			
+			/* Check to see if we had a previous detection */
+			if( msg->target.data.yaw_detected == TASK_YAW_DETECTED_NOT_SET ) {
+				
+				/* Check to see if we have a previous value for yaw
+			 	 * If not, we set it. */
+				if( msg->target.data.yaw_previous == TASK_YAW_PREVIOUS_NOT_SET ) {
+					msg->target.data.yaw_previous = msg->status.data.yaw;
+				}
+				
+				/* If we do not have a previous detection, start sweeping */
+				
+				/* Check for timeout */
+				if( dt < TASK_SWEEP_YAW_TIMEOUT ) {
+					/* If the bouy is not detected, go into sweep mode */
+					task_sweep( msg, cf, dt, subtask_dt );
+				}
+				else {
+					msg->target.data.yaw = msg->target.data.yaw_previous;
+					msg->target.data.yaw_detected = TASK_YAW_DETECTED_NOT_SET;
+					return TASK_FAILURE;
+				}
+				
+				return TASK_CONTINUING;
+			}
+			else { /* If we had a detection, use it again until timeout */
+				msg->target.data.yaw = msg->target.data.yaw_detected;
+			}
+			
+		}
 
 		return TASK_CONTINUING;
-	}
+	}/* end Non-Course Mode */
 
 	return TASK_CONTINUING;
 } /* end task_buoy() */
@@ -207,19 +280,17 @@ int task_buoy( MSG_DATA *msg, CONF_VARS *cf, int dt, int subtask, int subtask_dt
  * Input:       msg: Current message data.
  * 				cf: Configuration variables.
  *              dt: The task time.
- *				subtask: Used to set which part of the task is to be run. Modify
- * 				upon success or failure.
  * 				subtask_dt: The subtask time.
  *
  * Output:      Task status: Success, failure, continuing.
  *
  *****************************************************************************/
 
-int task_gate( MSG_DATA *msg, CONF_VARS *cf, int dt, int subtask, int subtask_dt )
+int task_gate( MSG_DATA *msg, CONF_VARS *cf, int dt, int subtask_dt )
 {
 	if( msg->task.data.course == TASK_COURSE_ON ) {
 		
-		switch( subtask ) {
+		switch( msg->task.data.subtask ) {
 			
 		case SUBTASK_SEARCH_DEPTH:
 			msg->target.data.depth = cf->depth_pipe;
@@ -275,29 +346,84 @@ int task_gate( MSG_DATA *msg, CONF_VARS *cf, int dt, int subtask, int subtask_dt
  * Input:       msg: Current message data.
  * 				cf: Configuration variables.
  *              dt: The task time.
- *				subtask: Used to set which part of the task is to be run. Modify
- * 				upon success or failure.
  * 				subtask_dt: The subtask time.
  *
  * Output:      Task status: Success, failure, continuing.
  *
  *****************************************************************************/
 
-int task_pipe( MSG_DATA *msg, CONF_VARS *cf, int dt, int subtask, int subtask_dt )
+int task_pipe( MSG_DATA *msg, CONF_VARS *cf, int dt, int subtask_dt )
 {
+	/* The concept of look ahead was not built in, so the task_pipe
+	 * method will b developed with its own infrastructure to handle
+	 * look ahead tracking */
+	
+	/* The length of pipe search time until look ahead is performed */
+	const static int PIPE_SEARCH_INTERVAL = 3;
+	
+	/* Time to perform look ahead */
+	const static int LOOK_AHEAD_INTERVAL = 1;
+	
+	/* Rollover timeout */
+	const static int ROLLOVER_TIMEOUT = PIPE_SEARCH_INTERVAL + LOOK_AHEAD_INTERVAL;
+	
+	
+	
+	/* Timer internal to task_pipe() function */
+	static int dt_pipe = dt;
+	
+	/* Toggles between pipe mode and look ahead mode */
+	static int pipe_mode_toggle = PIPE_MODE_PIPE;
+	
+	/* Reset flag */
+	static int pipe_mode_reset = FALSE;
+	
+	
+	
+	
+	/* Initialization of look ahead infrastructure */
+	if( pipe_mode_reset == TRUE ) {
+		
+		/* The reset flag must indicate to not reset these values the
+		 * next time through the loop */
+		pipe_mode_reset = FALSE;
+		
+		/* When the pipe_mode is reset, we look for the pipe */
+		pipe_mode_toggle = PIPE_MODE_PIPE;
+		
+		/* Set the time to the input parameter time */
+		dt_pipe = dt;
+	}
+	
+	/* Change to look ahead mode if the time is right ... */
+	if( ( ( dt - dt_pipe ) + LOOK_AHEAD_INTERVAL ) % ROLLOVER_TIMEOUT  == 0 ) {
+		pipe_mode_toggle = PIPE_MODE_LOOK_AHEAD;
+	}
+	
+	/* Swtich back to pipe mode when the (delta-)timeout is expended */
+	if( ( dt - dt_pipe ) % ROLLOVER_TIMEOUT  == 0 ) {
+		pipe_mode_toggle = PIPE_MODE_PIPE;
+	}
+	
+	
 	if( msg->task.data.course == TASK_COURSE_ON ) {
-		switch( subtask ) {
+		
+		switch( msg->task.data.subtask ) {
+			
 		case SUBTASK_SEARCH_DEPTH:
 			msg->target.data.depth = cf->depth_pipe;
 			/* Check to see if we have reached the target depth. */
 			if( fabsf(msg->status.data.depth - msg->target.data.depth) < SUBTASK_DEPTH_MARGIN ) {
+				pipe_mode_reset = TRUE;
 				return TASK_SUCCESS;
 			}
 			/* Check to see if too much time has elapsed. */
 			else if( subtask_dt > SUBTASK_MAX_SEARCH_TIME ) {
+				pipe_mode_reset = TRUE;
 				return TASK_FAILURE;
 			}
 			else {
+				pipe_mode_reset = FALSE;
 				return SUBTASK_CONTINUING;
 			}
 		case SUBTASK_SEARCH:
@@ -305,12 +431,15 @@ int task_pipe( MSG_DATA *msg, CONF_VARS *cf, int dt, int subtask, int subtask_dt
 			msg->target.data.fy = POLOLU_MOVE_FORWARD;
 			
 			if( msg->vision.data.status == TASK_PIPE_DETECTED ) {
+				pipe_mode_reset = TRUE;
 				return SUBTASK_SUCCESS;
 			}
 			else if( subtask_dt > SUBTASK_MAX_SEARCH_TIME ) {
+				pipe_mode_reset = TRUE;
 				return SUBTASK_FAILURE;
 			}
 			else {
+				pipe_mode_reset = FALSE;
 				return SUBTASK_CONTINUING;
 			}
 		case SUBTASK_CORRECT:
@@ -325,6 +454,7 @@ int task_pipe( MSG_DATA *msg, CONF_VARS *cf, int dt, int subtask, int subtask_dt
 			}
 
 			/* TODO: Need a way to check for SUCCESS or FAILURE in this case. */
+			pipe_mode_reset = FALSE;
 			return SUBTASK_CONTINUING;
 		case SUBTASK_PIPE_END:
 			/* TODO: Add in details for this case. */
@@ -333,10 +463,12 @@ int task_pipe( MSG_DATA *msg, CONF_VARS *cf, int dt, int subtask, int subtask_dt
 			 * for each transition */
 			/* A return value in this case to allow transition (ie success or failure)
 			 * must be added here*/
+			pipe_mode_reset = TRUE;
 			break;
 		}
 	}
 	else {
+				
 		/* Set the values based on current orientation and pixel error. */
 		msg->target.data.yaw    = msg->status.data.yaw + (float)msg->vision.data.bottom_y * TASK_PIPE_YAW_GAIN;
 		msg->target.data.fx     = msg->vision.data.bottom_x * TASK_PIPE_FX_GAIN;
@@ -347,10 +479,12 @@ int task_pipe( MSG_DATA *msg, CONF_VARS *cf, int dt, int subtask, int subtask_dt
 			msg->target.data.fx = -1 * TASK_PIPE_FX_MAX;
 		}
 		//printf("TASK_PIPE: fx = %f\n", msg->target.data.fx);
-
+		
+		pipe_mode_reset = TRUE;
 		return TASK_CONTINUING;
 	}
 
+	pipe_mode_reset = TRUE;
 	return TASK_CONTINUING;
 } /* end task_pipe() */
 
@@ -365,15 +499,13 @@ int task_pipe( MSG_DATA *msg, CONF_VARS *cf, int dt, int subtask, int subtask_dt
  * Input:       msg: Current message data.
  * 				cf: Configuration variables.
  *              dt: The task time.
- *				subtask: Used to set which part of the task is to be run. Modify
- * 				upon success or failure.
  * 				subtask_dt: The subtask time.
  *
  * Output:      Task status: Success, failure, continuing.
  *
  *****************************************************************************/
 
-int task_square( MSG_DATA *msg, CONF_VARS *cf, int dt, int subtask, int subtask_dt )
+int task_square( MSG_DATA *msg, CONF_VARS *cf, int dt, int subtask_dt )
 {
 	msg->target.data.pitch = 0;
 	msg->target.data.roll = 0;
@@ -385,24 +517,27 @@ int task_square( MSG_DATA *msg, CONF_VARS *cf, int dt, int subtask, int subtask_
 
 /******************************************************************************
  *
- * Title:       int task_none( MSG_DATA *msg, CONF_VARS *cf, int dt, int subtask, int subtask_dt )
+ * Title:       int task_none( MSG_DATA *msg, CONF_VARS *cf, int dt, int subtask_dt )
  *
  * Description: Hold the current position.
  *
  * Input:       msg: Current message data.
  * 				cf: Configuration variables.
  *              dt: The task time.
- *				subtask: Used to set which part of the task is to be run. Modify
- * 				upon success or failure.
  * 				subtask_dt: The subtask time.
  *
  * Output:      Task status: Success, failure, continuing.
  *
  *****************************************************************************/
 
-int task_none( MSG_DATA *msg, CONF_VARS *cf, int dt, int subtask, int subtask_dt )
+int task_none( MSG_DATA *msg, CONF_VARS *cf, int dt, int subtask_dt )
 {
-
+	/* Reset the yaw_previous variable */
+	msg->target.data.yaw_previous = TASK_YAW_PREVIOUS_NOT_SET;
+	
+	/* Reset the yaw_detected variable */
+	msg->target.data.yaw_detected = TASK_YAW_PREVIOUS_NOT_SET;
+	
 	return TASK_CONTINUING;
 } /* end task_none() */
 
@@ -416,19 +551,19 @@ int task_none( MSG_DATA *msg, CONF_VARS *cf, int dt, int subtask, int subtask_dt
  * Input:       msg: Current message data.
  * 				cf: Configuration variables.
  *              dt: The task time.
- *				subtask: Used to set which part of the task is to be run. Modify
- * 				upon success or failure.
  * 				subtask_dt: The subtask time.
  *
  * Output:      Task status: Success, failure, continuing.
  *
  *****************************************************************************/
 
-int task_boxes( MSG_DATA *msg, CONF_VARS *cf, int dt, int subtask, int subtask_dt )
+int task_boxes( MSG_DATA *msg, CONF_VARS *cf, int dt, int subtask_dt )
 {
 	/* TODO: Fill this function in like task_buoy() and task_pipe(). */
 	if( msg->task.data.course == TASK_COURSE_ON ) {
-		switch( subtask ) {
+		
+		switch( msg->task.data.subtask ) {
+			
 		case SUBTASK_SEARCH_DEPTH:
 			msg->target.data.depth = cf->depth_boxes;
 			/* Check to see if we have reached the target depth. */
@@ -495,19 +630,19 @@ int task_boxes( MSG_DATA *msg, CONF_VARS *cf, int dt, int subtask, int subtask_d
  * Input:       msg: Current message data.
  * 				cf: Configuration variables.
  *              dt: The task time.
- *				subtask: Used to set which part of the task is to be run. Modify
- * 				upon success or failure.
  * 				subtask_dt: The subtask time.
  *
  * Output:      Task status: Success, failure, continuing.
  *
  *****************************************************************************/
 
-int task_fence( MSG_DATA *msg, CONF_VARS *cf, int dt, int subtask, int subtask_dt )
+int task_fence( MSG_DATA *msg, CONF_VARS *cf, int dt, int subtask_dt )
 {
 	/* TODO: Fill this function in like task_buoy() and task_pipe(). */
 	if( msg->task.data.course == TASK_COURSE_ON ) {
-		switch( subtask ) {
+		
+		switch( msg->task.data.subtask ) {
+			
 		case SUBTASK_SEARCH_DEPTH:
 			msg->target.data.depth = cf->depth_fence;
 			/* Check to see if we have reached the target depth. */
@@ -567,15 +702,13 @@ int task_fence( MSG_DATA *msg, CONF_VARS *cf, int dt, int subtask, int subtask_d
  * Input:       msg: Current message data.
  * 				cf: Configuration variables.
  *              dt: The task time.
- *				subtask: Used to set which part of the task is to be run. Modify
- * 				upon success or failure.
  * 				subtask_dt: The subtask time.
  *
  * Output:      Task status: Success, failure, continuing.
  *
  *****************************************************************************/
 
-int task_suitcase( MSG_DATA *msg, CONF_VARS *cf, int dt, int subtask, int subtask_dt )
+int task_suitcase( MSG_DATA *msg, CONF_VARS *cf, int dt, int subtask_dt )
 {
 	/* TODO: Fill this function in like task_buoy() and task_pipe(). */
 
@@ -592,15 +725,13 @@ int task_suitcase( MSG_DATA *msg, CONF_VARS *cf, int dt, int subtask, int subtas
  * Input:       msg: Current message data.
  * 				cf: Configuration variables.
  *              dt: The task time.
- *				subtask: Used to set which part of the task is to be run. Modify
- * 				upon success or failure.
  * 				subtask_dt: The subtask time.
  *
  * Output:      Task status: Success, failure, continuing.
  *
  *****************************************************************************/
 
-int task_surface( MSG_DATA *msg, CONF_VARS *cf, int dt, int subtask, int subtask_dt )
+int task_surface( MSG_DATA *msg, CONF_VARS *cf, int dt, int subtask_dt )
 {
 	/* Make sure fx and fy are zero. */
 	msg->target.data.fx = 0;
@@ -622,15 +753,13 @@ int task_surface( MSG_DATA *msg, CONF_VARS *cf, int dt, int subtask, int subtask
  * Input:       msg: Current message data.
  * 				cf: Configuration variables.
  *              dt: The task time.
- *				subtask: Used to set which part of the task is to be run. Modify
- * 				upon success or failure.
  * 				subtask_dt: The subtask time.
  *
  * Output:      Task status: Success, failure, continuing.
  *
  *****************************************************************************/
 
-int task_course( MSG_DATA *msg, CONF_VARS *cf, int dt, int subtask, int subtask_dt )
+int task_course( MSG_DATA *msg, CONF_VARS *cf, int dt, int subtask_dt )
 {
 
 	return TASK_CONTINUING;
@@ -646,15 +775,13 @@ int task_course( MSG_DATA *msg, CONF_VARS *cf, int dt, int subtask, int subtask_
  * Input:       msg: Current message data.
  * 				cf: Configuration variables.
  *              dt: The task time.
- *				subtask: Used to set which part of the task is to be run. Modify
- * 				upon success or failure.
  * 				subtask_dt: The subtask time.
  *
  * Output:      Task status: Success, failure, continuing.
  *
  *****************************************************************************/
 
-int task_nod( MSG_DATA *msg, CONF_VARS *cf, int dt, int subtask, int subtask_dt )
+int task_nod( MSG_DATA *msg, CONF_VARS *cf, int dt, int subtask_dt )
 {
 
 	return TASK_CONTINUING;
@@ -670,20 +797,54 @@ int task_nod( MSG_DATA *msg, CONF_VARS *cf, int dt, int subtask, int subtask_dt 
  * Input:       msg: Current message data.
  * 				cf: Configuration variables.
  *              dt: The task time.
- *				subtask: Used to set which part of the task is to be run. Modify
- * 				upon success or failure.
  * 				subtask_dt: The subtask time.
  *
  * Output:      Task status: Success, failure, continuing.
  *
  *****************************************************************************/
 
-int task_spin( MSG_DATA *msg, CONF_VARS *cf, int dt, int subtask, int subtask_dt )
+int task_spin( MSG_DATA *msg, CONF_VARS *cf, int dt, int subtask_dt )
 {
 	/* Continuously add 1 degree to yaw every time through this loop. It might
 	 * be better to only add the 1 degree if enough time has elapsed by using
 	 * the dt argument. */
 	msg->target.data.yaw++;
 
+	return TASK_CONTINUING;
+} /* end task_spin() */
+
+
+/******************************************************************************
+ *
+ * Title:       int task_spin( MSG_DATA *msg, CONF_VARS *cf, int dt, int subtask, int subtask_dt )
+ *
+ * Description: Make the sub spin in place.
+ *
+ * Input:       msg: Current message data.
+ * 				cf: Configuration variables.
+ *              dt: The task time.
+ * 				subtask_dt: The subtask time.
+ *
+ * Output:      Task status: Success, failure, continuing.
+ *
+ *****************************************************************************/
+
+int task_sweep( MSG_DATA *msg, CONF_VARS *cf, int dt, int subtask_dt )
+{
+	/* Check to see if we have a previous value for yaw
+	 * If not, we set it. */
+	if( msg->target.data.yaw_previous == TASK_YAW_PREVIOUS_NOT_SET ) {
+		msg->target.data.yaw_previous = msg->status.data.yaw;
+	}
+	
+	if( dt < TASK_SWEEP_YAW_TIMEOUT ) {
+		/* Sweep the target angle back and forth */
+		msg->target.data.yaw = msg->target.data.yaw_previous + 
+							   TASK_SWEEP_YAW_ANGLE * sin( dt * 2 * M_PI / TASK_SWEEP_YAW_PERIOD );
+	}
+	else {
+		msg->target.data.yaw = msg->target.data.yaw_previous;
+	}
+	
 	return TASK_CONTINUING;
 } /* end task_spin() */
