@@ -59,13 +59,14 @@ int vision_find_dot( int *dotx,
     CvPoint center;
     IplImage *hsvImg = NULL;
     IplImage *outImg = NULL;
-    IplConvKernel *w = cvCreateStructuringElementEx( 2, 2,
+    IplConvKernel *w = cvCreateStructuringElementEx( 5, 5,
             (int)floor( ( 3.0 ) / 2 ), (int)floor( ( 3.0 ) / 2 ), CV_SHAPE_RECT );
     CvSize sz = cvSize( srcImg->width & -2, srcImg->height & -2 );
     IplImage *hsv_clone = NULL;
     IplImage *tgrayH = NULL;
     IplImage *tgrayS = NULL;
     IplImage *tgrayV = NULL;
+    int smooth_size = 9;
 
     /* Initialize to impossible values. */
     center.x = -1;
@@ -97,15 +98,15 @@ int vision_find_dot( int *dotx,
 	 * Gaussian and then merge back to HSV image.  */
     cvSetImageCOI( hsv_clone, 1 );
     cvCopy( hsv_clone, tgrayH, 0 );
-	cvSmooth( tgrayH, tgrayH, CV_GAUSSIAN, 5, 5 );
+	cvSmooth( tgrayH, tgrayH, CV_GAUSSIAN, smooth_size, smooth_size );
 
 	cvSetImageCOI( hsv_clone, 2 );
     cvCopy( hsv_clone, tgrayS, 0 );
-	cvSmooth( tgrayS, tgrayS, CV_GAUSSIAN, 5, 5 );
+	cvSmooth( tgrayS, tgrayS, CV_GAUSSIAN, smooth_size, smooth_size );
 
 	cvSetImageCOI( hsv_clone, 3 );
     cvCopy( hsv_clone, tgrayV, 0 );
-	cvSmooth( tgrayV, tgrayV, CV_GAUSSIAN, 5, 5 );
+	cvSmooth( tgrayV, tgrayV, CV_GAUSSIAN, smooth_size, smooth_size );
 
 	cvMerge( tgrayH, tgrayS, tgrayV, NULL, hsvImg );
 
@@ -195,6 +196,7 @@ int vision_find_pipe( int *pipex,
             (int)floor( ( 3.0 ) / 2 ), (int)floor( ( 3.0 ) / 2 ), CV_SHAPE_RECT );
     IplConvKernel *wD = cvCreateStructuringElementEx( 3, 3,
             (int)floor( ( 3.0 ) / 2 ), (int)floor( ( 3.0 ) / 2 ), CV_SHAPE_RECT );
+    int smooth_size = 9;
 
     /* Initialize to impossible values. */
     center.x = -1;
@@ -221,15 +223,15 @@ int vision_find_pipe( int *pipex,
 	 * Gaussian and then merge back to HSV image.  */
     cvSetImageCOI( hsv_clone, 1 );
     cvCopy( hsv_clone, tgrayH, 0 );
-	cvSmooth( tgrayH, tgrayH, CV_GAUSSIAN, 5, 5 );
+	cvSmooth( tgrayH, tgrayH, CV_GAUSSIAN, smooth_size, smooth_size );
 
 	cvSetImageCOI( hsv_clone, 2 );
     cvCopy( hsv_clone, tgrayS, 0 );
-	cvSmooth( tgrayS, tgrayS, CV_GAUSSIAN, 5, 5 );
+	cvSmooth( tgrayS, tgrayS, CV_GAUSSIAN, smooth_size, smooth_size );
 
 	cvSetImageCOI( hsv_clone, 3 );
     cvCopy( hsv_clone, tgrayV, 0 );
-	cvSmooth( tgrayV, tgrayV, CV_GAUSSIAN, 5, 5 );
+	cvSmooth( tgrayV, tgrayV, CV_GAUSSIAN, smooth_size, smooth_size );
 
 	cvMerge( tgrayH, tgrayS, tgrayV, NULL, hsv_image );
 
@@ -513,13 +515,14 @@ int vision_find_fence( int *fence_center,
     int ii = 0;
     int jj = 0;
     int kk = 0;
+    int smooth_size = 9;
 
     IplImage *hsv_image = NULL;
     IplImage *outImg = NULL;
-    IplConvKernel *wE = cvCreateStructuringElementEx( 2, 2,
+    IplConvKernel *wE = cvCreateStructuringElementEx( 3, 3,
             1, 1, CV_SHAPE_RECT );
-    IplConvKernel *wD = cvCreateStructuringElementEx( 9, 9,
-            (int)floor( ( 9.0 ) / 2 ), (int)floor( ( 9.0 ) / 2 ), CV_SHAPE_RECT );
+    IplConvKernel *wD = cvCreateStructuringElementEx( 7, 7,
+            4, 4, CV_SHAPE_RECT );
     CvSize sz = cvSize( srcImg->width & -2, srcImg->height & -2 );
     IplImage *hsv_clone = NULL;
     IplImage *tgrayH = NULL;
@@ -553,15 +556,15 @@ int vision_find_fence( int *fence_center,
 	 * Gaussian and then merge back to HSV image.  */
     cvSetImageCOI( hsv_clone, 1 );
     cvCopy( hsv_clone, tgrayH, 0 );
-	cvSmooth( tgrayH, tgrayH, CV_GAUSSIAN, 5, 5 );
+	cvSmooth( tgrayH, tgrayH, CV_GAUSSIAN, smooth_size, smooth_size );
 
 	cvSetImageCOI( hsv_clone, 2 );
     cvCopy( hsv_clone, tgrayS, 0 );
-	cvSmooth( tgrayS, tgrayS, CV_GAUSSIAN, 5, 5 );
+	cvSmooth( tgrayS, tgrayS, CV_GAUSSIAN, smooth_size, smooth_size );
 
 	cvSetImageCOI( hsv_clone, 3 );
     cvCopy( hsv_clone, tgrayV, 0 );
-	cvSmooth( tgrayV, tgrayV, CV_GAUSSIAN, 5, 5 );
+	cvSmooth( tgrayV, tgrayV, CV_GAUSSIAN, smooth_size, smooth_size );
 
 	cvMerge( tgrayH, tgrayS, tgrayV, NULL, hsv_image );
 
@@ -584,6 +587,14 @@ int vision_find_fence( int *fence_center,
         		kk++;
 			}
 		}
+	}
+	/* We were getting a floating point exception and OpenCV was crashing. I
+	 * believe it is because we can divide by 0 here if we are not careful.
+	 * I am setting kk = 1 for now but is there a better value we should use?
+	 * I think we will be fine because if kk = 0 then sum_x = 0 and
+	 * sum_x / kk = 0 no matter what we set kk equal to. */
+	if( kk == 0 ) {
+		kk = 1;
 	}
     *fence_center = floor(sum_x / kk);
 
