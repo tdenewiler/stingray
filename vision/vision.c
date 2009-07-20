@@ -57,9 +57,9 @@ int vision_find_dot( int *dotx,
                    )
 {
     CvPoint center;
-    CvPoint2D32f rotCenter;
-    CvMat *rotation;
-    IplImage *rotateImg = NULL;
+    //CvPoint2D32f rotCenter;
+    //CvMat *rotation;
+    //IplImage *rotateImg = NULL;
     IplImage *hsvImg = NULL;
     IplImage *outImg = NULL;
     IplConvKernel *w = cvCreateStructuringElementEx( 2, 2,
@@ -68,21 +68,21 @@ int vision_find_dot( int *dotx,
     /* Initialize to impossible values. */
     center.x = -1;
     center.y = -1;
-    rotCenter.x = srcImg->width / 2;
-    rotCenter.y = srcImg->height / 2;
-    rotation = cvCreateMat( 2 , 3 , CV_32FC1 );
+    //rotCenter.x = srcImg->width / 2;
+    //rotCenter.y = srcImg->height / 2;
+    //rotation = cvCreateMat( 2 , 3 , CV_32FC1 );
 
 	/* Capture a new source image. */
     srcImg = cvQueryFrame( cap );
     if( !srcImg ) {
         return 0;
     }
-	rotateImg = cvCreateImage( cvGetSize( srcImg ), IPL_DEPTH_8U, 3 );
+	//rotateImg = cvCreateImage( cvGetSize( srcImg ), IPL_DEPTH_8U, 3 );
 
     /* Rotate image. First find rotation matrix. Then apply affine warp. */
-    cv2DRotationMatrix( rotCenter, angle, 1, rotation );
-    cvWarpAffine( srcImg, rotateImg, rotation );
-    cvCopy( rotateImg, srcImg );
+    //cv2DRotationMatrix( rotCenter, angle, 1, rotation );
+    //cvWarpAffine( srcImg, rotateImg, rotation );
+    //cvCopy( rotateImg, srcImg );
 
 	/* Create images to work on. */
     hsvImg = cvCreateImage( cvGetSize(srcImg), IPL_DEPTH_8U, 3 );
@@ -108,7 +108,7 @@ int vision_find_dot( int *dotx,
     /* Clear variables to free memory. */
     cvReleaseImage( &hsvImg );
     cvReleaseImage( &outImg );
-    cvReleaseImage( &rotateImg );
+    //cvReleaseImage( &rotateImg );
 
 	/* Check that the values of dotx & doty are not negative */
 	if( dotx < 0 || doty < 0 )
@@ -153,6 +153,7 @@ int vision_find_pipe( int *pipex,
     CvSize sz = cvSize( srcImg->width & -2, srcImg->height & -2 );
     CvPoint center;
     IplImage *hsv_image = NULL;
+    IplImage *hsv_clone = NULL;
     IplImage *outImg = NULL;
     IplImage *tgrayH = NULL;
     IplImage *tgrayS = NULL;
@@ -173,10 +174,10 @@ int vision_find_pipe( int *pipex,
 
     hsv_image = cvCreateImage( cvGetSize( srcImg ), IPL_DEPTH_8U, 3 );
     outImg = cvCreateImage( cvGetSize( srcImg ), IPL_DEPTH_8U, 1 );
-    
-    /* Segment the image into a binary image. */
+
+    /* Convert to HSV and clone image for smoothing */
     cvCvtColor( srcImg, hsv_image, CV_RGB2HSV );
-	
+	hsv_clone = cvCloneImage( hsv_image );
 	/* Create a grayscale image. */
     tgrayH = cvCreateImage( sz, 8, 1 );
 	tgrayS = cvCreateImage( sz, 8, 1 );
@@ -184,26 +185,26 @@ int vision_find_pipe( int *pipex,
 
     /* Find squares in every color plane of the image.
 	 * Filter each plane with a gaussian, merge back to HSV image  */
-    cvSetImageCOI( hsv_image, 1 );
-    cvCopy( hsv_image, tgrayH, 0 );
+    cvSetImageCOI( hsv_clone, 1 );
+    cvCopy( hsv_clone, tgrayH, 0 );
 	cvSmooth( tgrayH, tgrayH, CV_GAUSSIAN, 5, 5 );
-		
-	cvSetImageCOI( hsv_image, 2 );
-    cvCopy( hsv_image, tgrayS, 0 );
+
+	cvSetImageCOI( hsv_clone, 2 );
+    cvCopy( hsv_clone, tgrayS, 0 );
 	cvSmooth( tgrayS, tgrayS, CV_GAUSSIAN, 5, 5 );
-		
-	cvSetImageCOI( hsv_image, 3 );
-    cvCopy( hsv_image, tgrayV, 0 );
+
+	cvSetImageCOI( hsv_clone, 3 );
+    cvCopy( hsv_clone, tgrayV, 0 );
 	cvSmooth( tgrayV, tgrayV, CV_GAUSSIAN, 5, 5 );
-	
+
 	cvMerge( tgrayH, tgrayS, tgrayV, NULL, hsv_image );
-	
+
 	cvInRangeS( hsv_image, cvScalar(hL,sL,vL), cvScalar(hH,sH,vH), binImg );
 
     /* Perform erosion, dilation, and conversion. */
     cvErode( binImg, binImg, wE );
     cvDilate( binImg, binImg, wD );
-    cvConvertScale( binImg, outImg, 0.0 );
+    cvConvertScale( binImg, outImg, 255.0 );
 
     /* Process the image. */
     *bearing = vision_get_bearing( outImg );
@@ -212,6 +213,7 @@ int vision_find_pipe( int *pipex,
 
     /* Clear variables to free memory. */
     cvReleaseImage( &hsv_image );
+    cvReleaseImage( &hsv_clone );
     cvReleaseImage( &outImg );
     cvReleaseImage( &tgrayH );
     cvReleaseImage( &tgrayS );
@@ -243,8 +245,8 @@ double vision_get_bearing( IplImage *inputBinImg )
     int rightEdgeCount = 0;
     int imHeight = inputBinImg->height;
     int imWidth = inputBinImg->width;
-    int edgeThreshold = 5;
-    double maxSTD = 75;
+    int edgeThreshold = 3;
+    double maxSTD = 5000;
     int k;
 	CvSeq *point_seq;
     CvMemStorage *storage;
@@ -260,17 +262,18 @@ double vision_get_bearing( IplImage *inputBinImg )
     /* Edge vectors, first element = x, second = y. */
     int leftEdge[imHeight][2];
     int rightEdge[imHeight][2];
+
     int i = 0;
     int j = 0;
 
     /* Initialize edge arrays, mset may be better. */
     for( i = 0; i < imHeight; i++ ) {
+        leftEdge[i][0] = 0;
         leftEdge[i][1] = 0;
-        leftEdge[i][2] = 0;
+        rightEdge[i][0] = 0;
         rightEdge[i][1] = 0;
-        rightEdge[i][2] = 0;
     }
-    for( i = 0; i < imHeight - 240; i++ ) {
+    for( i = 0; i < imHeight - 10; i++ ) {
         /* Scan through each line of image and look for first non zero pixel
          * then get the (i,j) pixel value. */
         while( (cvGet2D(inputBinImg, i, j).val[0] < 1) && (j<imWidth - 1) ) {
@@ -278,8 +281,8 @@ double vision_get_bearing( IplImage *inputBinImg )
         }
         /* If we exit before getting to end of row, edge exists. */
         if( (j < imWidth - 1) && (j > 0) ) {
-            leftEdge[leftEdgeCount][1] = i;
-            leftEdge[leftEdgeCount][2] = j;
+            leftEdge[leftEdgeCount][0] = i; //FLIP i, j, here worksish
+            leftEdge[leftEdgeCount][1] = j;
             leftEdgeCount++;
             /* Continue scanning to find right edge. */
             while( (cvGet2D(inputBinImg, i, j).val[0] > 0) && (j < imWidth - 1) ) {
@@ -287,8 +290,8 @@ double vision_get_bearing( IplImage *inputBinImg )
             }
             if( j < imWidth - 2 ) { /* Scan didn't get to end of image so
             						  * right edge exists. */
-                rightEdge[rightEdgeCount][1] = i;
-                rightEdge[rightEdgeCount][2] = j;
+                rightEdge[rightEdgeCount][0] = i;
+                rightEdge[rightEdgeCount][1] = j;
                 rightEdgeCount++;
             }
         }
@@ -308,16 +311,16 @@ double vision_get_bearing( IplImage *inputBinImg )
 
     if( leftEdgeCount > edgeThreshold ) {
         for( i = 0; i < leftEdgeCount; i++ ) {
-        	point = cvPoint2D32f(leftEdge[i][1],leftEdge[i][2]);
+        	point = cvPoint2D32f(leftEdge[i][0],leftEdge[i][1]);
             cvSeqPush( point_seq, &point );
         }
-        cvFitLine( point_seq, CV_DIST_L2, 0, 0.01, 0.01, left_line );
-        mL = left_line[1] / left_line[0];
+        cvFitLine( point_seq, CV_DIST_L12, 0, 0.001, 0.001, left_line );
+        mL = atan2( left_line[1], left_line[0] );
         LError = cvCreateMat( 1, leftEdgeCount - 1, CV_32SC1 );
         for( k = 0; k < leftEdgeCount - 1; k++ ) {
             /* Save errors in vector LError. */
             cvSetReal2D( LError, 0, k, (double)(leftEdge[k][2])
-                - (double)(mL * (leftEdge[k][1] - left_line[2]) + left_line[3]) );
+                - (double)(( left_line[1] / left_line[0] ) * (leftEdge[k][0] - left_line[1]) + left_line[3]) );
         }
         /* Calculate standard deviation of error. */
         cvAvgSdv( LError, NULL, &Left_STD, NULL );
@@ -326,15 +329,15 @@ double vision_get_bearing( IplImage *inputBinImg )
 
     if( rightEdgeCount > edgeThreshold ) {
         for( i = 0; i < rightEdgeCount; i++ ) {
-        	point = cvPoint2D32f(leftEdge[i][1],leftEdge[i][2]);
+        	point = cvPoint2D32f(leftEdge[i][0],leftEdge[i][1]);
             cvSeqPush( point_seq, &point );
         }
-        cvFitLine( point_seq, CV_DIST_L2, 0, 0.01, 0.01, right_line );
-        mR = right_line[1] / right_line[0];
+        cvFitLine( point_seq, CV_DIST_L12, 0, 0.001, 0.001, right_line );
+        mR = atan2( right_line[1], right_line[0] );
         RError = cvCreateMat( 1, rightEdgeCount - 1, CV_32SC1 );
         for( k = 0; k < rightEdgeCount - 1; k++ ) {
             cvSetReal2D( RError, 0, k, (double)(rightEdge[k][2])
-                - (double)(mR* (rightEdge[k][1]-right_line[2]) + right_line[3]) );
+                - (double)(( left_line[1] / left_line[0] ) * (rightEdge[k][0]-right_line[1]) + right_line[3]) );
         }
         cvAvgSdv( RError, NULL, &Right_STD, NULL);
         cvClearSeq( point_seq );
@@ -493,6 +496,7 @@ int vision_find_fence( int *fence_center,
   	cvFlip( srcImg, srcImg );
     center = srcImg->width / 2;
 
+	/* Create intermediate images. */
     hsv_image = cvCreateImage( cvGetSize( srcImg ), IPL_DEPTH_8U, 3 );
     outImg = cvCreateImage( cvGetSize( srcImg ), IPL_DEPTH_8U, 1 );
 
