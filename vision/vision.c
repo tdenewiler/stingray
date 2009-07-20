@@ -57,32 +57,25 @@ int vision_find_dot( int *dotx,
                    )
 {
     CvPoint center;
-    //CvPoint2D32f rotCenter;
-    //CvMat *rotation;
-    //IplImage *rotateImg = NULL;
     IplImage *hsvImg = NULL;
     IplImage *outImg = NULL;
     IplConvKernel *w = cvCreateStructuringElementEx( 2, 2,
             (int)floor( ( 3.0 ) / 2 ), (int)floor( ( 3.0 ) / 2 ), CV_SHAPE_RECT );
+    CvSize sz = cvSize( srcImg->width & -2, srcImg->height & -2 );
+    IplImage *hsv_clone = NULL;
+    IplImage *tgrayH = NULL;
+    IplImage *tgrayS = NULL;
+    IplImage *tgrayV = NULL;
 
     /* Initialize to impossible values. */
     center.x = -1;
     center.y = -1;
-    //rotCenter.x = srcImg->width / 2;
-    //rotCenter.y = srcImg->height / 2;
-    //rotation = cvCreateMat( 2 , 3 , CV_32FC1 );
 
 	/* Capture a new source image. */
     srcImg = cvQueryFrame( cap );
     if( !srcImg ) {
         return 0;
     }
-	//rotateImg = cvCreateImage( cvGetSize( srcImg ), IPL_DEPTH_8U, 3 );
-
-    /* Rotate image. First find rotation matrix. Then apply affine warp. */
-    //cv2DRotationMatrix( rotCenter, angle, 1, rotation );
-    //cvWarpAffine( srcImg, rotateImg, rotation );
-    //cvCopy( rotateImg, srcImg );
 
 	/* Create images to work on. */
     hsvImg = cvCreateImage( cvGetSize(srcImg), IPL_DEPTH_8U, 3 );
@@ -93,6 +86,30 @@ int vision_find_dot( int *dotx,
 
     /* Segment the flipped image into a binary image. */
     cvCvtColor( srcImg, hsvImg, CV_RGB2HSV );
+	hsv_clone = cvCloneImage( hsvImg );
+	
+	/* Create three separate grayscale images, one for each channel. */
+    tgrayH = cvCreateImage( sz, 8, 1 );
+	tgrayS = cvCreateImage( sz, 8, 1 );
+	tgrayV = cvCreateImage( sz, 8, 1 );
+
+    /* Find squares in every color plane of the image. Filter each plane with a
+	 * Gaussian and then merge back to HSV image.  */
+    cvSetImageCOI( hsv_clone, 1 );
+    cvCopy( hsv_clone, tgrayH, 0 );
+	cvSmooth( tgrayH, tgrayH, CV_GAUSSIAN, 5, 5 );
+
+	cvSetImageCOI( hsv_clone, 2 );
+    cvCopy( hsv_clone, tgrayS, 0 );
+	cvSmooth( tgrayS, tgrayS, CV_GAUSSIAN, 5, 5 );
+
+	cvSetImageCOI( hsv_clone, 3 );
+    cvCopy( hsv_clone, tgrayV, 0 );
+	cvSmooth( tgrayV, tgrayV, CV_GAUSSIAN, 5, 5 );
+
+	cvMerge( tgrayH, tgrayS, tgrayV, NULL, hsvImg );
+
+	/* Threshold all three channels using our own values. */
     cvInRangeS( hsvImg, cvScalar(hL, sL, vL), cvScalar(hH, sH, vH), binImg );
 
     /* Perform erosion, dilation, and conversion. */
@@ -108,7 +125,6 @@ int vision_find_dot( int *dotx,
     /* Clear variables to free memory. */
     cvReleaseImage( &hsvImg );
     cvReleaseImage( &outImg );
-    //cvReleaseImage( &rotateImg );
 
 	/* Check that the values of dotx & doty are not negative */
 	if( dotx < 0 || doty < 0 )
@@ -178,13 +194,14 @@ int vision_find_pipe( int *pipex,
     /* Convert to HSV and clone image for smoothing */
     cvCvtColor( srcImg, hsv_image, CV_RGB2HSV );
 	hsv_clone = cvCloneImage( hsv_image );
-	/* Create a grayscale image. */
+	
+	/* Create three separate grayscale images, one for each channel. */
     tgrayH = cvCreateImage( sz, 8, 1 );
 	tgrayS = cvCreateImage( sz, 8, 1 );
 	tgrayV = cvCreateImage( sz, 8, 1 );
 
-    /* Find squares in every color plane of the image.
-	 * Filter each plane with a gaussian, merge back to HSV image  */
+    /* Find squares in every color plane of the image. Filter each plane with a
+	 * Gaussian and then merge back to HSV image.  */
     cvSetImageCOI( hsv_clone, 1 );
     cvCopy( hsv_clone, tgrayH, 0 );
 	cvSmooth( tgrayH, tgrayH, CV_GAUSSIAN, 5, 5 );
@@ -199,6 +216,7 @@ int vision_find_pipe( int *pipex,
 
 	cvMerge( tgrayH, tgrayS, tgrayV, NULL, hsv_image );
 
+	/* Threshold all three channels using our own values. */
 	cvInRangeS( hsv_image, cvScalar(hL,sL,vL), cvScalar(hH,sH,vH), binImg );
 
     /* Perform erosion, dilation, and conversion. */
@@ -485,9 +503,14 @@ int vision_find_fence( int *fence_center,
             1, 1, CV_SHAPE_RECT );
     IplConvKernel *wD = cvCreateStructuringElementEx( 9, 9,
             (int)floor( ( 9.0 ) / 2 ), (int)floor( ( 9.0 ) / 2 ), CV_SHAPE_RECT );
+    CvSize sz = cvSize( srcImg->width & -2, srcImg->height & -2 );
+    IplImage *hsv_clone = NULL;
+    IplImage *tgrayH = NULL;
+    IplImage *tgrayS = NULL;
+    IplImage *tgrayV = NULL;
 
+	/* Capture a new source image. */
     srcImg = cvQueryFrame( cap );
-
     if( !srcImg ) {
         return 0;
     }
@@ -502,6 +525,30 @@ int vision_find_fence( int *fence_center,
 
     /* Segment the image into a binary image. */
     cvCvtColor( srcImg, hsv_image, CV_RGB2HSV );
+	hsv_clone = cvCloneImage( hsv_image );
+	
+	/* Create three separate grayscale images, one for each channel. */
+    tgrayH = cvCreateImage( sz, 8, 1 );
+	tgrayS = cvCreateImage( sz, 8, 1 );
+	tgrayV = cvCreateImage( sz, 8, 1 );
+
+    /* Find squares in every color plane of the image. Filter each plane with a
+	 * Gaussian and then merge back to HSV image.  */
+    cvSetImageCOI( hsv_clone, 1 );
+    cvCopy( hsv_clone, tgrayH, 0 );
+	cvSmooth( tgrayH, tgrayH, CV_GAUSSIAN, 5, 5 );
+
+	cvSetImageCOI( hsv_clone, 2 );
+    cvCopy( hsv_clone, tgrayS, 0 );
+	cvSmooth( tgrayS, tgrayS, CV_GAUSSIAN, 5, 5 );
+
+	cvSetImageCOI( hsv_clone, 3 );
+    cvCopy( hsv_clone, tgrayV, 0 );
+	cvSmooth( tgrayV, tgrayV, CV_GAUSSIAN, 5, 5 );
+
+	cvMerge( tgrayH, tgrayS, tgrayV, NULL, hsv_image );
+
+	/* Threshold all three channels using our own values. */
     cvInRangeS( hsv_image, cvScalar(hL,sL,vL), cvScalar(hH,sH,vH), binImg );
 
     /* Perform erosion, dilation, and conversion. */
