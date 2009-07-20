@@ -150,10 +150,14 @@ int vision_find_pipe( int *pipex,
                       float vH
                     )
 {
+    CvSize sz = cvSize( srcImg->width & -2, srcImg->height & -2 );
     CvPoint center;
     IplImage *hsv_image = NULL;
     IplImage *outImg = NULL;
-    IplConvKernel *wE = cvCreateStructuringElementEx( 2, 2,
+    IplImage *tgrayH = NULL;
+    IplImage *tgrayS = NULL;
+    IplImage *tgrayV = NULL;
+	IplConvKernel *wE = cvCreateStructuringElementEx( 2, 2,
             (int)floor( ( 3.0 ) / 2 ), (int)floor( ( 3.0 ) / 2 ), CV_SHAPE_RECT );
     IplConvKernel *wD = cvCreateStructuringElementEx( 3, 3,
             (int)floor( ( 3.0 ) / 2 ), (int)floor( ( 3.0 ) / 2 ), CV_SHAPE_RECT );
@@ -169,10 +173,32 @@ int vision_find_pipe( int *pipex,
 
     hsv_image = cvCreateImage( cvGetSize( srcImg ), IPL_DEPTH_8U, 3 );
     outImg = cvCreateImage( cvGetSize( srcImg ), IPL_DEPTH_8U, 1 );
-
+    
     /* Segment the image into a binary image. */
     cvCvtColor( srcImg, hsv_image, CV_RGB2HSV );
-    cvInRangeS( hsv_image, cvScalar(hL,sL,vL), cvScalar(hH,sH,vH), binImg );
+	
+	/* Create a grayscale image. */
+    tgrayH = cvCreateImage( sz, 8, 1 );
+	tgrayS = cvCreateImage( sz, 8, 1 );
+	tgrayV = cvCreateImage( sz, 8, 1 );
+
+    /* Find squares in every color plane of the image.
+	 * Filter each plane with a gaussian, merge back to HSV image  */
+    cvSetImageCOI( hsv_image, 1 );
+    cvCopy( hsv_image, tgrayH, 0 );
+	cvSmooth( tgrayH, tgrayH, CV_GAUSSIAN, 5, 5 );
+		
+	cvSetImageCOI( hsv_image, 2 );
+    cvCopy( hsv_image, tgrayS, 0 );
+	cvSmooth( tgrayS, tgrayS, CV_GAUSSIAN, 5, 5 );
+		
+	cvSetImageCOI( hsv_image, 3 );
+    cvCopy( hsv_image, tgrayV, 0 );
+	cvSmooth( tgrayV, tgrayV, CV_GAUSSIAN, 5, 5 );
+	
+	cvMerge( tgrayH, tgrayS, tgrayV, NULL, hsv_image );
+	
+	cvInRangeS( hsv_image, cvScalar(hL,sL,vL), cvScalar(hH,sH,vH), binImg );
 
     /* Perform erosion, dilation, and conversion. */
     cvErode( binImg, binImg, wE );
@@ -187,6 +213,9 @@ int vision_find_pipe( int *pipex,
     /* Clear variables to free memory. */
     cvReleaseImage( &hsv_image );
     cvReleaseImage( &outImg );
+    cvReleaseImage( &tgrayH );
+    cvReleaseImage( &tgrayS );
+    cvReleaseImage( &tgrayV );
 
     return 1;
 } /* end vision_find_pipe() */
