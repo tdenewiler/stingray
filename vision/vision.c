@@ -184,6 +184,8 @@ int vision_find_pipe( int *pipex,
                       float vH
                     )
 {
+	const static double BEARING_DELTA_MIN = 0.000001;
+	
     CvSize sz = cvSize( srcImg->width & -2, srcImg->height & -2 );
     CvPoint center;
     IplImage *hsv_image = NULL;
@@ -255,6 +257,10 @@ int vision_find_pipe( int *pipex,
     cvReleaseImage( &tgrayH );
     cvReleaseImage( &tgrayS );
     cvReleaseImage( &tgrayV );
+    
+    /* No detection condition, only using bearing - not centroid. */
+    if( fabs(*bearing) < BEARING_DELTA_MIN )
+    	return 2;
 
     return 1;
 } /* end vision_find_pipe() */
