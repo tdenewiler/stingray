@@ -128,8 +128,8 @@ int main( int argc, char *argv[] )
     MSG_DATA msg;
     int dotx = -1;
     int doty = -1;
-    int tmp_dotx = -1;
-    int tmp_doty = -1;
+    //int tmp_dotx = -1;
+    //int tmp_doty = -1;
     int width = -1;
     int height = -1;
     int pipex = -1;
@@ -298,13 +298,13 @@ int main( int argc, char *argv[] )
 				msg.vision.data.front_y = (f_img->height / 2) - doty;
 
 				/* Rotate centroid to account for camera mounted at angle. */
-				tmp_dotx = msg.vision.data.front_x;
-				tmp_doty = msg.vision.data.front_y;
-				msg.vision.data.front_x = tmp_dotx * cos(cf.vision_angle) +
-					tmp_doty * sin(cf.vision_angle);
+				//tmp_dotx = msg.vision.data.front_x;
+				//tmp_doty = msg.vision.data.front_y;
+				//msg.vision.data.front_x = tmp_dotx * cos(cf.vision_angle) +
+					//tmp_doty * sin(cf.vision_angle);
 				/* Possible sign error - the sine term should be negative */
-				msg.vision.data.front_y = tmp_dotx * sin(cf.vision_angle) +
-					tmp_doty * cos(cf.vision_angle);
+				//msg.vision.data.front_y = tmp_dotx * sin(cf.vision_angle) +
+					//tmp_doty * cos(cf.vision_angle);
 
 				/* Draw a circle at the centroid location. */
 				cvCircle( f_img, cvPoint(dotx, doty),
@@ -328,14 +328,14 @@ int main( int argc, char *argv[] )
             if( status == 1 ) {
             	/* Set the detection status of vision */
 				msg.vision.data.status = TASK_PIPE_DETECTED;
-				
+
 				for( ii = 0; ii < lineWidth; ii++ ) {
 					if( bearing != 0 ) {
 						/* Draw a line indicating the bearing. */
 						cvCircle( b_img,
-								cvPoint( b_img->width / 2 + ((int)(bearing * ii)),
-									(b_img->width / 2) + ii ),
-									2, cvScalar(255, 255, 0), 2 );
+							cvPoint( b_img->width / 2 + ((int)(bearing * ii)),
+							(b_img->width / 2) + ii ),
+							2, cvScalar(255, 255, 0), 2 );
 					}
 					else {
 						/* Draw a red line to indicate no detection. */
@@ -345,10 +345,14 @@ int main( int argc, char *argv[] )
 								2, cvScalar(0, 0, 255), 2 );
 					}
 				}
+				/* Draw a circle to indicate the centroid. */
+				cvCircle( b_img, cvPoint(pipex, b_img->height / 2),
+					10, cvScalar(255, 255, 0), 5, 8 );
+
 				/* Set target offsets in network message. We are taking the
 				 * negative of bearing for the y offset due to the way yaw is
 				 * calculated on the IMU. */
-                bearing = atan(bearing) * 180 / M_PI;
+                bearing = bearing * 180 / M_PI;
                 msg.vision.data.bottom_x = pipex - (b_img->width / 2);
                 msg.vision.data.bottom_y = -1 * bearing;
             }
@@ -369,7 +373,7 @@ int main( int argc, char *argv[] )
             if( status == 1 ) {
             	/* Set the detection status of vision */
 				msg.vision.data.status = TASK_FENCE_DETECTED;
-            	
+
 				/* Draw a circle at the centroid. */
 				cvCircle( f_img, cvPoint(fence_center, f_img->height / 2),
 					10, cvScalar(0, 0, 255), 5, 8 );
@@ -395,19 +399,19 @@ int main( int argc, char *argv[] )
         }
         else if( task == TASK_GATE && f_cam ) {
         	/* Look for the gate */
-        	
+
         	/* Default to fail detection until code is written */
         	msg.vision.data.status = TASK_NOT_DETECTED;
 
 		}
 		else if( task == TASK_BOXES && b_cam ) {
-			
+
 			/* Look for the boxes. */
 			status = vision_find_boxes( b_cam, b_img, boxes, squares );
 			if( status > 0 ) {
 				/* Set the detection status of vision */
 		    	msg.vision.data.status = TASK_BOXES_DETECTED;
-				
+
 				/* Initialize the centroid sequence reader. */
 				cvStartReadSeq( boxes, &reader1, 0 );
 				/* Read four sequence elements at a time. */
@@ -459,7 +463,7 @@ int main( int argc, char *argv[] )
 			if( status == 1 ) {
 				/* Set the detection status of vision */
 		    	msg.vision.data.status = TASK_SUITCASE_DETECTED;
-				
+
 				/* Set target offsets in network message. */
 				/* !!!!!!!!!!! Fix these !!!!!!!!!!! */
 				msg.vision.data.suitcase_x = 0;
@@ -483,9 +487,9 @@ int main( int argc, char *argv[] )
             if( recv_bytes > 0 ) {
                 recv_buf[recv_bytes] = '\0';
                 messages_decode( server_fd, recv_buf, &msg, recv_bytes );
-                
+
                 task = msg.task.data.task;
-                
+
                 /* Force vision to look for the pipe no matter which pipe
 			     * subtask we are currently searching for. */
 				if( task == TASK_PIPE1 || task == TASK_PIPE2 ||
