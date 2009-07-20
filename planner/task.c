@@ -468,19 +468,23 @@ int task_pipe( MSG_DATA *msg, CONF_VARS *cf, int dt, int subtask_dt )
 		}
 	}
 	else {
-				
-		/* Set the values based on current orientation and pixel error. */
-		msg->target.data.yaw    = msg->status.data.yaw + (float)msg->vision.data.bottom_y * TASK_PIPE_YAW_GAIN;
-		msg->target.data.fx     = msg->vision.data.bottom_x * TASK_PIPE_FX_GAIN;
-		if( msg->target.data.fx > TASK_PIPE_FX_MAX ) {
-			msg->target.data.fx = TASK_PIPE_FX_MAX;
+			
+		/* If the pipe is detected, make course correction */	
+		if( msg->vision.data.status == TASK_PIPE_DETECTED ) {
+			
+			/* Set the values based on current orientation and pixel error. */
+			msg->target.data.yaw    = msg->status.data.yaw + (float)msg->vision.data.bottom_y * TASK_PIPE_YAW_GAIN;
+			msg->target.data.fx     = msg->vision.data.bottom_x * TASK_PIPE_FX_GAIN;
+			if( msg->target.data.fx > TASK_PIPE_FX_MAX ) {
+				msg->target.data.fx = TASK_PIPE_FX_MAX;
+			}
+			else if( msg->target.data.fx < -1 * TASK_PIPE_FX_MAX ) {
+				msg->target.data.fx = -1 * TASK_PIPE_FX_MAX;
+			}
+			//printf("TASK_PIPE: fx = %f\n", msg->target.data.fx);
 		}
-		else if( msg->target.data.fx < -1 * TASK_PIPE_FX_MAX ) {
-			msg->target.data.fx = -1 * TASK_PIPE_FX_MAX;
-		}
-		//printf("TASK_PIPE: fx = %f\n", msg->target.data.fx);
 		
-		pipe_mode_reset = TRUE;
+		pipe_mode_reset = FALSE;
 		return TASK_CONTINUING;
 	}
 
