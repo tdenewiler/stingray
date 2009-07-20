@@ -87,7 +87,7 @@ int vision_find_dot( int *dotx,
     /* Segment the flipped image into a binary image. */
     cvCvtColor( srcImg, hsvImg, CV_RGB2HSV );
 	hsv_clone = cvCloneImage( hsvImg );
-	
+
 	/* Create three separate grayscale images, one for each channel. */
     tgrayH = cvCreateImage( sz, 8, 1 );
 	tgrayS = cvCreateImage( sz, 8, 1 );
@@ -127,8 +127,25 @@ int vision_find_dot( int *dotx,
     cvReleaseImage( &outImg );
 
 	/* Check that the values of dotx & doty are not negative */
-	if( dotx < 0 || doty < 0 )
+	if( dotx < 0 || doty < 0 ) {
+		/* Clear variables to free memory. */
+		cvReleaseImage( &hsvImg );
+		cvReleaseImage( &outImg );
+		cvReleaseImage( &hsv_clone );
+		cvReleaseImage( &tgrayH );
+		cvReleaseImage( &tgrayS );
+		cvReleaseImage( &tgrayV );
+
 		return 0;
+	}
+
+    /* Clear variables to free memory. */
+    cvReleaseImage( &hsvImg );
+    cvReleaseImage( &outImg );
+    cvReleaseImage( &hsv_clone );
+    cvReleaseImage( &tgrayH );
+    cvReleaseImage( &tgrayS );
+    cvReleaseImage( &tgrayV );
 
     return 1;
 } /* end vision_find_dot() */
@@ -194,7 +211,7 @@ int vision_find_pipe( int *pipex,
     /* Convert to HSV and clone image for smoothing */
     cvCvtColor( srcImg, hsv_image, CV_RGB2HSV );
 	hsv_clone = cvCloneImage( hsv_image );
-	
+
 	/* Create three separate grayscale images, one for each channel. */
     tgrayH = cvCreateImage( sz, 8, 1 );
 	tgrayS = cvCreateImage( sz, 8, 1 );
@@ -526,7 +543,7 @@ int vision_find_fence( int *fence_center,
     /* Segment the image into a binary image. */
     cvCvtColor( srcImg, hsv_image, CV_RGB2HSV );
 	hsv_clone = cvCloneImage( hsv_image );
-	
+
 	/* Create three separate grayscale images, one for each channel. */
     tgrayH = cvCreateImage( sz, 8, 1 );
 	tgrayS = cvCreateImage( sz, 8, 1 );
@@ -573,6 +590,10 @@ int vision_find_fence( int *fence_center,
     /* Clear variables to free memory. */
     cvReleaseImage( &hsv_image );
     cvReleaseImage( &outImg );
+    cvReleaseImage( &hsv_clone );
+    cvReleaseImage( &tgrayH );
+    cvReleaseImage( &tgrayS );
+    cvReleaseImage( &tgrayV );
 
     return 1;
 } /* end vision_find_pipe() */
