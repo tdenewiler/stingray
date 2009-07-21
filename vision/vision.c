@@ -59,14 +59,17 @@ int vision_find_dot( int *dotx,
     CvPoint center;
     IplImage *hsvImg = NULL;
     IplImage *outImg = NULL;
-    IplConvKernel *w = cvCreateStructuringElementEx( 5, 5,
+    IplConvKernel *wL = cvCreateStructuringElementEx( 7, 7,
+            (int)floor( ( 7.0 ) / 2 ), (int)floor( ( 7.0 ) / 2 ), CV_SHAPE_RECT );
+    IplConvKernel *wS = cvCreateStructuringElementEx( 2, 2,
             (int)floor( ( 3.0 ) / 2 ), (int)floor( ( 3.0 ) / 2 ), CV_SHAPE_RECT );
+
     CvSize sz = cvSize( srcImg->width & -2, srcImg->height & -2 );
     IplImage *hsv_clone = NULL;
     IplImage *tgrayH = NULL;
     IplImage *tgrayS = NULL;
     IplImage *tgrayV = NULL;
-    int smooth_size = 9;
+    int smooth_size = 5;
 
     /* Initialize to impossible values. */
     center.x = -1;
@@ -98,7 +101,7 @@ int vision_find_dot( int *dotx,
 	 * Gaussian and then merge back to HSV image.  */
     cvSetImageCOI( hsv_clone, 1 );
     cvCopy( hsv_clone, tgrayH, 0 );
-	cvSmooth( tgrayH, tgrayH, CV_GAUSSIAN, smooth_size, smooth_size );
+	//cvSmooth( tgrayH, tgrayH, CV_GAUSSIAN, smooth_size, smooth_size );
 
 	cvSetImageCOI( hsv_clone, 2 );
     cvCopy( hsv_clone, tgrayS, 0 );
@@ -106,7 +109,7 @@ int vision_find_dot( int *dotx,
 
 	cvSetImageCOI( hsv_clone, 3 );
     cvCopy( hsv_clone, tgrayV, 0 );
-	cvSmooth( tgrayV, tgrayV, CV_GAUSSIAN, smooth_size, smooth_size );
+	//cvSmooth( tgrayV, tgrayV, CV_GAUSSIAN, smooth_size, smooth_size );
 
 	cvMerge( tgrayH, tgrayS, tgrayV, NULL, hsvImg );
 
@@ -114,8 +117,10 @@ int vision_find_dot( int *dotx,
     cvInRangeS( hsvImg, cvScalar(hL, sL, vL), cvScalar(hH, sH, vH), binImg );
 
     /* Perform erosion, dilation, and conversion. */
-    cvErode( binImg, binImg, w );
-    cvDilate( binImg, binImg, w );
+    cvErode( binImg, binImg, wS );
+    cvDilate( binImg, binImg, wS );
+	cvDilate( binImg, binImg, wL );
+
     cvConvertScale( binImg, outImg, 255.0 );
 
     /* Find the centroid. */
@@ -195,10 +200,13 @@ int vision_find_pipe( int *pipex,
     IplImage *tgrayS = NULL;
     IplImage *tgrayV = NULL;
 	IplConvKernel *wE = cvCreateStructuringElementEx( 2, 2,
-            (int)floor( ( 3.0 ) / 2 ), (int)floor( ( 3.0 ) / 2 ), CV_SHAPE_RECT );
+            (int)floor( ( 2.0 ) / 2 ), (int)floor( ( 2.0 ) / 2 ), CV_SHAPE_RECT );
     IplConvKernel *wD = cvCreateStructuringElementEx( 3, 3,
             (int)floor( ( 3.0 ) / 2 ), (int)floor( ( 3.0 ) / 2 ), CV_SHAPE_RECT );
-    int smooth_size = 9;
+    IplConvKernel *wBig = cvCreateStructuringElementEx( 5, 5,
+            (int)floor( ( 5.0 ) / 2 ), (int)floor( ( 5.0 ) / 2 ), CV_SHAPE_RECT );
+
+    int smooth_size = 5;
 
     /* Initialize to impossible values. */
     center.x = -1;
@@ -225,15 +233,15 @@ int vision_find_pipe( int *pipex,
 	 * Gaussian and then merge back to HSV image.  */
     cvSetImageCOI( hsv_clone, 1 );
     cvCopy( hsv_clone, tgrayH, 0 );
-	cvSmooth( tgrayH, tgrayH, CV_GAUSSIAN, smooth_size, smooth_size );
+	//cvSmooth( tgrayH, tgrayH, CV_GAUSSIAN, 7, 7 );
 
 	cvSetImageCOI( hsv_clone, 2 );
     cvCopy( hsv_clone, tgrayS, 0 );
-	cvSmooth( tgrayS, tgrayS, CV_GAUSSIAN, smooth_size, smooth_size );
+	cvSmooth( tgrayS, tgrayS, CV_GAUSSIAN, 5, 5 );
 
 	cvSetImageCOI( hsv_clone, 3 );
     cvCopy( hsv_clone, tgrayV, 0 );
-	cvSmooth( tgrayV, tgrayV, CV_GAUSSIAN, smooth_size, smooth_size );
+	//cvSmooth( tgrayV, tgrayV, CV_GAUSSIAN, 3, 3 );
 
 	cvMerge( tgrayH, tgrayS, tgrayV, NULL, hsv_image );
 
@@ -243,6 +251,11 @@ int vision_find_pipe( int *pipex,
     /* Perform erosion, dilation, and conversion. */
     cvErode( binImg, binImg, wE );
     cvDilate( binImg, binImg, wD );
+    cvErode( binImg, binImg, wD );
+    cvDilate( binImg, binImg, wD );
+    cvErode( binImg, binImg, wE );
+    cvDilate( binImg, binImg, wBig );
+
     cvConvertScale( binImg, outImg, 255.0 );
 
     /* Process the image. */
