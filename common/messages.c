@@ -131,6 +131,8 @@ void messages_send( int fd,
             msg->status.data.roll_period    = htonl( msg->status.data.roll_period );
             msg->status.data.yaw_period     = htonl( msg->status.data.yaw_period );
             msg->status.data.depth_period   = htonl( msg->status.data.depth_period );
+            msg->status.data.fx_period   	= htonl( msg->status.data.fx_period );
+            msg->status.data.fy_period   	= htonl( msg->status.data.fy_period );
 
             /* Actually send message here. */
             net_send( fd, &msg->status, sizeof(STATUS_MSG) );
@@ -140,6 +142,8 @@ void messages_send( int fd,
             msg->status.data.roll_period    = ntohl( msg->status.data.roll_period );
             msg->status.data.yaw_period     = ntohl( msg->status.data.yaw_period );
             msg->status.data.depth_period   = ntohl( msg->status.data.depth_period );
+            msg->status.data.fx_period   	= ntohl( msg->status.data.fx_period );
+            msg->status.data.fy_period   	= ntohl( msg->status.data.fy_period );
             break;
 
         case VISION_MSGID:

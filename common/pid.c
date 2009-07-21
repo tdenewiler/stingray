@@ -58,6 +58,20 @@ int pid_init( PID *pid, CONF_VARS *cf )
 	pid->depth.ki		= cf->ki_depth;
 	pid->depth.kd		= cf->kd_depth;
 	pid->depth.period	= cf->period_depth;
+	
+	/*
+	pid->fx.ref		= cf->target_fx;
+	pid->fx.kp		= cf->kp_fx;
+	pid->fx.ki		= cf->ki_fx;
+	pid->fx.kd		= cf->kd_fx;
+	pid->fx.period	= cf->period_fx;
+	
+	pid->fy.ref		= cf->target_fy;
+	pid->fy.kp		= cf->kp_fy;
+	pid->fy.ki		= cf->ki_fy;
+	pid->fy.kd		= cf->kd_fy;
+	pid->fy.period	= cf->period_fy;
+	*/
 
 	pid->voith_angle	= 0;
 	pid->voith_speed	= 0;
@@ -117,16 +131,61 @@ void pid_loop( int pololu_fd,
 		pid->depth.perr = 0;
 		pid->depth.ierr = 0;
 		pid->depth.derr = 0;
+		pid->fx.perr = 0;
+		pid->fx.ierr = 0;
+		pid->fx.derr = 0;
+		pid->fy.perr = 0;
+		pid->fy.ierr = 0;
+		pid->fy.derr = 0;
 		msg->target.data.mode = AUTONOMOUS;
 	}
 
 	/* These next three need to be set from vison, hydrophone, gui, etc. They
 	 * depend on the target values reported from those sensor systems.
 	 * Reference: float atan2f(float y, float x); theta = atan( y / x ) */
-	pid->voith_angle = pid_compute_sub_angle( msg->target.data.fx, msg->target.data.fy );
+	
+			
+	float fx_perr_old = pid->fx.perr;
+	float fy_perr_old = pid->fy.perr;
+	
+	/* Update the gains. */
+	pid->fx.kp		= msg->gain.data.kp_fx;
+	pid->fx.ki		= msg->gain.data.ki_fx;
+	pid->fx.kd		= msg->gain.data.kd_fx;
+	
+	pid->fy.kp		= msg->gain.data.kp_fy;
+	pid->fy.ki		= msg->gain.data.ki_fy;
+	pid->fy.kd		= msg->gain.data.kd_fy;
+	
+	/* Calculate the errors. */
+	pid->fx.ref		= msg->target.data.fx;
+	pid->fx.cval	= msg->status.data.fx;
+	pid->fx.perr	= pid->fx.cval - pid->fx.ref;
+	pid->fx.ierr	+= pid->fx.perr * dt / 1000000;
+	pid->fx.ierr	= pid_bound_integral( pid->fx.ierr, pid->fx.ki, PID_FX_INTEGRAL );
+	pid->fx.derr	= pid->fx.perr - fx_perr_old;
+	
+	pid->fy.ref		= msg->target.data.fy;
+	pid->fy.cval	= msg->status.data.fy;
+	pid->fy.perr	= pid->fy.cval - pid->fy.ref;
+	pid->fy.ierr	+= pid->fy.perr * dt / 1000000;
+	pid->fy.ierr	= pid_bound_integral( pid->fy.ierr, pid->fy.ki, PID_FY_INTEGRAL );
+	pid->fy.derr	= pid->fy.perr - fy_perr_old;
+	
+	/* PID equations. */
+	pid->forward_thrust =	pid->fx.kp * pid->fx.perr +
+					   		pid->fx.ki * pid->fx.ierr +
+					   		pid->fx.kd * pid->fx.derr;
+					
+	pid->lateral_thrust =	pid->fy.kp * pid->fy.perr +
+					   		pid->fy.ki * pid->fy.ierr +
+					   		pid->fy.kd * pid->fy.derr;
+					   		
+	/* Compute voith actuator values */
+	pid->voith_angle = pid_compute_sub_angle( pid->lateral_thrust, pid->forward_thrust );
 	pid->voith_speed = msg->target.data.speed;
-	pid->voith_thrust = sqrt( msg->target.data.fx * msg->target.data.fx +
-	                          msg->target.data.fy * msg->target.data.fy );
+	pid->voith_thrust = sqrt( pid->lateral_thrust * pid->lateral_thrust +
+	                          pid->forward_thrust * pid->forward_thrust );
 
 	/* Initialize return values. */
 	int r1 = -1;
@@ -222,8 +281,8 @@ void pid_loop( int pololu_fd,
 
 		/* PID equations. */
 		pid->yaw_torque =	pid->yaw.kp * pid->yaw.perr +
-						  pid->yaw.ki * pid->yaw.ierr +
-						  pid->yaw.kd * pid->yaw.derr;
+						  	pid->yaw.ki * pid->yaw.ierr +
+						  	pid->yaw.kd * pid->yaw.derr;
 
 		/* Check bounds. */
 		if( fabsf( pid->yaw_torque ) > POLOLU_MAX_YAW_TORQUE ) {

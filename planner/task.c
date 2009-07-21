@@ -661,8 +661,8 @@ int task_boxes( MSG_DATA *msg, CONF_VARS *cf, int dt, int subtask_dt )
 		if( msg->vision.data.status == TASK_BOXES_DETECTED ) {
 			
 			/* Set the values based on current orientation and pixel error. */
-			msg->target.data.fx = msg->vision.data.box1_x * TASK_BOXES_FX_GAIN;
-			msg->target.data.fy = msg->vision.data.box1_y * TASK_BOXES_FY_GAIN;
+			msg->target.data.fx = -1 * msg->vision.data.box1_x * TASK_BOXES_FX_GAIN;
+			msg->target.data.fy = -1 * msg->vision.data.box1_y * TASK_BOXES_FY_GAIN;
 			
 			/* fx & fy bound check */
 			if( fabsf(msg->target.data.fx) > TASK_BOXES_FX_MAX ) {
@@ -677,8 +677,12 @@ int task_boxes( MSG_DATA *msg, CONF_VARS *cf, int dt, int subtask_dt )
 			    abs(msg->vision.data.box1_y) < SUBTASK_BOXES_WINDOW_Y ) {
 				
 				/* Print that we are done with this to the screen */
-				printf( "Done Centering over Boxes" ); 
+				printf( "Centered over boxes." ); 
 			}
+		}
+		else {
+			msg->target.data.fx = 0;
+			msg->target.data.fy = 0;
 		}
 		
 		return TASK_CONTINUING;

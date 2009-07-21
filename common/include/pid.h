@@ -35,6 +35,8 @@
 #define PID_PITCH_INTEGRAL 70
 #define PID_YAW_INTEGRAL 40
 #define PID_DEPTH_INTEGRAL 75
+#define PID_FX_INTEGRAL 75
+#define PID_FY_INTEGRAL 75
 #define PID_SUB_ANGLE_EPSILON 0.01
 #endif /* PID_BOUNDS */
 
@@ -73,10 +75,14 @@ typedef struct _PID {
 	PID_DATA roll;			//!< PID values for roll.
 	PID_DATA yaw;			//!< PID values for yaw.
 	PID_DATA depth;			//!< PID values for depth.
+	PID_DATA fx;			//!< PID values for fx.
+	PID_DATA fy;			//!< PID values for fy.
 	float voith_angle;		//!< The angle for the thrust vector.
 	int voith_speed;		//!< The rotational speed for the Voith motors.
 	int voith_thrust;		//!< The thrust for the Voith motors.
 	int vertical_thrust;	//!< The vertical thrust for the wing motors.
+	int forward_thrust;	    //!< The thrust in the forward direction.
+	int lateral_thrust;		//!< The thrust in the lateral direction.
 	int pitch_torque;		//!< The calculated pitch torque.
 	int roll_torque;		//!< The calculated roll torque.
 	int yaw_torque;			//!< The calculated yaw torque.

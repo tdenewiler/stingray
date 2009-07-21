@@ -242,6 +242,12 @@ typedef struct _GAIN {
     double kp_depth;    //!< Proportional gain for depth
     double ki_depth;    //!< Integrator gain for depth
     double kd_depth;    //!< Derivative gain for depth
+    double kp_fx; 		//!< Proportional gain for fx
+    double ki_fx;		//!< Integrator gain for fx
+    double kd_fx;		//!< Derivative gain for fx
+    double kp_fy;		//!< Proportional gain for fy
+    double ki_fy;		//!< Integrator gain for fy
+    double kd_fy;		//!< Derivative gain for fy
     double kp_ax;       //!< Proportional gain for acceleration in X
     double ki_ax;       //!< Integrator gain for acceleration in X
     double kd_ax;       //!< Derivative gain for acceleration in X
@@ -272,6 +278,8 @@ typedef struct _STATUS {
     float roll;         //!< Roll angle, from Euler angles
     float yaw;          //!< Yaw angle, from Euler angles
     float depth;        //!< Depth from pressure sensor
+    float fx;			//!< The last fx stored in status
+    float fy;			//!< The last fy stored in status
     float pitch_perr;   //!< Pitch P error
     float pitch_ierr;   //!< Pitch I error
     float pitch_derr;   //!< Pitch D error
@@ -288,6 +296,14 @@ typedef struct _STATUS {
     float depth_ierr;   //!< Depth I error
     float depth_derr;   //!< Depth D error
     int depth_period;   //!< Depth dt
+    float fx_perr;	    //!< fx P error
+    float fx_ierr;	    //!< fx I error
+    float fx_derr;	    //!< fx D error
+    int fx_period;	    //!< fx dt
+    float fy_perr;	    //!< fx P error
+    float fy_ierr;	    //!< fx I error
+    float fy_derr;	    //!< fx D error
+    int fy_period;	    //!< fx dt
 } STAT;
 
 typedef struct _STATUS_MSG {

@@ -447,9 +447,7 @@ int main( int argc, char *argv[] )
 				cvClearSeq( boxes );
 				cvClearSeq( squares );
 			}
-			else { /* No positive detection */
-				msg.vision.data.status = TASK_NOT_DETECTED;
-			}
+			
 		} /* end TASK_BOXES */
 		
 		else if( task == TASK_SUITCASE && b_cam ) {
