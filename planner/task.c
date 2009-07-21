@@ -458,6 +458,9 @@ int task_pipe( MSG_DATA *msg, CONF_VARS *cf, int dt, int subtask_dt )
 						
 						/* Increment the subtask. This is where we should return subtask success. */
 						non_course_subtask++;
+						
+						/* Print that we are done with this to the screen */
+						printf( "Done Centering over Pipe" );
 					}
 				}
 			}
@@ -492,6 +495,9 @@ int task_pipe( MSG_DATA *msg, CONF_VARS *cf, int dt, int subtask_dt )
 						
 						/* Increment the subtask. This is where we should return subtask success. */
 						non_course_subtask++;
+						
+						/* Print that we are done with this to the screen */
+						printf( "Done Correcting the bearing over Pipe" );
 					}
 				}
 			}
@@ -664,6 +670,14 @@ int task_boxes( MSG_DATA *msg, CONF_VARS *cf, int dt, int subtask_dt )
 			}
 			if( fabsf(msg->target.data.fy) > TASK_BOXES_FY_MAX ) {
 				msg->target.data.fy = util_sign_value( msg->target.data.fy ) * TASK_BOXES_FY_MAX;
+			}
+			
+			/* Check that we are centered */
+			if( abs(msg->vision.data.box1_x) < SUBTASK_BOXES_WINDOW_X &&
+			    abs(msg->vision.data.box1_y) < SUBTASK_BOXES_WINDOW_Y ) {
+				
+				/* Print that we are done with this to the screen */
+				printf( "Done Centering over Boxes" ); 
 			}
 		}
 		
