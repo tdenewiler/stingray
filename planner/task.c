@@ -478,8 +478,8 @@ int task_pipe( MSG_DATA *msg, CONF_VARS *cf, int dt, int subtask_dt )
 			break;
 		}
 	}
-	else { /* Non-course mode */
-			
+	else {
+		/* Non-course mode */
 		/* If the pipe is detected, make course correction */	
 		if( msg->vision.data.status == TASK_PIPE_DETECTED ) {
 			
