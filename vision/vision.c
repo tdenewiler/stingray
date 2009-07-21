@@ -42,8 +42,6 @@
 
 int vision_find_dot( int *dotx,
                      int *doty,
-                     int *width,
-                     int *height,
                      int angle,
                      CvCapture *cap,
                      IplImage *srcImg,
@@ -69,7 +67,14 @@ int vision_find_dot( int *dotx,
     IplImage *tgrayH = NULL;
     IplImage *tgrayS = NULL;
     IplImage *tgrayV = NULL;
+<<<<<<< .mine
+    IplImage *tgrayHeq = NULL;
+    IplImage *tgraySeq = NULL;
+    IplImage *tgrayVeq = NULL;
+    int smooth_size = 9;
+=======
     int smooth_size = 5;
+>>>>>>> .r135
 
     /* Initialize to impossible values. */
     center.x = -1;
@@ -96,6 +101,9 @@ int vision_find_dot( int *dotx,
     tgrayH = cvCreateImage( sz, 8, 1 );
 	tgrayS = cvCreateImage( sz, 8, 1 );
 	tgrayV = cvCreateImage( sz, 8, 1 );
+    tgrayHeq = cvCreateImage( sz, 8, 1 );
+	tgraySeq = cvCreateImage( sz, 8, 1 );
+	tgrayVeq = cvCreateImage( sz, 8, 1 );
 
     /* Find squares in every color plane of the image. Filter each plane with a
 	 * Gaussian and then merge back to HSV image.  */
@@ -110,8 +118,14 @@ int vision_find_dot( int *dotx,
 	cvSetImageCOI( hsv_clone, 3 );
     cvCopy( hsv_clone, tgrayV, 0 );
 	//cvSmooth( tgrayV, tgrayV, CV_GAUSSIAN, smooth_size, smooth_size );
+	
+	/* Equalize the histograms of each channel. */
+	cvEqualizeHist( tgrayH, tgrayHeq );
+	cvEqualizeHist( tgrayS, tgraySeq );
+	cvEqualizeHist( tgrayV, tgrayVeq );
 
-	cvMerge( tgrayH, tgrayS, tgrayV, NULL, hsvImg );
+	//cvMerge( tgrayH, tgrayS, tgrayV, NULL, hsvImg );
+	cvMerge( tgrayHeq, tgraySeq, tgrayVeq, NULL, hsvImg );
 
 	/* Threshold all three channels using our own values. */
     cvInRangeS( hsvImg, cvScalar(hL, sL, vL), cvScalar(hH, sH, vH), binImg );
@@ -141,6 +155,9 @@ int vision_find_dot( int *dotx,
 		cvReleaseImage( &tgrayH );
 		cvReleaseImage( &tgrayS );
 		cvReleaseImage( &tgrayV );
+		cvReleaseImage( &tgrayHeq );
+		cvReleaseImage( &tgraySeq );
+		cvReleaseImage( &tgrayVeq );
 
 		return 0;
 	}
@@ -152,6 +169,9 @@ int vision_find_dot( int *dotx,
     cvReleaseImage( &tgrayH );
     cvReleaseImage( &tgrayS );
     cvReleaseImage( &tgrayV );
+	cvReleaseImage( &tgrayHeq );
+	cvReleaseImage( &tgraySeq );
+	cvReleaseImage( &tgrayVeq );
 
     return 1;
 } /* end vision_find_dot() */
@@ -199,6 +219,9 @@ int vision_find_pipe( int *pipex,
     IplImage *tgrayH = NULL;
     IplImage *tgrayS = NULL;
     IplImage *tgrayV = NULL;
+    IplImage *tgrayHeq = NULL;
+    IplImage *tgraySeq = NULL;
+    IplImage *tgrayVeq = NULL;
 	IplConvKernel *wE = cvCreateStructuringElementEx( 2, 2,
             (int)floor( ( 2.0 ) / 2 ), (int)floor( ( 2.0 ) / 2 ), CV_SHAPE_RECT );
     IplConvKernel *wD = cvCreateStructuringElementEx( 3, 3,
@@ -228,6 +251,9 @@ int vision_find_pipe( int *pipex,
     tgrayH = cvCreateImage( sz, 8, 1 );
 	tgrayS = cvCreateImage( sz, 8, 1 );
 	tgrayV = cvCreateImage( sz, 8, 1 );
+    tgrayHeq = cvCreateImage( sz, 8, 1 );
+	tgraySeq = cvCreateImage( sz, 8, 1 );
+	tgrayVeq = cvCreateImage( sz, 8, 1 );
 
     /* Find squares in every color plane of the image. Filter each plane with a
 	 * Gaussian and then merge back to HSV image.  */
@@ -243,7 +269,13 @@ int vision_find_pipe( int *pipex,
     cvCopy( hsv_clone, tgrayV, 0 );
 	//cvSmooth( tgrayV, tgrayV, CV_GAUSSIAN, 3, 3 );
 
-	cvMerge( tgrayH, tgrayS, tgrayV, NULL, hsv_image );
+	/* Equalize the histograms of each channel. */
+	cvEqualizeHist( tgrayH, tgrayHeq );
+	cvEqualizeHist( tgrayS, tgraySeq );
+	cvEqualizeHist( tgrayV, tgrayVeq );
+
+	//cvMerge( tgrayH, tgrayS, tgrayV, NULL, hsv_image );
+	cvMerge( tgrayHeq, tgraySeq, tgrayVeq, NULL, hsv_image );
 
 	/* Threshold all three channels using our own values. */
 	cvInRangeS( hsv_image, cvScalar(hL,sL,vL), cvScalar(hH,sH,vH), binImg );
@@ -270,6 +302,9 @@ int vision_find_pipe( int *pipex,
     cvReleaseImage( &tgrayH );
     cvReleaseImage( &tgrayS );
     cvReleaseImage( &tgrayV );
+	cvReleaseImage( &tgrayHeq );
+	cvReleaseImage( &tgraySeq );
+	cvReleaseImage( &tgrayVeq );
     
     /* No detection condition, only using bearing - not centroid. */
     if( fabs(*bearing) < BEARING_DELTA_MIN )
@@ -547,6 +582,9 @@ int vision_find_fence( int *fence_center,
     IplImage *tgrayH = NULL;
     IplImage *tgrayS = NULL;
     IplImage *tgrayV = NULL;
+    IplImage *tgrayHeq = NULL;
+    IplImage *tgraySeq = NULL;
+    IplImage *tgrayVeq = NULL;
 
 	/* Capture a new source image. */
     srcImg = cvQueryFrame( cap );
@@ -570,6 +608,9 @@ int vision_find_fence( int *fence_center,
     tgrayH = cvCreateImage( sz, 8, 1 );
 	tgrayS = cvCreateImage( sz, 8, 1 );
 	tgrayV = cvCreateImage( sz, 8, 1 );
+    tgrayHeq = cvCreateImage( sz, 8, 1 );
+	tgraySeq = cvCreateImage( sz, 8, 1 );
+	tgrayVeq = cvCreateImage( sz, 8, 1 );
 
     /* Find squares in every color plane of the image. Filter each plane with a
 	 * Gaussian and then merge back to HSV image.  */
@@ -585,7 +626,13 @@ int vision_find_fence( int *fence_center,
     cvCopy( hsv_clone, tgrayV, 0 );
 	cvSmooth( tgrayV, tgrayV, CV_GAUSSIAN, smooth_size, smooth_size );
 
-	cvMerge( tgrayH, tgrayS, tgrayV, NULL, hsv_image );
+	/* Equalize the histograms of each channel. */
+	cvEqualizeHist( tgrayH, tgrayHeq );
+	cvEqualizeHist( tgrayS, tgraySeq );
+	cvEqualizeHist( tgrayV, tgrayVeq );
+
+	//cvMerge( tgrayH, tgrayS, tgrayV, NULL, hsv_image );
+	cvMerge( tgrayHeq, tgraySeq, tgrayVeq, NULL, hsv_image );
 
 	/* Threshold all three channels using our own values. */
     cvInRangeS( hsv_image, cvScalar(hL,sL,vL), cvScalar(hH,sH,vH), binImg );
@@ -624,6 +671,9 @@ int vision_find_fence( int *fence_center,
     cvReleaseImage( &tgrayH );
     cvReleaseImage( &tgrayS );
     cvReleaseImage( &tgrayV );
+	cvReleaseImage( &tgrayHeq );
+	cvReleaseImage( &tgraySeq );
+	cvReleaseImage( &tgrayVeq );
 
     return 1;
 } /* end vision_find_pipe() */
@@ -646,7 +696,6 @@ int vision_get_fence_bottom( IplImage *inputBinImg, int *center )
     int y_max = 0;
     int imHeight = inputBinImg->height;
     int imWidth = inputBinImg->width;
-    //int minPipeWidth = 20;
     int minPipeWidth = 10;
     int edgeThreshold = 2;
     int c= 0;
@@ -661,10 +710,6 @@ int vision_get_fence_bottom( IplImage *inputBinImg, int *center )
     /* Initialize edge arrays, memset may be better. */
     memset( &leftEdge, 0, sizeof(leftEdge) );
     memset( &rightEdge, 0, sizeof(rightEdge) );
-    //for( i = 0; i < imHeight; i++ ) {
-        //leftEdge[i] = 0;
-        //rightEdge[i] = imWidth;
-    //}
     for( i = 0; i < imHeight - 1; i++ ) {
         /* Scan through each line of image and look for first non zero pixel
          * then get the (i,j) pixel value. */
@@ -695,6 +740,9 @@ int vision_get_fence_bottom( IplImage *inputBinImg, int *center )
     	for( i = 0; i < k; i++ ) {
         		c += rightEdge[i] - leftEdge[i];
 		}
+	}
+	if( k == 0 ) {
+		k = 1;
 	}
 	*center = c / k;
 
@@ -729,7 +777,7 @@ int vision_find_boxes( CvCapture *cap,
 	int status = -1;
 
 	/* Initialize variables. */
-	storage = cvCreateMemStorage(0);
+	storage = cvCreateMemStorage( 0 );
 
     /* Capture a new source image. */
     srcImg = cvQueryFrame( cap );
@@ -914,36 +962,101 @@ int vision_find_squares4( IplImage *img, CvMemStorage *storage, CvSeq *box_cente
 } /* end vision_find_squares4() */
 
 
-/*****************************************************************
- the function draws all the squares in the image
- * ***************************************************************/
-/*void drawSquares( IplImage* img, CvSeq* squares )
+/******************************************************************************
+ *
+ * Title:       int vision_suitcase(  CvCapture *cap,
+ * 					   			      IplImage *srcImg,
+ * 									  CvSeq *result,
+ * 									  CvSeq *squares
+ *                                  )
+ *
+ * Description: Finds the centroid of the suitcase structure in an image.
+ *
+ * Input:       cap: A pointer to an open camera.
+ *				srcImg: Memory location to store a captured image.
+ *
+ * Output:      status: 1 on success, 0 on failure.
+ *
+ *****************************************************************************/
+
+int vision_suitcase( CvCapture *cap,
+					 IplImage *srcImg,
+					 CvSeq *result,
+					 CvSeq *squares )
 {
-    CvSeqReader reader;
-    IplImage* cpy = cvCloneImage( img );
-    int i;
+	/* Declare variables. */
+	IplImage *img = NULL;
+	CvMemStorage *storage = 0;
+	int status = -1;
 
-    // initialize reader of the sequence
-    cvStartReadSeq( squares, &reader, 0 );
+	/* Initialize variables. */
+	storage = cvCreateMemStorage( 0 );
 
-    // read 4 sequence elements at a time (all vertices of a square)
-    for( i = 0; i < squares->total; i += 4 )
-    {
-        CvPoint pt[4], *rect = pt;
-        int count = 4;
-
-        // read 4 vertices
-        CV_READ_SEQ_ELEM( pt[0], reader );
-        CV_READ_SEQ_ELEM( pt[1], reader );
-        CV_READ_SEQ_ELEM( pt[2], reader );
-        CV_READ_SEQ_ELEM( pt[3], reader );
-
-        // draw the square as a closed polyline
-        cvPolyLine( cpy, &rect, &count, 1, 1, CV_RGB(0,255,0), 3, CV_AA, 0 );
+    /* Capture a new source image. */
+    srcImg = cvQueryFrame( cap );
+    if ( !srcImg ) {
+        return 0;
     }
 
-    // show the resultant image
-    cvShowImage( wndname, cpy );
-    cvReleaseImage( &cpy );
-}
-*/
+	/* Clone the source image so that we have an image we can write over. The
+	 * source image needs to be kept clean so that we can display it later. */
+	img = cvCloneImage( srcImg );
+    status = vision_find_squares4( img, storage, result, squares );
+
+    /* Clear memory storage and reset free space position. */
+    cvReleaseImage( &img );
+    cvClearMemStorage( storage );
+
+    return status;
+} /* end vision_suitcase() */
+
+
+/******************************************************************************
+ *
+ * Title:       int vision_find_circle(  CvCapture *cap,
+ * 					   			         IplImage *srcImg,
+ * 										 CvSeq *circles
+ *                                     )
+ *
+ * Description: Finds a circle in an image.
+ *
+ * Input:       cap: A pointer to an open camera.
+ *				srcImg: Memory location to store a captured image.
+ * 				circles: A sequence to store detected circle data in.
+ *
+ * Output:      status: 1 on success, 0 on failure.
+ *
+ *****************************************************************************/
+
+int vision_find_circle( CvCapture *cap,
+					    IplImage *srcImg,
+						CvSeq *circles )
+{
+	/* Declare variables. */
+	IplImage *gray = NULL;
+	CvMemStorage *storage = 0;
+
+	/* Initialize variables. */
+	storage = cvCreateMemStorage( 0 );
+
+    /* Capture a new source image. */
+    srcImg = cvQueryFrame( cap );
+    if ( !srcImg ) {
+        return 0;
+    }
+	
+	/* Convert captured image to grayscale. */
+    gray = cvCreateImage( cvGetSize(srcImg), 8, 1 );
+	cvCvtColor( srcImg, gray, CV_BGR2GRAY );
+	cvSmooth( gray, gray, CV_GAUSSIAN, 9, 9 );
+	
+	/* Look for circles. */
+	circles = cvHoughCircles( gray, storage, CV_HOUGH_GRADIENT, 2,
+		gray->height / 4, 200, 100 );
+
+    /* Clear memory storage and reset free space position. */
+    cvReleaseImage( &gray );
+    cvClearMemStorage( storage );
+
+    return circles->total;
+} /* end vision_find_circle() */
