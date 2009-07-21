@@ -67,14 +67,10 @@ int vision_find_dot( int *dotx,
     IplImage *tgrayH = NULL;
     IplImage *tgrayS = NULL;
     IplImage *tgrayV = NULL;
-<<<<<<< .mine
     IplImage *tgrayHeq = NULL;
     IplImage *tgraySeq = NULL;
     IplImage *tgrayVeq = NULL;
     int smooth_size = 9;
-=======
-    int smooth_size = 5;
->>>>>>> .r135
 
     /* Initialize to impossible values. */
     center.x = -1;
@@ -228,8 +224,6 @@ int vision_find_pipe( int *pipex,
             (int)floor( ( 3.0 ) / 2 ), (int)floor( ( 3.0 ) / 2 ), CV_SHAPE_RECT );
     IplConvKernel *wBig = cvCreateStructuringElementEx( 5, 5,
             (int)floor( ( 5.0 ) / 2 ), (int)floor( ( 5.0 ) / 2 ), CV_SHAPE_RECT );
-
-    int smooth_size = 5;
 
     /* Initialize to impossible values. */
     center.x = -1;
