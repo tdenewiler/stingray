@@ -271,44 +271,44 @@ int main( int argc, char *argv[] )
 		} /* end TASK_NONE */
         else if( task == TASK_BUOY && f_cam ) {
 			/* Look for the buoy. */
-			//status = vision_find_dot( &dotx, &doty,
-					//cf.vision_angle, f_cam, f_img, f_bin_img,
-					//msg.vsetting.data.buoy_hsv.hL,
-					//msg.vsetting.data.buoy_hsv.hH,
-					//msg.vsetting.data.buoy_hsv.sL,
-					//msg.vsetting.data.buoy_hsv.sH,
-					//msg.vsetting.data.buoy_hsv.vL,
-					//msg.vsetting.data.buoy_hsv.vH );
+			status = vision_find_dot( &dotx, &doty,
+					cf.vision_angle, f_cam, f_img, f_bin_img,
+					msg.vsetting.data.buoy_hsv.hL,
+					msg.vsetting.data.buoy_hsv.hH,
+					msg.vsetting.data.buoy_hsv.sL,
+					msg.vsetting.data.buoy_hsv.sH,
+					msg.vsetting.data.buoy_hsv.vL,
+					msg.vsetting.data.buoy_hsv.vH );
 
-			//if( status == 1 ) {
-				///* Set the detection status of vision */
-				//msg.vision.data.status = TASK_BOUY_DETECTED;
+			if( status == 1 ) {
+				/* Set the detection status of vision */
+				msg.vision.data.status = TASK_BOUY_DETECTED;
 
-				///* The subtractions are opposite of each other on purpose. This
-				 //* is so that they match the way the depth sensor and yaw sensor
-				 //* work. */
-				//msg.vision.data.front_x = dotx - (f_img->width / 2);
-				//msg.vision.data.front_y = (f_img->height / 2) - doty;
+				/* The subtractions are opposite of each other on purpose. This
+				 * is so that they match the way the depth sensor and yaw sensor
+				 * work. */
+				msg.vision.data.front_x = dotx - (f_img->width / 2);
+				msg.vision.data.front_y = (f_img->height / 2) - doty;
 
-				///* Draw a circle at the centroid location. */
-				//cvCircle( f_img, cvPoint(dotx, doty),
-					//10, cvScalar(255, 0, 0), 5, 8 );
+				/* Draw a circle at the centroid location. */
+				cvCircle( f_img, cvPoint(dotx, doty),
+					10, cvScalar(255, 0, 0), 5, 8 );
 					
 				/* Requires some sore of exit criteria. */
-			//}
+			}
 				
 			/* Try to detect circles using cvHoughCircles(). */
-			status = vision_find_circle( f_cam, f_img, circles );
-			if( status > 0 ) {
-				for( ii = 0; ii < circles->total; ii++ ) {
-					circle_pt = (float *)cvGetSeqElem( circles, ii );
-					cvCircle( f_img, cvPoint(cvRound(circle_pt[0]),
-						cvRound(circle_pt[1])), 3, CV_RGB(0,255,0), -1, 8, 0 );
-					cvCircle( f_img, cvPoint(cvRound(circle_pt[0]),
-						cvRound(circle_pt[1])), cvRound(circle_pt[2]),
-						CV_RGB(255,0,0), 3, 8, 0 );
-				}
-			}
+			//status = vision_find_circle( f_cam, f_img, circles );
+			//if( status > 0 ) {
+				//for( ii = 0; ii < circles->total; ii++ ) {
+					//circle_pt = (float *)cvGetSeqElem( circles, ii );
+					//cvCircle( f_img, cvPoint(cvRound(circle_pt[0]),
+						//cvRound(circle_pt[1])), 3, CV_RGB(0,255,0), -1, 8, 0 );
+					//cvCircle( f_img, cvPoint(cvRound(circle_pt[0]),
+						//cvRound(circle_pt[1])), cvRound(circle_pt[2]),
+						//CV_RGB(255,0,0), 3, 8, 0 );
+				//}
+			//}
 			else {
 				/* No positive detection */
 				msg.vision.data.status = TASK_NOT_DETECTED;
