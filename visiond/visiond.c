@@ -129,6 +129,7 @@ int main( int argc, char *argv[] )
     int dotx = -1;
     int doty = -1;
     int pipex = -1;
+    int pipey = -1;
     int fence_center = -1;
 	int y_max = -1;
     double bearing = -1;
@@ -157,7 +158,7 @@ int main( int argc, char *argv[] )
 	storage1 = cvCreateMemStorage(0);
 	CvSeq *boxes = cvCreateSeq( 0, sizeof(CvSeq), sizeof(CvPoint), storage1 );
 	CvSeq *circles = cvCreateSeq( 0, sizeof(CvSeq), sizeof(CvPoint), storage1 );
-	float *circle_pt;
+	float *circle_pt = NULL;
 	CvSeqReader reader1;
 	CvMemStorage *storage2 = 0;
 	storage2 = cvCreateMemStorage(0);
@@ -316,7 +317,7 @@ int main( int argc, char *argv[] )
 		} /* end TASK_BUOY */
 		else if( task == TASK_PIPE && b_cam ) {
 			/* Look for the pipe */
-			status = vision_find_pipe( &pipex, &bearing, b_cam, b_img, b_bin_img,
+			status = vision_find_pipe( &pipex, &pipey, &bearing, b_cam, b_img, b_bin_img,
                     msg.vsetting.data.pipe_hsv.hL,
                     msg.vsetting.data.pipe_hsv.hH,
                     msg.vsetting.data.pipe_hsv.sL,
@@ -354,8 +355,9 @@ int main( int argc, char *argv[] )
 				 * negative of bearing for the y offset due to the way yaw is
 				 * calculated on the IMU. */
                 bearing = bearing * 180 / M_PI;
-                msg.vision.data.bottom_x = pipex - (b_img->width / 2);
-                msg.vision.data.bottom_y = -1 * bearing;
+                msg.vision.data.bearing = -1 * bearing;
+                msg.vision.data.bottom_x = pipex - (b_img->width  / 2);
+                msg.vision.data.bottom_y = pipey - (b_img->height / 2);
             }
             else { /* No positive detection */
 				msg.vision.data.status = TASK_NOT_DETECTED;

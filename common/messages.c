@@ -149,8 +149,7 @@ void messages_send( int fd,
             msg->vision.data.front_x    = htonl( msg->vision.data.front_x );
             msg->vision.data.front_y    = htonl( msg->vision.data.front_y );
             msg->vision.data.bottom_x   = htonl( msg->vision.data.bottom_x );
-			msg->vision.data.fence_x	= htonl( msg->vision.data.fence_x );
-			msg->vision.data.fence_y	= htonl( msg->vision.data.fence_y );
+            msg->vision.data.bottom_y   = htonl( msg->vision.data.bottom_y );
 			msg->vision.data.box1_x		= htonl( msg->vision.data.box1_x );
 			msg->vision.data.box1_y		= htonl( msg->vision.data.box1_y );
 			msg->vision.data.box2_x		= htonl( msg->vision.data.box2_x );
@@ -158,6 +157,7 @@ void messages_send( int fd,
 			msg->vision.data.suitcase_x	= htonl( msg->vision.data.suitcase_x );
 			msg->vision.data.suitcase_y	= htonl( msg->vision.data.suitcase_y );
 			msg->vision.data.status		= htonl( msg->vision.data.status );
+			msg->vision.data.confidence	= htonl( msg->vision.data.confidence );
 			msg->vision.data.mode		= htonl( msg->vision.data.mode );
 
             /* Actually send message here. */
@@ -167,8 +167,7 @@ void messages_send( int fd,
             msg->vision.data.front_x    = ntohl( msg->vision.data.front_x );
             msg->vision.data.front_y    = ntohl( msg->vision.data.front_y );
             msg->vision.data.bottom_x   = ntohl( msg->vision.data.bottom_x );
-			msg->vision.data.fence_x	= ntohl( msg->vision.data.fence_x );
-			msg->vision.data.fence_y	= ntohl( msg->vision.data.fence_y );
+            msg->vision.data.bottom_y   = ntohl( msg->vision.data.bottom_y );
 			msg->vision.data.box1_x		= ntohl( msg->vision.data.box1_x );
 			msg->vision.data.box1_y		= ntohl( msg->vision.data.box1_y );
 			msg->vision.data.box2_x		= ntohl( msg->vision.data.box2_x );
@@ -176,6 +175,7 @@ void messages_send( int fd,
 			msg->vision.data.suitcase_x	= ntohl( msg->vision.data.suitcase_x );
 			msg->vision.data.suitcase_y	= ntohl( msg->vision.data.suitcase_y );
 			msg->vision.data.status		= ntohl( msg->vision.data.status );
+			msg->vision.data.confidence	= ntohl( msg->vision.data.confidence );
 			msg->vision.data.mode		= ntohl( msg->vision.data.mode );
             break;
 
@@ -368,8 +368,7 @@ int messages_decode( int fd, char *buf, MSG_DATA *msg, int bytes )
 			msg->vision.data.front_x    = ntohl( msg->vision.data.front_x );
 			msg->vision.data.front_y    = ntohl( msg->vision.data.front_y );
 			msg->vision.data.bottom_x   = ntohl( msg->vision.data.bottom_x );
-			msg->vision.data.fence_x	= ntohl( msg->vision.data.fence_x );
-			msg->vision.data.fence_y	= ntohl( msg->vision.data.fence_y );
+			msg->vision.data.bottom_y   = ntohl( msg->vision.data.bottom_y );
 			msg->vision.data.box1_x		= ntohl( msg->vision.data.box1_x );
 			msg->vision.data.box1_y		= ntohl( msg->vision.data.box1_y );
 			msg->vision.data.box2_x		= ntohl( msg->vision.data.box2_x );
@@ -377,6 +376,7 @@ int messages_decode( int fd, char *buf, MSG_DATA *msg, int bytes )
 			msg->vision.data.suitcase_x	= ntohl( msg->vision.data.suitcase_x );
 			msg->vision.data.suitcase_y	= ntohl( msg->vision.data.suitcase_y );
 			msg->vision.data.status		= ntohl( msg->vision.data.status );
+			msg->vision.data.confidence = ntohl( msg->vision.data.confidence );
 			msg->vision.data.mode		= ntohl( msg->vision.data.mode );
 
 			bytes -= sizeof(VISION_MSG);

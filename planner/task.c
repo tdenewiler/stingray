@@ -206,6 +206,8 @@ int task_buoy( MSG_DATA *msg, CONF_VARS *cf, int dt, int subtask_dt )
 			
 			/* Set target values based on current orientation and pixel error. */
 			msg->target.data.yaw = msg->status.data.yaw + (float)msg->vision.data.front_x * TASK_BUOY_YAW_GAIN;
+			
+			/* Save the current detection in case we lose it. */
 			msg->target.data.yaw_detected = msg->target.data.yaw;
 			
 			
@@ -217,33 +219,13 @@ int task_buoy( MSG_DATA *msg, CONF_VARS *cf, int dt, int subtask_dt )
 			
 			//printf("TASK_BUOY:     %f    %f\n", msg->target.data.depth,
 				//(float)msg->vision.data.front_y * TASK_BUOY_DEPTH_GAIN);
-			
-			/* Success Criteria */
-			if( msg->vision.data.status == TASK_BOUY_TOUCHED ) {
-				
-				/* Set the target yaw to the anticipated pipe2 yaw */
-				msg->target.data.yaw = TASK_PIPE2_YAW;
-				
-				/* Set yaw detect to undetected value */
-				msg->target.data.yaw_detected = TASK_YAW_DETECTED_NOT_SET;
-				return TASK_SUCCESS;
-			}
-			
-			/* If we are still trying to touch the bouy, return continuing */
-			return TASK_CONTINUING;
 		}
 		else { /* If the bouy is not detected */
 			
-			/* Check to see if we had a previous detection */
+			/* Check to see if we had a previous detection.
+			 * If we do not have a previous detection, start sweeping. */
 			if( msg->target.data.yaw_detected == TASK_YAW_DETECTED_NOT_SET ) {
 				
-				/* Check to see if we have a previous value for yaw
-			 	 * If not, we set it. */
-				if( msg->target.data.yaw_previous == TASK_YAW_PREVIOUS_NOT_SET ) {
-					msg->target.data.yaw_previous = msg->status.data.yaw;
-				}
-				
-				/* If we do not have a previous detection, start sweeping */
 				
 				/* Check for timeout */
 				if( dt < TASK_SWEEP_YAW_TIMEOUT ) {
@@ -251,20 +233,34 @@ int task_buoy( MSG_DATA *msg, CONF_VARS *cf, int dt, int subtask_dt )
 					task_sweep( msg, cf, dt, subtask_dt );
 				}
 				else {
+					/* If we have a timeout, stop sweeping and return
+					 * to the yaw we started with. Reset detection yaw. */
 					msg->target.data.yaw = msg->target.data.yaw_previous;
 					msg->target.data.yaw_detected = TASK_YAW_DETECTED_NOT_SET;
 					return TASK_FAILURE;
 				}
-				
-				return TASK_CONTINUING;
 			}
 			else { /* If we had a detection, use it again until timeout */
 				msg->target.data.yaw = msg->target.data.yaw_detected;
 			}
 			
 		}
+		
+		/* Success Criteria */
+		if( msg->vision.data.status == TASK_BOUY_TOUCHED ) {
+			
+			/* Set the target yaw to the anticipated pipe2 yaw */
+			msg->target.data.yaw = TASK_PIPE2_YAW;
+			
+			/* Set yaw detect to undetected value */
+			msg->target.data.yaw_detected = TASK_YAW_DETECTED_NOT_SET;
+			return TASK_SUCCESS;
+		}
 
+		/* No events ( timeout or success ) indicate to switch tasks, 
+		 * lets continue. */
 		return TASK_CONTINUING;
+		
 	}/* end Non-Course Mode */
 
 	return TASK_CONTINUING;
@@ -369,8 +365,10 @@ int task_pipe( MSG_DATA *msg, CONF_VARS *cf, int dt, int subtask_dt )
 	
 	
 	
-	/* Timer internal to task_pipe() function */
-	static int dt_pipe = dt;
+	/* Timer internal to task_pipe() function. Stored until the task
+	 * switches, to be used as reference. */
+	static int time_ref = dt;
+	int        dt_pipe  = dt - time_ref;
 	
 	/* Toggles between pipe mode and look ahead mode */
 	static int pipe_mode_toggle = PIPE_MODE_PIPE;
@@ -381,27 +379,37 @@ int task_pipe( MSG_DATA *msg, CONF_VARS *cf, int dt, int subtask_dt )
 	
 	
 	
-	/* Initialization of look ahead infrastructure */
+	/* Initialization of look ahead infrastructure.
+	 * ----
+	 * This is called when the pipe task switches - meaning that if we
+	 * return success or failure, the pipe_mode_reset flag needs to be
+	 * TRUE. For continuing, it needs to be false. */
 	if( pipe_mode_reset == TRUE ) {
 		
 		/* The reset flag must indicate to not reset these values the
 		 * next time through the loop */
 		pipe_mode_reset = FALSE;
 		
-		/* When the pipe_mode is reset, we look for the pipe */
+		/* When the pipe_mode is reset, we look for the pipe first */
 		pipe_mode_toggle = PIPE_MODE_PIPE;
 		
-		/* Set the time to the input parameter time */
-		dt_pipe = dt;
+		/* Set the time to the input parameter time as our reference time */
+		time_ref = dt;
 	}
 	
-	/* Change to look ahead mode if the time is right ... */
-	if( ( ( dt - dt_pipe ) + LOOK_AHEAD_INTERVAL ) % ROLLOVER_TIMEOUT  == 0 ) {
+	/* Check the time to see what we want vision to do now. Is it look
+	 * for the pipe, or look ahead to the next task?
+	 * We can set the duration in seconds for each to occur and they will
+	 * alternate back and forth until timeout or the look ahead detects
+	 * its target */
+	
+	/* Switch to look ahead if the time is right */
+	if( ( dt_pipe + LOOK_AHEAD_INTERVAL ) % ROLLOVER_TIMEOUT  == 0 ) {
 		pipe_mode_toggle = PIPE_MODE_LOOK_AHEAD;
 	}
 	
 	/* Swtich back to pipe mode when the (delta-)timeout is expended */
-	if( ( dt - dt_pipe ) % ROLLOVER_TIMEOUT  == 0 ) {
+	if( ( dt_pipe ) % ROLLOVER_TIMEOUT  == 0 ) {
 		pipe_mode_toggle = PIPE_MODE_PIPE;
 	}
 	
@@ -426,6 +434,7 @@ int task_pipe( MSG_DATA *msg, CONF_VARS *cf, int dt, int subtask_dt )
 				pipe_mode_reset = FALSE;
 				return SUBTASK_CONTINUING;
 			}
+			
 		case SUBTASK_SEARCH:
 			/* Start moving forward. */
 			msg->target.data.fy = POLOLU_MOVE_FORWARD;
@@ -442,6 +451,7 @@ int task_pipe( MSG_DATA *msg, CONF_VARS *cf, int dt, int subtask_dt )
 				pipe_mode_reset = FALSE;
 				return SUBTASK_CONTINUING;
 			}
+			
 		case SUBTASK_CORRECT:
 			/* Set target values based on current orientation and pixel error. */
 			msg->target.data.yaw    = msg->status.data.yaw + (float)msg->vision.data.bottom_y * TASK_PIPE_YAW_GAIN;
@@ -456,6 +466,7 @@ int task_pipe( MSG_DATA *msg, CONF_VARS *cf, int dt, int subtask_dt )
 			/* TODO: Need a way to check for SUCCESS or FAILURE in this case. */
 			pipe_mode_reset = FALSE;
 			return SUBTASK_CONTINUING;
+			
 		case SUBTASK_PIPE_END:
 			/* TODO: Add in details for this case. */
 			/* To implement this correctly, the interface between having
@@ -467,13 +478,13 @@ int task_pipe( MSG_DATA *msg, CONF_VARS *cf, int dt, int subtask_dt )
 			break;
 		}
 	}
-	else {
+	else { /* Non-course mode */
 			
 		/* If the pipe is detected, make course correction */	
 		if( msg->vision.data.status == TASK_PIPE_DETECTED ) {
 			
 			/* Set the values based on current orientation and pixel error. */
-			msg->target.data.yaw    = msg->status.data.yaw + (float)msg->vision.data.bottom_y * TASK_PIPE_YAW_GAIN;
+			msg->target.data.yaw    = msg->status.data.yaw + msg->vision.data.bearing * TASK_PIPE_YAW_GAIN;
 			msg->target.data.fx     = msg->vision.data.bottom_x * TASK_PIPE_FX_GAIN;
 			if( msg->target.data.fx > TASK_PIPE_FX_MAX ) {
 				msg->target.data.fx = TASK_PIPE_FX_MAX;
@@ -665,7 +676,7 @@ int task_fence( MSG_DATA *msg, CONF_VARS *cf, int dt, int subtask_dt )
 			/* Start moving forward. */
 			msg->target.data.fy = POLOLU_MOVE_FORWARD;
 			/* TODO: Fix this magic number. */
-			if( msg->vision.data.fence_x < -1000 ) {
+			if( msg->vision.data.front_x < -1000 ) {
 				return SUBTASK_SUCCESS;
 			}
 			else if( subtask_dt > SUBTASK_MAX_SEARCH_TIME ) {
@@ -676,8 +687,8 @@ int task_fence( MSG_DATA *msg, CONF_VARS *cf, int dt, int subtask_dt )
 			}
 		case SUBTASK_CORRECT:
 			/* Set target values based on current orientation and pixel error. */
-			msg->target.data.yaw   = msg->status.data.yaw + (float)msg->vision.data.fence_x * TASK_FENCE_YAW_GAIN;
-			msg->target.data.depth = msg->status.data.depth + (float)msg->vision.data.fence_y * TASK_FENCE_DEPTH_GAIN;
+			msg->target.data.yaw   = msg->status.data.yaw + (float)msg->vision.data.front_x * TASK_FENCE_YAW_GAIN;
+			msg->target.data.depth = msg->status.data.depth + (float)msg->vision.data.front_y * TASK_FENCE_DEPTH_GAIN;
 
 			/* TODO: Need a way to check for SUCCESS or FAILURE in this case. */
 			return SUBTASK_CONTINUING;

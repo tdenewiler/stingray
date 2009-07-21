@@ -303,16 +303,16 @@ typedef struct _VISION {
     int front_x;    //!< The x component of the detected object in front camera.
     int front_y;    //!< The y component of the detected object in front camera.
     int bottom_x;   //!< The x component of the detected object in bottom camera.
-    float bottom_y; //!< The y component of the detected object in bottom camera.
-	int fence_x;	//!< The x component of the fence.
-	int fence_y;	//!< The y component of the fence.
+    int bottom_y;   //!< The y component of the detected object in bottom camera.
+    float bearing;  //!< The bearing of the pipe
 	int box1_x;		//!< The x component of the first box found.
 	int box1_y;		//!< The y component of the first box found.
 	int box2_x;		//!< The x component of the second box found.
 	int box2_y;		//!< The y component of the second box found.
 	int suitcase_x; //!< The x component of the suitcase.
 	int suitcase_y; //!< The y component of the suitcase.
-	int status;    	//!< The status of the vision detection. 
+	int status;    	//!< The status of the vision detection.
+	int confidence;	//!< The status of the vision detection.
 	int mode;		//!< Which window to display video in and the video type.
 } VISION;
 
