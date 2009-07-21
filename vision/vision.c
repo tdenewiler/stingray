@@ -176,6 +176,7 @@ int vision_find_dot( int *dotx,
 /******************************************************************************
  *
  * Title:       int vision_find_pipe(   int *pipex,
+ * 									    int *pipey,
  *                                      float *bearing,
  *                                      CvCapture *cap,
  *                                      IplImage *srcImg,
@@ -185,6 +186,7 @@ int vision_find_dot( int *dotx,
  * Description: Finds a pipe object from a camera.
  *
  * Input:       pipex: Pointer to variable for x position of pipe.
+ * 				pipey: Pointer to variable for y position of pipe.
  *              bearing: Pointer to variable for bearing of pipe.
  *              cap: A pointer to an open camera.
  *
@@ -193,6 +195,7 @@ int vision_find_dot( int *dotx,
  *****************************************************************************/
 
 int vision_find_pipe( int *pipex,
+					  int *pipey,
                       double *bearing,
                       CvCapture *cap,
                       IplImage *srcImg,
@@ -288,6 +291,7 @@ int vision_find_pipe( int *pipex,
     *bearing = vision_get_bearing( outImg );
     center = vision_find_centroid( outImg, 0 );
     *pipex = center.x;
+    *pipey = center.y;
 
     /* Clear variables to free memory. */
     cvReleaseImage( &hsv_image );

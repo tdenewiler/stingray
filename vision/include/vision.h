@@ -63,10 +63,12 @@ int vision_find_dot( int *dotx,
 
 //! Finds a pipe object from a camera.
 //! \param pipex Pointer to variable for x position of pipe.
+//! \param pipey Pointer to variable for y position of pipe.
 //! \param bearing Pointer to variable for bearing of pipe.
 //! \param cam A pointer to an open camera.
 //! \param srcImg The unprocessed image.
 int vision_find_pipe( int *pipex,
+					  int *pipey,
                       double *bearing,
                       CvCapture *cam,
                       IplImage *srcImg,
