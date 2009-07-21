@@ -402,11 +402,16 @@ int main( int argc, char *argv[] )
         	msg.vision.data.status = TASK_NOT_DETECTED;
 		} /* end TASK_GATE */
 		else if( task == TASK_BOXES && b_cam ) {
+			
+			/* Set to not detected to start and reset if we get a hit */
+			msg.vision.data.status = TASK_NOT_DETECTED;
+			
 			/* Look for the boxes. */
 			status = vision_find_boxes( b_cam, img, boxes, squares );
-			if( status > 0 ) {
-				/* Set the detection status of vision */
-		    	msg.vision.data.status = TASK_BOXES_DETECTED;
+			
+			/* If we get a positive status message, render the box
+			 * and populate the network message. */
+			if( status > 0 ) {	
 
 				/* Initialize the centroid sequence reader. */
 				cvStartReadSeq( boxes, &reader1, 0 );
@@ -431,6 +436,9 @@ int main( int argc, char *argv[] )
 				}
 				/* Set target offsets in network message. */
 				if( boxes->total > 0 ) {
+					/* Set the detection status of vision */
+		    		msg.vision.data.status = TASK_BOXES_DETECTED;
+		    		
 					msg.vision.data.box1_x = box_pt.x;
 					msg.vision.data.box1_y = box_pt.y;
 				}

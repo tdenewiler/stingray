@@ -350,69 +350,18 @@ int task_gate( MSG_DATA *msg, CONF_VARS *cf, int dt, int subtask_dt )
 
 int task_pipe( MSG_DATA *msg, CONF_VARS *cf, int dt, int subtask_dt )
 {
-	/* The concept of look ahead was not built in, so the task_pipe
-	 * method will b developed with its own infrastructure to handle
-	 * look ahead tracking */
+	/* Temporary for testing of non course "else" */
+	const static int NON_COURSE_SUBTASK_CENTER 		= 0;
+	const static int NON_COURSE_SUBTASK_YAW_CORRECT = 1;
+	const static int NON_COURSE_SUBTASK_DRIVE 		= 2;
 	
-	/* The length of pipe search time until look ahead is performed */
-	const static int PIPE_SEARCH_INTERVAL = 3;
+	/* Holds the place of msg->task.data.subtask */
+	static int non_course_subtask = NON_COURSE_SUBTASK_CENTER;
 	
-	/* Time to perform look ahead */
-	const static int LOOK_AHEAD_INTERVAL = 1;
-	
-	/* Rollover timeout */
-	const static int ROLLOVER_TIMEOUT = PIPE_SEARCH_INTERVAL + LOOK_AHEAD_INTERVAL;
-	
-	
-	
-	/* Timer internal to task_pipe() function. Stored until the task
-	 * switches, to be used as reference. */
-	static int time_ref = dt;
-	int        dt_pipe  = dt - time_ref;
-	
-	/* Toggles between pipe mode and look ahead mode */
-	static int pipe_mode_toggle = PIPE_MODE_PIPE;
-	
-	/* Reset flag */
-	static int pipe_mode_reset = FALSE;
-	
-	
-	
-	
-	/* Initialization of look ahead infrastructure.
-	 * ----
-	 * This is called when the pipe task switches - meaning that if we
-	 * return success or failure, the pipe_mode_reset flag needs to be
-	 * TRUE. For continuing, it needs to be false. */
-	if( pipe_mode_reset == TRUE ) {
-		
-		/* The reset flag must indicate to not reset these values the
-		 * next time through the loop */
-		pipe_mode_reset = FALSE;
-		
-		/* When the pipe_mode is reset, we look for the pipe first */
-		pipe_mode_toggle = PIPE_MODE_PIPE;
-		
-		/* Set the time to the input parameter time as our reference time */
-		time_ref = dt;
-	}
-	
-	/* Check the time to see what we want vision to do now. Is it look
-	 * for the pipe, or look ahead to the next task?
-	 * We can set the duration in seconds for each to occur and they will
-	 * alternate back and forth until timeout or the look ahead detects
-	 * its target */
-	
-	/* Switch to look ahead if the time is right */
-	if( ( dt_pipe + LOOK_AHEAD_INTERVAL ) % ROLLOVER_TIMEOUT  == 0 ) {
-		pipe_mode_toggle = PIPE_MODE_LOOK_AHEAD;
-	}
-	
-	/* Swtich back to pipe mode when the (delta-)timeout is expended */
-	if( ( dt_pipe ) % ROLLOVER_TIMEOUT  == 0 ) {
-		pipe_mode_toggle = PIPE_MODE_PIPE;
-	}
-	
+	/* Timers for centering and bearing correction */
+	static int time_ref_center  = SUBTASK_TIME_REF_NOT_SET;
+	static int time_ref_bearing = SUBTASK_TIME_REF_NOT_SET;
+	static int time_ref_drive   = SUBTASK_TIME_REF_NOT_SET;
 	
 	if( msg->task.data.course == TASK_COURSE_ON ) {
 		
@@ -422,16 +371,13 @@ int task_pipe( MSG_DATA *msg, CONF_VARS *cf, int dt, int subtask_dt )
 			msg->target.data.depth = cf->depth_pipe;
 			/* Check to see if we have reached the target depth. */
 			if( fabsf(msg->status.data.depth - msg->target.data.depth) < SUBTASK_DEPTH_MARGIN ) {
-				pipe_mode_reset = TRUE;
 				return TASK_SUCCESS;
 			}
 			/* Check to see if too much time has elapsed. */
 			else if( subtask_dt > SUBTASK_MAX_SEARCH_TIME ) {
-				pipe_mode_reset = TRUE;
 				return TASK_FAILURE;
 			}
 			else {
-				pipe_mode_reset = FALSE;
 				return SUBTASK_CONTINUING;
 			}
 			
@@ -440,15 +386,12 @@ int task_pipe( MSG_DATA *msg, CONF_VARS *cf, int dt, int subtask_dt )
 			msg->target.data.fy = POLOLU_MOVE_FORWARD;
 			
 			if( msg->vision.data.status == TASK_PIPE_DETECTED ) {
-				pipe_mode_reset = TRUE;
 				return SUBTASK_SUCCESS;
 			}
 			else if( subtask_dt > SUBTASK_MAX_SEARCH_TIME ) {
-				pipe_mode_reset = TRUE;
 				return SUBTASK_FAILURE;
 			}
 			else {
-				pipe_mode_reset = FALSE;
 				return SUBTASK_CONTINUING;
 			}
 			
@@ -464,7 +407,6 @@ int task_pipe( MSG_DATA *msg, CONF_VARS *cf, int dt, int subtask_dt )
 			}
 
 			/* TODO: Need a way to check for SUCCESS or FAILURE in this case. */
-			pipe_mode_reset = FALSE;
 			return SUBTASK_CONTINUING;
 			
 		case SUBTASK_PIPE_END:
@@ -474,7 +416,6 @@ int task_pipe( MSG_DATA *msg, CONF_VARS *cf, int dt, int subtask_dt )
 			 * for each transition */
 			/* A return value in this case to allow transition (ie success or failure)
 			 * must be added here*/
-			pipe_mode_reset = TRUE;
 			break;
 		}
 	}
@@ -483,23 +424,108 @@ int task_pipe( MSG_DATA *msg, CONF_VARS *cf, int dt, int subtask_dt )
 		/* If the pipe is detected, make course correction */	
 		if( msg->vision.data.status == TASK_PIPE_DETECTED ) {
 			
+			/* Get the x & y fixed correctly */
 			/* Set the values based on current orientation and pixel error. */
-			msg->target.data.yaw    = msg->status.data.yaw + msg->vision.data.bearing * TASK_PIPE_YAW_GAIN;
-			msg->target.data.fx     = msg->vision.data.bottom_x * TASK_PIPE_FX_GAIN;
-			if( msg->target.data.fx > TASK_PIPE_FX_MAX ) {
-				msg->target.data.fx = TASK_PIPE_FX_MAX;
+			if( non_course_subtask == NON_COURSE_SUBTASK_CENTER ) {
+				
+				/* Set the new targets then check for bounds */
+				msg->target.data.fx = msg->vision.data.bottom_x * TASK_PIPE_FX_GAIN;
+				msg->target.data.fy = msg->vision.data.bottom_y * TASK_PIPE_FY_GAIN;
+				
+				/* fx & fy bound check */
+				if( fabsf(msg->target.data.fx) > TASK_PIPE_FX_MAX ) {
+					msg->target.data.fx = util_sign_value( msg->target.data.fx ) * TASK_PIPE_FX_MAX;
+				}
+				if( fabsf(msg->target.data.fy) > TASK_PIPE_FY_MAX ) {
+					msg->target.data.fy = util_sign_value( msg->target.data.fy ) * TASK_PIPE_FY_MAX;
+				}
+				
+				/* If we are in the window, we are done centering */
+				if( abs(msg->vision.data.bottom_x) < SUBTASK_PIPE_WINDOW_X &&
+				    abs(msg->vision.data.bottom_y) < SUBTASK_PIPE_WINDOW_Y ) {
+				    
+				    /* Start the centering timer */
+				    if( time_ref_center == SUBTASK_TIME_REF_NOT_SET ) {
+				    	time_ref_center = dt;
+					}
+					
+					/* Check if we have waited long enough for the centering timeout*/
+					if( ( dt - time_ref_center ) > SUBTASK_TIMEOUT_CENTER ) {
+						
+						/* Reset the centering timer to the "not set" value so it can
+						 * be reused */
+						time_ref_center = SUBTASK_TIME_REF_NOT_SET;
+						
+						/* Increment the subtask. This is where we should return subtask success. */
+						non_course_subtask++;
+					}
+				}
 			}
-			else if( msg->target.data.fx < -1 * TASK_PIPE_FX_MAX ) {
-				msg->target.data.fx = -1 * TASK_PIPE_FX_MAX;
+			
+			/* Now that we are centered, correct the yaw and fx */
+			if( non_course_subtask == NON_COURSE_SUBTASK_YAW_CORRECT ) {
+				
+				/* Set the values based on current orientation and pixel error. */
+				msg->target.data.yaw = msg->status.data.yaw + msg->vision.data.bearing * TASK_PIPE_YAW_GAIN;
+				msg->target.data.fx  = msg->vision.data.bottom_x * TASK_PIPE_FX_GAIN;
+				
+				/* Check the bounds of fx */
+				if( fabsf(msg->target.data.fx) > TASK_PIPE_FX_MAX ) {
+					msg->target.data.fx = util_sign_value( msg->target.data.fx ) * TASK_PIPE_FX_MAX;
+				}
+				
+				/* If we are in the bearing range, we are done setting the bearing */
+				if(  abs (msg->vision.data.bottom_x ) < SUBTASK_PIPE_WINDOW_X &&
+				    fabsf(msg->status.data.yaw_perr ) < SUBTASK_PIPE_ANGLE_MARGIN ) {
+				    
+				    /* Start the centering timer */
+				    if( time_ref_bearing == SUBTASK_TIME_REF_NOT_SET ) {
+				    	time_ref_bearing = dt;
+					}
+					
+					/* Check if we have waited long enough for the centering timeout*/
+					if( ( dt - time_ref_bearing ) > SUBTASK_TIMEOUT_BEARING ) {
+						
+						/* Reset the centering timer to the "not set" value so it can
+						 * be reused */
+						time_ref_bearing = SUBTASK_TIME_REF_NOT_SET;
+						
+						/* Increment the subtask. This is where we should return subtask success. */
+						non_course_subtask++;
+					}
+				}
 			}
-			//printf("TASK_PIPE: fx = %f\n", msg->target.data.fx);
+			
+			/* Drive forward once we have our bearing */
+			if( non_course_subtask == NON_COURSE_SUBTASK_DRIVE ) {
+				
+				/* Set the timer if it hasn't been set */
+				if( time_ref_drive == SUBTASK_TIME_REF_NOT_SET ) {
+					time_ref_drive = dt;
+				}
+				
+				/* If there is a timeout, we are done, reset everything */
+				if( ( dt - time_ref_drive ) > SUBTASK_PIPE_DRIVE_TIMEOUT ) {
+					
+					/* Reset the reference time */
+					time_ref_drive = SUBTASK_TIME_REF_NOT_SET;
+					
+					/* Reset the subtask number */
+					non_course_subtask = 0;
+					
+					/* This will get annoying */
+					printf( "Done with pipe.\n" );
+					
+					/* In course mode, return success */
+				}
+			}
+			
+			return SUBTASK_CONTINUING;	
 		}
 		
-		pipe_mode_reset = FALSE;
 		return TASK_CONTINUING;
 	}
 
-	pipe_mode_reset = TRUE;
 	return TASK_CONTINUING;
 } /* end task_pipe() */
 
@@ -623,11 +649,17 @@ int task_boxes( MSG_DATA *msg, CONF_VARS *cf, int dt, int subtask_dt )
 			break;
 		}
 	}
-	else {
-		/* Set the values based on current orientation and pixel error. */
-		msg->target.data.fx = msg->vision.data.box1_x * TASK_BOXES_FX_GAIN;
-		msg->target.data.fy = msg->vision.data.box1_y * TASK_BOXES_FY_GAIN;
-
+	else { /* Non-course mode. */
+		
+		/* Set fx and fy targets if we get a detection. */
+		if( msg->vision.data.status == TASK_BOXES_DETECTED ) {
+			
+			/* Set the values based on current orientation and pixel error. */
+			msg->target.data.fx = msg->vision.data.box1_x * TASK_BOXES_FX_GAIN;
+			msg->target.data.fy = msg->vision.data.box1_y * TASK_BOXES_FY_GAIN;
+			
+		}
+		
 		return TASK_CONTINUING;
 	}
 
