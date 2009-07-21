@@ -658,6 +658,13 @@ int task_boxes( MSG_DATA *msg, CONF_VARS *cf, int dt, int subtask_dt )
 			msg->target.data.fx = msg->vision.data.box1_x * TASK_BOXES_FX_GAIN;
 			msg->target.data.fy = msg->vision.data.box1_y * TASK_BOXES_FY_GAIN;
 			
+			/* fx & fy bound check */
+			if( fabsf(msg->target.data.fx) > TASK_BOXES_FX_MAX ) {
+				msg->target.data.fx = util_sign_value( msg->target.data.fx ) * TASK_BOXES_FX_MAX;
+			}
+			if( fabsf(msg->target.data.fy) > TASK_BOXES_FY_MAX ) {
+				msg->target.data.fy = util_sign_value( msg->target.data.fy ) * TASK_BOXES_FY_MAX;
+			}
 		}
 		
 		return TASK_CONTINUING;

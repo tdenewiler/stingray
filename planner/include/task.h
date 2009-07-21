@@ -64,6 +64,8 @@
 #define TASK_PIPE_FY_MAX				75
 #define TASK_BOXES_FX_GAIN				0.25
 #define TASK_BOXES_FY_GAIN				0.25
+#define TASK_BOXES_FX_MAX				75
+#define TASK_BOXES_FY_MAX				75
 #define TASK_SUCCESS					1
 #define TASK_FAILURE					-1
 #define TASK_CONTINUING					0
