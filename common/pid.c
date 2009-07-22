@@ -168,6 +168,15 @@ void pid_loop( int pololu_fd,
 	pid->fy.ierr	= pid_bound_integral( pid->fy.ierr, pid->fy.ki, PID_FY_INTEGRAL );
 	pid->fy.derr	= pid->fy.perr - fy_perr_old;
 	
+	/* Update status message. */
+	msg->status.data.fx_perr	= pid->fx.perr;
+	msg->status.data.fx_ierr	= pid->fx.ierr;
+	msg->status.data.fx_derr	= pid->fx.derr;
+	
+	msg->status.data.fy_perr	= pid->fy.perr;
+	msg->status.data.fy_ierr	= pid->fy.ierr;
+	msg->status.data.fy_derr	= pid->fy.derr;
+	
 	
 	/* PID equations. */
 	pid->forward_thrust =	pid->fx.kp * pid->fx.perr +
@@ -177,7 +186,15 @@ void pid_loop( int pololu_fd,
 	pid->lateral_thrust =	pid->fy.kp * pid->fy.perr +
 					   		pid->fy.ki * pid->fy.ierr +
 					   		pid->fy.kd * pid->fy.derr;
-					   		
+	/* Check bounds. */
+	if( fabsf( pid->forward_thrust ) > PID_TOTAL_FY_THRUST ) {
+		pid->pitch_torque = util_sign_value( pid->forward_thrust ) * PID_TOTAL_FY_THRUST;
+	}
+	/* Check bounds. */
+	if( fabsf( pid->lateral_thrust ) > PID_TOTAL_FX_THRUST ) {
+		pid->pitch_torque = util_sign_value( pid->lateral_thrust ) * PID_TOTAL_FX_THRUST;
+	}
+		   		
 	/* Update status */
 	msg->status.data.fx = pid->lateral_thrust;
 	msg->status.data.fy = pid->forward_thrust;
