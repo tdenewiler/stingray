@@ -59,19 +59,15 @@ int pid_init( PID *pid, CONF_VARS *cf )
 	pid->depth.kd		= cf->kd_depth;
 	pid->depth.period	= cf->period_depth;
 	
-	/*
-	pid->fx.ref		= cf->target_fx;
-	pid->fx.kp		= cf->kp_fx;
-	pid->fx.ki		= cf->ki_fx;
-	pid->fx.kd		= cf->kd_fx;
-	pid->fx.period	= cf->period_fx;
+	pid->fx.ref			= cf->target_fx;
+	pid->fx.kp			= cf->kp_fx;
+	pid->fx.ki			= cf->ki_fx;
+	pid->fx.kd			= cf->kd_fx;
 	
-	pid->fy.ref		= cf->target_fy;
-	pid->fy.kp		= cf->kp_fy;
-	pid->fy.ki		= cf->ki_fy;
-	pid->fy.kd		= cf->kd_fy;
-	pid->fy.period	= cf->period_fy;
-	*/
+	pid->fy.ref			= cf->target_fy;
+	pid->fy.kp			= cf->kp_fy;
+	pid->fy.ki			= cf->ki_fy;
+	pid->fy.kd			= cf->kd_fy;
 
 	pid->voith_angle	= 0;
 	pid->voith_speed	= 0;

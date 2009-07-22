@@ -470,6 +470,12 @@ void events_gain_cf( GtkWidget *widget,
     msg.gain.data.kp_depth  = cf.kp_depth;
     msg.gain.data.ki_depth  = cf.ki_depth;
     msg.gain.data.kd_depth  = cf.kd_depth;
+    msg.gain.data.kp_fx  	= cf.kp_fx;
+    msg.gain.data.ki_fx  	= cf.ki_fx;
+    msg.gain.data.kd_fx  	= cf.kd_fx;
+    msg.gain.data.kp_fy  	= cf.kp_fy;
+    msg.gain.data.ki_fy  	= cf.ki_fy;
+    msg.gain.data.kd_fy  	= cf.kd_fy;
 	
 	/* Set the button values. */
     gtk_spin_button_set_value( (GtkSpinButton *)button_kp_yaw, msg.gain.data.kp_yaw );
