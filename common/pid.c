@@ -188,11 +188,11 @@ void pid_loop( int pololu_fd,
 					   		pid->fy.kd * pid->fy.derr;
 	/* Check bounds. */
 	if( fabsf( pid->forward_thrust ) > PID_TOTAL_FY_THRUST ) {
-		pid->pitch_torque = util_sign_value( pid->forward_thrust ) * PID_TOTAL_FY_THRUST;
+		pid->forward_thrust = util_sign_value( pid->forward_thrust ) * PID_TOTAL_FY_THRUST;
 	}
 	/* Check bounds. */
 	if( fabsf( pid->lateral_thrust ) > PID_TOTAL_FX_THRUST ) {
-		pid->pitch_torque = util_sign_value( pid->lateral_thrust ) * PID_TOTAL_FX_THRUST;
+		pid->lateral_thrust = util_sign_value( pid->lateral_thrust ) * PID_TOTAL_FX_THRUST;
 	}
 		   		
 	/* Update status */
