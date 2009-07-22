@@ -83,15 +83,12 @@ extern GtkWidget *button_kd_roll;
 extern GtkWidget *button_kp_depth;
 extern GtkWidget *button_ki_depth;
 extern GtkWidget *button_kd_depth;
-extern GtkWidget *button_kp_ax;
-extern GtkWidget *button_ki_ax;
-extern GtkWidget *button_kd_ax;
-extern GtkWidget *button_kp_ay;
-extern GtkWidget *button_ki_ay;
-extern GtkWidget *button_kd_ay;
-extern GtkWidget *button_kp_az;
-extern GtkWidget *button_ki_az;
-extern GtkWidget *button_kd_az;
+extern GtkWidget *button_kp_fx;
+extern GtkWidget *button_ki_fx;
+extern GtkWidget *button_kd_fx;
+extern GtkWidget *button_kp_fy;
+extern GtkWidget *button_ki_fy;
+extern GtkWidget *button_kd_fy;
 
 /* Target buttons. */
 extern GtkWidget *button_target_yaw;
@@ -414,6 +411,18 @@ void events_gain( GtkWidget *widget,
                               button_ki_depth );
     msg.gain.data.kd_depth  = gtk_spin_button_get_value( (GtkSpinButton *)
                               button_kd_depth );
+    msg.gain.data.kp_fx     = gtk_spin_button_get_value( (GtkSpinButton *)
+                              button_kp_fx );
+    msg.gain.data.ki_fx     = gtk_spin_button_get_value( (GtkSpinButton *)
+                              button_ki_fx );
+    msg.gain.data.kd_fx     = gtk_spin_button_get_value( (GtkSpinButton *)
+                              button_kd_fx );
+    msg.gain.data.kp_fy     = gtk_spin_button_get_value( (GtkSpinButton *)
+                              button_kp_fy );
+    msg.gain.data.ki_fy     = gtk_spin_button_get_value( (GtkSpinButton *)
+                              button_ki_fy );
+    msg.gain.data.kd_fy     = gtk_spin_button_get_value( (GtkSpinButton *)
+                              button_kd_fy );
 
     /* Send the gain message. */
 	if( planner_fd > 0 ) {
@@ -522,6 +531,12 @@ void events_gain_zero( GtkWidget *widget,
     msg.gain.data.kp_depth  = 0;
     msg.gain.data.ki_depth  = 0;
     msg.gain.data.kd_depth  = 0;
+    msg.gain.data.kp_fx     = 0;
+    msg.gain.data.ki_fx     = 0;
+    msg.gain.data.kd_fx     = 0;
+    msg.gain.data.kp_fy     = 0;
+    msg.gain.data.ki_fy     = 0;
+    msg.gain.data.kd_fy     = 0;
 	
 	/* Set the button values. */
     gtk_spin_button_set_value( (GtkSpinButton *)button_kp_yaw, msg.gain.data.kp_yaw );
@@ -536,6 +551,12 @@ void events_gain_zero( GtkWidget *widget,
     gtk_spin_button_set_value( (GtkSpinButton *)button_kp_depth, msg.gain.data.kp_depth );
     gtk_spin_button_set_value( (GtkSpinButton *)button_ki_depth, msg.gain.data.ki_depth );
     gtk_spin_button_set_value( (GtkSpinButton *)button_kd_depth, msg.gain.data.kd_depth );
+    gtk_spin_button_set_value( (GtkSpinButton *)button_kp_fx, msg.gain.data.kp_fx );
+    gtk_spin_button_set_value( (GtkSpinButton *)button_ki_fx, msg.gain.data.ki_fx );
+    gtk_spin_button_set_value( (GtkSpinButton *)button_kd_fx, msg.gain.data.kd_fx );
+    gtk_spin_button_set_value( (GtkSpinButton *)button_kp_fy, msg.gain.data.kp_fy );
+    gtk_spin_button_set_value( (GtkSpinButton *)button_ki_fy, msg.gain.data.ki_fy );
+    gtk_spin_button_set_value( (GtkSpinButton *)button_kd_fy, msg.gain.data.kd_fy );
 	
     /* Send the gain message. */
 	if( planner_fd > 0 ) {

@@ -363,10 +363,10 @@ typedef struct _TASK_MSG {
 #ifndef _LJ_MSG_
 #define _LJ_MSG_
 typedef struct _LJ_DATA {
-    float battery1;
-    float battery2;
-    float pressure;
-    float water;
+    float battery1;	//!< Motor battery.
+    float battery2;	//!< Computer battery.
+    float pressure;	//!< Depth sensor.
+    float water;	//!< Water leak detection sensor.
 } LJ_DATA;
 
 typedef struct _LJ_MSG {
@@ -379,12 +379,12 @@ typedef struct _LJ_MSG {
 #ifndef _VSETTING_MSG_
 #define _VSETTING_MSG_
 typedef struct _HSV_HL {
-    float hL;
-    float hH;
-    float sL;
-    float sH;
-    float vL;
-    float vH;
+    float hL;	//!< Hue low threshold.
+    float hH;	//!< Hue high threshold.
+    float sL;	//!< Saturation low threshold.
+    float sH;	//!< Saturation high threshold.
+    float vL;	//!< Value low threshold.
+    float vH;	//!< Value high threshold.
 } HSV_HL;
 
 typedef struct _VSETTING {

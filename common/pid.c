@@ -143,10 +143,10 @@ void pid_loop( int pololu_fd,
 	/* These next three need to be set from vison, hydrophone, gui, etc. They
 	 * depend on the target values reported from those sensor systems.
 	 * Reference: float atan2f(float y, float x); theta = atan( y / x ) */
-	
 			
 	float fx_perr_old = pid->fx.perr;
 	float fy_perr_old = pid->fy.perr;
+	float depth_perr_old = pid->depth.perr;
 	
 	/* Update the gains. */
 	pid->fx.kp		= msg->gain.data.kp_fx;
@@ -157,7 +157,7 @@ void pid_loop( int pololu_fd,
 	pid->fy.ki		= msg->gain.data.ki_fy;
 	pid->fy.kd		= msg->gain.data.kd_fy;
 	
-	/* Calculate the errors. */
+	/* Calculate the errors for fx and fy. */
 	pid->fx.ref		= msg->target.data.fx;
 	pid->fx.cval	= msg->status.data.fx;
 	pid->fx.perr	= pid->fx.cval - pid->fx.ref;
@@ -308,7 +308,7 @@ void pid_loop( int pololu_fd,
 		pid->depth.perr = pid->depth.cval - pid->depth.ref;
 		pid->depth.ierr += pid->depth.perr * dt / 1000000;
 		pid->depth.ierr = pid_bound_integral( pid->depth.ierr, pid->depth.ki, PID_DEPTH_INTEGRAL );
-		pid->depth.derr = 0.0;
+		pid->depth.derr	= pid->depth.perr - depth_perr_old;
 
 		/* Update status message. */
 		msg->status.data.depth_perr	= pid->depth.perr;
