@@ -179,11 +179,11 @@ void pid_loop( int pololu_fd,
 	
 	
 	/* PID equations. */
-	pid->forward_thrust =	pid->fx.kp * pid->fx.perr +
+	pid->lateral_thrust =	pid->fx.kp * pid->fx.perr +
 					   		pid->fx.ki * pid->fx.ierr +
 					   		pid->fx.kd * pid->fx.derr;
 					
-	pid->lateral_thrust =	pid->fy.kp * pid->fy.perr +
+	pid->forward_thrust =	pid->fy.kp * pid->fy.perr +
 					   		pid->fy.ki * pid->fy.ierr +
 					   		pid->fy.kd * pid->fy.derr;
 	/* Check bounds. */
