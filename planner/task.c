@@ -424,6 +424,8 @@ int task_pipe( MSG_DATA *msg, CONF_VARS *cf, int dt, int subtask_dt )
 		/* If the pipe is detected, make course correction */	
 		if( msg->vision.data.status == TASK_PIPE_DETECTED ) {
 			
+			
+			/* ======== CENTERING ============ */
 			/* Get the x & y fixed correctly */
 			/* Set the values based on current orientation and pixel error. */
 			if( non_course_subtask == NON_COURSE_SUBTASK_CENTER ) {
@@ -450,7 +452,7 @@ int task_pipe( MSG_DATA *msg, CONF_VARS *cf, int dt, int subtask_dt )
 					}
 					
 					/* Check if we have waited long enough for the centering timeout*/
-					if( ( dt - time_ref_center ) > SUBTASK_TIMEOUT_CENTER ) {
+					if( ( dt - time_ref_center ) > SUBTASK_TIME_WAIT_CENTER ) {
 						
 						/* Reset the centering timer to the "not set" value so it can
 						 * be reused */
@@ -463,8 +465,11 @@ int task_pipe( MSG_DATA *msg, CONF_VARS *cf, int dt, int subtask_dt )
 						printf( "Done Centering over Pipe" );
 					}
 				}
-			}
+			}/* ======== END CENTERING ============ */
 			
+			
+			
+			/* ======== BEARING CORRECT ============ */
 			/* Now that we are centered, correct the yaw and fx */
 			if( non_course_subtask == NON_COURSE_SUBTASK_YAW_CORRECT ) {
 				
@@ -487,7 +492,7 @@ int task_pipe( MSG_DATA *msg, CONF_VARS *cf, int dt, int subtask_dt )
 					}
 					
 					/* Check if we have waited long enough for the centering timeout*/
-					if( ( dt - time_ref_bearing ) > SUBTASK_TIMEOUT_BEARING ) {
+					if( ( dt - time_ref_bearing ) > SUBTASK_TIME_WAIT_BEARING ) {
 						
 						/* Reset the centering timer to the "not set" value so it can
 						 * be reused */
@@ -500,8 +505,10 @@ int task_pipe( MSG_DATA *msg, CONF_VARS *cf, int dt, int subtask_dt )
 						printf( "Done Correcting the bearing over Pipe" );
 					}
 				}
-			}
+			}/* ======== END BEARING CORRECT ============ */
 			
+			
+			/* ======== DRIVE FORWARDS ============ */
 			/* Drive forward once we have our bearing */
 			if( non_course_subtask == NON_COURSE_SUBTASK_DRIVE ) {
 				
@@ -517,16 +524,22 @@ int task_pipe( MSG_DATA *msg, CONF_VARS *cf, int dt, int subtask_dt )
 					time_ref_drive = SUBTASK_TIME_REF_NOT_SET;
 					
 					/* Reset the subtask number */
-					non_course_subtask = 0;
+					non_course_subtask = NON_COURSE_SUBTASK_CENTER;
 					
 					/* This will get annoying */
 					printf( "Done with pipe.\n" );
 					
 					/* In course mode, return success */
 				}
-			}
+			}/* ======== END DRIVE FORWARDS ============ */
 			
 			return SUBTASK_CONTINUING;	
+		}
+		else { /* If we lose the pipe, reset wait times for centering & cearing correct */
+			
+			time_ref_center  = SUBTASK_TIME_REF_NOT_SET;
+			time_ref_bearing = SUBTASK_TIME_REF_NOT_SET;
+			time_ref_drive   = SUBTASK_TIME_REF_NOT_SET;
 		}
 		
 		return TASK_CONTINUING;

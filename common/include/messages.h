@@ -278,8 +278,6 @@ typedef struct _STATUS {
     float roll;         //!< Roll angle, from Euler angles
     float yaw;          //!< Yaw angle, from Euler angles
     float depth;        //!< Depth from pressure sensor
-    float fx;			//!< The last fx stored in status
-    float fy;			//!< The last fy stored in status
     float pitch_perr;   //!< Pitch P error
     float pitch_ierr;   //!< Pitch I error
     float pitch_derr;   //!< Pitch D error

@@ -159,18 +159,19 @@ void pid_loop( int pololu_fd,
 	
 	/* Calculate the errors for fx and fy. */
 	pid->fx.ref		= msg->target.data.fx;
-	pid->fx.cval	= msg->status.data.fx;
+	pid->fx.cval	= 0;
 	pid->fx.perr	= pid->fx.cval - pid->fx.ref;
 	pid->fx.ierr	+= pid->fx.perr * dt / 1000000;
 	pid->fx.ierr	= pid_bound_integral( pid->fx.ierr, pid->fx.ki, PID_FX_INTEGRAL );
 	pid->fx.derr	= pid->fx.perr - fx_perr_old;
 	
 	pid->fy.ref		= msg->target.data.fy;
-	pid->fy.cval	= msg->status.data.fy;
+	pid->fy.cval	= 0;
 	pid->fy.perr	= pid->fy.cval - pid->fy.ref;
 	pid->fy.ierr	+= pid->fy.perr * dt / 1000000;
 	pid->fy.ierr	= pid_bound_integral( pid->fy.ierr, pid->fy.ki, PID_FY_INTEGRAL );
 	pid->fy.derr	= pid->fy.perr - fy_perr_old;
+	
 	
 	/* PID equations. */
 	pid->forward_thrust =	pid->fx.kp * pid->fx.perr +
