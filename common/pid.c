@@ -178,6 +178,10 @@ void pid_loop( int pololu_fd,
 					   		pid->fy.ki * pid->fy.ierr +
 					   		pid->fy.kd * pid->fy.derr;
 					   		
+	/* Update status */
+	msg->status.data.fx = pid->lateral_thrust;
+	msg->status.data.fy = pid->forward_thrust;
+					   		
 	/* Compute voith actuator values */
 	pid->voith_angle = pid_compute_sub_angle( pid->lateral_thrust, pid->forward_thrust );
 	pid->voith_speed = msg->target.data.speed;

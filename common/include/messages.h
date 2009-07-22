@@ -278,6 +278,8 @@ typedef struct _STATUS {
     float roll;         //!< Roll angle, from Euler angles
     float yaw;          //!< Yaw angle, from Euler angles
     float depth;        //!< Depth from pressure sensor
+    float fx;			//!< fx from pid.c
+    float fy;			//!< fx from pid.c
     float pitch_perr;   //!< Pitch P error
     float pitch_ierr;   //!< Pitch I error
     float pitch_derr;   //!< Pitch D error

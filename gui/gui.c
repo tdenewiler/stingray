@@ -61,7 +61,7 @@ void gui_update_status_text( )
     char sbuff[2048];
 
     sprintf( sbuff,
-             "Pitch, Roll, Yaw, Depth:\t[ %.3f\t%.3f\t%.3f\t%.3f ]\n"
+             "Pitch, Roll, Yaw, Depth, fx , fy:\t[ %.3f\t%.3f\t%.3f\t%.3f\t%.3f\t%.3f ]\n"
              "Accel X, Y, Z:\t\t\t[ %.3f\t%.3f\t%.3f ]\n"
              "Ang Rate X, Y, Z:\t\t[ %.3f\t%.3f\t%.3f ]\n"
              "Labjack (B1 B2 D W):\t[ %.3fV\t%.3fV\t%.3f\t%.3f ]\n"
@@ -70,10 +70,14 @@ void gui_update_status_text( )
              "Roll:\t\t\t\t\t[ %.3f\t%.3f\t%.3f ]\n"
              "Yaw:\t\t\t\t\t[ %.3f\t%.3f\t%.3f ]\n"
              "Depth:\t\t\t\t[ %.3f\t%.3f\t%.3f ]\n"
+             "fx:\t\t\t\t[ %.3f\t%.3f\t%.3f ]\n"
+             "fy:\t\t\t\t[ %.3f\t%.3f\t%.3f ]\n"
              , msg.status.data.pitch
              , msg.status.data.roll
              , msg.status.data.yaw
              , msg.status.data.depth
+             , msg.status.data.fx
+             , msg.status.data.fy
              , msg.status.data.accel[0]
              , msg.status.data.accel[1]
              , msg.status.data.accel[2]
@@ -96,6 +100,12 @@ void gui_update_status_text( )
              , msg.status.data.depth_perr
              , msg.status.data.depth_ierr
              , msg.status.data.depth_derr
+             , msg.status.data.fx_perr
+             , msg.status.data.fx_ierr
+             , msg.status.data.fx_derr
+             , msg.status.data.fy_perr
+             , msg.status.data.fy_ierr
+             , msg.status.data.fy_derr
            );
     //printf( "GUI_UPDATE_STATUS_TEXT:\n%s\n", sbuff );
 
