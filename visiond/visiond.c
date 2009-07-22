@@ -264,7 +264,7 @@ int main( int argc, char *argv[] )
     		msg.vision.data.bottom_x = 0;
     		msg.vision.data.bottom_y = 0.0;
 		} /* end TASK_NONE */
-		
+
         else if( task == TASK_BUOY && f_cam ) {
 			/* Look for the buoy. */
 			status = vision_find_dot( &dotx, &doty,
@@ -288,10 +288,10 @@ int main( int argc, char *argv[] )
 				/* Draw a circle at the centroid location. */
 				cvCircle( img, cvPoint(dotx, doty),
 					10, cvScalar(255, 0, 0), 5, 8 );
-					
+
 				/* Requires some sore of exit criteria. */
 			}
-				
+
 			/* Try to detect circles using cvHoughCircles(). */
 			//status = vision_find_circle( f_cam, img, circles );
 			//if( status > 0 ) {
@@ -309,17 +309,18 @@ int main( int argc, char *argv[] )
 				msg.vision.data.status = TASK_NOT_DETECTED;
 			}
 		} /* end TASK_BUOY */
-		
+
 		else if( task == TASK_PIPE && f_cam ) {
 			/* Set to not detected to start and reset if we get a hit. */
 			msg.vision.data.status = TASK_NOT_DETECTED;
-			
+
 			/* Look for the pipe */
-			status = vision_find_boxes( f_cam, img, boxes, squares, VISION_PIPE );
-			
+			status = vision_find_boxes( f_cam, img, boxes, squares, VISION_PIPE,
+				&msg.vision.data.bearing );
+
 			/* If we get a positive status message, render the box
 			 * and populate the network message. */
-			if( status > 0 ) {	
+			if( status > 0 ) {
 				/* Initialize the centroid sequence reader. */
 				cvStartReadSeq( boxes, &reader1, 0 );
 				/* Read four sequence elements at a time. */
@@ -360,7 +361,7 @@ int main( int argc, char *argv[] )
 				msg.vision.data.status = TASK_NOT_DETECTED;
 			}
 		} /* end TASK_PIPE */
-		
+
 		else if( task == TASK_FENCE && f_cam ) {
 			
 			/* Initialize to no positive detection. */
@@ -396,24 +397,25 @@ int main( int argc, char *argv[] )
             }
             
         } /* end TASK_FENCE */
-		
+
         else if( task == TASK_GATE && f_cam ) {
         	/* Look for the gate */
 
         	/* Default to fail detection until code is written */
         	msg.vision.data.status = TASK_NOT_DETECTED;
 		} /* end TASK_GATE */
-		
+
 		else if( task == TASK_BOXES && f_cam ) {
 			/* Set to not detected to start and reset if we get a hit */
 			msg.vision.data.status = TASK_NOT_DETECTED;
-			
+
 			/* Look for the boxes. */
-			status = vision_find_boxes( f_cam, img, boxes, squares, VISION_BOX );
-			
+			status = vision_find_boxes( f_cam, img, boxes, squares, VISION_BOX,
+				&msg.vision.data.bearing );
+
 			/* If we get a positive status message, render the box
 			 * and populate the network message. */
-			if( status > 0 ) {	
+			if( status > 0 ) {
 				/* Initialize the centroid sequence reader. */
 				cvStartReadSeq( boxes, &reader1, 0 );
 				/* Read four sequence elements at a time. */
@@ -450,7 +452,7 @@ int main( int argc, char *argv[] )
 			}
 			
 		} /* end TASK_BOXES */
-		
+
 		else if( task == TASK_SUITCASE && f_cam ) {
 			
 			/* No positive detection. */
@@ -495,7 +497,7 @@ int main( int argc, char *argv[] )
 				cvClearSeq( squares );
 			}
 		} /* end TASK_SUITCASE */
-		
+
 		else {
 			/* No mode or no valid cameras -- Simulate. */
 			if( loop_counter % 100 == 0 ) {
