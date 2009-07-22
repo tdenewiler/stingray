@@ -268,14 +268,11 @@ void parse_line( CONF_VARS *config )
         else if( strncmp( tokens[1], "pitch", STRING_SIZE ) == 0 ) {
             sscanf( tokens[2], "%lf", &config->kp_pitch );
         }
-        else if( strncmp( tokens[1], "ax", STRING_SIZE ) == 0 ) {
-            sscanf( tokens[2], "%lf", &config->kp_ax );
+        else if( strncmp( tokens[1], "fx", STRING_SIZE ) == 0 ) {
+            sscanf( tokens[2], "%lf", &config->kp_fx );
         }
-        else if( strncmp( tokens[1], "ay", STRING_SIZE ) == 0 ) {
-            sscanf( tokens[2], "%lf", &config->kp_ay );
-        }
-        else if( strncmp( tokens[1], "az", STRING_SIZE ) == 0 ) {
-            sscanf( tokens[2], "%lf", &config->kp_az );
+        else if( strncmp( tokens[1], "fy", STRING_SIZE ) == 0 ) {
+            sscanf( tokens[2], "%lf", &config->kp_fy );
         }
         else if( strncmp( tokens[1], "depth", STRING_SIZE ) == 0 ) {
             sscanf( tokens[2], "%lf", &config->kp_depth );
@@ -292,14 +289,11 @@ void parse_line( CONF_VARS *config )
         else if( strncmp( tokens[1], "pitch", STRING_SIZE ) == 0 ) {
             sscanf( tokens[2], "%lf", &config->ki_pitch );
         }
-        else if( strncmp( tokens[1], "ax", STRING_SIZE ) == 0 ) {
-            sscanf( tokens[2], "%lf", &config->ki_ax );
+        else if( strncmp( tokens[1], "fx", STRING_SIZE ) == 0 ) {
+            sscanf( tokens[2], "%lf", &config->ki_fx );
         }
-        else if( strncmp( tokens[1], "ay", STRING_SIZE ) == 0 ) {
-            sscanf( tokens[2], "%lf", &config->ki_ay );
-        }
-        else if( strncmp( tokens[1], "az", STRING_SIZE ) == 0 ) {
-            sscanf( tokens[2], "%lf", &config->ki_az );
+        else if( strncmp( tokens[1], "fy", STRING_SIZE ) == 0 ) {
+            sscanf( tokens[2], "%lf", &config->ki_fy );
         }
         else if( strncmp( tokens[1], "depth", STRING_SIZE ) == 0 ) {
             sscanf( tokens[2], "%lf", &config->ki_depth );
@@ -316,14 +310,11 @@ void parse_line( CONF_VARS *config )
         else if( strncmp( tokens[1], "pitch", STRING_SIZE ) == 0 ) {
             sscanf( tokens[2], "%lf", &config->kd_pitch );
         }
-        else if( strncmp( tokens[1], "ax", STRING_SIZE ) == 0 ) {
-            sscanf( tokens[2], "%lf", &config->kd_ax );
+        else if( strncmp( tokens[1], "fx", STRING_SIZE ) == 0 ) {
+            sscanf( tokens[2], "%lf", &config->kd_fx );
         }
-        else if( strncmp( tokens[1], "ay", STRING_SIZE ) == 0 ) {
-            sscanf( tokens[2], "%lf", &config->kd_ay );
-        }
-        else if( strncmp( tokens[1], "az", STRING_SIZE ) == 0 ) {
-            sscanf( tokens[2], "%lf", &config->kd_az );
+        else if( strncmp( tokens[1], "fy",STRING_SIZE ) == 0 ) {
+            sscanf( tokens[2], "%lf", &config->kd_fy );
         }
         else if( strncmp( tokens[1], "depth", STRING_SIZE ) == 0 ) {
             sscanf( tokens[2], "%lf", &config->kd_depth );
@@ -460,7 +451,7 @@ void parse_line( CONF_VARS *config )
         }
     }
     /* end vision HSV values */
-	
+
 	/* depth values */
 	else if( strncmp( tokens[0], "depth", STRING_SIZE ) == 0 ) {
 		if( strncmp( tokens[1], "gate", STRING_SIZE ) == 0 ) {
@@ -494,7 +485,7 @@ void parse_line( CONF_VARS *config )
 		}
 	}
 	/* end depth values */
-	
+
 	/* heading values */
 	else if( strncmp( tokens[0], "heading", STRING_SIZE ) == 0 ) {
 		if( strncmp( tokens[1], "buoy", STRING_SIZE ) == 0 ) {
@@ -505,7 +496,7 @@ void parse_line( CONF_VARS *config )
 		}
 	}
 	/* end heading values */
-	
+
 	/* task start values */
 	else if( strncmp( tokens[0], "start", STRING_SIZE ) == 0 ) {
 		if( strncmp( tokens[1], "task", STRING_SIZE ) == 0 ) {
@@ -739,7 +730,7 @@ void parse_default_config( CONF_VARS *config )
     config->nav_port = 2000;
     strncpy( config->nav_IP, "127.0.0.1", STRING_SIZE );
     config->max_api_clients = 5;
-	
+
 	/* planner */
 	config->enable_planner = FALSE;
 	config->planner_port = 2002;
@@ -758,15 +749,12 @@ void parse_default_config( CONF_VARS *config )
     config->kp_depth = 0;
     config->ki_depth = 0;
     config->kd_depth = 0;
-    config->kp_ax = 1;
-    config->ki_ax = 0;
-    config->kd_ax = 0;
-    config->kp_ay = 1;
-    config->ki_ay = 0;
-    config->kd_ay = 0;
-    config->kp_az = 1;
-    config->ki_az = 0;
-    config->kd_az = 0;
+    config->kp_fx = 1;
+    config->ki_fx = 0;
+    config->kd_fx = 0;
+    config->kp_fy = 1;
+    config->ki_fy = 0;
+    config->kd_fy = 0;
 
     /* target values */
     config->target_pitch = 0.0;
@@ -799,7 +787,7 @@ void parse_default_config( CONF_VARS *config )
     config->fence_sH = 0.0;
     config->fence_vL = 0.0;
     config->fence_vH = 0.0;
-	
+
 	/* depths */
 	config->depth_boxes = 0.600;
 	config->depth_buoy = 0.600;
@@ -810,11 +798,11 @@ void parse_default_config( CONF_VARS *config )
 	config->depth_suitcase_search = 0.600;
 	config->depth_surface = 0.600;
 	config->fence_min = 0.600;
-	
+
 	/* headings */
 	config->heading_buoy = 0.0;
 	config->heading_gate = 0.0;
-	
+
 	/* task starts */
 	config->task_start = 1;
 	config->subtask_start = 2;
@@ -839,7 +827,7 @@ void parse_default_config( CONF_VARS *config )
     config->enable_relay = FALSE;
     strncpy( config->relay_port, "/dev/ttyUSB7", STRING_SIZE );
     config->relay_baud = 9600;
-	
+
 	/* vision */
 	config->vision_window = FALSE;
 	config->vision_angle = 0;
@@ -899,15 +887,12 @@ void parse_print_config( CONF_VARS *config )
     printf("PARSE_PRINT_CONFIG: kp_depth = %lf\n", config->kp_depth);
     printf("PARSE_PRINT_CONFIG: ki_depth = %lf\n", config->ki_depth);
     printf("PARSE_PRINT_CONFIG: kd_depth = %lf\n", config->kd_depth);
-    printf("PARSE_PRINT_CONFIG: kp_ax = %lf\n", config->kp_ax);
-    printf("PARSE_PRINT_CONFIG: ki_ax = %lf\n", config->ki_ax);
-    printf("PARSE_PRINT_CONFIG: kd_ax = %lf\n", config->kd_ax);
-    printf("PARSE_PRINT_CONFIG: kp_ay = %lf\n", config->kp_ay);
-    printf("PARSE_PRINT_CONFIG: ki_ay = %lf\n", config->ki_ay);
-    printf("PARSE_PRINT_CONFIG: kd_ay = %lf\n", config->kd_ay);
-    printf("PARSE_PRINT_CONFIG: kp_az = %lf\n", config->kp_az);
-    printf("PARSE_PRINT_CONFIG: ki_az = %lf\n", config->ki_az);
-    printf("PARSE_PRINT_CONFIG: kd_az = %lf\n", config->kd_az);
+    printf("PARSE_PRINT_CONFIG: kp_fx = %lf\n", config->kp_fx);
+    printf("PARSE_PRINT_CONFIG: ki_fx = %lf\n", config->ki_fx);
+    printf("PARSE_PRINT_CONFIG: kd_fx = %lf\n", config->kd_fx);
+    printf("PARSE_PRINT_CONFIG: kp_fy = %lf\n", config->kp_fy);
+    printf("PARSE_PRINT_CONFIG: ki_fy = %lf\n", config->ki_fy);
+    printf("PARSE_PRINT_CONFIG: kd_fy = %lf\n", config->kd_fy);
     printf("PARSE_PRINT_CONFIG: target_pitch = %f\n", config->target_pitch);
     printf("PARSE_PRINT_CONFIG: target_roll = %f\n", config->target_roll);
     printf("PARSE_PRINT_CONFIG: target_yaw = %f\n", config->target_yaw);
