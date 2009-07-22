@@ -20,6 +20,31 @@
 #define FALSE 0
 #endif /* FALSE */
 
+#ifndef VISION_BORDER
+#define VISION_BORDER 0.95
+#endif /* VISION_BORDER */
+
+#ifndef VISION_RECT_THRESH
+#define VISION_RECT_THRESH 5
+#endif /* VISION_RECT_THRESH */
+
+#ifndef VISION_ASPECT_RATIOS
+#define VISION_ASPECT_RATIOS
+#define VISION_AR_PIPE		8
+#define VISION_AR_BOX		2
+#define VISION_AR_SUITCASE	1.5
+#define VISION_AR_THRESH	0.35
+#endif /* VISION_ASPECT_RATIOS */
+
+#ifndef VISION_TASK
+#define VISION_TASK
+#define VISION_PIPE		1
+#define VISION_BUOY		2
+#define VISION_FENCE	3
+#define VISION_BOX		4
+#define VISION_SUITCASE	5
+#endif /* VISION_TASK */
+
 
 /******************************
 **
@@ -114,14 +139,14 @@ int vision_find_fence( int *pipex,
 //! \return 1 if suitcase found, 0 otherwise.
 int vision_suitcase( CvCapture *cap, IplImage *srcImg, CvSeq *result, CvSeq *squares );
 
-//! Captures an image,calls findSquares4
-int vision_find_boxes( CvCapture *cap, IplImage *srcImg, CvSeq *result, CvSeq *squares );
+//! Captures an image, calls findSquares.
+int vision_find_boxes( CvCapture *cap, IplImage *srcImg, CvSeq *result, CvSeq *squares, int task );
 						 
 //! Helper function for finding boxes (angle calculations)
-double vision_angle( CvPoint* pt1, CvPoint* pt2, CvPoint* pt0 );
+double vision_angle( CvPoint* pt1, CvPoint* pt2, CvPoint* pt0, IplImage *img, int task );
 
 //! Finds rectangle centers from a camera
-int vision_find_squares4( IplImage *img, CvMemStorage *storage, CvSeq *box_centers, CvSeq *squares );
+int vision_find_squares( IplImage *img, CvMemStorage *storage, CvSeq *box_centers, CvSeq *squares, int task );
 
 //! Finds a circle in an image.
 //! \param cap The camera to capture images from.

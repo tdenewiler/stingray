@@ -233,6 +233,7 @@ int vision_find_pipe( int *pipex,
     center.y = -1;
 
     srcImg = cvQueryFrame( cap );
+	//srcImg = cvLoadImage( "../../../../pics/stingrayBackup/images/b20090717_135344.719209.jpg" );
     if( !srcImg ) {
         return 0;
     }
@@ -767,7 +768,8 @@ int vision_get_fence_bottom( IplImage *inputBinImg, int *center )
 int vision_find_boxes( CvCapture *cap,
                        IplImage *srcImg,
 					   CvSeq *result,
-					   CvSeq *squares )
+					   CvSeq *squares,
+					   int task )
 {
 	/* Declare variables. */
 	IplImage *img = NULL;
@@ -779,6 +781,7 @@ int vision_find_boxes( CvCapture *cap,
 
     /* Capture a new source image. */
     srcImg = cvQueryFrame( cap );
+	//srcImg = cvLoadImage( "../../../../pics/stingrayBackup/images/b20090717_135344.719209.jpg" );
     if ( !srcImg ) {
         return 0;
     }
@@ -786,7 +789,7 @@ int vision_find_boxes( CvCapture *cap,
 	/* Clone the source image so that we have an image we can write over. The
 	 * source image needs to be kept clean so that we can display it later. */
 	img = cvCloneImage( srcImg );
-    status = vision_find_squares4( img, storage, result, squares );
+    status = vision_find_squares( img, storage, result, squares, task );
 
     /* Clear memory storage and reset free space position. */
     cvReleaseImage( &img );
@@ -813,22 +816,99 @@ int vision_find_boxes( CvCapture *cap,
  *
  *****************************************************************************/
 
-double vision_angle( CvPoint* pt1, CvPoint* pt2, CvPoint* pt0 )
+double vision_angle( CvPoint* pt1, CvPoint* pt2, CvPoint* pt0, IplImage *img, int task )
 {
 	/* Calculate length between points. */
     double dx1 = pt1->x - pt0->x;
     double dy1 = pt1->y - pt0->y;
     double dx2 = pt2->x - pt0->x;
     double dy2 = pt2->y - pt0->y;
+	double dx = fabsf( dx1 - dx2 );
+	double dy = fabsf( dy1 - dy2 );
+	double borderx = img->width * VISION_BORDER;
+	double bordery = img->height * VISION_BORDER;
+	double ar = 0;
+	double arinv = 0;
+	int ar_passed = FALSE;
 
 	/* The find box code detects a box at the image boundary. To remove this we
 	 * are going to exclude boxes that are within a small band around the edge
-	 * of the image. There are magic numbers here for a 640x480 image that
-	 * should be changed to be a percentage of the actual image being
-	 * processed. That would involve passing the image size in as an extra
-	 * argument. */
-	if( (fabsf(dy1 - dy2) > 450.) || (fabsf(dx1 - dx2) > 610.) ) {
+	 * of the image. */
+	if( (dx > borderx) || (dy > bordery) ) {
 		return 100000.;
+	}
+
+	/* Check that the lengths of the found box are within the bounds of the
+	 * aspect ratios for the individual targets. They can be off by a certain
+	 * percentage set by VISION_AR_THRESH to accomodate looking at the objects
+	 * from an angle. */
+	if( dy == 0 ) {
+		ar = 0.;
+	}
+	else {
+		ar = dx / dy;
+	}
+	if( dx == 0 ) {
+		arinv = 0.;
+	}
+	else {
+		arinv = dy / dx;
+	}
+	switch( task ) {
+	case VISION_SUITCASE:
+		/* Check the aspect ratio. */
+		if( ar > VISION_AR_SUITCASE * (1 - VISION_AR_THRESH) &&
+			ar < VISION_AR_SUITCASE * (1 + VISION_AR_THRESH) ) {
+			/* Found a valid box. */
+			ar_passed = TRUE;
+		}
+		/* Check to see if we are looking at the box rotated by 90 degrees. */
+		if( !ar_passed ) {
+			if( arinv < VISION_AR_SUITCASE * (1 - VISION_AR_THRESH) ||
+				arinv > VISION_AR_SUITCASE * (1 + VISION_AR_THRESH) ) {
+				return 100000.;
+			}
+		}
+		/* Else we have found a box with a valid aspect ratio. */
+		else {
+			break;
+		}
+	case VISION_PIPE:
+		/* Check the aspect ratio. */
+		if( ar > VISION_AR_PIPE * (1 - VISION_AR_THRESH) &&
+			ar < VISION_AR_PIPE * (1 + VISION_AR_THRESH) ) {
+			/* Found a valid box. */
+			ar_passed = TRUE;
+		}
+		/* Check to see if we are looking at the box rotated by 90 degrees. */
+		if( !ar_passed ) {
+			if( arinv < VISION_AR_PIPE * (1 - VISION_AR_THRESH) ||
+				arinv > VISION_AR_PIPE * (1 + VISION_AR_THRESH) ) {
+				return 100000.;
+			}
+		}
+		/* Else we have found a box with a valid aspect ratio. */
+		else {
+			break;
+		}
+	case VISION_BOX:
+		/* Check the aspect ratio. */
+		if( ar > VISION_AR_BOX * (1 - VISION_AR_THRESH) &&
+			ar < VISION_AR_BOX * (1 + VISION_AR_THRESH) ) {
+			/* Found a valid box. */
+			ar_passed = TRUE;
+		}
+		/* Check to see if we are looking at the box rotated by 90 degrees. */
+		if( !ar_passed ) {
+			if( arinv < VISION_AR_BOX * (1 - VISION_AR_THRESH) ||
+				arinv > VISION_AR_BOX * (1 + VISION_AR_THRESH) ) {
+				return 100000.;
+			}
+		}
+		/* Else we have found a box with a valid aspect ratio. */
+		else {
+			break;
+		}
 	}
 
 	/* Return the cosine between the two points. */
@@ -838,7 +918,7 @@ double vision_angle( CvPoint* pt1, CvPoint* pt2, CvPoint* pt0 )
 
 /******************************************************************************
  *
- * Title:       int vision_find_squares4(  IplImage *img,
+ * Title:       int vision_find_squares(  IplImage *img,
  * 										   CvMemStorage *storage,
  * 										   CvSeq *box_centers,
  * 										   CvSeq *squares
@@ -854,7 +934,7 @@ double vision_angle( CvPoint* pt1, CvPoint* pt2, CvPoint* pt0 )
  *
  *****************************************************************************/
 
-int vision_find_squares4( IplImage *img, CvMemStorage *storage, CvSeq *box_centers, CvSeq *squares )
+int vision_find_squares( IplImage *img, CvMemStorage *storage, CvSeq *box_centers, CvSeq *squares, int task )
 {
 	/* Declare variables. */
     CvSeq* contours;
@@ -901,7 +981,7 @@ int vision_find_squares4( IplImage *img, CvMemStorage *storage, CvSeq *box_cente
             }
             else {
                 /* Apply threshold if l != 0. */
-                cvThreshold( tgray, gray, (l+1)*255/N, 255, CV_THRESH_BINARY );
+                cvThreshold( tgray, gray, (l + 1) * 255 / N, 255, CV_THRESH_BINARY );
             }
 
             /* Find contours and store them all as a list. */
@@ -926,7 +1006,8 @@ int vision_find_squares4( IplImage *img, CvMemStorage *storage, CvSeq *box_cente
                             t = fabs(vision_angle(
 								(CvPoint*)cvGetSeqElem( result, i ),
 								(CvPoint*)cvGetSeqElem( result, i-2 ),
-								(CvPoint*)cvGetSeqElem( result, i-1 )));
+								(CvPoint*)cvGetSeqElem( result, i-1 ),
+								gray, task ));
                             s = s > t ? s : t;
                         }
                     }
@@ -957,7 +1038,7 @@ int vision_find_squares4( IplImage *img, CvMemStorage *storage, CvSeq *box_cente
     cvReleaseImage( &timg );
 
     return status;
-} /* end vision_find_squares4() */
+} /* end vision_find_squares() */
 
 
 /******************************************************************************
@@ -999,7 +1080,7 @@ int vision_suitcase( CvCapture *cap,
 	/* Clone the source image so that we have an image we can write over. The
 	 * source image needs to be kept clean so that we can display it later. */
 	img = cvCloneImage( srcImg );
-    status = vision_find_squares4( img, storage, result, squares );
+    status = vision_find_squares( img, storage, result, squares, VISION_SUITCASE );
 
     /* Clear memory storage and reset free space position. */
     cvReleaseImage( &img );
