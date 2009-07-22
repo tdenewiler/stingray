@@ -114,7 +114,7 @@ int vision_find_dot( int *dotx,
 	cvSetImageCOI( hsv_clone, 3 );
     cvCopy( hsv_clone, tgrayV, 0 );
 	//cvSmooth( tgrayV, tgrayV, CV_GAUSSIAN, smooth_size, smooth_size );
-	
+
 	/* Equalize the histograms of each channel. */
 	cvEqualizeHist( tgrayH, tgrayHeq );
 	cvEqualizeHist( tgrayS, tgraySeq );
@@ -135,6 +135,7 @@ int vision_find_dot( int *dotx,
 
     /* Find the centroid. */
     center = vision_find_centroid( outImg, 5 );
+    //status = vision_window_filter( outImg, &center, 15, 15 );
     *dotx = center.x;
     *doty = center.y;
 
@@ -209,7 +210,7 @@ int vision_find_pipe( int *pipex,
                     )
 {
 	const static double BEARING_DELTA_MIN = 0.000001;
-	
+
     CvSize sz = cvSize( srcImg->width & -2, srcImg->height & -2 );
     CvPoint center;
     IplImage *hsv_image = NULL;
@@ -304,7 +305,7 @@ int vision_find_pipe( int *pipex,
 	cvReleaseImage( &tgrayHeq );
 	cvReleaseImage( &tgraySeq );
 	cvReleaseImage( &tgrayVeq );
-    
+
     /* No detection condition, only using bearing - not centroid. */
     if( fabs(*bearing) < BEARING_DELTA_MIN )
     	return 2;
@@ -769,7 +770,8 @@ int vision_find_boxes( CvCapture *cap,
                        IplImage *srcImg,
 					   CvSeq *result,
 					   CvSeq *squares,
-					   int task )
+					   int task,
+					   float *angle )
 {
 	/* Declare variables. */
 	IplImage *img = NULL;
@@ -789,11 +791,12 @@ int vision_find_boxes( CvCapture *cap,
 	/* Clone the source image so that we have an image we can write over. The
 	 * source image needs to be kept clean so that we can display it later. */
 	img = cvCloneImage( srcImg );
-    status = vision_find_squares( img, storage, result, squares, task );
+    status = vision_find_squares( img, storage, result, squares, task, angle );
 
     /* Clear memory storage and reset free space position. */
     cvReleaseImage( &img );
     cvClearMemStorage( storage );
+    cvReleaseMemStorage( &storage );
 
     return status;
 } /* end vision_find_boxes() */
@@ -816,15 +819,16 @@ int vision_find_boxes( CvCapture *cap,
  *
  *****************************************************************************/
 
-double vision_angle( CvPoint* pt1, CvPoint* pt2, CvPoint* pt0, IplImage *img, int task )
+double vision_angle( CvPoint* pt1, CvPoint* pt2, CvPoint* pt0, IplImage *img,
+					 int task, float *angle )
 {
 	/* Calculate length between points. */
     double dx1 = pt1->x - pt0->x;
     double dy1 = pt1->y - pt0->y;
     double dx2 = pt2->x - pt0->x;
     double dy2 = pt2->y - pt0->y;
-	double dx = fabsf( dx1 - dx2 );
-	double dy = fabsf( dy1 - dy2 );
+	double dx = sqrt(dx1 * dx1 + dy1 * dy1);
+	double dy = sqrt(dx2 * dx2 + dy2 * dy2);
 	double borderx = img->width * VISION_BORDER;
 	double bordery = img->height * VISION_BORDER;
 	double ar = 0;
@@ -874,6 +878,14 @@ double vision_angle( CvPoint* pt1, CvPoint* pt2, CvPoint* pt0, IplImage *img, in
 			break;
 		}
 	case VISION_PIPE:
+		/* Find the angle of the pipe so that we follow the longer edge. */
+		if( dy1 > dy2 ) {
+			*angle = atan2( dy1, dx1 );
+		}
+		else {
+			*angle = atan2( dy2, dx2 );
+		}
+
 		/* Check the aspect ratio. */
 		if( ar > VISION_AR_PIPE * (1 - VISION_AR_THRESH) &&
 			ar < VISION_AR_PIPE * (1 + VISION_AR_THRESH) ) {
@@ -934,7 +946,9 @@ double vision_angle( CvPoint* pt1, CvPoint* pt2, CvPoint* pt0, IplImage *img, in
  *
  *****************************************************************************/
 
-int vision_find_squares( IplImage *img, CvMemStorage *storage, CvSeq *box_centers, CvSeq *squares, int task )
+int vision_find_squares( IplImage *img, CvMemStorage *storage,
+						 CvSeq *box_centers, CvSeq *squares,
+						 int task, float *angle )
 {
 	/* Declare variables. */
     CvSeq* contours;
@@ -1007,14 +1021,14 @@ int vision_find_squares( IplImage *img, CvMemStorage *storage, CvSeq *box_center
 								(CvPoint*)cvGetSeqElem( result, i ),
 								(CvPoint*)cvGetSeqElem( result, i-2 ),
 								(CvPoint*)cvGetSeqElem( result, i-1 ),
-								gray, task ));
+								gray, task, angle ));
                             s = s > t ? s : t;
                         }
                     }
 
                     /* If cosines of all angles are small (all angles are ~90 degree)
 					 * then write rectangle vertices to resultant sequence. */
-                    if( s < 0.16 ) {
+                    if( s < VISION_MIN_ANGLE ) {
                         for( i = 0; i < 4; i++ ) {
                          	cvContourMoments( result, &moments );
         				 	box_centroid.x = (int)(moments.m10 / moments.m00);
@@ -1067,6 +1081,7 @@ int vision_suitcase( CvCapture *cap,
 	IplImage *img = NULL;
 	CvMemStorage *storage = 0;
 	int status = -1;
+	float angle = 0;
 
 	/* Initialize variables. */
 	storage = cvCreateMemStorage( 0 );
@@ -1080,7 +1095,7 @@ int vision_suitcase( CvCapture *cap,
 	/* Clone the source image so that we have an image we can write over. The
 	 * source image needs to be kept clean so that we can display it later. */
 	img = cvCloneImage( srcImg );
-    status = vision_find_squares( img, storage, result, squares, VISION_SUITCASE );
+    status = vision_find_squares( img, storage, result, squares, VISION_SUITCASE, &angle );
 
     /* Clear memory storage and reset free space position. */
     cvReleaseImage( &img );
@@ -1123,15 +1138,17 @@ int vision_find_circle( CvCapture *cap,
     if ( !srcImg ) {
         return 0;
     }
-	
+
 	/* Convert captured image to grayscale. */
     gray = cvCreateImage( cvGetSize(srcImg), 8, 1 );
 	cvCvtColor( srcImg, gray, CV_BGR2GRAY );
 	cvSmooth( gray, gray, CV_GAUSSIAN, 9, 9 );
-	
+
 	/* Look for circles. */
-	circles = cvHoughCircles( gray, storage, CV_HOUGH_GRADIENT, 2,
-		gray->height / 4, 200, 100 );
+	//circles = cvHoughCircles( gray, storage, CV_HOUGH_GRADIENT, 2,
+		//gray->height / 4, 200, 100 );
+	circles = cvHoughCircles( gray, storage, CV_HOUGH_GRADIENT, 10,
+		gray->height / 15, 200, 100 );
 
     /* Clear memory storage and reset free space position. */
     cvReleaseImage( &gray );
@@ -1139,3 +1156,71 @@ int vision_find_circle( CvCapture *cap,
 
     return circles->total;
 } /* end vision_find_circle() */
+
+
+/******************************************************************************
+ *
+ * Title:       int vision_window_filter(  IplImage *img,
+ * 										   CvPoint *center,
+ * 										   int sizex,
+ * 										   int sizey
+ *                                      )
+ *
+ * Description: Finds the centroid in a binary image using the sum of a window.
+ *
+ * Input:       img: The binary image to search over.
+ *				center: A pointer to fill in the centroid values.
+ * 				sizex: The window size in x direction.
+ * 				sizey: The window size in y direction.
+ *
+ * Output:      status: 1 on success, 0 on failure.
+ *
+ *****************************************************************************/
+
+int vision_window_filter( IplImage *img,
+					    CvPoint *center,
+						int sizex,
+						int sizey )
+{
+	/* Try to add some logic to handle the case when sizex or sizey is an even
+	 * number. */
+	/* Declare variables. */
+	int rows = 0;
+	int cols = 0;
+	int wrows = 0;
+	int wcols = 0;
+	int anchorx = floor(sizex/2) + 1;
+	int anchory = floor(sizey/2) + 1;
+	double sum = 0.;
+	double retsum = 0.;
+
+	/* In a loop run over the entire image and look for highest sum inside a
+	 * window. */
+	sum = cvGet2D( img, img->height - 1, img->width - 1 ).val[0];
+	for( cols = 0; cols < img->height - (sizey + 1); cols++ ) {
+		for( rows = 0; rows < img->width - (sizex + 1); rows++ ) {
+			/* Search through the window to find the sum of the pixels. */
+			for( wcols = cols; wcols < cols + sizey; wcols++ ) {
+				for( wrows = rows; wrows < rows + sizex; wrows++ ) {
+					sum += cvGet2D( img, wcols, wrows ).val[0];
+				}
+			}
+			//printf("sum = %lf\n", sum);
+			if( sum > retsum ) {
+				/* We have found a new max correlation. */
+				retsum = sum;
+				center->x = rows + anchorx;
+				center->y = cols + anchory;
+			}
+			/* Reset the sum here because we are moving the window. */
+			sum = 0.;
+		}
+	}
+
+	if( retsum > 0. ) {
+		return 1;
+	}
+	else {
+		return 0;
+	}
+} /* end vision_window_filter() */

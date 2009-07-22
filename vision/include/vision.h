@@ -28,12 +28,16 @@
 #define VISION_RECT_THRESH 5
 #endif /* VISION_RECT_THRESH */
 
+#ifndef VISION_MIN_ANGLE
+#define VISION_MIN_ANGLE 0.16
+#endif /* VISION_MIN_ANGLE */
+
 #ifndef VISION_ASPECT_RATIOS
 #define VISION_ASPECT_RATIOS
 #define VISION_AR_PIPE		8
 #define VISION_AR_BOX		2
-#define VISION_AR_SUITCASE	1.5
-#define VISION_AR_THRESH	0.35
+#define VISION_AR_SUITCASE	1
+#define VISION_AR_THRESH	0.5
 #endif /* VISION_ASPECT_RATIOS */
 
 #ifndef VISION_TASK
@@ -140,13 +144,16 @@ int vision_find_fence( int *pipex,
 int vision_suitcase( CvCapture *cap, IplImage *srcImg, CvSeq *result, CvSeq *squares );
 
 //! Captures an image, calls findSquares.
-int vision_find_boxes( CvCapture *cap, IplImage *srcImg, CvSeq *result, CvSeq *squares, int task );
-						 
+int vision_find_boxes( CvCapture *cap, IplImage *srcImg, CvSeq *result,
+					   CvSeq *squares, int task, float *angle );
+
 //! Helper function for finding boxes (angle calculations)
-double vision_angle( CvPoint* pt1, CvPoint* pt2, CvPoint* pt0, IplImage *img, int task );
+double vision_angle( CvPoint* pt1, CvPoint* pt2, CvPoint* pt0, IplImage *img,
+					 int task, float *angle );
 
 //! Finds rectangle centers from a camera
-int vision_find_squares( IplImage *img, CvMemStorage *storage, CvSeq *box_centers, CvSeq *squares, int task );
+int vision_find_squares( IplImage *img, CvMemStorage *storage, CvSeq *box_centers,
+						 CvSeq *squares, int task, float *angle );
 
 //! Finds a circle in an image.
 //! \param cap The camera to capture images from.
@@ -154,6 +161,13 @@ int vision_find_squares( IplImage *img, CvMemStorage *storage, CvSeq *box_center
 //! \param circles A sequence to store detected circle data in.
 //! \return 1 if circle found, 0 otherwise.
 int vision_find_circle( CvCapture *cap, IplImage *srcImg, CvSeq *circles );
+
+//! Finds the centroid in a binary image using the sum of a window.
+//! \return 1 if circle found, 0 otherwise.
+int vision_window_filter( IplImage *img,
+					    CvPoint *center,
+						int sizex,
+						int sizey );
 
 
 #endif /* _VISION_H_ */
