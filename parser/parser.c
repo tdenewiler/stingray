@@ -263,7 +263,12 @@ void parse_line( CONF_VARS *config )
             sscanf( tokens[2], "%lf", &config->kp_yaw );
         }
         else if( strncmp( tokens[1], "roll", STRING_SIZE ) == 0 ) {
-            sscanf( tokens[2], "%lf", &config->kp_roll );
+        	if( strncmp( tokens[2], "lateral", STRING_SIZE ) == 0 ) {
+        		sscanf( tokens[3], "%lf", &config->kp_roll_lateral );
+			}
+			else {
+	            sscanf( tokens[2], "%lf", &config->kp_roll );
+			}
         }
         else if( strncmp( tokens[1], "pitch", STRING_SIZE ) == 0 ) {
             sscanf( tokens[2], "%lf", &config->kp_pitch );
@@ -275,7 +280,12 @@ void parse_line( CONF_VARS *config )
             sscanf( tokens[2], "%lf", &config->kp_fy );
         }
         else if( strncmp( tokens[1], "depth", STRING_SIZE ) == 0 ) {
-            sscanf( tokens[2], "%lf", &config->kp_depth );
+        	if( strncmp( tokens[2], "lateral", STRING_SIZE ) == 0 ) {
+        		sscanf( tokens[3], "%lf", &config->kp_depth_forward );
+			}
+			else {
+            	sscanf( tokens[2], "%lf", &config->kp_depth );
+			}
         }
     }
 
@@ -755,6 +765,9 @@ void parse_default_config( CONF_VARS *config )
     config->kp_fy = 1;
     config->ki_fy = 0;
     config->kd_fy = 0;
+    config->kp_roll_lateral = 0;
+    config->kp_depth_forward = 0;
+    config->kp_place_holder = 0;
 
     /* target values */
     config->target_pitch = 0.0;
@@ -893,6 +906,8 @@ void parse_print_config( CONF_VARS *config )
     printf("PARSE_PRINT_CONFIG: kp_fy = %lf\n", config->kp_fy);
     printf("PARSE_PRINT_CONFIG: ki_fy = %lf\n", config->ki_fy);
     printf("PARSE_PRINT_CONFIG: kd_fy = %lf\n", config->kd_fy);
+    
+    
     printf("PARSE_PRINT_CONFIG: target_pitch = %f\n", config->target_pitch);
     printf("PARSE_PRINT_CONFIG: target_roll = %f\n", config->target_roll);
     printf("PARSE_PRINT_CONFIG: target_yaw = %f\n", config->target_yaw);

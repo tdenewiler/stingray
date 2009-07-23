@@ -88,6 +88,9 @@ typedef struct _CONF_VARS {
     double      kp_fy;
     double      ki_fy;
     double      kd_fy;
+    double 		kp_roll_lateral;
+    double 		kp_depth_forward;
+    double 		kp_place_holder;
     float       target_pitch;
     float       target_roll;
     float       target_yaw;
