@@ -310,12 +310,12 @@ int main( int argc, char *argv[] )
 			}
 		} /* end TASK_BUOY */
 
-		else if( task == TASK_PIPE && b_cam ) {
+		else if( task == TASK_PIPE && f_cam ) {
 			/* Set to not detected to start and reset if we get a hit. */
 			msg.vision.data.status = TASK_NOT_DETECTED;
 
 			/* Look for the pipe. */
-			status = vision_find_boxes( b_cam, img, boxes, squares, VISION_PIPE,
+			status = vision_find_boxes( f_cam, img, boxes, squares, VISION_PIPE,
 				&msg.vision.data.bearing );
 
 			/* If we get a positive status message, render the box

@@ -58,12 +58,12 @@ int pid_init( PID *pid, CONF_VARS *cf )
 	pid->depth.ki		= cf->ki_depth;
 	pid->depth.kd		= cf->kd_depth;
 	pid->depth.period	= cf->period_depth;
-	
+
 	pid->fx.ref			= cf->target_fx;
 	pid->fx.kp			= cf->kp_fx;
 	pid->fx.ki			= cf->ki_fx;
 	pid->fx.kd			= cf->kd_fx;
-	
+
 	pid->fy.ref			= cf->target_fy;
 	pid->fy.kp			= cf->kp_fy;
 	pid->fy.ki			= cf->ki_fy;
@@ -139,20 +139,20 @@ void pid_loop( int pololu_fd,
 	/* These next three need to be set from vison, hydrophone, gui, etc. They
 	 * depend on the target values reported from those sensor systems.
 	 * Reference: float atan2f(float y, float x); theta = atan( y / x ) */
-			
+
 	float fx_perr_old = pid->fx.perr;
 	float fy_perr_old = pid->fy.perr;
 	float depth_perr_old = pid->depth.perr;
-	
+
 	/* Update the gains. */
 	pid->fx.kp		= msg->gain.data.kp_fx;
 	pid->fx.ki		= msg->gain.data.ki_fx;
 	pid->fx.kd		= msg->gain.data.kd_fx;
-	
+
 	pid->fy.kp		= msg->gain.data.kp_fy;
 	pid->fy.ki		= msg->gain.data.ki_fy;
 	pid->fy.kd		= msg->gain.data.kd_fy;
-	
+
 	/* Calculate the errors for fx and fy. */
 	pid->fx.ref		= msg->target.data.fx;
 	pid->fx.cval	= 0;
@@ -160,29 +160,29 @@ void pid_loop( int pololu_fd,
 	pid->fx.ierr	+= pid->fx.perr * dt / 1000000;
 	pid->fx.ierr	= pid_bound_integral( pid->fx.ierr, pid->fx.ki, PID_FX_INTEGRAL );
 	pid->fx.derr	= pid->fx.perr - fx_perr_old;
-	
+
 	pid->fy.ref		= msg->target.data.fy;
 	pid->fy.cval	= 0;
 	pid->fy.perr	= pid->fy.cval - pid->fy.ref;
 	pid->fy.ierr	+= pid->fy.perr * dt / 1000000;
 	pid->fy.ierr	= pid_bound_integral( pid->fy.ierr, pid->fy.ki, PID_FY_INTEGRAL );
 	pid->fy.derr	= pid->fy.perr - fy_perr_old;
-	
+
 	/* Update status message. */
 	msg->status.data.fx_perr	= pid->fx.perr;
 	msg->status.data.fx_ierr	= pid->fx.ierr;
 	msg->status.data.fx_derr	= pid->fx.derr;
-	
+
 	msg->status.data.fy_perr	= pid->fy.perr;
 	msg->status.data.fy_ierr	= pid->fy.ierr;
 	msg->status.data.fy_derr	= pid->fy.derr;
-	
-	
+
+
 	/* PID equations. */
 	pid->lateral_thrust =	pid->fx.kp * pid->fx.perr +
 					   		pid->fx.ki * pid->fx.ierr +
 					   		pid->fx.kd * pid->fx.derr;
-					
+
 	pid->forward_thrust =	pid->fy.kp * pid->fy.perr +
 					   		pid->fy.ki * pid->fy.ierr +
 					   		pid->fy.kd * pid->fy.derr;
@@ -194,11 +194,11 @@ void pid_loop( int pololu_fd,
 	if( fabsf( pid->lateral_thrust ) > PID_TOTAL_FX_THRUST ) {
 		pid->lateral_thrust = util_sign_value( pid->lateral_thrust ) * PID_TOTAL_FX_THRUST;
 	}
-		   		
+
 	/* Update status */
 	msg->status.data.fx = pid->lateral_thrust;
 	msg->status.data.fy = pid->forward_thrust;
-					   		
+
 	/* Compute voith actuator values */
 	pid->voith_angle = pid_compute_sub_angle( pid->lateral_thrust, pid->forward_thrust );
 	pid->voith_speed = msg->target.data.speed;
