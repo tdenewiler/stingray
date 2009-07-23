@@ -92,6 +92,9 @@ GtkWidget *button_kd_fx;
 GtkWidget *button_kp_fy;
 GtkWidget *button_ki_fy;
 GtkWidget *button_kd_fy;
+GtkWidget *button_kp_roll_lateral;
+GtkWidget *button_kp_depth_forward;
+GtkWidget *button_kp_place_holder;
 GtkWidget *button_cf_gains;
 GtkWidget *button_zero_gains;
 
@@ -1098,6 +1101,7 @@ int buttons_gains( GtkWidget *box )
     GtkWidget *depth_frame;
     GtkWidget *fx_frame;
     GtkWidget *fy_frame;
+    GtkWidget *coupling_frame;
     GtkWidget *getset_frame;
     GtkAdjustment *adj;
     GtkWidget *hbox;
@@ -1115,6 +1119,8 @@ int buttons_gains( GtkWidget *box )
     GtkWidget *vbox18;
     GtkWidget *vbox19;
     GtkWidget *vbox20;
+    GtkWidget *vbox21;
+    GtkWidget *vbox22;
 
     /* Create new boxes. */
     hbox   = gtk_hbox_new( FALSE, 0 );
@@ -1132,14 +1138,17 @@ int buttons_gains( GtkWidget *box )
     vbox18 = gtk_vbox_new( TRUE, 0 );
     vbox19 = gtk_vbox_new( TRUE, 0 );
     vbox20 = gtk_vbox_new( TRUE, 0 );
+    vbox21 = gtk_vbox_new( TRUE, 0 );
+    vbox22 = gtk_vbox_new( TRUE, 0 );
 
     /* Create frames. */
-    yaw_frame    = buttons_make_frame( "Yaw" );
-    pitch_frame  = buttons_make_frame( "Pitch" );
-    roll_frame   = buttons_make_frame( "Roll" );
-    depth_frame  = buttons_make_frame( "Depth" );
-    fx_frame     = buttons_make_frame( "Fx" );
-    fy_frame     = buttons_make_frame( "Fy" );
+    yaw_frame      = buttons_make_frame( "Yaw" );
+    pitch_frame    = buttons_make_frame( "Pitch" );
+    roll_frame     = buttons_make_frame( "Roll" );
+    depth_frame    = buttons_make_frame( "Depth" );
+    fx_frame       = buttons_make_frame( "Fx" );
+    fy_frame       = buttons_make_frame( "Fy" );
+    coupling_frame = buttons_make_frame( "Coupling" );
     getset_frame = buttons_make_frame( "Get/Set" );
 
     /* Add the frames to boxes. */
@@ -1149,16 +1158,18 @@ int buttons_gains( GtkWidget *box )
     gtk_container_add( GTK_CONTAINER( vbox13 ), depth_frame );
     gtk_container_add( GTK_CONTAINER( vbox17 ), fx_frame );
     gtk_container_add( GTK_CONTAINER( vbox18 ), fy_frame );
+    gtk_container_add( GTK_CONTAINER( vbox21 ), coupling_frame );
     gtk_container_add( GTK_CONTAINER( vbox15 ), getset_frame );
 
     /* Add boxes to the frames. */
-    gtk_container_add( GTK_CONTAINER( yaw_frame ),    vbox4 );
-    gtk_container_add( GTK_CONTAINER( pitch_frame ),  vbox5 );
-    gtk_container_add( GTK_CONTAINER( roll_frame ),   vbox6 );
-    gtk_container_add( GTK_CONTAINER( depth_frame ),  vbox14 );
-    gtk_container_add( GTK_CONTAINER( fx_frame ),     vbox19 );
-    gtk_container_add( GTK_CONTAINER( fy_frame ),     vbox20 );
-    gtk_container_add( GTK_CONTAINER( getset_frame ), vbox16 );
+    gtk_container_add( GTK_CONTAINER( yaw_frame ),      vbox4 );
+    gtk_container_add( GTK_CONTAINER( pitch_frame ),    vbox5 );
+    gtk_container_add( GTK_CONTAINER( roll_frame ),     vbox6 );
+    gtk_container_add( GTK_CONTAINER( depth_frame ),    vbox14 );
+    gtk_container_add( GTK_CONTAINER( fx_frame ),       vbox19 );
+    gtk_container_add( GTK_CONTAINER( fy_frame ),       vbox20 );
+    gtk_container_add( GTK_CONTAINER( coupling_frame ), vbox22 );
+    gtk_container_add( GTK_CONTAINER( getset_frame ),   vbox16 );
 
     /* Create normal buttons. */
 	button_cf_gains = gtk_button_new_with_label( "Use Config File Gains" );
@@ -1264,6 +1275,21 @@ int buttons_gains( GtkWidget *box )
 	   -10000.0, 10000.0, BUTTON_GAIN_INCR, 1.0, 0 );
     button_kd_fy = buttons_make_spin( "Kd",
 	   GTK_SIGNAL_FUNC( events_gain ), vbox20, adj );
+	   
+	adj = ( GtkAdjustment * )gtk_adjustment_new( msg.gain.data.kp_roll_lateral,
+		-10000.0, 10000.0, BUTTON_GAIN_INCR, 1.0, 0 );
+    button_kp_roll_lateral = buttons_make_spin( "Kp - Roll/Fx",
+		GTK_SIGNAL_FUNC( events_gain ), vbox22, adj );
+
+    adj = ( GtkAdjustment * )gtk_adjustment_new( msg.gain.data.kp_depth_forward,
+		-10000.0, 10000.0, BUTTON_GAIN_INCR, 1.0, 0 );
+    button_kp_depth_forward = buttons_make_spin( "Kp - Depth/Fy",
+       GTK_SIGNAL_FUNC( events_gain ), vbox22, adj );
+
+    adj = ( GtkAdjustment * )gtk_adjustment_new( msg.gain.data.kp_place_holder,
+	   -10000.0, 10000.0, BUTTON_GAIN_INCR, 1.0, 0 );
+    button_kp_place_holder = buttons_make_spin( "Unused",
+	   GTK_SIGNAL_FUNC( events_gain ), vbox22, adj );
 
     /* Pack the boxes. */
     gtk_box_pack_start( GTK_BOX( box ), hbox, FALSE, TRUE, 0 );
@@ -1273,6 +1299,7 @@ int buttons_gains( GtkWidget *box )
     gtk_box_pack_start( GTK_BOX( hbox ), vbox13, FALSE, TRUE, 0 );
     gtk_box_pack_start( GTK_BOX( hbox ), vbox17, FALSE, TRUE, 0 );
     gtk_box_pack_start( GTK_BOX( hbox ), vbox18, FALSE, TRUE, 0 );
+    gtk_box_pack_start( GTK_BOX( hbox ), vbox21, FALSE, TRUE, 0 );
     gtk_box_pack_start( GTK_BOX( hbox ), vbox15, FALSE, TRUE, 0 );
 
     return TRUE;

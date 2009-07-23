@@ -89,6 +89,9 @@ extern GtkWidget *button_kd_fx;
 extern GtkWidget *button_kp_fy;
 extern GtkWidget *button_ki_fy;
 extern GtkWidget *button_kd_fy;
+extern GtkWidget *button_kp_roll_lateral;
+extern GtkWidget *button_kp_depth_forward;
+extern GtkWidget *button_kp_place_holder;
 
 /* Target buttons. */
 extern GtkWidget *button_target_yaw;
@@ -422,7 +425,13 @@ void events_gain( GtkWidget *widget,
     msg.gain.data.ki_fy     = gtk_spin_button_get_value( (GtkSpinButton *)
                               button_ki_fy );
     msg.gain.data.kd_fy     = gtk_spin_button_get_value( (GtkSpinButton *)
-                              button_kd_fy );
+                              button_kd_fy );             
+    msg.gain.data.kp_roll_lateral = gtk_spin_button_get_value( (GtkSpinButton *)
+                              button_kp_roll_lateral );
+    msg.gain.data.kp_depth_forward = gtk_spin_button_get_value( (GtkSpinButton *)
+                              button_kp_depth_forward );
+    msg.gain.data.kp_place_holder  = gtk_spin_button_get_value( (GtkSpinButton *)
+                              button_kp_place_holder );
 
     /* Send the gain message. */
 	if( planner_fd > 0 ) {
@@ -458,24 +467,27 @@ void events_gain_cf( GtkWidget *widget,
                   gpointer data )
 {
 	/* Set the message values. */
-    msg.gain.data.kp_pitch  = cf.kp_pitch;
-    msg.gain.data.ki_pitch  = cf.ki_pitch;
-    msg.gain.data.kd_pitch  = cf.kd_pitch;
-    msg.gain.data.kp_roll   = cf.kp_roll;
-    msg.gain.data.ki_roll   = cf.ki_roll;
-    msg.gain.data.kd_roll   = cf.kd_roll;
-    msg.gain.data.kp_yaw    = cf.kp_yaw;
-    msg.gain.data.ki_yaw    = cf.ki_yaw;
-    msg.gain.data.kd_yaw    = cf.kd_yaw;
-    msg.gain.data.kp_depth  = cf.kp_depth;
-    msg.gain.data.ki_depth  = cf.ki_depth;
-    msg.gain.data.kd_depth  = cf.kd_depth;
-    msg.gain.data.kp_fx  	= cf.kp_fx;
-    msg.gain.data.ki_fx  	= cf.ki_fx;
-    msg.gain.data.kd_fx  	= cf.kd_fx;
-    msg.gain.data.kp_fy  	= cf.kp_fy;
-    msg.gain.data.ki_fy  	= cf.ki_fy;
-    msg.gain.data.kd_fy  	= cf.kd_fy;
+    msg.gain.data.kp_pitch  		= cf.kp_pitch;
+    msg.gain.data.ki_pitch  		= cf.ki_pitch;
+    msg.gain.data.kd_pitch  		= cf.kd_pitch;
+    msg.gain.data.kp_roll   		= cf.kp_roll;
+    msg.gain.data.ki_roll   		= cf.ki_roll;
+    msg.gain.data.kd_roll   		= cf.kd_roll;
+    msg.gain.data.kp_yaw    		= cf.kp_yaw;
+    msg.gain.data.ki_yaw    		= cf.ki_yaw;
+    msg.gain.data.kd_yaw    		= cf.kd_yaw;
+    msg.gain.data.kp_depth  		= cf.kp_depth;
+    msg.gain.data.ki_depth  		= cf.ki_depth;
+    msg.gain.data.kd_depth  		= cf.kd_depth;
+    msg.gain.data.kp_fx  			= cf.kp_fx;
+    msg.gain.data.ki_fx  			= cf.ki_fx;
+    msg.gain.data.kd_fx  			= cf.kd_fx;
+    msg.gain.data.kp_fy  			= cf.kp_fy;
+    msg.gain.data.ki_fy  			= cf.ki_fy;
+    msg.gain.data.kd_fy  			= cf.kd_fy;
+    msg.gain.data.kp_roll_lateral	= cf.kp_roll_lateral;
+    msg.gain.data.kp_depth_forward	= cf.kp_depth_forward;
+    msg.gain.data.kp_place_holder	= cf.kp_place_holder;
 	
 	/* Set the button values. */
     gtk_spin_button_set_value( (GtkSpinButton *)button_kp_yaw, msg.gain.data.kp_yaw );
@@ -490,6 +502,16 @@ void events_gain_cf( GtkWidget *widget,
     gtk_spin_button_set_value( (GtkSpinButton *)button_kp_depth, msg.gain.data.kp_depth );
     gtk_spin_button_set_value( (GtkSpinButton *)button_ki_depth, msg.gain.data.ki_depth );
     gtk_spin_button_set_value( (GtkSpinButton *)button_kd_depth, msg.gain.data.kd_depth );
+	gtk_spin_button_set_value( (GtkSpinButton *)button_kp_fx, msg.gain.data.kp_fx );
+    gtk_spin_button_set_value( (GtkSpinButton *)button_ki_fx, msg.gain.data.ki_fx );
+    gtk_spin_button_set_value( (GtkSpinButton *)button_kd_fx, msg.gain.data.kd_fx );
+    gtk_spin_button_set_value( (GtkSpinButton *)button_kp_fy, msg.gain.data.kp_fy );
+    gtk_spin_button_set_value( (GtkSpinButton *)button_ki_fy, msg.gain.data.ki_fy );
+    gtk_spin_button_set_value( (GtkSpinButton *)button_kd_fy, msg.gain.data.kd_fy );
+    gtk_spin_button_set_value( (GtkSpinButton *)button_kp_roll_lateral, msg.gain.data.kp_roll_lateral );
+    gtk_spin_button_set_value( (GtkSpinButton *)button_kp_depth_forward, msg.gain.data.kp_depth_forward );
+    gtk_spin_button_set_value( (GtkSpinButton *)button_kp_place_holder, msg.gain.data.kp_place_holder );
+	
 	
     /* Send the gain message. */
 	if( planner_fd > 0 ) {
@@ -525,24 +547,27 @@ void events_gain_zero( GtkWidget *widget,
                   gpointer data )
 {
 	/* Set the message values. */
-    msg.gain.data.kp_pitch  = 0;
-    msg.gain.data.ki_pitch  = 0;
-    msg.gain.data.kd_pitch  = 0;
-    msg.gain.data.kp_roll   = 0;
-    msg.gain.data.ki_roll   = 0;
-    msg.gain.data.kd_roll   = 0;
-    msg.gain.data.kp_yaw    = 0;
-    msg.gain.data.ki_yaw    = 0;
-    msg.gain.data.kd_yaw    = 0;
-    msg.gain.data.kp_depth  = 0;
-    msg.gain.data.ki_depth  = 0;
-    msg.gain.data.kd_depth  = 0;
-    msg.gain.data.kp_fx     = 0;
-    msg.gain.data.ki_fx     = 0;
-    msg.gain.data.kd_fx     = 0;
-    msg.gain.data.kp_fy     = 0;
-    msg.gain.data.ki_fy     = 0;
-    msg.gain.data.kd_fy     = 0;
+    msg.gain.data.kp_pitch  		= 0;
+    msg.gain.data.ki_pitch  		= 0;
+    msg.gain.data.kd_pitch  		= 0;
+    msg.gain.data.kp_roll   		= 0;
+    msg.gain.data.ki_roll   		= 0;
+    msg.gain.data.kd_roll  		 	= 0;
+    msg.gain.data.kp_yaw    		= 0;
+    msg.gain.data.ki_yaw   		 	= 0;
+    msg.gain.data.kd_yaw    		= 0;
+    msg.gain.data.kp_depth  		= 0;
+    msg.gain.data.ki_depth  		= 0;
+    msg.gain.data.kd_depth  		= 0;
+    msg.gain.data.kp_fx     		= 0;
+    msg.gain.data.ki_fx     		= 0;
+    msg.gain.data.kd_fx     		= 0;
+    msg.gain.data.kp_fy     		= 0;
+    msg.gain.data.ki_fy     		= 0;
+    msg.gain.data.kd_fy     		= 0;
+    msg.gain.data.kp_roll_lateral	= 0;
+    msg.gain.data.kp_depth_forward  = 0;
+    msg.gain.data.kp_place_holder   = 0;
 	
 	/* Set the button values. */
     gtk_spin_button_set_value( (GtkSpinButton *)button_kp_yaw, msg.gain.data.kp_yaw );
@@ -563,6 +588,9 @@ void events_gain_zero( GtkWidget *widget,
     gtk_spin_button_set_value( (GtkSpinButton *)button_kp_fy, msg.gain.data.kp_fy );
     gtk_spin_button_set_value( (GtkSpinButton *)button_ki_fy, msg.gain.data.ki_fy );
     gtk_spin_button_set_value( (GtkSpinButton *)button_kd_fy, msg.gain.data.kd_fy );
+    gtk_spin_button_set_value( (GtkSpinButton *)button_kp_fy, msg.gain.data.kp_roll_lateral );
+    gtk_spin_button_set_value( (GtkSpinButton *)button_ki_fy, msg.gain.data.kp_depth_forward );
+    gtk_spin_button_set_value( (GtkSpinButton *)button_kd_fy, msg.gain.data.kp_place_holder );
 	
     /* Send the gain message. */
 	if( planner_fd > 0 ) {
@@ -626,6 +654,15 @@ void events_gain_get( )
     gtk_spin_button_set_value( (GtkSpinButton *)button_kp_depth, msg.gain.data.kp_depth );
     gtk_spin_button_set_value( (GtkSpinButton *)button_ki_depth, msg.gain.data.ki_depth );
     gtk_spin_button_set_value( (GtkSpinButton *)button_kd_depth, msg.gain.data.kd_depth );
+    gtk_spin_button_set_value( (GtkSpinButton *)button_kp_fx, msg.gain.data.kp_fx );
+    gtk_spin_button_set_value( (GtkSpinButton *)button_ki_fx, msg.gain.data.ki_fx );
+    gtk_spin_button_set_value( (GtkSpinButton *)button_kd_fx, msg.gain.data.kd_fx);
+    gtk_spin_button_set_value( (GtkSpinButton *)button_kp_fy, msg.gain.data.kp_fy );
+    gtk_spin_button_set_value( (GtkSpinButton *)button_ki_fy, msg.gain.data.ki_fy );
+    gtk_spin_button_set_value( (GtkSpinButton *)button_kd_fy, msg.gain.data.kd_fy);
+    gtk_spin_button_set_value( (GtkSpinButton *)button_kp_fy, msg.gain.data.kp_roll_lateral );
+    gtk_spin_button_set_value( (GtkSpinButton *)button_ki_fy, msg.gain.data.kp_depth_forward );
+    gtk_spin_button_set_value( (GtkSpinButton *)button_kd_fy, msg.gain.data.kp_place_holder);
 } /* end events_gain_get() */
 
 
@@ -646,30 +683,48 @@ void events_gain_get( )
 void events_gain_set( )
 {
 	/* Set message data to button values. */
-    msg.gain.data.kp_yaw    = gtk_spin_button_get_value( (GtkSpinButton *)
+    msg.gain.data.kp_yaw    		= gtk_spin_button_get_value( (GtkSpinButton *)
         button_kp_yaw );
-    msg.gain.data.ki_yaw    = gtk_spin_button_get_value( (GtkSpinButton *)
+    msg.gain.data.ki_yaw    		= gtk_spin_button_get_value( (GtkSpinButton *)
         button_ki_yaw );
-    msg.gain.data.kd_yaw    = gtk_spin_button_get_value( (GtkSpinButton *)
+    msg.gain.data.kd_yaw    		= gtk_spin_button_get_value( (GtkSpinButton *)
         button_kd_yaw );
-    msg.gain.data.kp_pitch  = gtk_spin_button_get_value( (GtkSpinButton *)
+    msg.gain.data.kp_pitch  		= gtk_spin_button_get_value( (GtkSpinButton *)
         button_kp_pitch );
-    msg.gain.data.ki_pitch  = gtk_spin_button_get_value( (GtkSpinButton *)
+    msg.gain.data.ki_pitch  		= gtk_spin_button_get_value( (GtkSpinButton *)
         button_ki_pitch );
-    msg.gain.data.kd_pitch  = gtk_spin_button_get_value( (GtkSpinButton *)
+    msg.gain.data.kd_pitch  		= gtk_spin_button_get_value( (GtkSpinButton *)
         button_kd_pitch );
-    msg.gain.data.kp_roll   = gtk_spin_button_get_value( (GtkSpinButton *)
+    msg.gain.data.kp_roll   		= gtk_spin_button_get_value( (GtkSpinButton *)
         button_kp_roll );
-    msg.gain.data.ki_roll   = gtk_spin_button_get_value( (GtkSpinButton *)
+    msg.gain.data.ki_roll   		= gtk_spin_button_get_value( (GtkSpinButton *)
         button_ki_roll );
-    msg.gain.data.kd_roll   = gtk_spin_button_get_value( (GtkSpinButton *)
+    msg.gain.data.kd_roll   		= gtk_spin_button_get_value( (GtkSpinButton *)
         button_kd_roll );
-    msg.gain.data.kp_depth  = gtk_spin_button_get_value( (GtkSpinButton *)
+    msg.gain.data.kp_depth  		= gtk_spin_button_get_value( (GtkSpinButton *)
         button_kp_depth );
-    msg.gain.data.ki_depth  = gtk_spin_button_get_value( (GtkSpinButton *)
+    msg.gain.data.ki_depth  		= gtk_spin_button_get_value( (GtkSpinButton *)
         button_ki_depth );
-    msg.gain.data.kd_depth  = gtk_spin_button_get_value( (GtkSpinButton *)
-        button_kd_depth );
+    msg.gain.data.kd_depth  		= gtk_spin_button_get_value( (GtkSpinButton *)
+        button_kd_depth );  
+    msg.gain.data.kp_fx  			= gtk_spin_button_get_value( (GtkSpinButton *)
+        button_kp_fx );
+    msg.gain.data.ki_fx  			= gtk_spin_button_get_value( (GtkSpinButton *)
+        button_ki_fx );
+    msg.gain.data.kd_fx  			= gtk_spin_button_get_value( (GtkSpinButton *)
+        button_kd_fx );
+    msg.gain.data.kp_fy  			= gtk_spin_button_get_value( (GtkSpinButton *)
+        button_kp_fy );
+    msg.gain.data.ki_fy  			= gtk_spin_button_get_value( (GtkSpinButton *)
+        button_ki_fy );
+    msg.gain.data.kd_fy  			= gtk_spin_button_get_value( (GtkSpinButton *)
+        button_kd_fy );
+    msg.gain.data.kp_roll_lateral  	= gtk_spin_button_get_value( (GtkSpinButton *)
+        button_kp_roll_lateral );
+    msg.gain.data.kp_depth_forward  = gtk_spin_button_get_value( (GtkSpinButton *)
+        button_kp_depth_forward );
+    msg.gain.data.kp_place_holder  	= gtk_spin_button_get_value( (GtkSpinButton *)
+        button_kp_place_holder );
     msg.gain.data.mode = GAIN_SET;
 
     /* Send the gain message. */

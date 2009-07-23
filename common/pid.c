@@ -68,6 +68,10 @@ int pid_init( PID *pid, CONF_VARS *cf )
 	pid->fy.kp			= cf->kp_fy;
 	pid->fy.ki			= cf->ki_fy;
 	pid->fy.kd			= cf->kd_fy;
+	
+	pid->kp_roll_lateral  = cf->kp_roll_lateral;
+	pid->kp_depth_forward = cf->kp_depth_forward;
+	pid->kp_place_holder  = cf->kp_place_holder;
 
 	pid->voith_angle	= 0;
 	pid->voith_speed	= 0;
@@ -153,6 +157,10 @@ void pid_loop( int pololu_fd,
 	pid->fy.ki		= msg->gain.data.ki_fy;
 	pid->fy.kd		= msg->gain.data.kd_fy;
 
+	pid->kp_roll_lateral   = msg->gain.data.kp_roll_lateral;
+	pid->kp_depth_forward  = msg->gain.data.kp_depth_forward;
+	pid->kp_place_holder   = msg->gain.data.kp_place_holder;
+	
 	/* Calculate the errors for fx and fy. */
 	pid->fx.ref		= msg->target.data.fx;
 	pid->fx.cval	= 0;
@@ -263,8 +271,9 @@ void pid_loop( int pololu_fd,
 
 		/* PID equations. */
 		pid->roll_torque =	pid->roll.kp * pid->roll.perr +
-						   pid->roll.ki * pid->roll.ierr +
-						   pid->roll.kd * pid->roll.derr;
+						   	pid->roll.ki * pid->roll.ierr +
+						   	pid->roll.kd * pid->roll.derr +
+						    pid->kp_roll_lateral * pid->fx.perr; /* Coupling between lateral thrust and roll */
 
 		/* Check bounds. */
 		if( fabsf( pid->roll_torque ) > PID_ROLL_TORQUE ) {

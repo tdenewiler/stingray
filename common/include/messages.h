@@ -229,34 +229,37 @@ typedef struct _TARGET_MSG {
 #define _GAIN_MSG_
 /*! Gains used by the uuv. Typically used with a PID controller */
 typedef struct _GAIN {
-    char mode;          //!< Gains mode. Either GET_GAINS or SET_GAINS
-    double kp_yaw;      //!< Proportional gain for the yaw angle
-    double ki_yaw;      //!< Integrator gain for the yaw angle
-    double kd_yaw;      //!< Derivative gain for the yaw angle
-    double kp_pitch;    //!< Proportional gain for the pitch angle
-    double ki_pitch;    //!< Integrator gain for the pitch angle
-    double kd_pitch;    //!< Derivative gain for the pitch angle
-    double kp_roll;     //!< Proportional gain for the roll angle
-    double ki_roll;     //!< Integrator gain for the roll angle
-    double kd_roll;     //!< Derivative gain for the roll angle
-    double kp_depth;    //!< Proportional gain for depth
-    double ki_depth;    //!< Integrator gain for depth
-    double kd_depth;    //!< Derivative gain for depth
-    double kp_fx; 		//!< Proportional gain for fx
-    double ki_fx;		//!< Integrator gain for fx
-    double kd_fx;		//!< Derivative gain for fx
-    double kp_fy;		//!< Proportional gain for fy
-    double ki_fy;		//!< Integrator gain for fy
-    double kd_fy;		//!< Derivative gain for fy
-    double kp_ax;       //!< Proportional gain for acceleration in X
-    double ki_ax;       //!< Integrator gain for acceleration in X
-    double kd_ax;       //!< Derivative gain for acceleration in X
-    double kp_ay;       //!< Proportional gain for acceleration in Y
-    double ki_ay;       //!< Integrator gain for acceleration in Y
-    double kd_ay;       //!< Derivative gain for acceleration in Y
-    double kp_az;       //!< Proportional gain for acceleration in Z
-    double ki_az;       //!< Integrator gain for acceleration in Z
-    double kd_az;       //!< Derivative gain for acceleration in Z
+    char mode;         		 	//!< Gains mode. Either GET_GAINS or SET_GAINS
+    double kp_yaw;      		//!< Proportional gain for the yaw angle
+    double ki_yaw;      		//!< Integrator gain for the yaw angle
+    double kd_yaw;      		//!< Derivative gain for the yaw angle
+    double kp_pitch;    		//!< Proportional gain for the pitch angle
+    double ki_pitch;    		//!< Integrator gain for the pitch angle
+    double kd_pitch;   		 	//!< Derivative gain for the pitch angle
+    double kp_roll;     		//!< Proportional gain for the roll angle
+    double ki_roll;     		//!< Integrator gain for the roll angle
+    double kd_roll;     		//!< Derivative gain for the roll angle
+    double kp_depth;    		//!< Proportional gain for depth
+    double ki_depth;    		//!< Integrator gain for depth
+    double kd_depth;    		//!< Derivative gain for depth
+    double kp_fx; 				//!< Proportional gain for fx
+    double ki_fx;				//!< Integrator gain for fx
+    double kd_fx;				//!< Derivative gain for fx
+    double kp_fy;				//!< Proportional gain for fy
+    double ki_fy;				//!< Integrator gain for fy
+    double kd_fy;				//!< Derivative gain for fy
+    double kp_ax;       		//!< Proportional gain for acceleration in X
+    double ki_ax;       		//!< Integrator gain for acceleration in X
+    double kd_ax;       		//!< Derivative gain for acceleration in X
+    double kp_ay;       		//!< Proportional gain for acceleration in Y
+    double ki_ay;       		//!< Integrator gain for acceleration in Y
+    double kd_ay;       		//!< Derivative gain for acceleration in Y
+    double kp_az;       		//!< Proportional gain for acceleration in Z
+    double ki_az;       		//!< Integrator gain for acceleration in Z
+    double kd_az;       		//!< Derivative gain for acceleration in Z
+    double kp_roll_lateral;		//!< Proportional gain for coupling between roll and lateral thrust
+    double kp_depth_forward;	//!< Proportional gain for coupling between depth and forward thrust
+    double kp_place_holder;		//!< Proportional gain place holder
 } GAIN;
 
 /*! API message to change the gains used by the UUV in PID loops. */

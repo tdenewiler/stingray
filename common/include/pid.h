@@ -73,21 +73,24 @@ typedef struct _PID_DATA {
 } PID_DATA;
 
 typedef struct _PID {
-	PID_DATA pitch;			//!< PID values for pitch.
-	PID_DATA roll;			//!< PID values for roll.
-	PID_DATA yaw;			//!< PID values for yaw.
-	PID_DATA depth;			//!< PID values for depth.
-	PID_DATA fx;			//!< PID values for fx.
-	PID_DATA fy;			//!< PID values for fy.
-	float voith_angle;		//!< The angle for the thrust vector.
-	int voith_speed;		//!< The rotational speed for the Voith motors.
-	int voith_thrust;		//!< The thrust for the Voith motors.
-	int vertical_thrust;	//!< The vertical thrust for the wing motors.
-	int forward_thrust;	    //!< The thrust in the forward direction.
-	int lateral_thrust;		//!< The thrust in the lateral direction.
-	int pitch_torque;		//!< The calculated pitch torque.
-	int roll_torque;		//!< The calculated roll torque.
-	int yaw_torque;			//!< The calculated yaw torque.
+	PID_DATA pitch;				//!< PID values for pitch.
+	PID_DATA roll;				//!< PID values for roll.
+	PID_DATA yaw;				//!< PID values for yaw.
+	PID_DATA depth;				//!< PID values for depth.
+	PID_DATA fx;				//!< PID values for fx.
+	PID_DATA fy;				//!< PID values for fy.
+	float voith_angle;			//!< The angle for the thrust vector.
+	int voith_speed;			//!< The rotational speed for the Voith motors.
+	int voith_thrust;			//!< The thrust for the Voith motors.
+	int vertical_thrust;		//!< The vertical thrust for the wing motors.
+	int forward_thrust;	    	//!< The thrust in the forward direction.
+	int lateral_thrust;			//!< The thrust in the lateral direction.
+	int pitch_torque;			//!< The calculated pitch torque.
+	int roll_torque;			//!< The calculated roll torque.
+	int yaw_torque;				//!< The calculated yaw torque.
+	double kp_roll_lateral;		//!< Proportional gain for coupling between roll and lateral thrust
+    double kp_depth_forward;	//!< Proportional gain for coupling between depth and forward thrust
+    double kp_place_holder;		//!< Proportional gain place holder
 } PID;
 
 #endif /* _PID_DATA_ */
