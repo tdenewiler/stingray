@@ -169,5 +169,13 @@ int vision_window_filter( IplImage *img,
 						int sizex,
 						int sizey );
 
+//! Performs Gaussian smoothing on an image.
+//! \param img The image to smooth.
+void vision_smooth( IplImage *img );
+
+//! Performs histogram equalization on an image.
+//! \param img The image to equalize histogram of.
+void vision_hist_eq( IplImage *img );
+
 
 #endif /* _VISION_H_ */

@@ -62,16 +62,6 @@ int vision_find_dot( int *dotx,
     IplConvKernel *wS = cvCreateStructuringElementEx( 2, 2,
             (int)floor( ( 3.0 ) / 2 ), (int)floor( ( 3.0 ) / 2 ), CV_SHAPE_RECT );
 
-    CvSize sz = cvSize( srcImg->width & -2, srcImg->height & -2 );
-    IplImage *hsv_clone = NULL;
-    IplImage *tgrayH = NULL;
-    IplImage *tgrayS = NULL;
-    IplImage *tgrayV = NULL;
-    IplImage *tgrayHeq = NULL;
-    IplImage *tgraySeq = NULL;
-    IplImage *tgrayVeq = NULL;
-    int smooth_size = 9;
-
     /* Initialize to impossible values. */
     center.x = -1;
     center.y = -1;
@@ -91,37 +81,12 @@ int vision_find_dot( int *dotx,
 
     /* Segment the flipped image into a binary image. */
     cvCvtColor( srcImg, hsvImg, CV_RGB2HSV );
-	hsv_clone = cvCloneImage( hsvImg );
 
-	/* Create three separate grayscale images, one for each channel. */
-    tgrayH = cvCreateImage( sz, 8, 1 );
-	tgrayS = cvCreateImage( sz, 8, 1 );
-	tgrayV = cvCreateImage( sz, 8, 1 );
-    tgrayHeq = cvCreateImage( sz, 8, 1 );
-	tgraySeq = cvCreateImage( sz, 8, 1 );
-	tgrayVeq = cvCreateImage( sz, 8, 1 );
-
-    /* Find squares in every color plane of the image. Filter each plane with a
-	 * Gaussian and then merge back to HSV image.  */
-    cvSetImageCOI( hsv_clone, 1 );
-    cvCopy( hsv_clone, tgrayH, 0 );
-	//cvSmooth( tgrayH, tgrayH, CV_GAUSSIAN, smooth_size, smooth_size );
-
-	cvSetImageCOI( hsv_clone, 2 );
-    cvCopy( hsv_clone, tgrayS, 0 );
-	cvSmooth( tgrayS, tgrayS, CV_GAUSSIAN, smooth_size, smooth_size );
-
-	cvSetImageCOI( hsv_clone, 3 );
-    cvCopy( hsv_clone, tgrayV, 0 );
-	//cvSmooth( tgrayV, tgrayV, CV_GAUSSIAN, smooth_size, smooth_size );
-
+	/* Smooth the image with a Gaussian filter. */
+	vision_smooth( hsvImg );
+	
 	/* Equalize the histograms of each channel. */
-	cvEqualizeHist( tgrayH, tgrayHeq );
-	cvEqualizeHist( tgrayS, tgraySeq );
-	cvEqualizeHist( tgrayV, tgrayVeq );
-
-	//cvMerge( tgrayH, tgrayS, tgrayV, NULL, hsvImg );
-	cvMerge( tgrayHeq, tgraySeq, tgrayVeq, NULL, hsvImg );
+	vision_hist_eq( hsvImg );
 
 	/* Threshold all three channels using our own values. */
     cvInRangeS( hsvImg, cvScalar(hL, sL, vL), cvScalar(hH, sH, vH), binImg );
@@ -130,7 +95,6 @@ int vision_find_dot( int *dotx,
     cvErode( binImg, binImg, wS );
     cvDilate( binImg, binImg, wS );
 	cvDilate( binImg, binImg, wL );
-
     cvConvertScale( binImg, outImg, 255.0 );
 
     /* Find the centroid. */
@@ -148,13 +112,6 @@ int vision_find_dot( int *dotx,
 		/* Clear variables to free memory. */
 		cvReleaseImage( &hsvImg );
 		cvReleaseImage( &outImg );
-		cvReleaseImage( &hsv_clone );
-		cvReleaseImage( &tgrayH );
-		cvReleaseImage( &tgrayS );
-		cvReleaseImage( &tgrayV );
-		cvReleaseImage( &tgrayHeq );
-		cvReleaseImage( &tgraySeq );
-		cvReleaseImage( &tgrayVeq );
 
 		return 0;
 	}
@@ -162,13 +119,6 @@ int vision_find_dot( int *dotx,
     /* Clear variables to free memory. */
     cvReleaseImage( &hsvImg );
     cvReleaseImage( &outImg );
-    cvReleaseImage( &hsv_clone );
-    cvReleaseImage( &tgrayH );
-    cvReleaseImage( &tgrayS );
-    cvReleaseImage( &tgrayV );
-	cvReleaseImage( &tgrayHeq );
-	cvReleaseImage( &tgraySeq );
-	cvReleaseImage( &tgrayVeq );
 
     return 1;
 } /* end vision_find_dot() */
@@ -720,7 +670,8 @@ int vision_get_fence_bottom( IplImage *inputBinImg, int *center )
         if( (j < imWidth) && (j > minPipeWidth) ) {
             leftEdge[k] = j;
             /* Countinue scanning to find bottom edge. */
-            while( (cvGet2D(inputBinImg, i, j).val[0] > 0) && (j < imWidth - 2) ) {
+            while( (cvGet2D(inputBinImg, i, j).val[0] > 0) &&
+				(j < imWidth - 2) ) {
                 j++;
             }
             if( j < imWidth - 2) {
@@ -783,7 +734,8 @@ int vision_find_boxes( CvCapture *cap,
 
     /* Capture a new source image. */
     srcImg = cvQueryFrame( cap );
-	//srcImg = cvLoadImage( "../../../../pics/stingrayBackup/images/b20090717_135344.719209.jpg" );
+	//srcImg = cvLoadImage(
+		//"../../../../pics/stingrayBackup/images/b20090717_135344.719209.jpg" );
     if ( !srcImg ) {
         return 0;
     }
@@ -791,7 +743,15 @@ int vision_find_boxes( CvCapture *cap,
 	/* Clone the source image so that we have an image we can write over. The
 	 * source image needs to be kept clean so that we can display it later. */
 	img = cvCloneImage( srcImg );
-    status = vision_find_squares( img, storage, result, squares, task, angle );
+
+	/* Smooth the image with a Gaussian filter. */
+	vision_smooth( img );
+	
+	/* Equalize the histograms of each channel. */
+	vision_hist_eq( img );
+
+	/* Look for boxes in the image. */
+	status = vision_find_squares( img, storage, result, squares, task, angle );
 
     /* Clear memory storage and reset free space position. */
     cvReleaseImage( &img );
@@ -1224,3 +1184,120 @@ int vision_window_filter( IplImage *img,
 		return 0;
 	}
 } /* end vision_window_filter() */
+
+
+/******************************************************************************
+ *
+ * Title:       void vision_smooth(  IplImage *img )
+ *
+ * Description: Performs Gaussian smoothing on an image.
+ *
+ * Input:       img: The image to smooth.
+ *
+ * Output:      None.
+ *
+ *****************************************************************************/
+
+void vision_smooth( IplImage *img )
+{
+	/* Declare variables. */
+    IplImage *clone = NULL;
+    IplImage *tgray1 = NULL;
+    IplImage *tgray2 = NULL;
+    IplImage *tgray3 = NULL;
+    CvSize sz = cvSize( img->width & -2, img->height & -2 );
+    int smooth_size = 9;
+	
+	/* Clone the original image. */
+	clone = cvCloneImage( img );
+
+	/* Create three separate grayscale images, one for each channel. */
+    tgray1 = cvCreateImage( sz, 8, 1 );
+	tgray2 = cvCreateImage( sz, 8, 1 );
+	tgray3 = cvCreateImage( sz, 8, 1 );
+
+    /* Filter each plane with a Gaussian and merge back to HSV image.  */
+    cvSetImageCOI( clone, 1 );
+    cvCopy( clone, tgray1, 0 );
+	cvSmooth( tgray1, tgray1, CV_GAUSSIAN, smooth_size, smooth_size );
+
+	cvSetImageCOI( clone, 2 );
+    cvCopy( clone, tgray2, 0 );
+	cvSmooth( tgray2, tgray2, CV_GAUSSIAN, smooth_size, smooth_size );
+
+	cvSetImageCOI( clone, 3 );
+    cvCopy( clone, tgray3, 0 );
+	cvSmooth( tgray3, tgray3, CV_GAUSSIAN, smooth_size, smooth_size );
+
+	cvMerge( tgray1, tgray2, tgray3, NULL, img );
+
+    /* Clear variables to free memory. */
+    cvReleaseImage( &clone );
+    cvReleaseImage( &tgray1 );
+    cvReleaseImage( &tgray2 );
+    cvReleaseImage( &tgray3 );
+} /* end vision_smooth() */
+
+
+/******************************************************************************
+ *
+ * Title:       void vision_hist_eq(  IplImage *img )
+ *
+ * Description: Performs histogram equalization on an image.
+ *
+ * Input:       img: The image to equalize histogram of.
+ *
+ * Output:      None.
+ *
+ *****************************************************************************/
+
+void vision_hist_eq( IplImage *img )
+{
+	/* Declare variables. */
+    IplImage *clone = NULL;
+    IplImage *tgray1 = NULL;
+    IplImage *tgray2 = NULL;
+    IplImage *tgray3 = NULL;
+    IplImage *tgray1eq = NULL;
+    IplImage *tgray2eq = NULL;
+    IplImage *tgray3eq = NULL;
+    CvSize sz = cvSize( img->width & -2, img->height & -2 );
+	
+	/* Clone the original image. */
+	clone = cvCloneImage( img );
+
+	/* Create three separate grayscale images, one for each channel. */
+    tgray1 = cvCreateImage( sz, 8, 1 );
+	tgray2 = cvCreateImage( sz, 8, 1 );
+	tgray3 = cvCreateImage( sz, 8, 1 );
+    tgray1eq = cvCreateImage( sz, 8, 1 );
+	tgray2eq = cvCreateImage( sz, 8, 1 );
+	tgray3eq = cvCreateImage( sz, 8, 1 );
+
+    /* Find squares in every color plane of the image. Filter each plane with a
+	 * Gaussian and then merge back to HSV image.  */
+    cvSetImageCOI( clone, 1 );
+    cvCopy( clone, tgray1, 0 );
+
+	cvSetImageCOI( clone, 2 );
+    cvCopy( clone, tgray2, 0 );
+
+	cvSetImageCOI( clone, 3 );
+    cvCopy( clone, tgray3, 0 );
+
+	/* Equalize the histograms of each channel. */
+	cvEqualizeHist( tgray1, tgray1eq );
+	cvEqualizeHist( tgray2, tgray2eq );
+	cvEqualizeHist( tgray3, tgray3eq );
+
+	cvMerge( tgray1eq, tgray2eq, tgray3eq, NULL, img );
+
+    /* Clear variables to free memory. */
+    cvReleaseImage( &clone );
+    cvReleaseImage( &tgray1 );
+    cvReleaseImage( &tgray2 );
+    cvReleaseImage( &tgray3 );
+	cvReleaseImage( &tgray1eq );
+	cvReleaseImage( &tgray2eq );
+	cvReleaseImage( &tgray3eq );
+} /* end vision_hist_eq() */
