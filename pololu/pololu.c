@@ -467,55 +467,38 @@ int pololuInitializeChannels( int fd )
 		return POLOLU_FAILURE;
 	}
 
-
-
 	// THIS IS OUR DEFAULT PROFILE
-	// set the motor controller parameters
-	result += pololuSetParameters( fd, POLOLU_RIGHT_VOITH_MOTOR, POLOLU_CHANNEL_ON, POLOLU_DEFAULT_DIRECTION, POLOLU_DEFAULT_RANGE );
-	result += pololuSetParameters( fd, POLOLU_LEFT_VOITH_MOTOR, POLOLU_CHANNEL_ON, POLOLU_DEFAULT_DIRECTION, POLOLU_DEFAULT_RANGE );
-	result += pololuSetSpeed( fd, POLOLU_RIGHT_VOITH_MOTOR, POLOLU_SPEED_VOITH );
-	result += pololuSetSpeed( fd, POLOLU_LEFT_VOITH_MOTOR, POLOLU_SPEED_VOITH );
-	result += pololuSetPosition7Bit( fd, POLOLU_RIGHT_VOITH_MOTOR, POLOLU_NEUTRAL );
-	result += pololuSetPosition7Bit( fd, POLOLU_LEFT_VOITH_MOTOR, POLOLU_NEUTRAL );
-	result += pololuSetParameters( fd, POLOLU_LEFT_WING_MOTOR, POLOLU_CHANNEL_ON, POLOLU_DEFAULT_DIRECTION, POLOLU_DEFAULT_RANGE );
-	result += pololuSetParameters( fd, POLOLU_RIGHT_WING_MOTOR, POLOLU_CHANNEL_ON, POLOLU_DEFAULT_DIRECTION, POLOLU_DEFAULT_RANGE );
-	result += pololuSetParameters( fd, POLOLU_TAIL_MOTOR, POLOLU_CHANNEL_ON, POLOLU_DEFAULT_DIRECTION, POLOLU_DEFAULT_RANGE );
-	result += pololuSetSpeed( fd, POLOLU_LEFT_WING_MOTOR, POLOLU_SPEED_INSTANT );
-	result += pololuSetSpeed( fd, POLOLU_RIGHT_WING_MOTOR, POLOLU_SPEED_INSTANT );
-	result += pololuSetSpeed( fd, POLOLU_TAIL_MOTOR, POLOLU_SPEED_INSTANT );
-	result += pololuSetPosition7Bit( fd, POLOLU_LEFT_WING_MOTOR, POLOLU_NEUTRAL );
-	result += pololuSetPosition7Bit( fd, POLOLU_RIGHT_WING_MOTOR, POLOLU_NEUTRAL );
-	result += pololuSetPosition7Bit( fd, POLOLU_TAIL_MOTOR, POLOLU_NEUTRAL );
-	// 15*5 bytes
-	
-	// set the voith servo parameters
-	result += pololuSetParameters( fd, POLOLU_LEFT_SERVO1, POLOLU_CHANNEL_ON, POLOLU_DEFAULT_DIRECTION, POLOLU_DEFAULT_RANGE ) ;
-	result += pololuSetNeutral( fd, POLOLU_LEFT_SERVO1, POLOLU_CH1_NEUTRAL );
-	result += pololuSetPosition7Bit( fd, POLOLU_LEFT_SERVO1, POLOLU_NEUTRAL );
-	result += pololuSetParameters( fd, POLOLU_LEFT_SERVO2, POLOLU_CHANNEL_ON, POLOLU_DEFAULT_DIRECTION, POLOLU_DEFAULT_RANGE );
-	result += pololuSetNeutral( fd, POLOLU_LEFT_SERVO2, POLOLU_CH2_NEUTRAL );
-	result += pololuSetPosition7Bit( fd, POLOLU_LEFT_SERVO2, POLOLU_NEUTRAL );
-	result += pololuSetParameters( fd, POLOLU_RIGHT_SERVO1, POLOLU_CHANNEL_ON, POLOLU_DEFAULT_DIRECTION, POLOLU_DEFAULT_RANGE );
-	result += pololuSetNeutral( fd, POLOLU_RIGHT_SERVO1, POLOLU_CH4_NEUTRAL );
-	result += pololuSetPosition7Bit( fd, POLOLU_RIGHT_SERVO1, POLOLU_NEUTRAL );
-	result += pololuSetParameters( fd, POLOLU_RIGHT_SERVO2, POLOLU_CHANNEL_ON, POLOLU_DEFAULT_DIRECTION, POLOLU_DEFAULT_RANGE );
-	result += pololuSetNeutral( fd, POLOLU_RIGHT_SERVO2, POLOLU_CH5_NEUTRAL );
-	result += pololuSetPosition7Bit( fd, POLOLU_RIGHT_SERVO2, POLOLU_NEUTRAL );
-	// 8*5+6*4
-	
-	// set the dropper servo parameters
-	/*
-	result += pololuSetParameters( fd, POLOLU_DROPPER, POLOLU_CHANNEL_ON, POLOLU_DEFAULT_DIRECTION, POLOLU_DROPPER_RANGE );
-	result += pololuSetNeutral( fd, POLOLU_DROPPER, POLOLU_DROPPER_NEUTRAL );
-	result += pololuSetPosition7Bit( fd, POLOLU_DROPPER, POLOLU_NEUTRAL );
-	*/
-	// 2*5+6
-	
-	// total bytes = 25*5+6*5
+	result += pololuSetParameters( fd, 0, 1, 1, 15 );
+	result += pololuSetParameters( fd, 3, 1, 1, 15 );
+	result += pololuSetSpeed( fd, 0, 10 );
+	result += pololuSetSpeed( fd, 3, 10 );
+	result += pololuSetPosition7Bit( fd, 0, 63 );
+	result += pololuSetPosition7Bit( fd, 3, 63 );
+	result += pololuSetParameters( fd, 7, 1, 1, 15 );
+	result += pololuSetParameters( fd, 8, 1, 1, 15 );
+	result += pololuSetParameters( fd, 10, 1, 1, 15 );
+	result += pololuSetSpeed( fd, 7, 0 );
+	result += pololuSetSpeed( fd, 8, 0 );
+	result += pololuSetSpeed( fd, 10, 0 );
+	result += pololuSetPosition7Bit( fd, 7, 63 );
+	result += pololuSetPosition7Bit( fd, 8, 63 );
+	result += pololuSetPosition7Bit( fd, 10, 63 );
+	result += pololuSetParameters( fd, 1, 1, 1, 15 ) ;
+	result += pololuSetNeutral( fd, 1, POLOLU_CH1_NEUTRAL );
+	result += pololuSetPosition7Bit( fd, 1, 63 );
+	result += pololuSetParameters( fd, 2, 1, 1, 15 );
+	result += pololuSetNeutral( fd, 2, POLOLU_CH2_NEUTRAL );
+	result += pololuSetPosition7Bit( fd, 2, 63 );
+	result += pololuSetParameters( fd, 4, 1, 1, 15 );
+	result += pololuSetNeutral( fd, 4, POLOLU_CH4_NEUTRAL );
+	result += pololuSetPosition7Bit( fd, 4, 63 );
+	result += pololuSetParameters( fd, 5, 1, 1, 15 );
+	result += pololuSetNeutral( fd, 5, POLOLU_CH5_NEUTRAL );
+	result += pololuSetPosition7Bit( fd, 5, 63 );
 
 	// the total number of bytes sent
 	// 5 for each normal command and 6 for each pololuSetNeutral command
-	if( result == 155 ) {
+	if( result == 139 ) {
 		result = POLOLU_SUCCESS;
 	}
 	else {
@@ -589,22 +572,22 @@ int pololuControlVoiths( int fd,
 	 * The yaw torque input is normalized by POLOLU_MAX_YAW_TORQUE and scaled
 	 * to POLOLU_YAW_CORRECTION. This result is modulated by the sin of the thrust angle. */
 	float yawAngleCorrection = yawTorque * ( POLOLU_YAW_CORRECTION / POLOLU_MAX_YAW_TORQUE ) * sin( angle ) * ( M_PI / 180 );
-
+	
 	/* Calculate the commands to send to the servos to control Voith direction. */
 	int leftCmd1  = (int)( POLOLU_SERVO_NEUTRAL + POLOLU_SERVO_GAIN * radius1 * cos(angle - yawAngleCorrection + leftAngleOffset) );
 	int leftCmd2  = (int)( POLOLU_SERVO_NEUTRAL + POLOLU_SERVO_GAIN * radius1 * sin(angle - yawAngleCorrection + leftAngleOffset) );
 	int rightCmd1 = (int)( POLOLU_SERVO_NEUTRAL - POLOLU_SERVO_GAIN * radius2 * cos(angle + yawAngleCorrection + rightAngleOffset) );
 	int rightCmd2 = (int)( POLOLU_SERVO_NEUTRAL - POLOLU_SERVO_GAIN * radius2 * sin(angle + yawAngleCorrection + rightAngleOffset) );
 
-	/* There is differential thrust in the voiths
+	/* There is differential thrust in the voiths 
 	 * The left and right scaling done here tries to account for this */
 	int voithThrustLeft   = voithThrust * POLOLU_VOITH_LEFT_SCALE;
 	int voithThrustRight  = voithThrust * POLOLU_VOITH_RIGHT_SCALE;
-
+	
 	/* Scale the Voith thrust value. */
 	int scaledVoithThrustLeft  = voithThrustLeft * POLOLU_VOITH_GAIN + POLOLU_VOITH_NEUTRAL;
 	int scaledVoithThrustRight = voithThrustRight * POLOLU_VOITH_GAIN + POLOLU_VOITH_NEUTRAL;
-
+	
 
 	/* Send the commands to the Pololu to control servo and motor positions. */
 	bytes += pololuSetPosition7Bit( fd, POLOLU_LEFT_SERVO1, leftCmd1 );
