@@ -63,18 +63,19 @@ int vision_find_dot( int *dotx,
             (int)floor( ( 3.0 ) / 2 ), (int)floor( ( 3.0 ) / 2 ), CV_SHAPE_RECT );
 
     /* Initialize to impossible values. */
-    center.x = -1;
-    center.y = -1;
-
-	/* Capture a new source image. */
-    srcImg = cvQueryFrame( cap );
-    if( !srcImg ) {
-        return 0;
-    }
+    center.x = -10000;
+    center.y = -10000;
 
 	/* Create images to work on. */
     hsvImg = cvCreateImage( cvGetSize(srcImg), IPL_DEPTH_8U, 3 );
     outImg = cvCreateImage( cvGetSize(srcImg), IPL_DEPTH_8U, 1 );
+	
+	/* Convert source image to values in range [0,1] from [0,255]. */
+	//cvConvertScale( srcImg, hsvImg, 1.0 / 255.0 );
+	
+	/* Enhance the red channel of the source image. */
+	//vision_saturate( hsvImg );
+	//cvConvertScale( hsvImg, srcImg, 255.0 );
 
     /* Flip the source image. */
     cvFlip( srcImg, srcImg );
@@ -159,9 +160,8 @@ int vision_find_pipe( int *pipex,
                       float vH
                     )
 {
-	const static double BEARING_DELTA_MIN = 0.000001;
+	double bearing_delta_min = 0.000001;
 
-    CvSize sz = cvSize( srcImg->width & -2, srcImg->height & -2 );
     CvPoint center;
     IplImage *hsv_image = NULL;
     IplImage *hsv_clone = NULL;
@@ -178,16 +178,11 @@ int vision_find_pipe( int *pipex,
             (int)floor( ( 3.0 ) / 2 ), (int)floor( ( 3.0 ) / 2 ), CV_SHAPE_RECT );
     IplConvKernel *wBig = cvCreateStructuringElementEx( 5, 5,
             (int)floor( ( 5.0 ) / 2 ), (int)floor( ( 5.0 ) / 2 ), CV_SHAPE_RECT );
+    CvSize sz = cvSize( srcImg->width & -2, srcImg->height & -2 );
 
     /* Initialize to impossible values. */
-    center.x = -1;
-    center.y = -1;
-
-    srcImg = cvQueryFrame( cap );
-	//srcImg = cvLoadImage( "../../../../pics/stingrayBackup/images/b20090717_135344.719209.jpg" );
-    if( !srcImg ) {
-        return 0;
-    }
+    center.x = -10000;
+    center.y = -10000;
 
     hsv_image = cvCreateImage( cvGetSize( srcImg ), IPL_DEPTH_8U, 3 );
     outImg = cvCreateImage( cvGetSize( srcImg ), IPL_DEPTH_8U, 1 );
@@ -257,7 +252,7 @@ int vision_find_pipe( int *pipex,
 	cvReleaseImage( &tgrayVeq );
 
     /* No detection condition, only using bearing - not centroid. */
-    if( fabs(*bearing) < BEARING_DELTA_MIN )
+    if( fabs(*bearing) < bearing_delta_min )
     	return 2;
 
     return 1;
@@ -536,12 +531,6 @@ int vision_find_fence( int *fence_center,
     IplImage *tgraySeq = NULL;
     IplImage *tgrayVeq = NULL;
 
-	/* Capture a new source image. */
-    srcImg = cvQueryFrame( cap );
-    if( !srcImg ) {
-        return 0;
-    }
-
     /* Flip the source image. */
   	cvFlip( srcImg, srcImg );
     center = srcImg->width / 2;
@@ -732,14 +721,6 @@ int vision_find_boxes( CvCapture *cap,
 	/* Initialize variables. */
 	storage = cvCreateMemStorage( 0 );
 
-    /* Capture a new source image. */
-    srcImg = cvQueryFrame( cap );
-	//srcImg = cvLoadImage(
-		//"../../../../pics/stingrayBackup/images/b20090717_135344.719209.jpg" );
-    if ( !srcImg ) {
-        return 0;
-    }
-
 	/* Clone the source image so that we have an image we can write over. The
 	 * source image needs to be kept clean so that we can display it later. */
 	img = cvCloneImage( srcImg );
@@ -838,19 +819,20 @@ double vision_angle( CvPoint* pt1, CvPoint* pt2, CvPoint* pt0, IplImage *img,
 			break;
 		}
 	case VISION_PIPE:
-		/* Find the angle of the pipe so that we follow the longer edge. */
-		if( dy1 > dy2 ) {
-			*angle = atan2( dy1, dx1 );
-		}
-		else {
-			*angle = atan2( dy2, dx2 );
-		}
-
 		/* Check the aspect ratio. */
 		if( ar > VISION_AR_PIPE * (1 - VISION_AR_THRESH) &&
 			ar < VISION_AR_PIPE * (1 + VISION_AR_THRESH) ) {
 			/* Found a valid box. */
 			ar_passed = TRUE;
+
+			/* Find the angle of the pipe so that we follow the longer edge. */
+			if( dy1 > dy2 ) {
+				*angle = atan2( dy1, dx2 ) * 180 / M_PI;
+			}
+			else {
+				*angle = atan2( dy2, dx2 ) * 180 / M_PI;
+			}
+			//printf("VISION_ANGLE: %f\n", *angle);
 		}
 		/* Check to see if we are looking at the box rotated by 90 degrees. */
 		if( !ar_passed ) {
@@ -858,6 +840,14 @@ double vision_angle( CvPoint* pt1, CvPoint* pt2, CvPoint* pt0, IplImage *img,
 				arinv > VISION_AR_PIPE * (1 + VISION_AR_THRESH) ) {
 				return 100000.;
 			}
+			/* Find the angle of the pipe so that we follow the longer edge. */
+			if( dy1 > dy2 ) {
+				*angle = atan2( dy1, dx2 ) * 180 / M_PI;
+			}
+			else {
+				*angle = atan2( dy2, dx2 ) * 180 / M_PI;
+			}
+			//printf("VISION_ANGLE: %f\n", *angle);
 		}
 		/* Else we have found a box with a valid aspect ratio. */
 		else {
@@ -869,6 +859,15 @@ double vision_angle( CvPoint* pt1, CvPoint* pt2, CvPoint* pt0, IplImage *img,
 			ar < VISION_AR_BOX * (1 + VISION_AR_THRESH) ) {
 			/* Found a valid box. */
 			ar_passed = TRUE;
+
+			/* Find the angle of the pipe so that we follow the longer edge. */
+			if( dy1 > dy2 ) {
+				*angle = atan2( dy1, dx2 );
+			}
+			else {
+				*angle = atan2( dy2, dx2 );
+			}
+			//printf("VISION_ANGLE: %f\n", *angle);
 		}
 		/* Check to see if we are looking at the box rotated by 90 degrees. */
 		if( !ar_passed ) {
@@ -876,6 +875,14 @@ double vision_angle( CvPoint* pt1, CvPoint* pt2, CvPoint* pt0, IplImage *img,
 				arinv > VISION_AR_BOX * (1 + VISION_AR_THRESH) ) {
 				return 100000.;
 			}
+			/* Find the angle of the pipe so that we follow the longer edge. */
+			if( dy1 > dy2 ) {
+				*angle = atan2( dy1, dx2 );
+			}
+			else {
+				*angle = atan2( dy2, dx2 );
+			}
+			//printf("VISION_ANGLE: %f\n", *angle);
 		}
 		/* Else we have found a box with a valid aspect ratio. */
 		else {
@@ -1046,12 +1053,6 @@ int vision_suitcase( CvCapture *cap,
 	/* Initialize variables. */
 	storage = cvCreateMemStorage( 0 );
 
-    /* Capture a new source image. */
-    srcImg = cvQueryFrame( cap );
-    if ( !srcImg ) {
-        return 0;
-    }
-
 	/* Clone the source image so that we have an image we can write over. The
 	 * source image needs to be kept clean so that we can display it later. */
 	img = cvCloneImage( srcImg );
@@ -1093,22 +1094,14 @@ int vision_find_circle( CvCapture *cap,
 	/* Initialize variables. */
 	storage = cvCreateMemStorage( 0 );
 
-    /* Capture a new source image. */
-    srcImg = cvQueryFrame( cap );
-    if ( !srcImg ) {
-        return 0;
-    }
-
 	/* Convert captured image to grayscale. */
     gray = cvCreateImage( cvGetSize(srcImg), 8, 1 );
 	cvCvtColor( srcImg, gray, CV_BGR2GRAY );
 	cvSmooth( gray, gray, CV_GAUSSIAN, 9, 9 );
 
 	/* Look for circles. */
-	//circles = cvHoughCircles( gray, storage, CV_HOUGH_GRADIENT, 2,
-		//gray->height / 4, 200, 100 );
-	circles = cvHoughCircles( gray, storage, CV_HOUGH_GRADIENT, 10,
-		gray->height / 15, 200, 100 );
+	circles = cvHoughCircles( gray, storage, CV_HOUGH_GRADIENT, 2,
+		gray->height / 4, 200, 100 );
 
     /* Clear memory storage and reset free space position. */
     cvReleaseImage( &gray );
@@ -1216,10 +1209,10 @@ void vision_smooth( IplImage *img )
 	tgray2 = cvCreateImage( sz, 8, 1 );
 	tgray3 = cvCreateImage( sz, 8, 1 );
 
-    /* Filter each plane with a Gaussian and merge back to HSV image.  */
+    /* Filter each plane with a Gaussian and merge back to original image.  */
     cvSetImageCOI( clone, 1 );
     cvCopy( clone, tgray1, 0 );
-	cvSmooth( tgray1, tgray1, CV_GAUSSIAN, smooth_size, smooth_size );
+	//cvSmooth( tgray1, tgray1, CV_GAUSSIAN, smooth_size, smooth_size );
 
 	cvSetImageCOI( clone, 2 );
     cvCopy( clone, tgray2, 0 );
@@ -1275,7 +1268,7 @@ void vision_hist_eq( IplImage *img )
 	tgray3eq = cvCreateImage( sz, 8, 1 );
 
     /* Find squares in every color plane of the image. Filter each plane with a
-	 * Gaussian and then merge back to HSV image.  */
+	 * Gaussian and then merge back to original image.  */
     cvSetImageCOI( clone, 1 );
     cvCopy( clone, tgray1, 0 );
 
@@ -1301,3 +1294,63 @@ void vision_hist_eq( IplImage *img )
 	cvReleaseImage( &tgray2eq );
 	cvReleaseImage( &tgray3eq );
 } /* end vision_hist_eq() */
+
+
+/******************************************************************************
+ *
+ * Title:       void vision_saturate(  IplImage *img )
+ *
+ * Description: Saturates channels of an image.
+ *
+ * Input:       img: The image to saturate.
+ *
+ * Output:      None.
+ *
+ *****************************************************************************/
+
+void vision_saturate( IplImage *img )
+{
+	/* Declare variables. */
+    IplImage *clone = NULL;
+    IplImage *tgray1 = NULL;
+    IplImage *tgray2 = NULL;
+    IplImage *tgray3 = NULL;
+    CvSize sz = cvSize( img->width & -2, img->height & -2 );
+	int ii = 0;
+	int jj = 0;
+	double power = 0.99;
+	CvScalar val;
+	
+	/* Clone the original image. */
+	clone = cvCloneImage( img );
+
+	/* Create three separate grayscale images, one for each channel. */
+    tgray1 = cvCreateImage( sz, 8, 1 );
+	tgray2 = cvCreateImage( sz, 8, 1 );
+	tgray3 = cvCreateImage( sz, 8, 1 );
+
+    /* Saturate each plane and merge back to original image.  */
+    cvSetImageCOI( clone, 1 );
+    cvCopy( clone, tgray1, 0 );
+
+	cvSetImageCOI( clone, 2 );
+    cvCopy( clone, tgray2, 0 );
+
+	cvSetImageCOI( clone, 3 );
+    cvCopy( clone, tgray3, 0 );
+	//for( ii = 0; ii < img->height; ii++ ) {
+		//for( jj = 0; jj < img->width; jj++ ) {
+			//val = cvGet2D( img, ii, jj );
+			//val.val[0] = pow( val.val[0], power );
+			//cvSet2D( img, ii, jj, val );
+		//}
+    //}
+
+	cvMerge( tgray1, tgray2, tgray3, NULL, img );
+
+    /* Clear variables to free memory. */
+    cvReleaseImage( &clone );
+    cvReleaseImage( &tgray1 );
+    cvReleaseImage( &tgray2 );
+    cvReleaseImage( &tgray3 );
+} /* end vision_saturate() */
