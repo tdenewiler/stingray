@@ -279,12 +279,9 @@ int main( int argc, char *argv[] )
 
     /* Open log file if flag set. */
     if( cf.enable_log ) {
-    	f_log = fopen( "planner_log.dat", "a+" );
+    	f_log = fopen( "log.csv", "a+" );
     	if( f_log ) {
-    		fprintf( f_log, "------------------------------\n" );
-    		fprintf( f_log, "--  BEGIN NEW LOG SESSION   --\n" );
-    		fprintf( f_log, "------------------------------\n" );
-    		fprintf( f_log, "time,pitch,roll,yaw,depth,accel1,accel2,accel3,ang1,"
+   		fprintf( f_log, "time,pitch,roll,yaw,depth,accel1,accel2,accel3,ang1,"
 				"ang2,ang3,fx,fy,tpitch,troll,tyaw,tdepth,tfx,tfy\n" );
 		}
 	}
@@ -416,8 +413,8 @@ int main( int argc, char *argv[] )
             gettimeofday( &ctime, NULL );
             ct = *( localtime ((const time_t*) &ctime.tv_sec) );
 			strftime( write_time, sizeof(write_time), "20%y-%m-%d_%H:%M:%S", &ct);
-            //snprintf( write_time + strlen(write_time),
-            	//	strlen(write_time), ".%03ld", ctime.tv_usec );
+            snprintf( write_time + strlen(write_time),
+            		strlen(write_time), ".%03ld", ctime.tv_usec );
 
 			/* Log every (enable_log) seconds. */
 			//if( dt > (cf.enable_log * 1000000) ) {

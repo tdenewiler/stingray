@@ -370,16 +370,15 @@ int main( int argc, char *argv[] )
             if( recv_bytes > 0 ) {
                 recv_buf[recv_bytes] = '\0';
                 messages_decode( server_fd, recv_buf, &msg, recv_bytes );
+				/* Make sure that the servo and speed commands are zero if
+				 * Pololu is not initialized. */
+				if( pololu_initialized == FALSE ) {
+					msg.target.data.fx = 0;
+					msg.target.data.fy = 0;
+					msg.target.data.speed = 0;
+				}
             }
         }
-
-        /* Check state of emergency stop value. */
-        //if( msg.stop.data.state == TRUE ) {
-            //printf("MAIN: EMERGENCY STOP received. Setting actuators to\n"
-                    //"     safe positions!\n");
-            ///* Set all the actuators to safe positions. */
-            //pololuInitializeChannels( pololu_fd );
-        //}
 
         /* Send dropper servo command. Check that Pololu is initialized. */
         //if( (pololu_fd > 0) && (pololu_initialized) ) {

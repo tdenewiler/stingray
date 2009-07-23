@@ -150,8 +150,6 @@ int main( int argc, char *argv[] )
 	CvMemStorage *storage1 = 0;
 	storage1 = cvCreateMemStorage(0);
 	CvSeq *boxes = cvCreateSeq( 0, sizeof(CvSeq), sizeof(CvPoint), storage1 );
-	CvSeq *circles = cvCreateSeq( 0, sizeof(CvSeq), sizeof(CvPoint), storage1 );
-	float *circle_pt = NULL;
 	CvSeqReader reader1;
 	CvMemStorage *storage2 = 0;
 	storage2 = cvCreateMemStorage(0);
@@ -166,12 +164,12 @@ int main( int argc, char *argv[] )
 
     /* Initialize variables. */
     server_fd = -1;
-    memset( &msg, 0, sizeof( MSG_DATA ) );
+    memset( &msg, 0, sizeof(MSG_DATA) );
 	messages_init( &msg );
 
     /* Parse command line arguments. */
     parse_default_config( &cf );
-    parse_cla( argc, argv, &cf, STINGRAY, ( const char * )VISIOND_FILENAME );
+    parse_cla( argc, argv, &cf, STINGRAY, (const char *)VISIOND_FILENAME );
 
     /* Initialize HSV message data to configuration values. */
     msg.vsetting.data.pipe_hsv.hL = cf.pipe_hL;
@@ -207,7 +205,8 @@ int main( int argc, char *argv[] )
     /* Need to have a config about what cameras if any to open */
     if( cf.op_mode == 99 ) {
     	/* Special case for bad camera. */
-    	printf("MAIN: Skipping camera opening because op mode = 99 in configuration file.\n");
+    	printf("MAIN: Skipping camera opening because op mode = 99 in "
+			   "configuration file.\n");
 	}
 	else {
 		/* Open front camera. */
@@ -266,6 +265,9 @@ int main( int argc, char *argv[] )
 		} /* end TASK_NONE */
 
         else if( task == TASK_BUOY && f_cam ) {
+			/* Get a new image. */
+			img = cvQueryFrame( f_cam );
+			
 			/* Look for the buoy. */
 			status = vision_find_dot( &dotx, &doty,
 					cf.vision_angle, f_cam, img, bin_img,
@@ -291,19 +293,6 @@ int main( int argc, char *argv[] )
 
 				/* Requires some sore of exit criteria. */
 			}
-
-			/* Try to detect circles using cvHoughCircles(). */
-			//status = vision_find_circle( f_cam, img, circles );
-			//if( status > 0 ) {
-				//for( ii = 0; ii < circles->total; ii++ ) {
-					//circle_pt = (float *)cvGetSeqElem( circles, ii );
-					//cvCircle( img, cvPoint(cvRound(circle_pt[0]),
-						//cvRound(circle_pt[1])), 3, CV_RGB(0,255,0), -1, 8, 0 );
-					//cvCircle( img, cvPoint(cvRound(circle_pt[0]),
-						//cvRound(circle_pt[1])), cvRound(circle_pt[2]),
-						//CV_RGB(255,0,0), 3, 8, 0 );
-				//}
-			//}
 			else {
 				/* No positive detection. */
 				msg.vision.data.status = TASK_NOT_DETECTED;
@@ -340,7 +329,8 @@ int main( int argc, char *argv[] )
 					CV_READ_SEQ_ELEM( pt[2], reader2 );
 					CV_READ_SEQ_ELEM( pt[3], reader2 );
 					/* Draw the square as a closed polyline. */
-					cvPolyLine( img, &rect, &count, 1, 1, CV_RGB(0, 255, 0), 3, CV_AA, 0 );
+					cvPolyLine( img, &rect, &count, 1, 1, CV_RGB(0, 255, 0),
+						3, CV_AA, 0 );
 				}
 				/* Set target offsets in network message. */
 				if( boxes->total > 0 ) {
@@ -388,10 +378,9 @@ int main( int argc, char *argv[] )
 					cvCircle( img, cvPoint(img->width / 2 + ii, y_max),
 						2, cvScalar(0, 255, 0), 2 );
 				}
-				/* Set target offsets in network message. */
-				/* The subtractions are opposite of each other on purpose. This
-				 * is so that they match the way the depth sensor and yaw sensor
-				 * work. */
+				/* Set target offsets in network message. The subtractions are
+				 * opposite of each other on purpose. This is so that they
+				 * match the way the depth sensor and yaw sensor work. */
 				msg.vision.data.front_x = fence_center - img->width / 2;
 				msg.vision.data.front_y = y_max - img->height / 4;
             }
@@ -405,12 +394,12 @@ int main( int argc, char *argv[] )
         	msg.vision.data.status = TASK_NOT_DETECTED;
 		} /* end TASK_GATE */
 
-		else if( task == TASK_BOXES && b_cam ) {
+		else if( task == TASK_BOXES && f_cam ) {
 			/* Set to not detected to start and reset if we get a hit. */
 			msg.vision.data.status = TASK_NOT_DETECTED;
 
 			/* Look for the boxes. */
-			status = vision_find_boxes( b_cam, img, boxes, squares, VISION_BOX,
+			status = vision_find_boxes( f_cam, img, boxes, squares, VISION_BOX,
 				&msg.vision.data.bearing );
 
 			/* If we get a positive status message, render the box
@@ -418,7 +407,7 @@ int main( int argc, char *argv[] )
 			if( status > 0 ) {
 				/* Initialize the centroid sequence reader. */
 				cvStartReadSeq( boxes, &reader1, 0 );
-				/* Read four sequence elements at a time. */
+				/* Read two sequence elements at a time. */
 				for( ii = 0; ii < boxes->total; ii += 2 ) {
 					/* Read centroid x and y coordinates. */
 					CV_READ_SEQ_ELEM( box_pt, reader1 );
@@ -428,6 +417,7 @@ int main( int argc, char *argv[] )
 				}
 				/* Initialize the vertex sequence reader. */
 				cvStartReadSeq( squares, &reader2, 0 );
+				/* Read four sequence elements at a time. */
 				for( ii = 0; ii < squares->total; ii += 4 ) {
 					/* Read vertex x and y coordinates. */
 					CV_READ_SEQ_ELEM( pt[0], reader2 );
@@ -546,6 +536,7 @@ int main( int argc, char *argv[] )
 			case VISIOND_NONE:
 				break;
 			}
+			/* Just show color video without any processing of it. */
 			if( msg.task.data.task == TASK_NONE ) {
 				switch( vision_mode ) {
 				case VISIOND_FCOLOR:
