@@ -50,7 +50,10 @@
 #define POLOLU_CH2_NEUTRAL      	3192 // Larger mean moves to left wing.
 #define POLOLU_CH4_NEUTRAL      	3190 // Larger means moves to rear.
 #define POLOLU_CH5_NEUTRAL      	3645 // Larger means moves to right wing.
-#define POLOLU_DROPPER_NEUTRAL		3000
+
+#define POLOLU_DROPPER_NEUTRAL		3000 // sets the dropper center position
+#define POLOLU_DROPPER_RANGE		15
+
 #define POLOLU_SERVO_NEUTRAL		63.5
 #define POLOLU_DEADZONE				0.1
 #define POLOLU_DZ_NEUTRAL			4

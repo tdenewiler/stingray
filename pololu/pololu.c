@@ -13,7 +13,7 @@
  *****************************************************************************/
 
 #include "pololu.h"
-#include "serial.h"POLOLU_RIGHT_SERVO1	
+#include "serial.h"
 
 
 /******************************************************************************
@@ -504,9 +504,11 @@ int pololuInitializeChannels( int fd )
 	// 8*5+6*4
 	
 	// set the dropper servo parameters
-	result += pololuSetParameters( fd, POLOLU_DROPPER, POLOLU_CHANNEL_ON, POLOLU_DEFAULT_DIRECTION, POLOLU_DEFAULT_RANGE );
+	/*
+	result += pololuSetParameters( fd, POLOLU_DROPPER, POLOLU_CHANNEL_ON, POLOLU_DEFAULT_DIRECTION, POLOLU_DROPPER_RANGE );
 	result += pololuSetNeutral( fd, POLOLU_DROPPER, POLOLU_DROPPER_NEUTRAL );
 	result += pololuSetPosition7Bit( fd, POLOLU_DROPPER, POLOLU_NEUTRAL );
+	*/
 	// 2*5+6
 	
 	// total bytes = 25*5+6*5
