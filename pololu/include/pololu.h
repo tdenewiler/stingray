@@ -37,10 +37,10 @@
 
 /** @name Neutral positions for the Voith servos and motors. */
 //@{
-#define POLOLU_CH1_NEUTRAL      	2824
-#define POLOLU_CH2_NEUTRAL      	3192
-#define POLOLU_CH4_NEUTRAL      	3185
-#define POLOLU_CH5_NEUTRAL      	3640
+#define POLOLU_CH1_NEUTRAL      	2824 // Larger means moves to rear.
+#define POLOLU_CH2_NEUTRAL      	3192 // Larger mean moves to left wing.
+#define POLOLU_CH4_NEUTRAL      	3190 // Larger means moves to rear.
+#define POLOLU_CH5_NEUTRAL      	3645 // Larger means moves to right wing.
 #define POLOLU_DROPPER_NEUTRAL		3000
 #define POLOLU_SERVO_NEUTRAL		63.5
 #define POLOLU_DEADZONE				0.1
