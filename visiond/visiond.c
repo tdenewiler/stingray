@@ -310,12 +310,12 @@ int main( int argc, char *argv[] )
 			}
 		} /* end TASK_BUOY */
 
-		else if( task == TASK_PIPE && f_cam ) {
+		else if( task == TASK_PIPE && b_cam ) {
 			/* Set to not detected to start and reset if we get a hit. */
 			msg.vision.data.status = TASK_NOT_DETECTED;
 
 			/* Look for the pipe. */
-			status = vision_find_boxes( f_cam, img, boxes, squares, VISION_PIPE,
+			status = vision_find_boxes( b_cam, img, boxes, squares, VISION_PIPE,
 				&msg.vision.data.bearing );
 
 			/* If we get a positive status message, render the box
@@ -346,7 +346,7 @@ int main( int argc, char *argv[] )
 				if( boxes->total > 0 ) {
 					/* Set the detection status of vision */
 		    		msg.vision.data.status = TASK_PIPE_DETECTED;
-		    		
+
 					msg.vision.data.bearing = 0; /* !!! TODO: Fix this value !!! */
 					msg.vision.data.bottom_x = box_pt.x - img->width / 2;
 					msg.vision.data.bottom_y = box_pt.y - img->height / 2;
@@ -363,10 +363,10 @@ int main( int argc, char *argv[] )
 		} /* end TASK_PIPE */
 
 		else if( task == TASK_FENCE && f_cam ) {
-			
+
 			/* Initialize to no positive detection. */
 			msg.vision.data.status = TASK_NOT_DETECTED;
-			
+
 			/* Look for the fence. */
             status = vision_find_fence( &fence_center, &y_max, f_cam, img, bin_img,
                     msg.vsetting.data.fence_hsv.hL,
@@ -395,7 +395,7 @@ int main( int argc, char *argv[] )
 				msg.vision.data.front_x = fence_center - img->width / 2;
 				msg.vision.data.front_y = y_max - img->height / 4;
             }
-            
+
         } /* end TASK_FENCE */
 
         else if( task == TASK_GATE && f_cam ) {
@@ -405,12 +405,12 @@ int main( int argc, char *argv[] )
         	msg.vision.data.status = TASK_NOT_DETECTED;
 		} /* end TASK_GATE */
 
-		else if( task == TASK_BOXES && f_cam ) {
+		else if( task == TASK_BOXES && b_cam ) {
 			/* Set to not detected to start and reset if we get a hit. */
 			msg.vision.data.status = TASK_NOT_DETECTED;
 
 			/* Look for the boxes. */
-			status = vision_find_boxes( f_cam, img, boxes, squares, VISION_BOX,
+			status = vision_find_boxes( b_cam, img, boxes, squares, VISION_BOX,
 				&msg.vision.data.bearing );
 
 			/* If we get a positive status message, render the box
@@ -441,7 +441,7 @@ int main( int argc, char *argv[] )
 				if( boxes->total > 0 ) {
 					/* Set the detection status of vision */
 		    		msg.vision.data.status = TASK_BOXES_DETECTED;
-		    		
+
 					msg.vision.data.box1_x = box_pt.x - img->width / 2;
 					msg.vision.data.box1_y = box_pt.y - img->height / 2;
 				}
@@ -450,16 +450,16 @@ int main( int argc, char *argv[] )
 				cvClearSeq( boxes );
 				cvClearSeq( squares );
 			}
-			
+
 		} /* end TASK_BOXES */
 
-		else if( task == TASK_SUITCASE && f_cam ) {
-			
+		else if( task == TASK_SUITCASE && b_cam ) {
+
 			/* No positive detection. */
 			msg.vision.data.status = TASK_NOT_DETECTED;
-			
+
 			/* Look for the suitcase. */
-			status = vision_suitcase( f_cam, img, boxes, squares );
+			status = vision_suitcase( b_cam, img, boxes, squares );
 			if( status > 0 ) {
 
 				/* Initialize the centroid sequence reader. */
@@ -487,7 +487,7 @@ int main( int argc, char *argv[] )
 				if( boxes->total > 0 ) {
 					/* Set the detection status of vision */
 		    		msg.vision.data.status = TASK_SUITCASE_DETECTED;
-					
+
 					msg.vision.data.suitcase_x = box_pt.x - img->width / 2;
 					msg.vision.data.suitcase_y = box_pt.y - img->height / 2;
 				}
