@@ -33,6 +33,15 @@
 #define POLOLU_DEFAULT_RANGE    15
 #define POLOLU_DEFAULT_NEUTRAL  3000
 #define POLOLU_SLEEP            10
+
+#define POLOLU_NEUTRAL 			63
+#define POLOLU_DEFAULT_RANGE	15
+#define POLOLU_DEFAULT_DIRECTION 1
+#define POLOLU_CHANNEL_ON		1
+#define POLOLU_CHANNEL_OFF		0
+#define POLOLU_SPEED_INSTANT	0
+#define POLOLU_SPEED_VOITH		10
+
 //@}
 
 /** @name Neutral positions for the Voith servos and motors. */
@@ -76,16 +85,22 @@
 
 /** @name The channel assignments for the servos and motors. */
 //@{
+	
+#define POLOLU_LEFT_VOITH_MOTOR		0
 #define POLOLU_LEFT_SERVO1			1
 #define POLOLU_LEFT_SERVO2			2
+
+#define POLOLU_RIGHT_VOITH_MOTOR	3
 #define POLOLU_RIGHT_SERVO1			4
 #define POLOLU_RIGHT_SERVO2			5
-#define POLOLU_RIGHT_VOITH_MOTOR	0
-#define POLOLU_LEFT_VOITH_MOTOR		3
+
+
 #define POLOLU_LEFT_WING_MOTOR		7
 #define POLOLU_RIGHT_WING_MOTOR		8
 #define POLOLU_TAIL_MOTOR			10
-#define POLOLU_DROPPER_SERVO		15
+#define POLOLU_DROPPER				13
+// this is channel 13 -AM
+// #define POLOLU_DROPPER_SERVO		15
 //@}
 
 
