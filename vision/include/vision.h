@@ -37,7 +37,7 @@
 #define VISION_AR_PIPE		8
 #define VISION_AR_BOX		2
 #define VISION_AR_SUITCASE	1
-#define VISION_AR_THRESH	0.5
+#define VISION_AR_THRESH	0.4
 #endif /* VISION_ASPECT_RATIOS */
 
 #ifndef VISION_TASK
