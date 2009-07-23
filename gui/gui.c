@@ -61,7 +61,7 @@ void gui_update_status_text( )
     char sbuff[2048];
 
     sprintf( sbuff,
-             "Pitch, Roll, Yaw, Depth, fx , fy:\t[ %.3f\t%.3f\t%.3f\t%.3f\t%.3f\t%.3f ]\n"
+             "Pitch, Roll, Yaw, Depth, Fx, Fy:\t[ %.3f\t%.3f\t%.3f\t%.3f\t%.3f\t%.3f ]\n"
              "Accel X, Y, Z:\t\t\t[ %.3f\t%.3f\t%.3f ]\n"
              "Ang Rate X, Y, Z:\t\t[ %.3f\t%.3f\t%.3f ]\n"
              "Labjack (B1 B2 D W):\t[ %.3fV\t%.3fV\t%.3f\t%.3f ]\n"
@@ -70,8 +70,8 @@ void gui_update_status_text( )
              "Roll:\t\t\t\t\t[ %.3f\t%.3f\t%.3f ]\n"
              "Yaw:\t\t\t\t\t[ %.3f\t%.3f\t%.3f ]\n"
              "Depth:\t\t\t\t[ %.3f\t%.3f\t%.3f ]\n"
-             "fx:\t\t\t\t[ %.3f\t%.3f\t%.3f ]\n"
-             "fy:\t\t\t\t[ %.3f\t%.3f\t%.3f ]\n"
+             "Fx:\t\t\t\t\t[ %.3f\t%.3f\t%.3f ]\n"
+             "Fy:\t\t\t\t\t[ %.3f\t%.3f\t%.3f ]\n"
              , msg.status.data.pitch
              , msg.status.data.roll
              , msg.status.data.yaw

@@ -314,7 +314,7 @@ int main( int argc, char *argv[] )
 			/* Set to not detected to start and reset if we get a hit. */
 			msg.vision.data.status = TASK_NOT_DETECTED;
 
-			/* Look for the pipe */
+			/* Look for the pipe. */
 			status = vision_find_boxes( f_cam, img, boxes, squares, VISION_PIPE,
 				&msg.vision.data.bearing );
 
@@ -376,7 +376,7 @@ int main( int argc, char *argv[] )
                     msg.vsetting.data.fence_hsv.vL,
                     msg.vsetting.data.fence_hsv.vH );
             if( status == 1 ) {
-            	/* Set the detection status of vision */
+            	/* Set the detection status of vision. */
 				msg.vision.data.status = TASK_FENCE_DETECTED;
 
 				/* Draw a circle at the centroid. */
@@ -401,12 +401,12 @@ int main( int argc, char *argv[] )
         else if( task == TASK_GATE && f_cam ) {
         	/* Look for the gate */
 
-        	/* Default to fail detection until code is written */
+        	/* Default to fail detection until code is written. */
         	msg.vision.data.status = TASK_NOT_DETECTED;
 		} /* end TASK_GATE */
 
 		else if( task == TASK_BOXES && f_cam ) {
-			/* Set to not detected to start and reset if we get a hit */
+			/* Set to not detected to start and reset if we get a hit. */
 			msg.vision.data.status = TASK_NOT_DETECTED;
 
 			/* Look for the boxes. */
@@ -623,47 +623,3 @@ int main( int argc, char *argv[] )
 
     exit( 0 );
 } /* end main() */
-
-
-/* Original pipe finding code. */
-	//status = vision_find_pipe( &pipex, &pipey, &bearing, f_cam, img, bin_img,
-                    //msg.vsetting.data.pipe_hsv.hL,
-                    //msg.vsetting.data.pipe_hsv.hH,
-                    //msg.vsetting.data.pipe_hsv.sL,
-                    //msg.vsetting.data.pipe_hsv.sH,
-                    //msg.vsetting.data.pipe_hsv.vL,
-                    //msg.vsetting.data.pipe_hsv.vH );
-            //if( status ) {
-            	///* Set the detection status of vision */
-            	//if( status != SUBTASK_SUCCESS ) {
-					//msg.vision.data.status = TASK_PIPE_DETECTED;
-				//}
-				//else {
-					///* No positive detection */
-					//msg.vision.data.status = TASK_NOT_DETECTED;
-				//}
-
-				//for( ii = 0; ii < lineWidth; ii++ ) {
-					//if( bearing != 0 ) {
-						///* Draw a line indicating the bearing. */
-						//cvCircle( img, cvPoint( img->width / 2 + ((int)(bearing * ii)),
-							//(img->width / 2) + ii ), 2, cvScalar(255, 255, 0), 2 );
-					//}
-					//else {
-						///* Draw a red line to indicate no detection. */
-						//cvCircle( img, cvPoint( img->width / 2 + ((int)(bearing * ii)),
-							//(img->width / 2) + ii ), 2, cvScalar(0, 0, 255), 2 );
-					//}
-				//}
-				///* Draw a circle to indicate the centroid. */
-				//cvCircle( img, cvPoint(pipex, img->height / 2),
-					//10, cvScalar(255, 255, 0), 5, 8 );
-
-				///* Set target offsets in network message. We are taking the
-				 //* negative of bearing for the y offset due to the way yaw is
-				 //* calculated on the IMU. */
-                //bearing = bearing * 180 / M_PI;
-                //msg.vision.data.bearing = -1 * bearing;
-                //msg.vision.data.bottom_x = pipex - img->width / 2;
-                //msg.vision.data.bottom_y = pipey - img->height / 2;
-            //}

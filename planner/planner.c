@@ -284,7 +284,8 @@ int main( int argc, char *argv[] )
     		fprintf( f_log, "------------------------------\n" );
     		fprintf( f_log, "--  BEGIN NEW LOG SESSION   --\n" );
     		fprintf( f_log, "------------------------------\n" );
-    		fprintf( f_log, "time,pitch,roll,yaw,psi,accel1,accel2,accel3,ang1,ang2,ang3\n" );
+    		fprintf( f_log, "time,pitch,roll,yaw,depth,accel1,accel2,accel3,ang1,"
+				"ang2,ang3,fx,fy,tpitch,troll,tyaw,tdepth,tfx,tfy\n" );
 		}
 	}
 
@@ -419,14 +420,19 @@ int main( int argc, char *argv[] )
             	//	strlen(write_time), ".%03ld", ctime.tv_usec );
 
 			/* Log every (enable_log) seconds. */
-			if( dt > (cf.enable_log * 1000000) ) {
+			//if( dt > (cf.enable_log * 1000000) ) {
 				STAT cs = msg.status.data;
-				fprintf( f_log, "%s, %.04f,%.04f,%.04f,%.04f,%.04f,%.04f,%.04f,%.04f,%.04f,%.04f\n",
+				TARGET target = msg.target.data;
+				fprintf( f_log, "%s, %.04f,%.04f,%.04f,%.04f,%.04f,%.04f,%.04f,"
+					"%.04f,%.04f,%.04f,%.04f,%.04f,%.04f,%.04f,%.04f,%.04f,"
+					"%.04f,%.04f\n",
 					write_time, cs.pitch, cs.roll, cs.yaw, msg.lj.data.pressure,
 					cs.accel[0], cs.accel[1], cs.accel[2],
-					cs.ang_rate[0], cs.ang_rate[1], cs.ang_rate[2] );
+					cs.ang_rate[0], cs.ang_rate[1], cs.ang_rate[2], cs.fx, cs.fy,
+					target.pitch, target.roll, target.yaw, target.depth,
+					target.fx, target.fy );
 				gettimeofday( &log_start, NULL );
-			}
+			//}
 		}
 
 		/* Update the task dt. dt value is in seconds */
