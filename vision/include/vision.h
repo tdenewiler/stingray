@@ -177,8 +177,12 @@ void vision_smooth( IplImage *img );
 //! \param img The image to equalize histogram of.
 void vision_hist_eq( IplImage *img );
 
-//! Saturates each channel of an image.
-//! \param img The image to smooth.
+//! Balances the colors in an image.
+//! \param img The image to modify.
+void vision_white_balance( IplImage *img );
+
+//! Saturates the colors of each channel in an image.
+//! \param img The image to saturate.
 void vision_saturate( IplImage *img );
 
 
