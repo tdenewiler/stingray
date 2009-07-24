@@ -1212,7 +1212,7 @@ void vision_smooth( IplImage *img )
 
 	cvSetImageCOI( clone, 2 );
     cvCopy( clone, tgray2, 0 );
-	cvSmooth( tgray2, tgray2, CV_GAUSSIAN, smooth_size, smooth_size );
+	//cvSmooth( tgray2, tgray2, CV_GAUSSIAN, smooth_size, smooth_size );
 
 	cvSetImageCOI( clone, 3 );
     cvCopy( clone, tgray3, 0 );
@@ -1384,18 +1384,18 @@ void vision_white_balance( IplImage *img )
 	int ii = 0;
 	int jj = 0;
 	uchar *temp_ptr;
-	//double rscale = 193. / 255.;
-	double rscale = 150. / 255.;
-	double gscale = 198. / 255.;
-	double bscale = 218. / 255.;
+	double scale = 0.9; // 193. / 255.;
+	double rscale = 255. / 193. * scale;
+	double bscale = 255. / 218. * scale;
+	double gscale = 255. / 198. * scale;
 
 	/* For each channel in the original image modify the RGB values. */
 	for( ii = 0; ii < img->height; ii++ ) {
 		for( jj = 0; jj < img->width; jj++ ) {
 			temp_ptr = &((uchar *)(img->imageData + img->widthStep * ii))[jj * 3];
-			temp_ptr[0] *= rscale;
+			temp_ptr[0] *= bscale;
 			temp_ptr[1] *= gscale;
-			temp_ptr[2] *= bscale;
+			temp_ptr[2] *= rscale;
 		}
 	}
 } /* end vision_white_balance() */
