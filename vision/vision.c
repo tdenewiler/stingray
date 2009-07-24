@@ -74,11 +74,15 @@ int vision_find_dot( int *dotx,
 	//cvConvertScale( srcImg, hsvImg, 1.0 / 255.0 );
 	
 	/* Enhance the red channel of the source image. */
-	//vision_saturate( hsvImg );
+	vision_saturate( srcImg );
 	//cvConvertScale( hsvImg, srcImg, 255.0 );
+	//srcImg = cvCloneImage( hsvImg );
 
     /* Flip the source image. */
     cvFlip( srcImg, srcImg );
+	
+	/* Saturate the source image. */
+	vision_saturate( srcImg );
 
     /* Segment the flipped image into a binary image. */
     cvCvtColor( srcImg, hsvImg, CV_RGB2HSV );
@@ -1311,33 +1315,62 @@ void vision_hist_eq( IplImage *img )
 void vision_saturate( IplImage *img )
 {
 	/* Declare variables. */
-    IplImage *clone = NULL;
-    IplImage *tgray1 = NULL;
-    IplImage *tgray2 = NULL;
-    IplImage *tgray3 = NULL;
-    CvSize sz = cvSize( img->width & -2, img->height & -2 );
+    //IplImage *clone = NULL;
+    //IplImage *tgray1 = NULL;
+    //IplImage *tgray2 = NULL;
+    //IplImage *tgray3 = NULL;
+    //CvSize sz = cvSize( img->width & -2, img->height & -2 );
 	int ii = 0;
 	int jj = 0;
-	double power = 0.99;
-	CvScalar val;
+	//CvPoint pt;
+	uchar *temp_ptr;
+	//double power = 0.99;
+	//CvScalar val;
+	//double rscale = 193. / 255.;
+	double rscale = 150. / 255.;
+	double gscale = 198. / 255.;
+	double bscale = 218. / 255.;
 	
 	/* Clone the original image. */
-	clone = cvCloneImage( img );
+	//clone = cvCloneImage( img );
 
 	/* Create three separate grayscale images, one for each channel. */
-    tgray1 = cvCreateImage( sz, 8, 1 );
-	tgray2 = cvCreateImage( sz, 8, 1 );
-	tgray3 = cvCreateImage( sz, 8, 1 );
+    //tgray1 = cvCreateImage( sz, 8, 1 );
+	//tgray2 = cvCreateImage( sz, 8, 1 );
+	//tgray3 = cvCreateImage( sz, 8, 1 );
+	
+	/* For each channel in the original image modify the RGB values. */
+	for( ii = 0; ii < img->height; ii++ ) {
+		for( jj = 0; jj < img->width; jj++ ) {
+			temp_ptr = &((uchar *)(img->imageData + img->widthStep * ii))[jj * 3];
+			temp_ptr[0] *= rscale;
+			temp_ptr[1] *= gscale;
+			temp_ptr[2] *= bscale;
+		}
+	}
 
-    /* Saturate each plane and merge back to original image.  */
-    cvSetImageCOI( clone, 1 );
-    cvCopy( clone, tgray1, 0 );
+	/* Split the three channel image into three grayscale images using set
+	 * channel of interest. */
+    //cvSetImageCOI( clone, 1 );
+	//cvCopy( clone, tgray1, 0 );
+	/* Go through the image and set the value of each pixel to zero. */
+	//for( ii = 0; ii < img->height; ii++ ) {
+		//for( jj = 0; jj < img->width; jj++ ) {
+			//val = cvGet2D( img, ii, jj );
+			//val.val[0] = 0;
+			//val.val[1] = 0;
+			//val.val[2] = 0;
+			//val.val[3] = 0;
+			//cvSet2D( img, ii, jj, val );
+		//}
+	//}
 
-	cvSetImageCOI( clone, 2 );
-    cvCopy( clone, tgray2, 0 );
+	//cvSetImageCOI( clone, 2 );
+	//cvCopy( clone, tgray2, 0 );
 
-	cvSetImageCOI( clone, 3 );
-    cvCopy( clone, tgray3, 0 );
+	//cvSetImageCOI( clone, 3 );
+	//cvCopy( clone, tgray3, 0 );
+	/* Go through the image and raise the value of the pixel to a power. */
 	//for( ii = 0; ii < img->height; ii++ ) {
 		//for( jj = 0; jj < img->width; jj++ ) {
 			//val = cvGet2D( img, ii, jj );
@@ -1346,11 +1379,12 @@ void vision_saturate( IplImage *img )
 		//}
     //}
 
-	cvMerge( tgray1, tgray2, tgray3, NULL, img );
+	/* Merge the grayscale images back to a three channel image. */
+	//cvMerge( tgray1, tgray2, tgray3, NULL, img );
 
     /* Clear variables to free memory. */
-    cvReleaseImage( &clone );
-    cvReleaseImage( &tgray1 );
-    cvReleaseImage( &tgray2 );
-    cvReleaseImage( &tgray3 );
+    //cvReleaseImage( &clone );
+    //cvReleaseImage( &tgray1 );
+    //cvReleaseImage( &tgray2 );
+    //cvReleaseImage( &tgray3 );
 } /* end vision_saturate() */
