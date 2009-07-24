@@ -190,7 +190,6 @@ int pololuSetSpeed( int fd,
 
 		// [128 64 32 16 8 4 2 1]
 		msg[4] = s & 127;
-
 		// send the message
 		//printf( "sp: %x %x %x %x %x \n",msg[0],msg[1],msg[2],msg[3],msg[4] );
 		result = send_serial( fd, &msg, 5 );
@@ -376,7 +375,7 @@ int pololuSetPositionAbsolute( int fd,
 		msg[4] = ( p >> 7 ) & 127;
 		msg[5] = ( p & 127 );
 
-		// send the message
+		// send the message8222 Ronson Road, San Diego, CA 92111
 		//printf("spA: %x %x %x %x %x %x \n",msg[0],msg[1],msg[2],msg[3],msg[4],msg[5]);
 		result = send_serial( fd, &msg, 6 );
 	}
@@ -466,35 +465,35 @@ int pololuInitializeChannels( int fd )
 	if( fd < 0 ) {
 		return POLOLU_FAILURE;
 	}
-
+	
 	// THIS IS OUR DEFAULT PROFILE
-	result += pololuSetParameters( fd, 0, 1, 1, 15 );
-	result += pololuSetParameters( fd, 3, 1, 1, 15 );
-	result += pololuSetSpeed( fd, 0, 10 );
-	result += pololuSetSpeed( fd, 3, 10 );
-	result += pololuSetPosition7Bit( fd, 0, 63 );
-	result += pololuSetPosition7Bit( fd, 3, 63 );
-	result += pololuSetParameters( fd, 7, 1, 1, 15 );
-	result += pololuSetParameters( fd, 8, 1, 1, 15 );
-	result += pololuSetParameters( fd, 10, 1, 1, 15 );
-	result += pololuSetSpeed( fd, 7, 0 );
-	result += pololuSetSpeed( fd, 8, 0 );
-	result += pololuSetSpeed( fd, 10, 0 );
-	result += pololuSetPosition7Bit( fd, 7, 63 );
-	result += pololuSetPosition7Bit( fd, 8, 63 );
-	result += pololuSetPosition7Bit( fd, 10, 63 );
-	result += pololuSetParameters( fd, 1, 1, 1, 15 ) ;
+	result += pololuSetParameters( fd, 0, POLOLU_ON, POLOLU_FORWARD, POLOLU_DEFAULT_RANGE );
+	result += pololuSetParameters( fd, 3, POLOLU_ON, POLOLU_FORWARD, POLOLU_DEFAULT_RANGE );
+	result += pololuSetSpeed( fd, 0, POLOLU_SPEED_VOITH );
+	result += pololuSetSpeed( fd, 3, POLOLU_SPEED_VOITH );
+	result += pololuSetPosition7Bit( fd, 0, POLOLU_NEUTRAL );
+	result += pololuSetPosition7Bit( fd, 3, POLOLU_NEUTRAL );
+	result += pololuSetParameters( fd, 7, POLOLU_ON, POLOLU_FORWARD, POLOLU_DEFAULT_RANGE );
+	result += pololuSetParameters( fd, 8, POLOLU_ON, POLOLU_FORWARD, POLOLU_DEFAULT_RANGE );
+	result += pololuSetParameters( fd, 10, POLOLU_ON, POLOLU_FORWARD, POLOLU_DEFAULT_RANGE );
+	result += pololuSetSpeed( fd, 7, POLOLU_SPEED_INSTANT );
+	result += pololuSetSpeed( fd, 8, POLOLU_SPEED_INSTANT );
+	result += pololuSetSpeed( fd, 10, POLOLU_SPEED_INSTANT );
+	result += pololuSetPosition7Bit( fd, 7, POLOLU_NEUTRAL );
+	result += pololuSetPosition7Bit( fd, 8, POLOLU_NEUTRAL );
+	result += pololuSetPosition7Bit( fd, 10, POLOLU_NEUTRAL );
+	result += pololuSetParameters( fd, 1, POLOLU_ON, POLOLU_FORWARD, POLOLU_DEFAULT_RANGE ) ;
 	result += pololuSetNeutral( fd, 1, POLOLU_CH1_NEUTRAL );
-	result += pololuSetPosition7Bit( fd, 1, 63 );
-	result += pololuSetParameters( fd, 2, 1, 1, 15 );
+	result += pololuSetPosition7Bit( fd, 1, POLOLU_NEUTRAL );
+	result += pololuSetParameters( fd, 2, POLOLU_ON, POLOLU_FORWARD, POLOLU_DEFAULT_RANGE );
 	result += pololuSetNeutral( fd, 2, POLOLU_CH2_NEUTRAL );
-	result += pololuSetPosition7Bit( fd, 2, 63 );
-	result += pololuSetParameters( fd, 4, 1, 1, 15 );
+	result += pololuSetPosition7Bit( fd, 2, POLOLU_NEUTRAL );
+	result += pololuSetParameters( fd, 4, POLOLU_ON, POLOLU_FORWARD, POLOLU_DEFAULT_RANGE );
 	result += pololuSetNeutral( fd, 4, POLOLU_CH4_NEUTRAL );
-	result += pololuSetPosition7Bit( fd, 4, 63 );
-	result += pololuSetParameters( fd, 5, 1, 1, 15 );
+	result += pololuSetPosition7Bit( fd, 4, POLOLU_NEUTRAL );
+	result += pololuSetParameters( fd, 5, POLOLU_ON, POLOLU_FORWARD, POLOLU_DEFAULT_RANGE );
 	result += pololuSetNeutral( fd, 5, POLOLU_CH5_NEUTRAL );
-	result += pololuSetPosition7Bit( fd, 5, 63 );
+	result += pololuSetPosition7Bit( fd, 5, POLOLU_NEUTRAL );
 
 	// the total number of bytes sent
 	// 5 for each normal command and 6 for each pololuSetNeutral command
