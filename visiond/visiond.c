@@ -266,8 +266,7 @@ int main( int argc, char *argv[] )
 
         else if( task == TASK_BUOY && f_cam ) {
 			/* Get a new image. */
-			img = cvQueryFrame( f_cam );
-			
+			img = cvQueryFrame( f_cam );			
 			/* Look for the buoy. */
 			status = vision_find_dot( &dotx, &doty,
 					cf.vision_angle, f_cam, img, bin_img,
