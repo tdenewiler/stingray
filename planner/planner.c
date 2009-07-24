@@ -279,7 +279,7 @@ int main( int argc, char *argv[] )
 
     /* Open log file if flag set. */
     if( cf.enable_log ) {
-    	f_log = fopen( "log.csv", "a+" );
+    	f_log = fopen( "log.csv", "w" );
     	if( f_log ) {
    		fprintf( f_log, "time,pitch,roll,yaw,depth,accel1,accel2,accel3,ang1,"
 				"ang2,ang3,fx,fy,tpitch,troll,tyaw,tdepth,tfx,tfy\n" );
