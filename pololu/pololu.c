@@ -466,38 +466,56 @@ int pololuInitializeChannels( int fd )
 		return POLOLU_FAILURE;
 	}
 	
-	// THIS IS OUR DEFAULT PROFILE
-	result += pololuSetParameters( fd, 0, POLOLU_ON, POLOLU_FORWARD, POLOLU_DEFAULT_RANGE );
-	result += pololuSetParameters( fd, 3, POLOLU_ON, POLOLU_FORWARD, POLOLU_DEFAULT_RANGE );
-	result += pololuSetSpeed( fd, 0, POLOLU_SPEED_VOITH );
-	result += pololuSetSpeed( fd, 3, POLOLU_SPEED_VOITH );
-	result += pololuSetPosition7Bit( fd, 0, POLOLU_NEUTRAL );
-	result += pololuSetPosition7Bit( fd, 3, POLOLU_NEUTRAL );
-	result += pololuSetParameters( fd, 7, POLOLU_ON, POLOLU_FORWARD, POLOLU_DEFAULT_RANGE );
-	result += pololuSetParameters( fd, 8, POLOLU_ON, POLOLU_FORWARD, POLOLU_DEFAULT_RANGE );
-	result += pololuSetParameters( fd, 10, POLOLU_ON, POLOLU_FORWARD, POLOLU_DEFAULT_RANGE );
-	result += pololuSetSpeed( fd, 7, POLOLU_SPEED_INSTANT );
-	result += pololuSetSpeed( fd, 8, POLOLU_SPEED_INSTANT );
-	result += pololuSetSpeed( fd, 10, POLOLU_SPEED_INSTANT );
-	result += pololuSetPosition7Bit( fd, 7, POLOLU_NEUTRAL );
-	result += pololuSetPosition7Bit( fd, 8, POLOLU_NEUTRAL );
-	result += pololuSetPosition7Bit( fd, 10, POLOLU_NEUTRAL );
-	result += pololuSetParameters( fd, 1, POLOLU_ON, POLOLU_FORWARD, POLOLU_DEFAULT_RANGE ) ;
-	result += pololuSetNeutral( fd, 1, POLOLU_CH1_NEUTRAL );
-	result += pololuSetPosition7Bit( fd, 1, POLOLU_NEUTRAL );
-	result += pololuSetParameters( fd, 2, POLOLU_ON, POLOLU_FORWARD, POLOLU_DEFAULT_RANGE );
-	result += pololuSetNeutral( fd, 2, POLOLU_CH2_NEUTRAL );
-	result += pololuSetPosition7Bit( fd, 2, POLOLU_NEUTRAL );
-	result += pololuSetParameters( fd, 4, POLOLU_ON, POLOLU_FORWARD, POLOLU_DEFAULT_RANGE );
-	result += pololuSetNeutral( fd, 4, POLOLU_CH4_NEUTRAL );
-	result += pololuSetPosition7Bit( fd, 4, POLOLU_NEUTRAL );
-	result += pololuSetParameters( fd, 5, POLOLU_ON, POLOLU_FORWARD, POLOLU_DEFAULT_RANGE );
-	result += pololuSetNeutral( fd, 5, POLOLU_CH5_NEUTRAL );
-	result += pololuSetPosition7Bit( fd, 5, POLOLU_NEUTRAL );
-
+	/* THIS IS OUR DEFAULT PROFILE */
+	
+	/* ======= Left Voith ======== */
+	
+	/* Left Voith Speed */
+	result += pololuSetParameters( fd, POLOLU_LEFT_VOITH_MOTOR, POLOLU_ON, POLOLU_FORWARD, POLOLU_DEFAULT_RANGE );
+	result += pololuSetSpeed( fd, POLOLU_LEFT_VOITH_MOTOR, POLOLU_SPEED_VOITH );
+	result += pololuSetPosition7Bit( fd, POLOLU_LEFT_VOITH_MOTOR, POLOLU_NEUTRAL );
+	/* Left Voith Servo 1 */
+	result += pololuSetParameters( fd, POLOLU_LEFT_SERVO1, POLOLU_ON, POLOLU_FORWARD, POLOLU_DEFAULT_RANGE ) ;
+	result += pololuSetNeutral( fd, POLOLU_LEFT_SERVO1, POLOLU_CH1_NEUTRAL );
+	result += pololuSetPosition7Bit( fd, POLOLU_LEFT_SERVO1, POLOLU_NEUTRAL );
+	/* Left Voith Servo 2 */
+	result += pololuSetParameters( fd, POLOLU_LEFT_SERVO2, POLOLU_ON, POLOLU_FORWARD, POLOLU_DEFAULT_RANGE );
+	result += pololuSetNeutral( fd, POLOLU_LEFT_SERVO2, POLOLU_CH2_NEUTRAL );
+	result += pololuSetPosition7Bit( fd, POLOLU_LEFT_SERVO2, POLOLU_NEUTRAL );
+	
+	/* ======= Right Voith ======== */
+	
+	/* Right Voith Speed */
+	result += pololuSetParameters( fd, POLOLU_RIGHT_VOITH_MOTOR, POLOLU_ON, POLOLU_FORWARD, POLOLU_DEFAULT_RANGE );
+	result += pololuSetSpeed( fd, POLOLU_RIGHT_VOITH_MOTOR, POLOLU_SPEED_VOITH );
+	result += pololuSetPosition7Bit( fd, POLOLU_RIGHT_VOITH_MOTOR, POLOLU_NEUTRAL );
+	/* Right Voith Servo 1 */
+	result += pololuSetParameters( fd, POLOLU_RIGHT_SERVO1, POLOLU_ON, POLOLU_FORWARD, POLOLU_DEFAULT_RANGE );
+	result += pololuSetNeutral( fd, POLOLU_RIGHT_SERVO1, POLOLU_CH4_NEUTRAL );
+	result += pololuSetPosition7Bit( fd, POLOLU_RIGHT_SERVO1, POLOLU_NEUTRAL );
+	/* Right Voith Servo 2 */
+	result += pololuSetParameters( fd, POLOLU_RIGHT_SERVO2, POLOLU_ON, POLOLU_FORWARD, POLOLU_DEFAULT_RANGE );
+	result += pololuSetNeutral( fd, POLOLU_RIGHT_SERVO2, POLOLU_CH5_NEUTRAL );
+	result += pololuSetPosition7Bit( fd, POLOLU_RIGHT_SERVO2, POLOLU_NEUTRAL );
+	
+	/* ======= Attidude and Depth ======== */
+	
+	/* Left Wing Thruster */
+	result += pololuSetParameters( fd, POLOLU_LEFT_WING_MOTOR, POLOLU_ON, POLOLU_FORWARD, POLOLU_DEFAULT_RANGE );
+	result += pololuSetSpeed( fd, POLOLU_LEFT_WING_MOTOR, POLOLU_SPEED_INSTANT );
+	result += pololuSetPosition7Bit( fd, POLOLU_LEFT_WING_MOTOR, POLOLU_NEUTRAL );
+	/* Right Wing Thruster */
+	result += pololuSetParameters( fd, POLOLU_RIGHT_WING_MOTOR, POLOLU_ON, POLOLU_FORWARD, POLOLU_DEFAULT_RANGE );
+	result += pololuSetSpeed( fd, POLOLU_RIGHT_WING_MOTOR, POLOLU_SPEED_INSTANT );
+	result += pololuSetPosition7Bit( fd, POLOLU_RIGHT_WING_MOTOR, POLOLU_NEUTRAL );
+	/* Tail Thruster */
+	result += pololuSetParameters( fd, POLOLU_TAIL_MOTOR, POLOLU_ON, POLOLU_FORWARD, POLOLU_DEFAULT_RANGE );
+	result += pololuSetSpeed( fd, POLOLU_TAIL_MOTOR, POLOLU_SPEED_INSTANT );
+	result += pololuSetPosition7Bit( fd, POLOLU_TAIL_MOTOR, POLOLU_NEUTRAL );
+	
 	// the total number of bytes sent
 	// 5 for each normal command and 6 for each pololuSetNeutral command
-	if( result == 139 ) {
+	if( result == POLOLU_RESULT_SUM ) {
 		result = POLOLU_SUCCESS;
 	}
 	else {
