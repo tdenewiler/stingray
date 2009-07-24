@@ -41,7 +41,7 @@
 #define POLOLU_CHANNEL_OFF		0
 #define POLOLU_SPEED_INSTANT	0
 #define POLOLU_SPEED_VOITH		10
-#define POLOLU_RESULT_SUM		139
+#define POLOLU_RESULT_SUM		( 139 + 16 )
 
 //@}
 
@@ -53,7 +53,7 @@
 #define POLOLU_CH5_NEUTRAL      	3645 // Larger means moves to right wing.
 
 #define POLOLU_DROPPER_NEUTRAL		3000 // sets the dropper center position
-#define POLOLU_DROPPER_RANGE		15
+#define POLOLU_DROPPER_RANGE		POLOLU_DEFAULT_RANGE
 
 #define POLOLU_SERVO_NEUTRAL		63.5
 #define POLOLU_DEADZONE				0.1

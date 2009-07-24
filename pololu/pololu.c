@@ -513,6 +513,13 @@ int pololuInitializeChannels( int fd )
 	result += pololuSetSpeed( fd, POLOLU_TAIL_MOTOR, POLOLU_SPEED_INSTANT );
 	result += pololuSetPosition7Bit( fd, POLOLU_TAIL_MOTOR, POLOLU_NEUTRAL );
 	
+	/* ======= Other Actuators ======== */
+	
+	/* Dropper Servo */
+	result += pololuSetParameters( fd, POLOLU_DROPPER, POLOLU_ON, POLOLU_FORWARD, POLOLU_DROPPER_RANGE );
+	result += pololuSetNeutral( fd, POLOLU_DROPPER, POLOLU_DROPPER_NEUTRAL );
+	result += pololuSetPosition7Bit( fd, POLOLU_DROPPER, POLOLU_DROPPER_NEUTRAL );
+	
 	// the total number of bytes sent
 	// 5 for each normal command and 6 for each pololuSetNeutral command
 	if( result == POLOLU_RESULT_SUM ) {
