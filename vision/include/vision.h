@@ -196,7 +196,7 @@ void vision_threshold( IplImage *img,
 						IplImage *bin_img,
 						int type,
 						int size,
-						double thresh );
+						double thresh);
 						
 //! Thresholds an image with rgb ratios.
 void vision_rgb_ratio_filter( IplImage *img , double * rgb_thresh );

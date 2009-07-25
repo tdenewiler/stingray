@@ -52,14 +52,21 @@ int vision_find_dot( int *dotx,
     CvPoint center;
     IplImage *hsvImg = NULL;
     IplImage *outImg = NULL;
+<<<<<<< .mine
+	IplImage *filterImg = NULL;
+	
+    //IplConvKernel *wL = cvCreateStructuringElementEx( 7, 7,
+    //        (int)floor( ( 7.0 ) / 2 ), (int)floor( ( 7.0 ) / 2 ), CV_SHAPE_ELLIPSE );
+=======
     
     double rgb_thresh[] = { 1.15, 1.65, 1.05, 2.40, 0.90, 1.80, 1.45, 300 };
     short  rgb_sum[] = { 195 , 570 };
     
     IplConvKernel *wL = cvCreateStructuringElementEx( 7, 7,
             (int)floor( ( 7.0 ) / 2 ), (int)floor( ( 7.0 ) / 2 ), CV_SHAPE_ELLIPSE );
+>>>>>>> .r175
     //IplConvKernel *wS = cvCreateStructuringElementEx( 2, 2,
-            //(int)floor( ( 3.0 ) / 2 ), (int)floor( ( 3.0 ) / 2 ), CV_SHAPE_ELLIPSE );
+    //        (int)floor( ( 2.0 ) / 2 ), (int)floor( ( 2.0 ) / 2 ), CV_SHAPE_ELLIPSE );
 
     /* Initialize to impossible values. */
     center.x = -10000;
@@ -68,9 +75,13 @@ int vision_find_dot( int *dotx,
 	/* Create intermediate images for scratch space. */
     hsvImg = cvCreateImage( cvGetSize(srcImg), IPL_DEPTH_8U, 3 );
     outImg = cvCreateImage( cvGetSize(srcImg), IPL_DEPTH_8U, 1 );
+<<<<<<< .mine
+	filterImg = cvCreateImage( cvGetSize(srcImg), IPL_DEPTH_8U, 1 );
+=======
 
 	/* Filter the RGB sums in the image. */
 	vision_rgb_sum_filter( srcImg, rgb_sum );
+>>>>>>> .r175
 	
 	/* Filter the RGB ratios in the image. */
 	vision_rgb_ratio_filter( srcImg, rgb_thresh );
@@ -107,23 +118,18 @@ int vision_find_dot( int *dotx,
     *dotx = center.x;
     *doty = center.y;
 
+	//binImg = cvCloneImage(filterImg);
     /* Clear variables to free memory. */
     cvReleaseImage( &hsvImg );
     cvReleaseImage( &outImg );
+	cvReleaseImage( &filterImg );
 
 	/* Check that the values of dotx & doty are not negative */
 	if( dotx < 0 || doty < 0 ) {
-		/* Clear variables to free memory. */
-		cvReleaseImage( &hsvImg );
-		cvReleaseImage( &outImg );
-
+		
 		return 0;
 	}
-
-    /* Clear variables to free memory. */
-    cvReleaseImage( &hsvImg );
-    cvReleaseImage( &outImg );
-
+	
     return 1;
 } /* end vision_find_dot() */
 
@@ -164,8 +170,8 @@ int vision_find_pipe( int *pipex,
     IplImage *hsv_image = NULL;
     IplImage *hsv_clone = NULL;
     IplImage *outImg = NULL;
-    IplConvKernel *wL = cvCreateStructuringElementEx( 7, 7,
-            (int)floor( ( 7.0 ) / 2 ), (int)floor( ( 7.0 ) / 2 ), CV_SHAPE_ELLIPSE );
+    //IplConvKernel *wL = cvCreateStructuringElementEx( 7, 7,
+    //        (int)floor( ( 7.0 ) / 2 ), (int)floor( ( 7.0 ) / 2 ), CV_SHAPE_ELLIPSE );
 
     /* Initialize to impossible values. */
     center.x = -10000;
@@ -200,8 +206,8 @@ int vision_find_pipe( int *pipex,
 
 	/* Filter the image. */
     //vision_window_filter( outImg, binImg, &center, 11, 11 );
-	vision_threshold( outImg, binImg, VISION_ADAPTIVE, 11, 0.91 );
-	cvErode( binImg, binImg, wL );
+	vision_threshold( outImg, binImg, VISION_ADAPTIVE, 1, 5. );
+	//cvErode( binImg, binImg, wL );
 
     /* Process the image to get the bearing and centroid. */
     *bearing = vision_get_bearing( outImg );
@@ -1358,30 +1364,40 @@ void vision_threshold( IplImage *img,
 	int jj = 0;
 	double maxval = 255.;
 	CvMat *kernel = NULL;
-
+	
 	/* Create a matrix to replace my ASCII art. */
 	kernel = cvCreateMat( size, size, CV_32FC1 );
 	for( ii = 0; ii < size; ii++ ) {
 		for( jj = 0; jj < size; jj++ ) {
 			if( pow(ii - ceil(size/2), 2) + pow(jj - ceil(size/2), 2) < floor(size/2) ) {
-				cvSet2D( kernel, ii, jj, cvScalar(1.) );
+				cvSet2D( kernel, ii, jj, cvScalar(1./pow((double)size, 2) ) );
 			}
 			else {
 				cvSet2D( kernel, ii, jj, cvScalar(0.) );
-			}
+							}
 		}
 	}
-
     /* Filter the image using convolution. */
     cvFilter2D( img, bin_img, kernel, cvPoint(floor(size/2),floor(size/2)) );
-	
+	//cvEqualizeHist(bin_img,img);
+	img = cvCloneImage(bin_img);
 	/* Threshold the image based on type of threshold -- normal else adaptive. */
 	if( type == VISION_BINARY ) {
-		cvThreshold( bin_img, img, thresh, maxval, CV_THRESH_BINARY );
+		cvThreshold( img, bin_img, thresh, maxval, CV_THRESH_BINARY );
 	}
 	else {
-		cvAdaptiveThreshold( bin_img, img, maxval, CV_ADAPTIVE_THRESH_MEAN_C, CV_THRESH_BINARY_INV, 3, 5 );
+		cvAdaptiveThreshold( img, bin_img, maxval, CV_ADAPTIVE_THRESH_MEAN_C, CV_THRESH_BINARY_INV, 3, 5 );
 	}
+	
+	//int t = 0;
+	//for( ii = 0; ii < img->height; ii++ ) {
+		//for( jj = 0; jj < img->width; jj++ ) {
+			//t = ((uchar *)(img->imageData + img->widthStep * ii))[jj];
+			//if(t>0){
+				//printf("FILTERED IMAGE VALUES %d \n", t);
+			//}	
+		//}
+	//}
 } /* end vision_threshold() */
 
 /******************************************************************************
