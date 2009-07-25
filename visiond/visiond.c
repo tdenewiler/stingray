@@ -149,7 +149,7 @@ int main( int argc, char *argv[] )
 	HSV fence;
 	
 	/* Temporary variable to make it easier to switch between using HSV
-	 * thresholding or boxes to try and find pipe. HSV = 1, Boxes = 2. */
+	 *  olding or boxes to try and find pipe. HSV = 1, Boxes = 2. */
 	int pipe_type = VISION_PIPE_HSV;
 	int pipex = -10000;
 	int pipey = -10000;
