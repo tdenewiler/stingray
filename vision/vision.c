@@ -53,7 +53,7 @@ int vision_find_dot( int *dotx,
     IplImage *hsvImg = NULL;
     IplImage *outImg = NULL;
     
-    double rgb_thresh[] = { 1.15 , 1.65 , 1.05 , 2.40 , 0.90 , 1.80 };
+    double rgb_thresh[] = { 1.15, 1.65, 1.05, 2.40, 0.90, 1.80, 1.45, 300 };
     short  rgb_sum[] = { 195 , 570 };
     
     IplConvKernel *wL = cvCreateStructuringElementEx( 7, 7,
@@ -1439,9 +1439,22 @@ void vision_rgb_ratio_filter( IplImage *img , double * rgb_thresh ) {
 				   rb >= rgb_thresh[2] && rb <= rgb_thresh[3] &&
 				   gb >= rgb_thresh[4] && gb <= rgb_thresh[5] ) )
 			{
+				
 				pixel[b] =
 				pixel[g] =
 				pixel[r] = 0;
+			}
+			else
+			{
+				/* If the product of the ratios is too small when the sum
+				 * is below a certain threshold, throw away pixel */
+				if( (rg*rb*gb) < rgb_thresh[6] && 
+					 (pixel[r]+pixel[g]+pixel[d]) <= rgb_thresh[7] )
+				{
+				  	pixel[b] =
+					pixel[g] =
+					pixel[r] = 0;
+				}
 			}
 		}
 	}
