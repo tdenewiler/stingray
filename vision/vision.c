@@ -58,9 +58,9 @@ int vision_find_dot( int *dotx,
     IplImage *hsvImg = NULL;
     IplImage *outImg = NULL;
     IplConvKernel *wL = cvCreateStructuringElementEx( 7, 7,
-            (int)floor( ( 7.0 ) / 2 ), (int)floor( ( 7.0 ) / 2 ), CV_SHAPE_RECT );
+            (int)floor( ( 7.0 ) / 2 ), (int)floor( ( 7.0 ) / 2 ), CV_SHAPE_ELLIPSE );
     IplConvKernel *wS = cvCreateStructuringElementEx( 2, 2,
-            (int)floor( ( 3.0 ) / 2 ), (int)floor( ( 3.0 ) / 2 ), CV_SHAPE_RECT );
+            (int)floor( ( 3.0 ) / 2 ), (int)floor( ( 3.0 ) / 2 ), CV_SHAPE_ELLIPSE );
 
     /* Initialize to impossible values. */
     center.x = -10000;
@@ -74,7 +74,7 @@ int vision_find_dot( int *dotx,
 	vision_white_balance( srcImg );
 
     /* Flip the source image. */
-    cvFlip( srcImg, srcImg );
+    //cvFlip( srcImg, srcImg );
 	
     /* Segment the flipped image into a binary image. */
     cvCvtColor( srcImg, hsvImg, CV_RGB2HSV );
@@ -89,14 +89,15 @@ int vision_find_dot( int *dotx,
     cvInRangeS( hsvImg, cvScalar(hL, sL, vL), cvScalar(hH, sH, vH), binImg );
 
     /* Perform erosion, dilation, and conversion. */
-    cvErode( binImg, binImg, wS );
+    //cvErode( binImg, binImg, wS );
     cvDilate( binImg, binImg, wS );
 	cvDilate( binImg, binImg, wL );
     cvConvertScale( binImg, outImg, 255.0 );
 
     /* Find the centroid. */
-    center = vision_find_centroid( outImg, 5 );
-    //status = vision_window_filter( outImg, &center, 15, 15 );
+    //center = vision_find_centroid( outImg, 5 );
+    vision_window_filter( outImg, &center, 11, 11 );
+	binImg = cvCloneImage( outImg );
     *dotx = center.x;
     *doty = center.y;
 
@@ -1131,42 +1132,104 @@ int vision_window_filter( IplImage *img,
 						int sizex,
 						int sizey )
 {
-	/* Try to add some logic to handle the case when sizex or sizey is an even
-	 * number. */
 	/* Declare variables. */
 	int rows = 0;
 	int cols = 0;
-	int wrows = 0;
-	int wcols = 0;
-	int anchorx = floor(sizex/2) + 1;
-	int anchory = floor(sizey/2) + 1;
-	double sum = 0.;
-	double retsum = 0.;
+	int ii = 0;
+	int jj = 0;
+	//int wrows = 0;
+	//int wcols = 0;
+	//int anchorx = floor(sizex/2) + 1;
+	//int anchory = floor(sizey/2) + 1;
+	double val = 0.;
+	double retval = 0.;
+	IplImage *timg = NULL;
+    //IplConvKernel *wM = cvCreateStructuringElementEx( sizex, sizey,
+            //(int)floor( ( sizex ) / 2 ), (int)floor( ( sizey ) / 2 ), CV_SHAPE_ELLIPSE );
+    //CvMat *filter;
+	int size = 33;
+	CvMat *kernel = NULL;
+    //double kernel[] = { 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0,
+    					//0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0,
+    					//0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0,
+    					//0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0,
+    					//0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0,
+    					//0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0,
+    					//0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
+    					//1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
+    					//1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
+    					//1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
+    					//0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0,
+    					//0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0,
+    					//0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0,
+    					//0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0,
+    					//0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0,
+    					//0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0,
+    					//0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0  }
 
-	/* In a loop run over the entire image and look for highest sum inside a
-	 * window. */
-	sum = cvGet2D( img, img->height - 1, img->width - 1 ).val[0];
-	for( cols = 0; cols < img->height - (sizey + 1); cols++ ) {
-		for( rows = 0; rows < img->width - (sizex + 1); rows++ ) {
-			/* Search through the window to find the sum of the pixels. */
-			for( wcols = cols; wcols < cols + sizey; wcols++ ) {
-				for( wrows = rows; wrows < rows + sizex; wrows++ ) {
-					sum += cvGet2D( img, wcols, wrows ).val[0];
-				}
+	/* Create a matrix to replace my ASCII art. */
+	kernel = cvCreateMat( size, size, CV_32FC1 );
+	for( ii = 0; ii < size; ii++ ) {
+		for( jj = 0; jj < size; jj++ ) {
+			if( pow(ii - ceil(size/2), 2) + pow(jj - ceil(size/2), 2) < floor(size/2) ) {
+				cvSet2D( kernel, ii, jj, cvScalar(1.) );
 			}
-			//printf("sum = %lf\n", sum);
-			if( sum > retsum ) {
-				/* We have found a new max correlation. */
-				retsum = sum;
-				center->x = rows + anchorx;
-				center->y = cols + anchory;
+			else {
+				cvSet2D( kernel, ii, jj, cvScalar(0.) );
 			}
-			/* Reset the sum here because we are moving the window. */
-			sum = 0.;
 		}
 	}
 
-	if( retsum > 0. ) {
+	/* Create temporary image. */
+    timg = cvCreateImage( cvGetSize(img), IPL_DEPTH_8U, 1 );
+
+	/* In a loop run over the entire image and look for highest sum inside a
+	 * window. */
+	//for( cols = 0; cols < img->height - (sizey + 1); cols++ ) {
+		//for( rows = 0; rows < img->width - (sizex + 1); rows++ ) {
+			///* Search through the window to find the sum of the pixels. */
+			//for( wcols = cols; wcols < cols + sizey; wcols++ ) {
+				//for( wrows = rows; wrows < rows + sizex; wrows++ ) {
+					//sum += cvGet2D( img, wcols, wrows ).val[0];
+				//}
+			//}
+			//if( sum > retsum ) {
+				///* We have found a new max correlation. */
+				//retsum = sum;
+				//center->x = rows + anchorx;
+				//center->y = cols + anchory;
+			//}
+			///* Reset the sum here because we are moving the window. */
+			//sum = 0.;
+		//}
+	//}
+	
+	/* Filter the image with our kernel. */
+	//cvFilter2D( img, timg, wM );
+	
+    /* Filter the image using convolution. */
+    //filter = cvCreateMatHeader( kernelRows, kernelCols, CV_64FC1 );
+    //cvSetData( filter, kernel, kernelCols * 16 );
+    cvFilter2D( img, timg, kernel, cvPoint(-1,-1) );
+
+	/* Look for the maximum value in the filtered image. */
+	for( cols = 0; cols < img->height - (sizey + 1); cols++ ) {
+		for( rows = 0; rows < img->width - (sizex + 1); rows++ ) {
+			/* Search through the window to find the sum of the pixels. */
+			val = cvGet2D( img, cols, rows ).val[0];
+			if( val > retval ) {
+				/* We have found a new max correlation. */
+				retval = val;
+				center->x = rows;
+				center->y = cols;
+			}
+		}
+	}
+
+	/* Release elements to free memory. */
+	cvReleaseImage( &timg );
+	
+	if( retval > 0. ) {
 		return 1;
 	}
 	else {
