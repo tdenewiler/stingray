@@ -1408,9 +1408,9 @@ void vision_rgb_ratio_filter( IplImage *img , double * rgb_thresh ) {
 	enum rgb_index { b , g , r };
 	
 	uchar *pixel;
-	double rg;
-	double rb;
-	double gb;
+	double rg = 0.0;
+	double rb = 0.0;
+	double gb = 0.0;
 
 	/* Validity check incoming parameters */
 	if( img == NULL ) {
@@ -1430,9 +1430,22 @@ void vision_rgb_ratio_filter( IplImage *img , double * rgb_thresh ) {
 		{
 			pixel = &((uchar *)(img->imageData + img->widthStep * ii))[jj * 3];
 			
-			rg = (double)pixel[r] / pixel[g];
-			rb = (double)pixel[r] / pixel[b];
-			gb = (double)pixel[g] / pixel[b];
+			/* Compute ratios. Check for div/0. */
+			if( pixel[g] != 0 )
+				rg = (double)pixel[r] / pixel[g];
+			else
+				rg = 0;
+			
+			if( pixel[b] != 0 )
+			{
+				rb = (double)pixel[r] / pixel[b];
+				gb = (double)pixel[g] / pixel[b];
+			}
+			else
+			{
+				rb = 0;
+				gb = 0;
+			}
 			
 			/* If the pixel is outside the threshold, turn it to black */
 			if( !( rg >= rgb_thresh[0] && rg <= rgb_thresh[1] &&
