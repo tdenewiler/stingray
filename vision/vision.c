@@ -46,19 +46,14 @@ int vision_find_dot( int *dotx,
                      CvCapture *cap,
                      IplImage *srcImg,
                      IplImage *binImg,
-                     float hL,
-                     float hH,
-                     float sL,
-                     float sH,
-                     float vL,
-                     float vH
+					 HSV *hsv
                    )
 {
     CvPoint center;
     IplImage *hsvImg = NULL;
     IplImage *outImg = NULL;
-    //IplConvKernel *wL = cvCreateStructuringElementEx( 7, 7,
-            //(int)floor( ( 7.0 ) / 2 ), (int)floor( ( 7.0 ) / 2 ), CV_SHAPE_ELLIPSE );
+    IplConvKernel *wL = cvCreateStructuringElementEx( 7, 7,
+            (int)floor( ( 7.0 ) / 2 ), (int)floor( ( 7.0 ) / 2 ), CV_SHAPE_ELLIPSE );
     //IplConvKernel *wS = cvCreateStructuringElementEx( 2, 2,
             //(int)floor( ( 3.0 ) / 2 ), (int)floor( ( 3.0 ) / 2 ), CV_SHAPE_ELLIPSE );
 
@@ -86,19 +81,19 @@ int vision_find_dot( int *dotx,
 	vision_hist_eq( hsvImg );
 
 	/* Threshold all three channels using our own values. */
-    cvInRangeS( hsvImg, cvScalar(hL, sL, vL), cvScalar(hH, sH, vH), binImg );
+    cvInRangeS( hsvImg, cvScalar(hsv->hL, hsv->sL, hsv->vL),
+		cvScalar(hsv->hH, hsv->sH, hsv->vH), binImg );
 
     /* Perform erosion, dilation, and conversion. */
-    //cvErode( binImg, binImg, wS );
-    //cvDilate( binImg, binImg, wS );
-	//cvDilate( binImg, binImg, wL );
-	//cvDilate( binImg, binImg, wL );
     cvConvertScale( binImg, outImg, 255.0 );
 
+	/* Filter the image. */
+    //vision_window_filter( outImg, binImg, &center, 11, 11 );
+	vision_threshold( outImg, binImg, VISION_ADAPTIVE, 11, 0.91 );
+	cvErode( binImg, binImg, wL );
+
     /* Find the centroid. */
-    vision_window_filter( outImg, binImg, &center, 11, 11 );
-	binImg = cvCloneImage( outImg );
-    center = vision_find_centroid( outImg, 5 );
+    center = vision_find_centroid( binImg, 5 );
     *dotx = center.x;
     *doty = center.y;
 
@@ -150,12 +145,7 @@ int vision_find_pipe( int *pipex,
                       CvCapture *cap,
                       IplImage *srcImg,
                       IplImage *binImg,
-                      float hL,
-                      float hH,
-                      float sL,
-                      float sH,
-                      float vL,
-                      float vH
+                      HSV *hsv
                     )
 {
 	double bearing_delta_min = 0.000001;
@@ -164,75 +154,45 @@ int vision_find_pipe( int *pipex,
     IplImage *hsv_image = NULL;
     IplImage *hsv_clone = NULL;
     IplImage *outImg = NULL;
-    IplImage *tgrayH = NULL;
-    IplImage *tgrayS = NULL;
-    IplImage *tgrayV = NULL;
-    IplImage *tgrayHeq = NULL;
-    IplImage *tgraySeq = NULL;
-    IplImage *tgrayVeq = NULL;
-	IplConvKernel *wE = cvCreateStructuringElementEx( 2, 2,
-            (int)floor( ( 2.0 ) / 2 ), (int)floor( ( 2.0 ) / 2 ), CV_SHAPE_RECT );
-    IplConvKernel *wD = cvCreateStructuringElementEx( 3, 3,
-            (int)floor( ( 3.0 ) / 2 ), (int)floor( ( 3.0 ) / 2 ), CV_SHAPE_RECT );
-    IplConvKernel *wBig = cvCreateStructuringElementEx( 5, 5,
-            (int)floor( ( 5.0 ) / 2 ), (int)floor( ( 5.0 ) / 2 ), CV_SHAPE_RECT );
-    CvSize sz = cvSize( srcImg->width & -2, srcImg->height & -2 );
+    IplConvKernel *wL = cvCreateStructuringElementEx( 7, 7,
+            (int)floor( ( 7.0 ) / 2 ), (int)floor( ( 7.0 ) / 2 ), CV_SHAPE_ELLIPSE );
 
     /* Initialize to impossible values. */
     center.x = -10000;
     center.y = -10000;
 
-    hsv_image = cvCreateImage( cvGetSize( srcImg ), IPL_DEPTH_8U, 3 );
-    outImg = cvCreateImage( cvGetSize( srcImg ), IPL_DEPTH_8U, 1 );
+    hsv_image = cvCreateImage( cvGetSize(srcImg), IPL_DEPTH_8U, 3 );
+    outImg = cvCreateImage( cvGetSize(srcImg), IPL_DEPTH_8U, 1 );
 
     /* Convert to HSV and clone image for smoothing */
     cvCvtColor( srcImg, hsv_image, CV_RGB2HSV );
 	hsv_clone = cvCloneImage( hsv_image );
 
-	/* Create three separate grayscale images, one for each channel. */
-    tgrayH = cvCreateImage( sz, 8, 1 );
-	tgrayS = cvCreateImage( sz, 8, 1 );
-	tgrayV = cvCreateImage( sz, 8, 1 );
-    tgrayHeq = cvCreateImage( sz, 8, 1 );
-	tgraySeq = cvCreateImage( sz, 8, 1 );
-	tgrayVeq = cvCreateImage( sz, 8, 1 );
+	/* Enhance the red channel of the source image. */
+	vision_white_balance( srcImg );
 
-    /* Find squares in every color plane of the image. Filter each plane with a
-	 * Gaussian and then merge back to HSV image.  */
-    cvSetImageCOI( hsv_clone, 1 );
-    cvCopy( hsv_clone, tgrayH, 0 );
-	//cvSmooth( tgrayH, tgrayH, CV_GAUSSIAN, 7, 7 );
+    /* Segment the flipped image into a binary image. */
+    cvCvtColor( srcImg, hsv_image, CV_RGB2HSV );
 
-	cvSetImageCOI( hsv_clone, 2 );
-    cvCopy( hsv_clone, tgrayS, 0 );
-	cvSmooth( tgrayS, tgrayS, CV_GAUSSIAN, 5, 5 );
-
-	cvSetImageCOI( hsv_clone, 3 );
-    cvCopy( hsv_clone, tgrayV, 0 );
-	//cvSmooth( tgrayV, tgrayV, CV_GAUSSIAN, 3, 3 );
-
+	/* Smooth the image with a Gaussian filter. */
+	vision_smooth( hsv_image );
+	
 	/* Equalize the histograms of each channel. */
-	cvEqualizeHist( tgrayH, tgrayHeq );
-	cvEqualizeHist( tgrayS, tgraySeq );
-	cvEqualizeHist( tgrayV, tgrayVeq );
-
-	//cvMerge( tgrayH, tgrayS, tgrayV, NULL, hsv_image );
-	cvMerge( tgrayHeq, tgraySeq, tgrayVeq, NULL, hsv_image );
+	vision_hist_eq( hsv_image );
 
 	/* Threshold all three channels using our own values. */
-	cvInRangeS( hsv_image, cvScalar(hL,sL,vL), cvScalar(hH,sH,vH), binImg );
+    cvInRangeS( hsv_image, cvScalar(hsv->hL, hsv->sL, hsv->vL),
+		cvScalar(hsv->hH, hsv->sH, hsv->vH), binImg );
 
     /* Perform erosion, dilation, and conversion. */
-    cvErode( binImg, binImg, wE );
-    cvDilate( binImg, binImg, wD );
-    cvErode( binImg, binImg, wD );
-    cvDilate( binImg, binImg, wD );
-    cvErode( binImg, binImg, wE );
-    cvDilate( binImg, binImg, wBig );
-
     cvConvertScale( binImg, outImg, 255.0 );
 
-    /* Process the image. */
+	/* Filter the image. */
+    //vision_window_filter( outImg, binImg, &center, 11, 11 );
+	vision_threshold( outImg, binImg, VISION_ADAPTIVE, 11, 0.91 );
+	cvErode( binImg, binImg, wL );
+
+    /* Process the image to get the bearing and centroid. */
     *bearing = vision_get_bearing( outImg );
     center = vision_find_centroid( outImg, 0 );
     *pipex = center.x;
@@ -242,12 +202,6 @@ int vision_find_pipe( int *pipex,
     cvReleaseImage( &hsv_image );
     cvReleaseImage( &hsv_clone );
     cvReleaseImage( &outImg );
-    cvReleaseImage( &tgrayH );
-    cvReleaseImage( &tgrayS );
-    cvReleaseImage( &tgrayV );
-	cvReleaseImage( &tgrayHeq );
-	cvReleaseImage( &tgraySeq );
-	cvReleaseImage( &tgrayVeq );
 
     /* No detection condition, only using bearing - not centroid. */
     if( fabs(*bearing) < bearing_delta_min )
@@ -499,12 +453,7 @@ int vision_find_fence( int *fence_center,
                       CvCapture *cap,
                       IplImage *srcImg,
                       IplImage *binImg,
-                      float hL,
-                      float hH,
-                      float sL,
-                      float sH,
-                      float vL,
-                      float vH
+					  HSV *hsv
                     )
 {
 	int center = 0;
@@ -512,22 +461,13 @@ int vision_find_fence( int *fence_center,
     int ii = 0;
     int jj = 0;
     int kk = 0;
-    int smooth_size = 9;
 
     IplImage *hsv_image = NULL;
     IplImage *outImg = NULL;
-    IplConvKernel *wE = cvCreateStructuringElementEx( 3, 3,
-            1, 1, CV_SHAPE_RECT );
-    IplConvKernel *wD = cvCreateStructuringElementEx( 7, 7,
-            4, 4, CV_SHAPE_RECT );
+    IplConvKernel *wL = cvCreateStructuringElementEx( 7, 7,
+            (int)floor( ( 7.0 ) / 2 ), (int)floor( ( 7.0 ) / 2 ), CV_SHAPE_ELLIPSE );
     CvSize sz = cvSize( srcImg->width & -2, srcImg->height & -2 );
     IplImage *hsv_clone = NULL;
-    IplImage *tgrayH = NULL;
-    IplImage *tgrayS = NULL;
-    IplImage *tgrayV = NULL;
-    IplImage *tgrayHeq = NULL;
-    IplImage *tgraySeq = NULL;
-    IplImage *tgrayVeq = NULL;
 
     /* Flip the source image. */
   	cvFlip( srcImg, srcImg );
@@ -537,47 +477,33 @@ int vision_find_fence( int *fence_center,
     hsv_image = cvCreateImage( cvGetSize( srcImg ), IPL_DEPTH_8U, 3 );
     outImg = cvCreateImage( cvGetSize( srcImg ), IPL_DEPTH_8U, 1 );
 
-    /* Segment the image into a binary image. */
+    /* Convert to HSV and clone image for smoothing */
     cvCvtColor( srcImg, hsv_image, CV_RGB2HSV );
 	hsv_clone = cvCloneImage( hsv_image );
 
-	/* Create three separate grayscale images, one for each channel. */
-    tgrayH = cvCreateImage( sz, 8, 1 );
-	tgrayS = cvCreateImage( sz, 8, 1 );
-	tgrayV = cvCreateImage( sz, 8, 1 );
-    tgrayHeq = cvCreateImage( sz, 8, 1 );
-	tgraySeq = cvCreateImage( sz, 8, 1 );
-	tgrayVeq = cvCreateImage( sz, 8, 1 );
+	/* Enhance the red channel of the source image. */
+	vision_white_balance( srcImg );
 
-    /* Find squares in every color plane of the image. Filter each plane with a
-	 * Gaussian and then merge back to HSV image.  */
-    cvSetImageCOI( hsv_clone, 1 );
-    cvCopy( hsv_clone, tgrayH, 0 );
-	cvSmooth( tgrayH, tgrayH, CV_GAUSSIAN, smooth_size, smooth_size );
+    /* Segment the flipped image into a binary image. */
+    cvCvtColor( srcImg, hsv_image, CV_RGB2HSV );
 
-	cvSetImageCOI( hsv_clone, 2 );
-    cvCopy( hsv_clone, tgrayS, 0 );
-	cvSmooth( tgrayS, tgrayS, CV_GAUSSIAN, smooth_size, smooth_size );
-
-	cvSetImageCOI( hsv_clone, 3 );
-    cvCopy( hsv_clone, tgrayV, 0 );
-	cvSmooth( tgrayV, tgrayV, CV_GAUSSIAN, smooth_size, smooth_size );
-
+	/* Smooth the image with a Gaussian filter. */
+	vision_smooth( hsv_image );
+	
 	/* Equalize the histograms of each channel. */
-	cvEqualizeHist( tgrayH, tgrayHeq );
-	cvEqualizeHist( tgrayS, tgraySeq );
-	cvEqualizeHist( tgrayV, tgrayVeq );
-
-	//cvMerge( tgrayH, tgrayS, tgrayV, NULL, hsv_image );
-	cvMerge( tgrayHeq, tgraySeq, tgrayVeq, NULL, hsv_image );
+	vision_hist_eq( hsv_image );
 
 	/* Threshold all three channels using our own values. */
-    cvInRangeS( hsv_image, cvScalar(hL,sL,vL), cvScalar(hH,sH,vH), binImg );
+    cvInRangeS( hsv_image, cvScalar(hsv->hL, hsv->sL, hsv->vL),
+		cvScalar(hsv->hH, hsv->sH, hsv->vH), binImg );
 
     /* Perform erosion, dilation, and conversion. */
-    cvErode( binImg, binImg, wE );
-    cvDilate( binImg, binImg, wD );
     cvConvertScale( binImg, outImg, 255.0 );
+
+	/* Filter the image. */
+    //vision_window_filter( outImg, binImg, &center, 11, 11 );
+	vision_threshold( outImg, binImg, VISION_ADAPTIVE, 11, 0.91 );
+	cvErode( binImg, binImg, wL );
 
     /* Process the image. */
     *y_max = vision_get_fence_bottom( outImg, &center );
@@ -605,12 +531,6 @@ int vision_find_fence( int *fence_center,
     cvReleaseImage( &hsv_image );
     cvReleaseImage( &outImg );
     cvReleaseImage( &hsv_clone );
-    cvReleaseImage( &tgrayH );
-    cvReleaseImage( &tgrayS );
-    cvReleaseImage( &tgrayV );
-	cvReleaseImage( &tgrayHeq );
-	cvReleaseImage( &tgraySeq );
-	cvReleaseImage( &tgrayVeq );
 
     return 1;
 } /* end vision_find_pipe() */
@@ -1136,55 +1056,31 @@ int vision_window_filter( IplImage *img,
 						int sizey )
 {
 	/* Declare variables. */
-	//int rows = 0;
-	//int cols = 0;
-	//double val = 0.;
-	//IplImage *timg = NULL;
-	int ii = 0;
-	int jj = 0;
-	double thresh = 0.91;
-	double maxval = 255.;
+	int rows = 0;
+	int cols = 0;
+	double val = 0.;
+	IplImage *timg = NULL;
 	double retval = 0.;
-	int size = 101;
-	CvMat *kernel = NULL;
 
-	/* Create a matrix to replace my ASCII art. */
-	kernel = cvCreateMat( size, size, CV_32FC1 );
-	for( ii = 0; ii < size; ii++ ) {
-		for( jj = 0; jj < size; jj++ ) {
-			if( pow(ii - ceil(size/2), 2) + pow(jj - ceil(size/2), 2) < floor(size/2) ) {
-				cvSet2D( kernel, ii, jj, cvScalar(1.) );
-			}
-			else {
-				cvSet2D( kernel, ii, jj, cvScalar(0.) );
+	/* Create temporary image. */
+    timg = cvCreateImage( cvGetSize(img), IPL_DEPTH_8U, 1 );
+
+	/* Look for the maximum value in the filtered image. */
+	for( cols = 0; cols < img->height - (sizey + 1); cols++ ) {
+		for( rows = 0; rows < img->width - (sizex + 1); rows++ ) {
+			/* Search through the window to find the sum of the pixels. */
+			val = cvGet2D( timg, cols, rows ).val[0];
+			if( val > retval ) {
+				/* We have found a new max correlation. */
+				retval = val;
+				center->x = rows;
+				center->y = cols;
 			}
 		}
 	}
 
-	/* Create temporary image. */
-    //timg = cvCreateImage( cvGetSize(img), IPL_DEPTH_8U, 1 );
-
-    /* Filter the image using convolution. */
-    cvFilter2D( img, bin_img, kernel, cvPoint(floor(size/2),floor(size/2)) );
-	cvThreshold( bin_img, img, thresh, maxval, CV_THRESH_BINARY );
-	//cvAdaptiveThreshold( bin_img, img, maxval, CV_ADAPTIVE_THRESH_MEAN_C, CV_THRESH_BINARY, 3, 5 );
-
-	/* Look for the maximum value in the filtered image. */
-	//for( cols = 0; cols < img->height - (sizey + 1); cols++ ) {
-		//for( rows = 0; rows < img->width - (sizex + 1); rows++ ) {
-			///* Search through the window to find the sum of the pixels. */
-			//val = cvGet2D( timg, cols, rows ).val[0];
-			//if( val > retval ) {
-				///* We have found a new max correlation. */
-				//retval = val;
-				//center->x = rows;
-				//center->y = cols;
-			//}
-		//}
-	//}
-
 	/* Release elements to free memory. */
-	//cvReleaseImage( &timg );
+	cvReleaseImage( &timg );
 	
 	if( retval > 0. ) {
 		return 1;
@@ -1404,7 +1300,7 @@ void vision_white_balance( IplImage *img )
 	int ii = 0;
 	int jj = 0;
 	uchar *temp_ptr;
-	double scale = 0.8; // 193. / 255.;
+	double scale = 0.8;
 	double rscale = 255. / 193. * scale;
 	double bscale = 255. / 218. * scale;
 	double gscale = 255. / 198. * scale;
@@ -1419,3 +1315,61 @@ void vision_white_balance( IplImage *img )
 		}
 	}
 } /* end vision_white_balance() */
+
+
+/******************************************************************************
+ *
+ * Title:       void vision_threshold(  IplImage *img,
+ * 										IplImage *bin_img,
+ * 										CvPoint *center,
+ * 										int sizex,
+ * 										int sizey
+ *                                    )
+ *
+ * Description: Thresholds an image.
+ *
+ * Input:       img: The binary image to search over.
+ *				center: A pointer to fill in the centroid values.
+ * 				sizex: The window size in x direction.
+ * 				sizey: The window size in y direction.
+ *
+ * Output:      None.
+ *
+ *****************************************************************************/
+
+void vision_threshold( IplImage *img,
+					   IplImage *bin_img,
+					   int type,
+					   int size,
+					   double thresh )
+{
+	/* Declare variables. */
+	int ii = 0;
+	int jj = 0;
+	double maxval = 255.;
+	CvMat *kernel = NULL;
+
+	/* Create a matrix to replace my ASCII art. */
+	kernel = cvCreateMat( size, size, CV_32FC1 );
+	for( ii = 0; ii < size; ii++ ) {
+		for( jj = 0; jj < size; jj++ ) {
+			if( pow(ii - ceil(size/2), 2) + pow(jj - ceil(size/2), 2) < floor(size/2) ) {
+				cvSet2D( kernel, ii, jj, cvScalar(1.) );
+			}
+			else {
+				cvSet2D( kernel, ii, jj, cvScalar(0.) );
+			}
+		}
+	}
+
+    /* Filter the image using convolution. */
+    cvFilter2D( img, bin_img, kernel, cvPoint(floor(size/2),floor(size/2)) );
+	
+	/* Threshold the image based on type of threshold -- normal else adaptive. */
+	if( type == VISION_BINARY ) {
+		cvThreshold( bin_img, img, thresh, maxval, CV_THRESH_BINARY );
+	}
+	else {
+		cvAdaptiveThreshold( bin_img, img, maxval, CV_ADAPTIVE_THRESH_MEAN_C, CV_THRESH_BINARY_INV, 3, 5 );
+	}
+} /* end vision_threshold() */

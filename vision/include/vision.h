@@ -32,6 +32,11 @@
 #define VISION_MIN_ANGLE 0.16
 #endif /* VISION_MIN_ANGLE */
 
+#ifndef VISION_THRESH
+#define VISION_BINARY   1
+#define VISION_ADAPTIVE 2
+#endif /* VISION_THRESH */
+
 #ifndef VISION_ASPECT_RATIOS
 #define VISION_ASPECT_RATIOS
 #define VISION_AR_PIPE		8
@@ -49,6 +54,12 @@
 #define VISION_SUITCASE	5
 #endif /* VISION_TASK */
 
+#ifndef VISION_PIPE_TYPE
+#define VISION_PIPE_TYPE	1
+#define VISION_PIPE_HSV		1
+#define VISION_PIPE_BOX		2
+#endif /* VISION_PIPE_TYPE */
+
 
 /******************************
 **
@@ -56,6 +67,15 @@
 **
 ******************************/
 
+/*! High and low limits for thresholding an HSV image. */
+typedef struct _HSV {
+	float hL;	//!< Low limit for hue.
+	float hH;	//!< High limit for hue.
+	float sL;	//!< Low limit for saturation.
+	float sH;	//!< High limit for saturation.
+	float vL;	//!< Low limit for value.
+	float vH;	//!< High limit for value.
+} HSV;
 
 
 /******************************
@@ -82,12 +102,7 @@ int vision_find_dot( int *dotx,
                      CvCapture *cam,
                      IplImage *srcImg,
                      IplImage *binImg,
-                     float hL,
-                     float hH,
-                     float sL,
-                     float sH,
-                     float vL,
-                     float vH
+                     HSV *hsv
                    );
 
 //! Finds a pipe object from a camera.
@@ -102,12 +117,7 @@ int vision_find_pipe( int *pipex,
                       CvCapture *cam,
                       IplImage *srcImg,
                       IplImage *binImg,
-                      float hL,
-                      float hH,
-                      float sL,
-                      float sH,
-                      float vL,
-                      float vH
+                      HSV *hsv
                     );
 
 //! Finds the centroid of the pixels in an image.
@@ -127,12 +137,7 @@ int vision_find_fence( int *pipex,
                       CvCapture *cam,
                       IplImage *srcImg,
                       IplImage *binImg,
-                      float hL,
-                      float hH,
-                      float sL,
-                      float sH,
-                      float vL,
-                      float vH
+					  HSV *hsv
                     );
 
 //! Finds the centroid of the suitcase structure in an image.
@@ -185,6 +190,13 @@ void vision_white_balance( IplImage *img );
 //! Saturates the colors of each channel in an image.
 //! \param img The image to saturate.
 void vision_saturate( IplImage *img );
+
+//! Thresholds an image.
+void vision_threshold( IplImage *img,
+						IplImage *bin_img,
+						int type,
+						int size,
+						double thresh );
 
 
 #endif /* _VISION_H_ */
