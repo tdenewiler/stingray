@@ -1449,7 +1449,7 @@ void vision_rgb_ratio_filter( IplImage *img , double * rgb_thresh ) {
 				/* If the product of the ratios is too small when the sum
 				 * is below a certain threshold, throw away pixel */
 				if( (rg*rb*gb) < rgb_thresh[6] && 
-					 (pixel[r]+pixel[g]+pixel[d]) <= rgb_thresh[7] )
+					 (pixel[r]+pixel[g]+pixel[b]) <= rgb_thresh[7] )
 				{
 				  	pixel[b] =
 					pixel[g] =
