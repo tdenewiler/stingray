@@ -61,7 +61,7 @@ int vision_find_dot( int *dotx,
     center.x = -10000;
     center.y = -10000;
 
-	/* Create images to work on. */
+	/* Create intermediate images for scratch space. */
     hsvImg = cvCreateImage( cvGetSize(srcImg), IPL_DEPTH_8U, 3 );
     outImg = cvCreateImage( cvGetSize(srcImg), IPL_DEPTH_8U, 1 );
 	
@@ -160,7 +160,8 @@ int vision_find_pipe( int *pipex,
     /* Initialize to impossible values. */
     center.x = -10000;
     center.y = -10000;
-
+	
+	/* Create intermediate images for scratch space. */
     hsv_image = cvCreateImage( cvGetSize(srcImg), IPL_DEPTH_8U, 3 );
     outImg = cvCreateImage( cvGetSize(srcImg), IPL_DEPTH_8U, 1 );
 
@@ -456,12 +457,12 @@ int vision_find_fence( int *fence_center,
 					  HSV *hsv
                     )
 {
+	/* Declare variables. */
 	int center = 0;
 	int sum_x = 0;
     int ii = 0;
     int jj = 0;
     int kk = 0;
-
     IplImage *hsv_image = NULL;
     IplImage *outImg = NULL;
     IplConvKernel *wL = cvCreateStructuringElementEx( 7, 7,
@@ -473,7 +474,7 @@ int vision_find_fence( int *fence_center,
   	cvFlip( srcImg, srcImg );
     center = srcImg->width / 2;
 
-	/* Create intermediate images. */
+	/* Create intermediate images for scratch space. */
     hsv_image = cvCreateImage( cvGetSize( srcImg ), IPL_DEPTH_8U, 3 );
     outImg = cvCreateImage( cvGetSize( srcImg ), IPL_DEPTH_8U, 1 );
 
