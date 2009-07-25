@@ -139,12 +139,21 @@ int main( int argc, char *argv[] )
     CvVideoWriter *f_writer = 0;
     CvVideoWriter *b_writer = 0;
     int is_color = TRUE;
-    double fps = 0.0;
     struct timeval ctime;
     struct tm ct;
     char write_time[80] = {0};
 	int vision_mode = VISIOND_NONE;
 	int task = TASK_NONE;
+	HSV buoy;
+	HSV pipe;
+	HSV fence;
+	
+	/* Temporary variable to make it easier to switch between using HSV
+	 * thresholding or boxes to try and find pipe. HSV = 1, Boxes = 2. */
+	int pipe_type = VISION_PIPE_HSV;
+	int pipex = -10000;
+	int pipey = -10000;
+	double bearing = -10000;
 
 	/* Variables to hold box centroid sequence and vertex sequence. */
 	CvMemStorage *storage1 = 0;
@@ -159,6 +168,21 @@ int main( int argc, char *argv[] )
 	CvPoint pt[4];
 	CvPoint *rect = pt;
 	int count = 4;
+	
+	/* Timer. */
+	struct timeval fps_time = {0, 0};
+	struct timeval fps_start = {0, 0};
+	int time1s = 0;
+	int time1ms = 0;
+	int time2s = 0;
+	int time2ms = 0;
+	int dt = 0;
+	int nframes = 0;
+    double fps = 0.0;
+
+	/* Initialize timers. */
+	gettimeofday( &fps_time, NULL );
+	gettimeofday( &fps_start, NULL );
 
     printf( "MAIN: Starting Vision daemon ...\n" );
 
@@ -190,6 +214,26 @@ int main( int argc, char *argv[] )
     msg.vsetting.data.fence_hsv.sH = cf.fence_sH;
     msg.vsetting.data.fence_hsv.vL = cf.fence_vL;
     msg.vsetting.data.fence_hsv.vH = cf.fence_vH;
+	
+	/* Initialize HSV structs to configuration values. */
+    pipe.hL = cf.pipe_hL;
+    pipe.hH = cf.pipe_hH;
+    pipe.sL = cf.pipe_sL;
+    pipe.sH = cf.pipe_sH;
+    pipe.vL = cf.pipe_vL;
+    pipe.vH = cf.pipe_vH;
+    buoy.hL = cf.buoy_hL;
+    buoy.hH = cf.buoy_hH;
+    buoy.sL = cf.buoy_sL;
+    buoy.sH = cf.buoy_sH;
+    buoy.vL = cf.buoy_vL;
+    buoy.vH = cf.buoy_vH;
+    fence.hL = cf.fence_hL;
+    fence.hH = cf.fence_hH;
+    fence.sL = cf.fence_sL;
+    fence.sH = cf.fence_sH;
+    fence.vL = cf.fence_vL;
+    fence.vH = cf.fence_vH;
 
     /* Set up server. */
     if( cf.enable_server ) {
@@ -265,17 +309,15 @@ int main( int argc, char *argv[] )
 		} /* end TASK_NONE */
 
         else if( task == TASK_BUOY && f_cam ) {
+			/* Set to not detected to start and reset if we get a hit. */
+			msg.vision.data.status = TASK_NOT_DETECTED;
+
 			/* Get a new image. */
 			img = cvQueryFrame( f_cam );			
+
 			/* Look for the buoy. */
-			status = vision_find_dot( &dotx, &doty,
-					cf.vision_angle, f_cam, img, bin_img,
-					msg.vsetting.data.buoy_hsv.hL,
-					msg.vsetting.data.buoy_hsv.hH,
-					msg.vsetting.data.buoy_hsv.sL,
-					msg.vsetting.data.buoy_hsv.sH,
-					msg.vsetting.data.buoy_hsv.vL,
-					msg.vsetting.data.buoy_hsv.vH );
+			status = vision_find_dot( &dotx, &doty, cf.vision_angle, f_cam,
+				img, bin_img, &buoy );
 			if( status == 1 ) {
 				/* Set the detection status of vision */
 				msg.vision.data.status = TASK_BOUY_DETECTED;
@@ -298,7 +340,54 @@ int main( int argc, char *argv[] )
 			}
 		} /* end TASK_BUOY */
 
-		else if( task == TASK_PIPE && f_cam ) {
+		else if( task == TASK_PIPE && f_cam && pipe_type == VISION_PIPE_HSV ) {
+			/* Set to not detected to start and reset if we get a hit. */
+			msg.vision.data.status = TASK_NOT_DETECTED;
+
+			/* Get a new image. */
+			img = cvQueryFrame( f_cam );			
+
+			/* Look for the pipe. */
+			status = vision_find_pipe( &pipex, &pipey, &bearing, f_cam,
+				img, bin_img, &pipe );
+
+			/* If we get a positive status message, render the box
+			 * and populate the network message. */
+			if( status == 1 ) {
+				/* Set the detection status of vision */
+				msg.vision.data.status = TASK_PIPE_DETECTED;
+
+				msg.vision.data.bearing = bearing;
+				msg.vision.data.bottom_x = pipex - img->width / 2;
+				msg.vision.data.bottom_y = pipey - img->height / 2;
+
+				/* Draw a circle at the centroid location. */
+				cvCircle( img, cvPoint(pipex, pipey),
+					10, cvScalar(255, 0, 0), 5, 8 );
+
+				/* Draw the bearing if it is there. */
+				if( bearing != 0 ) {
+					cvCircle( img,
+							cvPoint( img->width / 2 + ((int)(bearing * ii)),
+								(img->width / 2) + ii ),
+								2, cvScalar(255, 255, 0), 2 );
+				}
+				else {
+					cvCircle( img,
+							cvPoint( img->width / 2 + ((int)(bearing * ii)),
+								(img->width / 2) + ii ),
+								2, cvScalar(0, 0, 255), 2 );
+				}
+
+				/* Requires some sore of exit criteria. */
+			}
+			else {
+				/* No positive detection. */
+				msg.vision.data.status = TASK_NOT_DETECTED;
+			}
+		} /* end TASK_PIPE */
+
+		else if( task == TASK_PIPE && f_cam && pipe_type == VISION_PIPE_BOX ) {
 			/* Set to not detected to start and reset if we get a hit. */
 			msg.vision.data.status = TASK_NOT_DETECTED;
 
@@ -352,18 +441,12 @@ int main( int argc, char *argv[] )
 		} /* end TASK_PIPE */
 
 		else if( task == TASK_FENCE && f_cam ) {
-
-			/* Initialize to no positive detection. */
+			/* Set to not detected to start and reset if we get a hit. */
 			msg.vision.data.status = TASK_NOT_DETECTED;
 
 			/* Look for the fence. */
             status = vision_find_fence( &fence_center, &y_max, f_cam, img, bin_img,
-                    msg.vsetting.data.fence_hsv.hL,
-                    msg.vsetting.data.fence_hsv.hH,
-                    msg.vsetting.data.fence_hsv.sL,
-                    msg.vsetting.data.fence_hsv.sH,
-                    msg.vsetting.data.fence_hsv.vL,
-                    msg.vsetting.data.fence_hsv.vH );
+                    &fence );
             if( status == 1 ) {
             	/* Set the detection status of vision. */
 				msg.vision.data.status = TASK_FENCE_DETECTED;
@@ -431,6 +514,8 @@ int main( int argc, char *argv[] )
 					/* Set the detection status of vision */
 		    		msg.vision.data.status = TASK_BOXES_DETECTED;
 
+					/* Set the message variables to the center of the detected
+					 * box. */
 					msg.vision.data.box1_x = box_pt.x - img->width / 2;
 					msg.vision.data.box1_y = box_pt.y - img->height / 2;
 				}
@@ -443,8 +528,7 @@ int main( int argc, char *argv[] )
 		} /* end TASK_BOXES */
 
 		else if( task == TASK_SUITCASE && b_cam ) {
-
-			/* No positive detection. */
+			/* Set to not detected to start and reset if we get a hit. */
 			msg.vision.data.status = TASK_NOT_DETECTED;
 
 			/* Look for the suitcase. */
@@ -502,7 +586,26 @@ int main( int argc, char *argv[] )
                 recv_buf[recv_bytes] = '\0';
                 messages_decode( server_fd, recv_buf, &msg, recv_bytes );
 
+				/* Update local variable using network variables. */
                 task = msg.task.data.task;
+				pipe.hL = msg.vsetting.data.pipe_hsv.hL;
+				pipe.hH = msg.vsetting.data.pipe_hsv.hH;
+				pipe.sL = msg.vsetting.data.pipe_hsv.sL;
+				pipe.sH = msg.vsetting.data.pipe_hsv.sH;
+				pipe.vL = msg.vsetting.data.pipe_hsv.vL;
+				pipe.vH = msg.vsetting.data.pipe_hsv.vH;
+				buoy.hL = msg.vsetting.data.buoy_hsv.hL;
+				buoy.hH = msg.vsetting.data.buoy_hsv.hH;
+				buoy.sL = msg.vsetting.data.buoy_hsv.sL;
+				buoy.sH = msg.vsetting.data.buoy_hsv.sH;
+				buoy.vL = msg.vsetting.data.buoy_hsv.vL;
+				buoy.vH = msg.vsetting.data.buoy_hsv.vH;
+				fence.hL = msg.vsetting.data.fence_hsv.hL;
+				fence.hH = msg.vsetting.data.fence_hsv.hH;
+				fence.sL = msg.vsetting.data.fence_hsv.sL;
+				fence.sH = msg.vsetting.data.fence_hsv.sH;
+				fence.vL = msg.vsetting.data.fence_hsv.vL;
+				fence.vH = msg.vsetting.data.fence_hsv.vH;
 
                 /* Force vision to look for the pipe no matter which pipe
 			     * subtask we are currently searching for. */
@@ -521,7 +624,7 @@ int main( int argc, char *argv[] )
 			/* Determine which image to show in which window. */
 			switch( vision_mode ) {
 			case VISIOND_FCOLOR:
-				cvShowImage( win, img );
+			cvShowImage( win, img );
 				break;
 			case VISIOND_FBINARY:
 				cvShowImage( win, bin_img );
@@ -549,6 +652,25 @@ int main( int argc, char *argv[] )
 				}
 			}
 		}
+		
+		/* Calculate frames per second. */
+		nframes++;
+		time1s =    fps_time.tv_sec;
+		time1ms =   fps_time.tv_usec;
+		time2s =    fps_start.tv_sec;
+		time2ms =   fps_start.tv_usec;
+		dt = util_calc_dt( &time1s, &time1ms, &time2s, &time2ms );
+
+		if( dt > 1000000 ) {
+			fps = (double)nframes / (dt / 1000000);
+			gettimeofday( &fps_start, NULL );
+			nframes = 0;
+			msg.vision.data.fps = fps;
+			//printf("MAIN: fps = %lf\n", fps);
+		}
+
+		/* Update timer. */
+		gettimeofday( &fps_time, NULL );
 
         /* Check state of save frames and video messages. */
         if( msg.vsetting.data.save_fframe && f_cam ) {

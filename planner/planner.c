@@ -328,6 +328,7 @@ int main( int argc, char *argv[] )
 				if( recv_bytes > 0 ) {
 					messages_decode( vision_fd, vision_buf, &msg, recv_bytes );
                     gettimeofday( &vision_start, NULL );
+					msg.status.data.fps = msg.vision.data.fps;
 				}
 			}
 		}

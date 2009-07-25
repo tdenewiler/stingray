@@ -307,6 +307,7 @@ typedef struct _STATUS {
     float fy_ierr;	    //!< fx I error
     float fy_derr;	    //!< fx D error
     int fy_period;	    //!< fx dt
+	double fps;			//!< Frames per second of currently used camera.
 } STAT;
 
 typedef struct _STATUS_MSG {
@@ -333,6 +334,7 @@ typedef struct _VISION {
 	int status;    	//!< The status of the vision detection.
 	int confidence;	//!< The status of the vision detection.
 	int mode;		//!< Which window to display video in and the video type.
+	double fps;		//!< Frames per second of currently used camera.
 } VISION;
 
 typedef struct _VISION_MSG {
