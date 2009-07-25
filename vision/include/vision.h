@@ -197,6 +197,12 @@ void vision_threshold( IplImage *img,
 						int type,
 						int size,
 						double thresh );
+						
+//! Thresholds an image with rgb ratios.
+void vision_rgb_ratio_filter( IplImage *img , double * rgb_thresh );
+
+//! Thresholds an image with rgb sums.
+void vision_rgb_sum_filter( IplImage *img , short * rgb_sum );
 
 
 #endif /* _VISION_H_ */

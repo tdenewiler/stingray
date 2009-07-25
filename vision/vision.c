@@ -52,6 +52,10 @@ int vision_find_dot( int *dotx,
     CvPoint center;
     IplImage *hsvImg = NULL;
     IplImage *outImg = NULL;
+    
+    double rgb_thresh[] = { 1.15 , 1.65 , 1.05 , 2.40 , 0.90 , 1.80 };
+    short  rgb_sum[] = { 195 , 570 };
+    
     IplConvKernel *wL = cvCreateStructuringElementEx( 7, 7,
             (int)floor( ( 7.0 ) / 2 ), (int)floor( ( 7.0 ) / 2 ), CV_SHAPE_ELLIPSE );
     //IplConvKernel *wS = cvCreateStructuringElementEx( 2, 2,
@@ -64,10 +68,16 @@ int vision_find_dot( int *dotx,
 	/* Create intermediate images for scratch space. */
     hsvImg = cvCreateImage( cvGetSize(srcImg), IPL_DEPTH_8U, 3 );
     outImg = cvCreateImage( cvGetSize(srcImg), IPL_DEPTH_8U, 1 );
+
+	/* Filter the RGB sums in the image. */
+	vision_rgb_sum_filter( srcImg, rgb_sum );
+	
+	/* Filter the RGB ratios in the image. */
+	vision_rgb_ratio_filter( srcImg, rgb_thresh );
 	
 	/* Enhance the red channel of the source image. */
 	vision_white_balance( srcImg );
-
+	
     /* Flip the source image. */
     //cvFlip( srcImg, srcImg );
 	
@@ -1144,7 +1154,6 @@ void vision_smooth( IplImage *img )
     cvReleaseImage( &tgray3 );
 } /* end vision_smooth() */
 
-
 /******************************************************************************
  *
  * Title:       void vision_hist_eq(  IplImage *img )
@@ -1374,3 +1383,122 @@ void vision_threshold( IplImage *img,
 		cvAdaptiveThreshold( bin_img, img, maxval, CV_ADAPTIVE_THRESH_MEAN_C, CV_THRESH_BINARY_INV, 3, 5 );
 	}
 } /* end vision_threshold() */
+
+/******************************************************************************
+ *
+ * Title:       void vision_rgb_ratio_filter( IplImage *img ,
+ * 									   		  double * rgb_thresh )
+ *
+ * Description: Turns any pixel black that doesn't match the input
+ * 				RGB thresholds
+ *
+ * Input:       img: The binary image to perform filter upon.
+ *				rgb_thresh: rgb thresholds for filtering. Format - 
+ * 					{ rmin , rmax , gmin , gmax , bmin , bmax }
+ *
+ * Output:      None.
+ *
+ *****************************************************************************/
+
+void vision_rgb_ratio_filter( IplImage *img , double * rgb_thresh ) {
+
+	/* Declare variables. */
+	int ii = 0;
+	int jj = 0;
+	enum rgb_index { b , g , r };
+	
+	uchar *pixel;
+	double rg;
+	double rb;
+	double gb;
+
+	/* Validity check incoming parameters */
+	if( img == NULL ) {
+		fprintf( stderr , "vision_rgb_ratio_filter () - \n "
+				"Input image is null!\n");
+	}
+	
+	if( rgb_thresh == NULL ) {
+		fprintf( stderr , "vision_rgb_ratio_filter () - \n "
+				"Incoming rgb threshold param is null!\n");
+	}
+	
+	/* For each channel in the original image modify the RGB values. */
+	for( ii = 0; ii < img->height; ii++ )
+	{
+		for( jj = 0; jj < img->width; jj++ )
+		{
+			pixel = &((uchar *)(img->imageData + img->widthStep * ii))[jj * 3];
+			
+			rg = (double)pixel[r] / pixel[g];
+			rb = (double)pixel[r] / pixel[b];
+			gb = (double)pixel[g] / pixel[b];
+			
+			/* If the pixel is outside the threshold, turn it to black */
+			if( !( rg >= rgb_thresh[0] && rg <= rgb_thresh[1] &&
+				   rb >= rgb_thresh[2] && rb <= rgb_thresh[3] &&
+				   gb >= rgb_thresh[4] && gb <= rgb_thresh[5] ) )
+			{
+				pixel[b] =
+				pixel[g] =
+				pixel[r] = 0;
+			}
+		}
+	}
+} /* end vision_rgb_ratio_filter() */
+
+/******************************************************************************
+ *
+ * Title:       void vision_rgb_sum_filter( IplImage *img , 
+ * 											double * rgb_sum  )
+ *
+ * Description: Turns any pixel black that doesn't match the input
+ * 				RGB thresholds
+ *
+ * Input:       img: The binary image to perform filter upon.
+ *				rgb_sum: rgb sum limits. Format - { sum_min , sum_max }
+ *
+ * Output:      None.
+ *
+ *****************************************************************************/
+
+void vision_rgb_sum_filter( IplImage *img , short * rgb_sum ) {
+
+	/* Declare variables. */
+	int ii = 0;
+	int jj = 0;
+	enum rgb_index { b , g , r };
+	
+	uchar *pixel;
+	short sum;
+
+	/* Validity check incoming parameters */
+	if( img == NULL ) {
+		fprintf( stderr , "vision_rgb_sum_filter () - \n "
+				"Input image is null!\n");
+	}
+	
+	if( rgb_sum == NULL ) {
+		fprintf( stderr , "vision_rgb_sum_filter () - \n "
+				"Incoming rgb sum param is null!\n");
+	}
+	
+	/* For each channel in the original image modify the RGB values. */
+	for( ii = 0; ii < img->height; ii++ )
+	{
+		for( jj = 0; jj < img->width; jj++ )
+		{
+			pixel = &((uchar *)(img->imageData + img->widthStep * ii))[jj * 3];
+			
+			sum = pixel[r] + pixel[g] + pixel[b];
+			
+			/* If the pixel is outside the threshold, turn it to black */
+			if( sum <= rgb_sum[0] || sum >= rgb_sum[1] )
+			{
+				pixel[b] =
+				pixel[g] =
+				pixel[r] = 0;
+			}
+		}
+	}
+} /* end vision_rgb_ratio_filter() */
