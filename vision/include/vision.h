@@ -165,6 +165,7 @@ int vision_find_circle( CvCapture *cap, IplImage *srcImg, CvSeq *circles );
 //! Finds the centroid in a binary image using the sum of a window.
 //! \return 1 if circle found, 0 otherwise.
 int vision_window_filter( IplImage *img,
+						IplImage *bin_img,
 					    CvPoint *center,
 						int sizex,
 						int sizey );

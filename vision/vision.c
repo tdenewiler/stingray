@@ -57,10 +57,10 @@ int vision_find_dot( int *dotx,
     CvPoint center;
     IplImage *hsvImg = NULL;
     IplImage *outImg = NULL;
-    IplConvKernel *wL = cvCreateStructuringElementEx( 7, 7,
-            (int)floor( ( 7.0 ) / 2 ), (int)floor( ( 7.0 ) / 2 ), CV_SHAPE_ELLIPSE );
-    IplConvKernel *wS = cvCreateStructuringElementEx( 2, 2,
-            (int)floor( ( 3.0 ) / 2 ), (int)floor( ( 3.0 ) / 2 ), CV_SHAPE_ELLIPSE );
+    //IplConvKernel *wL = cvCreateStructuringElementEx( 7, 7,
+            //(int)floor( ( 7.0 ) / 2 ), (int)floor( ( 7.0 ) / 2 ), CV_SHAPE_ELLIPSE );
+    //IplConvKernel *wS = cvCreateStructuringElementEx( 2, 2,
+            //(int)floor( ( 3.0 ) / 2 ), (int)floor( ( 3.0 ) / 2 ), CV_SHAPE_ELLIPSE );
 
     /* Initialize to impossible values. */
     center.x = -10000;
@@ -90,14 +90,15 @@ int vision_find_dot( int *dotx,
 
     /* Perform erosion, dilation, and conversion. */
     //cvErode( binImg, binImg, wS );
-    cvDilate( binImg, binImg, wS );
-	cvDilate( binImg, binImg, wL );
+    //cvDilate( binImg, binImg, wS );
+	//cvDilate( binImg, binImg, wL );
+	//cvDilate( binImg, binImg, wL );
     cvConvertScale( binImg, outImg, 255.0 );
 
     /* Find the centroid. */
-    //center = vision_find_centroid( outImg, 5 );
-    vision_window_filter( outImg, &center, 11, 11 );
+    vision_window_filter( outImg, binImg, &center, 11, 11 );
 	binImg = cvCloneImage( outImg );
+    center = vision_find_centroid( outImg, 5 );
     *dotx = center.x;
     *doty = center.y;
 
@@ -1111,6 +1112,7 @@ int vision_find_circle( CvCapture *cap,
 /******************************************************************************
  *
  * Title:       int vision_window_filter(  IplImage *img,
+ * 										   IplImage *bin_img,
  * 										   CvPoint *center,
  * 										   int sizex,
  * 										   int sizey
@@ -1128,44 +1130,23 @@ int vision_find_circle( CvCapture *cap,
  *****************************************************************************/
 
 int vision_window_filter( IplImage *img,
+						IplImage *bin_img,
 					    CvPoint *center,
 						int sizex,
 						int sizey )
 {
 	/* Declare variables. */
-	int rows = 0;
-	int cols = 0;
+	//int rows = 0;
+	//int cols = 0;
+	//double val = 0.;
+	//IplImage *timg = NULL;
 	int ii = 0;
 	int jj = 0;
-	//int wrows = 0;
-	//int wcols = 0;
-	//int anchorx = floor(sizex/2) + 1;
-	//int anchory = floor(sizey/2) + 1;
-	double val = 0.;
+	double thresh = 0.91;
+	double maxval = 255.;
 	double retval = 0.;
-	IplImage *timg = NULL;
-    //IplConvKernel *wM = cvCreateStructuringElementEx( sizex, sizey,
-            //(int)floor( ( sizex ) / 2 ), (int)floor( ( sizey ) / 2 ), CV_SHAPE_ELLIPSE );
-    //CvMat *filter;
-	int size = 33;
+	int size = 101;
 	CvMat *kernel = NULL;
-    //double kernel[] = { 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0,
-    					//0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0,
-    					//0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0,
-    					//0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0,
-    					//0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0,
-    					//0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0,
-    					//0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
-    					//1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
-    					//1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
-    					//1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
-    					//0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0,
-    					//0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0,
-    					//0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0,
-    					//0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0,
-    					//0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0,
-    					//0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0,
-    					//0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0  }
 
 	/* Create a matrix to replace my ASCII art. */
 	kernel = cvCreateMat( size, size, CV_32FC1 );
@@ -1181,53 +1162,29 @@ int vision_window_filter( IplImage *img,
 	}
 
 	/* Create temporary image. */
-    timg = cvCreateImage( cvGetSize(img), IPL_DEPTH_8U, 1 );
+    //timg = cvCreateImage( cvGetSize(img), IPL_DEPTH_8U, 1 );
 
-	/* In a loop run over the entire image and look for highest sum inside a
-	 * window. */
+    /* Filter the image using convolution. */
+    cvFilter2D( img, bin_img, kernel, cvPoint(floor(size/2),floor(size/2)) );
+	cvThreshold( bin_img, img, thresh, maxval, CV_THRESH_BINARY );
+	//cvAdaptiveThreshold( bin_img, img, maxval, CV_ADAPTIVE_THRESH_MEAN_C, CV_THRESH_BINARY, 3, 5 );
+
+	/* Look for the maximum value in the filtered image. */
 	//for( cols = 0; cols < img->height - (sizey + 1); cols++ ) {
 		//for( rows = 0; rows < img->width - (sizex + 1); rows++ ) {
 			///* Search through the window to find the sum of the pixels. */
-			//for( wcols = cols; wcols < cols + sizey; wcols++ ) {
-				//for( wrows = rows; wrows < rows + sizex; wrows++ ) {
-					//sum += cvGet2D( img, wcols, wrows ).val[0];
-				//}
-			//}
-			//if( sum > retsum ) {
+			//val = cvGet2D( timg, cols, rows ).val[0];
+			//if( val > retval ) {
 				///* We have found a new max correlation. */
-				//retsum = sum;
-				//center->x = rows + anchorx;
-				//center->y = cols + anchory;
+				//retval = val;
+				//center->x = rows;
+				//center->y = cols;
 			//}
-			///* Reset the sum here because we are moving the window. */
-			//sum = 0.;
 		//}
 	//}
-	
-	/* Filter the image with our kernel. */
-	//cvFilter2D( img, timg, wM );
-	
-    /* Filter the image using convolution. */
-    //filter = cvCreateMatHeader( kernelRows, kernelCols, CV_64FC1 );
-    //cvSetData( filter, kernel, kernelCols * 16 );
-    cvFilter2D( img, timg, kernel, cvPoint(-1,-1) );
-
-	/* Look for the maximum value in the filtered image. */
-	for( cols = 0; cols < img->height - (sizey + 1); cols++ ) {
-		for( rows = 0; rows < img->width - (sizex + 1); rows++ ) {
-			/* Search through the window to find the sum of the pixels. */
-			val = cvGet2D( img, cols, rows ).val[0];
-			if( val > retval ) {
-				/* We have found a new max correlation. */
-				retval = val;
-				center->x = rows;
-				center->y = cols;
-			}
-		}
-	}
 
 	/* Release elements to free memory. */
-	cvReleaseImage( &timg );
+	//cvReleaseImage( &timg );
 	
 	if( retval > 0. ) {
 		return 1;
@@ -1447,7 +1404,7 @@ void vision_white_balance( IplImage *img )
 	int ii = 0;
 	int jj = 0;
 	uchar *temp_ptr;
-	double scale = 0.9; // 193. / 255.;
+	double scale = 0.8; // 193. / 255.;
 	double rscale = 255. / 193. * scale;
 	double bscale = 255. / 218. * scale;
 	double gscale = 255. / 198. * scale;
