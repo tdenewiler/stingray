@@ -189,7 +189,6 @@ int main( int argc, char *argv[] )
 	memset( &lj,  0, sizeof(LABJACK_DATA) );
 	messages_init( &msg );
 
-
 	/* Parse command line arguments. */
 	parse_default_config( &cf );
 	parse_cla( argc, argv, &cf, STINGRAY, ( const char * )PLANNER_FILENAME );
@@ -415,22 +414,22 @@ int main( int argc, char *argv[] )
             ct = *( localtime ((const time_t*) &ctime.tv_sec) );
 			strftime( write_time, sizeof(write_time), "20%y-%m-%d_%H:%M:%S", &ct);
             snprintf( write_time + strlen(write_time),
-            		strlen(write_time), ".%03ld", ctime.tv_usec );
+            		strlen(write_time), ".%06ld", ctime.tv_usec );
 
 			/* Log every (enable_log) seconds. */
-			//if( dt > (cf.enable_log * 1000000) ) {
+			if( dt > (cf.enable_log * 100000) ) {
 				STAT cs = msg.status.data;
 				TARGET target = msg.target.data;
-				fprintf( f_log, "%s, %.04f,%.04f,%.04f,%.04f,%.04f,%.04f,%.04f,"
-					"%.04f,%.04f,%.04f,%.04f,%.04f,%.04f,%.04f,%.04f,%.04f,"
-					"%.04f,%.04f\n",
+				fprintf( f_log, "%s, %.06f,%.06f,%.06f,%.06f,%.06f,%.06f,%.06f,"
+					"%.06f,%.06f,%.06f,%.06f,%.06f,%.06f,%.06f,%.06f,%.06f,"
+					"%.06f,%.06f\n",
 					write_time, cs.pitch, cs.roll, cs.yaw, msg.lj.data.pressure,
 					cs.accel[0], cs.accel[1], cs.accel[2],
 					cs.ang_rate[0], cs.ang_rate[1], cs.ang_rate[2], cs.fx, cs.fy,
 					target.pitch, target.roll, target.yaw, target.depth,
 					target.fx, target.fy );
 				gettimeofday( &log_start, NULL );
-			//}
+			}
 		}
 
 		/* Update the task dt. dt value is in seconds */

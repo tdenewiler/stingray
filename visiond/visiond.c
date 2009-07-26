@@ -353,7 +353,7 @@ int main( int argc, char *argv[] )
 
 			/* If we get a positive status message, render the box
 			 * and populate the network message. */
-			if( status == 1 ) {
+			if( status == 1 || status == 2 ) {
 				/* Set the detection status of vision */
 				msg.vision.data.status = TASK_PIPE_DETECTED;
 
@@ -384,6 +384,9 @@ int main( int argc, char *argv[] )
 			else {
 				/* No positive detection. */
 				msg.vision.data.status = TASK_NOT_DETECTED;
+			}
+			if( status == 2 ) {
+				msg.vision.data.status = TASK_BOUY_TOUCHED;
 			}
 		} /* end TASK_PIPE */
 
@@ -666,7 +669,7 @@ int main( int argc, char *argv[] )
 			gettimeofday( &fps_start, NULL );
 			nframes = 0;
 			msg.vision.data.fps = fps;
-			//printf("MAIN: fps = %lf\n", fps);
+			printf("MAIN: fps = %lf\n", fps);
 		}
 
 		/* Update timer. */

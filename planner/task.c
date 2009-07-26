@@ -182,22 +182,20 @@ int task_buoy( MSG_DATA *msg, CONF_VARS *cf, int dt, int subtask_dt )
 		}
 	}
 	else { /* Non-Course Mode */
-
-		/* Check to see if we have a previous value from the pipe routine */
+		/* Check to see if we have a previous value from the pipe routine. */
 		if( msg->target.data.yaw_previous == TASK_YAW_PREVIOUS_NOT_SET ) {
 			msg->target.data.yaw_previous = msg->status.data.yaw;
 		}
 
 		/* Check for timeout */
 		if( dt > TASK_BOUY_MAX_SEARCH_TIME ) {
-
-			/* Reset yaw to our initial yaw if we have a timeout */
+			/* Reset yaw to our initial yaw if we have a timeout. */
 			msg->target.data.yaw = msg->target.data.yaw_previous;
 
-			/* Set yaw detect to undetected value */
+			/* Set yaw detect to undetected value. */
 			msg->target.data.yaw_detected = TASK_YAW_DETECTED_NOT_SET;
 
-			/* We have failed... */
+			/* We have failed ... */
 			return TASK_FAILURE;
 		}
 
@@ -240,15 +238,14 @@ int task_buoy( MSG_DATA *msg, CONF_VARS *cf, int dt, int subtask_dt )
 					return TASK_FAILURE;
 				}
 			}
-			else { /* If we had a detection, use it again until timeout */
+			else { /* If we had a detection, use it again until timeout. */
 				msg->target.data.yaw = msg->target.data.yaw_detected;
 			}
 
 		}
 
-		/* Success Criteria */
+		/* Success criteria. */
 		if( msg->vision.data.status == TASK_BOUY_TOUCHED ) {
-
 			/* Set the target yaw to the anticipated pipe2 yaw */
 			msg->target.data.yaw = TASK_PIPE2_YAW;
 
