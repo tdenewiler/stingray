@@ -61,7 +61,8 @@ void gui_update_status_text( )
     char sbuff[2048];
 
     sprintf( sbuff,
-             "Pitch, Roll, Yaw, Depth, Fx, Fy:\t[ %.3f\t%.3f\t%.3f\t%.3f\t%.3f\t%.3f ]\n"
+             "Pitch, Roll, Yaw, Depth, Fx, Fy:\t[ %.3f\t%.3f\t%.3f\t%.3f ]\n"
+			 "Fx, Fy, FPS:\t\t\t\t\t[ %.3f\t%.3f\t%.3lf ]\n"
              "Accel X, Y, Z:\t\t\t[ %.3f\t%.3f\t%.3f ]\n"
              "Ang Rate X, Y, Z:\t\t[ %.3f\t%.3f\t%.3f ]\n"
              "Labjack (B1 B2 D W):\t[ %.3fV\t%.3fV\t%.3f\t%.3f ]\n"
@@ -78,6 +79,7 @@ void gui_update_status_text( )
              , msg.status.data.depth
              , msg.status.data.fx
              , msg.status.data.fy
+			 , msg.status.data.fps
              , msg.status.data.accel[0]
              , msg.status.data.accel[1]
              , msg.status.data.accel[2]
