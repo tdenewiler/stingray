@@ -52,8 +52,8 @@ int vision_find_dot( int *dotx,
     CvPoint center;
     IplImage *hsvImg = NULL;
     IplImage *outImg = NULL;
-    IplConvKernel *wL = cvCreateStructuringElementEx( 7, 7,
-            (int)floor( ( 7.0 ) / 2 ), (int)floor( ( 7.0 ) / 2 ), CV_SHAPE_ELLIPSE );
+    IplConvKernel *wL = cvCreateStructuringElementEx( 5, 5,
+            (int)floor( ( 5.0 ) / 2 ), (int)floor( ( 5.0 ) / 2 ), CV_SHAPE_RECT );
 	int num_pix = 0;
 	int touch_thresh = 100;
 
@@ -83,13 +83,19 @@ int vision_find_dot( int *dotx,
 	/* Threshold all three channels using our own values. */
     cvInRangeS( hsvImg, cvScalar(hsv->hL, hsv->sL, hsv->vL),
 		cvScalar(hsv->hH, hsv->sH, hsv->vH), binImg );
-
-    /* Perform erosion, dilation, and conversion. */
-    cvConvertScale( binImg, outImg, 255.0 );
+	
+	/* Median filter image to remove outliers */
+	cvSmooth( binImg, outImg, CV_MEDIAN, 9, 9, 0. ,0. );
+	cvErode( outImg, binImg, wL );
+	
+    //cvConvertScale( outImg, binImg, 255.0 );
+    
+	/* Perform erosion, dilation, and conversion. */
+    //cvConvertScale( binImg, outImg, 255.0 );
 
 	/* Filter the image. */
     //vision_window_filter( outImg, binImg, &center, 11, 11 );
-	vision_threshold( outImg, binImg, VISION_ADAPTIVE, 11, 0.91 );
+	//vision_threshold( outImg, binImg, VISION_ADAPTIVE, 11, 0.91 );
 	//cvErode( binImg, binImg, wL );
 
     /* Find the centroid. */
