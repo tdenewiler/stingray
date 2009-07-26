@@ -52,21 +52,10 @@ int vision_find_dot( int *dotx,
     CvPoint center;
     IplImage *hsvImg = NULL;
     IplImage *outImg = NULL;
-<<<<<<< .mine
-	IplImage *filterImg = NULL;
-	
-    //IplConvKernel *wL = cvCreateStructuringElementEx( 7, 7,
-    //        (int)floor( ( 7.0 ) / 2 ), (int)floor( ( 7.0 ) / 2 ), CV_SHAPE_ELLIPSE );
-=======
-    
-    double rgb_thresh[] = { 1.15, 1.65, 1.05, 2.40, 0.90, 1.80, 1.45, 300 };
-    short  rgb_sum[] = { 195 , 570 };
-    
     IplConvKernel *wL = cvCreateStructuringElementEx( 7, 7,
             (int)floor( ( 7.0 ) / 2 ), (int)floor( ( 7.0 ) / 2 ), CV_SHAPE_ELLIPSE );
->>>>>>> .r175
-    //IplConvKernel *wS = cvCreateStructuringElementEx( 2, 2,
-    //        (int)floor( ( 2.0 ) / 2 ), (int)floor( ( 2.0 ) / 2 ), CV_SHAPE_ELLIPSE );
+	int num_pix = 0;
+	int touch_thresh = 100;
 
     /* Initialize to impossible values. */
     center.x = -10000;
@@ -75,17 +64,7 @@ int vision_find_dot( int *dotx,
 	/* Create intermediate images for scratch space. */
     hsvImg = cvCreateImage( cvGetSize(srcImg), IPL_DEPTH_8U, 3 );
     outImg = cvCreateImage( cvGetSize(srcImg), IPL_DEPTH_8U, 1 );
-<<<<<<< .mine
-	filterImg = cvCreateImage( cvGetSize(srcImg), IPL_DEPTH_8U, 1 );
-=======
 
-	/* Filter the RGB sums in the image. */
-	vision_rgb_sum_filter( srcImg, rgb_sum );
->>>>>>> .r175
-	
-	/* Filter the RGB ratios in the image. */
-	vision_rgb_ratio_filter( srcImg, rgb_thresh );
-	
 	/* Enhance the red channel of the source image. */
 	vision_white_balance( srcImg );
 	
@@ -111,22 +90,25 @@ int vision_find_dot( int *dotx,
 	/* Filter the image. */
     //vision_window_filter( outImg, binImg, &center, 11, 11 );
 	vision_threshold( outImg, binImg, VISION_ADAPTIVE, 11, 0.91 );
-	cvErode( binImg, binImg, wL );
+	//cvErode( binImg, binImg, wL );
 
     /* Find the centroid. */
     center = vision_find_centroid( binImg, 5 );
     *dotx = center.x;
     *doty = center.y;
 
-	//binImg = cvCloneImage(filterImg);
     /* Clear variables to free memory. */
     cvReleaseImage( &hsvImg );
     cvReleaseImage( &outImg );
-	cvReleaseImage( &filterImg );
 
+	/* Check to see how many pixels are detected in the image. */
+	num_pix = cvCountNonZero( binImg );
+	if( num_pix > touch_thresh ) {
+		return 2;
+	}
+	
 	/* Check that the values of dotx & doty are not negative */
 	if( dotx < 0 || doty < 0 ) {
-		
 		return 0;
 	}
 	
