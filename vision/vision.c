@@ -55,7 +55,7 @@ int vision_find_dot( int *dotx,
     IplConvKernel *wS = cvCreateStructuringElementEx( 2, 2,
             (int)floor( ( 2.0 ) / 2 ), (int)floor( ( 2.0 ) / 2 ), CV_SHAPE_RECT );
 	int num_pix = 0;
-	int touch_thresh = 2500;
+	int touch_thresh = 10000;
 
     /* Initialize to impossible values. */
     center.x = -10000;
