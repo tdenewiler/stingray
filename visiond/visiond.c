@@ -320,7 +320,7 @@ int main( int argc, char *argv[] )
 				img, bin_img, &buoy );
 			if( status == 1 || status == 2 ) {
 				/* We have detected the buoy. */
-				msg.vision.data.status = TASK_BOUY_DETECTED;
+				msg.vision.data.status = TASK_BUOY_DETECTED;
 				
 				/* The subtractions are opposite of each other on purpose. This
 				 * is so that they match the way the depth sensor and yaw sensor
@@ -334,7 +334,7 @@ int main( int argc, char *argv[] )
 
 				if( status == 2 ) {
 					/* We have touched the buoy. */
-					msg.vision.data.status = TASK_BOUY_TOUCHED;
+					msg.vision.data.status = TASK_BUOY_TOUCHED;
 				}
 			}
 		} /* end TASK_BUOY */
@@ -385,7 +385,7 @@ int main( int argc, char *argv[] )
 				msg.vision.data.status = TASK_NOT_DETECTED;
 			}
 			if( status == 2 ) {
-				msg.vision.data.status = TASK_BOUY_TOUCHED;
+				msg.vision.data.status = TASK_BUOY_TOUCHED;
 			}
 		} /* end TASK_PIPE */
 

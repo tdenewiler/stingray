@@ -164,9 +164,8 @@ int task_buoy( MSG_DATA *msg, CONF_VARS *cf, int dt, int subtask_dt )
 			/* Start moving forward. */
 			msg->target.data.fy = POLOLU_MOVE_FORWARD;
 
-			/* If the bouy has been detected, front_x will be different
-			 * than BOUY_NOT_DETECTED */
-			if( msg->vision.data.status == TASK_BOUY_DETECTED ) {
+			/* Check to see if we think we have detected the buoy. */
+			if( msg->vision.data.status == TASK_BUOY_DETECTED ) {
 				return SUBTASK_SUCCESS;
 			}
 			else if( subtask_dt > SUBTASK_MAX_SEARCH_TIME ) {
@@ -175,13 +174,24 @@ int task_buoy( MSG_DATA *msg, CONF_VARS *cf, int dt, int subtask_dt )
 			else {
 				return SUBTASK_CONTINUING;
 			}
+			
 		case SUBTASK_CORRECT:
 			/* Set target values based on current orientation and pixel error. */
-			msg->target.data.yaw = msg->status.data.yaw + (float)msg->vision.data.front_x * TASK_BUOY_YAW_GAIN;
-			msg->target.data.depth = msg->status.data.depth + (float)msg->vision.data.front_y * TASK_BUOY_DEPTH_GAIN;
+			msg->target.data.yaw = msg->status.data.yaw +
+				(float)msg->vision.data.front_x * TASK_BUOY_YAW_GAIN;
+			msg->target.data.depth = msg->status.data.depth +
+				(float)msg->vision.data.front_y * TASK_BUOY_DEPTH_GAIN;
 
-			/* TODO: Need a way to check for SUCCESS or FAILURE in this case. */
-			return SUBTASK_CONTINUING;
+			/* Check to see if we think we have touched the buoy. */
+			if( msg->vision.data.status == TASK_BUOY_TOUCHED ) {
+				return TASK_SUCCESS;
+			}
+			else if( subtask_dt > SUBTASK_MAX_SEARCH_TIME ) {
+				return SUBTASK_FAILURE;
+			}
+			else {
+				return SUBTASK_CONTINUING;
+			}
 		}
 	}
 	else { /* Non-Course Mode */
@@ -192,7 +202,7 @@ int task_buoy( MSG_DATA *msg, CONF_VARS *cf, int dt, int subtask_dt )
 		}
 
 		/* Check for timeout */
-		if( dt > TASK_BOUY_MAX_SEARCH_TIME ) {
+		if( dt > TASK_BUOY_MAX_SEARCH_TIME ) {
 			/* Reset yaw to our initial yaw if we have a timeout. */
 			msg->target.data.yaw = TASK_PIPE2_YAW;
 
@@ -205,7 +215,7 @@ int task_buoy( MSG_DATA *msg, CONF_VARS *cf, int dt, int subtask_dt )
 		} /* End if timeout */
 
 		/*  If the bouy was detected ..*/
-		if( msg->vision.data.status == TASK_BOUY_DETECTED ) {
+		if( msg->vision.data.status == TASK_BUOY_DETECTED ) {
 
 			/* Set target values based on current orientation and pixel error. */
 			msg->target.data.yaw = msg->status.data.yaw + (float)msg->vision.data.front_x * TASK_BUOY_YAW_GAIN;
@@ -240,7 +250,7 @@ int task_buoy( MSG_DATA *msg, CONF_VARS *cf, int dt, int subtask_dt )
 		}/* End if bouy detected/not detected */
 
 		/* Success criteria. */
-		if( msg->vision.data.status == TASK_BOUY_TOUCHED ) {
+		if( msg->vision.data.status == TASK_BUOY_TOUCHED ) {
 			/* Set the target yaw to the anticipated pipe2 yaw */
 			msg->target.data.yaw = TASK_PIPE2_YAW;
 
