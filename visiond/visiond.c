@@ -147,7 +147,7 @@ int main( int argc, char *argv[] )
 	HSV buoy;
 	HSV pipe;
 	HSV fence;
-	
+
 	/* Temporary variable to make it easier to switch between using HSV
 	 *  olding or boxes to try and find pipe. HSV = 1, Boxes = 2. */
 	int pipe_type = VISION_PIPE_HSV;
@@ -168,7 +168,7 @@ int main( int argc, char *argv[] )
 	CvPoint pt[4];
 	CvPoint *rect = pt;
 	int count = 4;
-	
+
 	/* Timer. */
 	struct timeval fps_time = {0, 0};
 	struct timeval fps_start = {0, 0};
@@ -214,7 +214,7 @@ int main( int argc, char *argv[] )
     msg.vsetting.data.fence_hsv.sH = cf.fence_sH;
     msg.vsetting.data.fence_hsv.vL = cf.fence_vL;
     msg.vsetting.data.fence_hsv.vH = cf.fence_vH;
-	
+
 	/* Initialize HSV structs to configuration values. */
     pipe.hL = cf.pipe_hL;
     pipe.hH = cf.pipe_hH;
@@ -313,7 +313,7 @@ int main( int argc, char *argv[] )
 			msg.vision.data.status = TASK_NOT_DETECTED;
 
 			/* Get a new image. */
-			img = cvQueryFrame( f_cam );			
+			img = cvQueryFrame( f_cam );
 
 			/* Look for the buoy. */
 			status = vision_find_dot( &dotx, &doty, cf.vision_angle, f_cam,
@@ -345,7 +345,7 @@ int main( int argc, char *argv[] )
 			msg.vision.data.status = TASK_NOT_DETECTED;
 
 			/* Get a new image. */
-			img = cvQueryFrame( f_cam );			
+			img = cvQueryFrame( f_cam );
 
 			/* Look for the pipe. */
 			status = vision_find_pipe( &pipex, &pipey, &bearing, f_cam,
@@ -393,6 +393,9 @@ int main( int argc, char *argv[] )
 		else if( task == TASK_PIPE && f_cam && pipe_type == VISION_PIPE_BOX ) {
 			/* Set to not detected to start and reset if we get a hit. */
 			msg.vision.data.status = TASK_NOT_DETECTED;
+
+			/* Get a new image. */
+			img = cvQueryFrame( f_cam );
 
 			/* Look for the pipe. */
 			status = vision_find_boxes( f_cam, img, boxes, squares, VISION_PIPE,
@@ -446,6 +449,9 @@ int main( int argc, char *argv[] )
 		else if( task == TASK_FENCE && f_cam ) {
 			/* Set to not detected to start and reset if we get a hit. */
 			msg.vision.data.status = TASK_NOT_DETECTED;
+
+			/* Get a new image. */
+			img = cvQueryFrame( f_cam );
 
 			/* Look for the fence. */
             status = vision_find_fence( &fence_center, &y_max, f_cam, img, bin_img,
@@ -655,7 +661,7 @@ int main( int argc, char *argv[] )
 				}
 			}
 		}
-		
+
 		/* Calculate frames per second. */
 		nframes++;
 		time1s =    fps_time.tv_sec;

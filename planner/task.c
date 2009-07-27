@@ -138,11 +138,8 @@ int task_run( MSG_DATA *msg, CONF_VARS *cf, int dt, int subtask_dt )
 
 int task_buoy( MSG_DATA *msg, CONF_VARS *cf, int dt, int subtask_dt )
 {
-
 	if( msg->task.data.course == TASK_COURSE_ON ) {
-
 		switch( msg->task.data.subtask ) {
-
 		case SUBTASK_SEARCH_DEPTH:
 			msg->target.data.depth = cf->depth_buoy;
 			/* Check to see if we have reached the target depth. */
@@ -195,47 +192,41 @@ int task_buoy( MSG_DATA *msg, CONF_VARS *cf, int dt, int subtask_dt )
 			/* Set yaw detect to undetected value. */
 			msg->target.data.yaw_detected = TASK_YAW_DETECTED_NOT_SET;
 
-			/* We have failed ... */
+			/* We have failed ... TODO: Fix this later. */
+			return TASK_CONTINUING;
 			return TASK_FAILURE;
 		}
 
 		/*  If the bouy was detected ..*/
 		if( msg->vision.data.status == TASK_BOUY_DETECTED ) {
-
 			/* Set target values based on current orientation and pixel error. */
 			msg->target.data.yaw = msg->status.data.yaw + (float)msg->vision.data.front_x * TASK_BUOY_YAW_GAIN;
 
 			/* Save the current detection in case we lose it. */
 			msg->target.data.yaw_detected = msg->target.data.yaw;
 
-
 			/* Need to divide the depth target by a largish number because the gain works
 			 * for yaw in degrees but not for depth in volts. The pixel error needs to
 			 * be converted so that it is meaningful for volts as well. */
 			msg->target.data.depth = msg->status.data.depth + (float)msg->vision.data.front_y * TASK_BUOY_DEPTH_GAIN;
-
-
-			//printf("TASK_BUOY:     %f    %f\n", msg->target.data.depth,
-				//(float)msg->vision.data.front_y * TASK_BUOY_DEPTH_GAIN);
 		}
 		else { /* If the bouy is not detected */
-
 			/* Check to see if we had a previous detection.
 			 * If we do not have a previous detection, start sweeping. */
 			if( msg->target.data.yaw_detected == TASK_YAW_DETECTED_NOT_SET ) {
-
-
 				/* Check for timeout */
 				if( dt < TASK_SWEEP_YAW_TIMEOUT ) {
 					/* If the bouy is not detected, go into sweep mode */
-					task_sweep( msg, cf, dt, subtask_dt );
+					//task_sweep( msg, cf, dt, subtask_dt );
 				}
 				else {
 					/* If we have a timeout, stop sweeping and return
 					 * to the yaw we started with. Reset detection yaw. */
 					msg->target.data.yaw = msg->target.data.yaw_previous;
 					msg->target.data.yaw_detected = TASK_YAW_DETECTED_NOT_SET;
-					return TASK_FAILURE;
+					/* TODO: Put this back later. */
+					return TASK_CONTINUING;
+					//return TASK_FAILURE;
 				}
 			}
 			else { /* If we had a detection, use it again until timeout. */

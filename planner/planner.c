@@ -212,12 +212,12 @@ int main( int argc, char *argv[] )
     msg.gain.data.kp_depth  	 = cf.kp_depth;
     msg.gain.data.ki_depth  	 = cf.ki_depth;
     msg.gain.data.kd_depth  	 = cf.kd_depth;
-    
+
     /* Initialize tasks */
     /* Never used because of lines ~332  -- FIX ME */
     task = cf.task_start;
     subtask = cf.subtask_start;
-	
+
 	msg.task.data.task = task;
 	msg.task.data.subtask = subtask;
 	msg.task.data.course = TASK_COURSE_OFF;
