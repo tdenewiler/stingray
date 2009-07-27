@@ -198,7 +198,7 @@ int vision_find_pipe( int *pipex,
 	}
 
     /* No detection condition, only using bearing - not centroid. */
-    if( fabs(*bearing) < bearing_delta_min )
+    if( fabs(*bearing) > bearing_delta_min )
     	return 2;
 
     return 1;
