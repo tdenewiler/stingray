@@ -1527,7 +1527,7 @@ void vision_rgb_sum_filter( IplImage *img , short * rgb_sum ) {
 			sum = pixel[r] + pixel[g] + pixel[b];
 
 			/* If the pixel is outside the threshold, turn it to black */
-			if( sum <= rgb_sum[0] || sum >= rgb_sum[1] )
+			if( sum < rgb_sum[0] || sum > rgb_sum[1] )
 			{
 				pixel[b] =
 				pixel[g] =
