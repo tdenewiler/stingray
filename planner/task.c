@@ -160,6 +160,17 @@ int task_buoy( MSG_DATA *msg, CONF_VARS *cf, int dt, int subtask_dt )
 			}
 			
 		case SUBTASK_SEARCH:
+			/* Go forward without visual feedback for an amount of time set in
+			 * configuration file. */
+			if( subtask_dt < cf->buoy_blind_time * 1000000 ) {
+				msg->target.data.fy = POLOLU_MOVE_FORWARD;
+				return SUBTASK_CONTINUING;
+			}
+			else {
+				return SUBTASK_SUCCESS;
+			}
+			
+		case SUBTASK_CORRECT:
 			/* Set search yaw to configuration file value. */
 			msg->target.data.yaw = cf->heading_buoy;
 			
@@ -176,8 +187,8 @@ int task_buoy( MSG_DATA *msg, CONF_VARS *cf, int dt, int subtask_dt )
 			else {
 				return SUBTASK_CONTINUING;
 			}
-			
-		case SUBTASK_CORRECT:
+		
+		case SUBTASK_BUOY_TOUCH:
 			/* Set target values based on current orientation and pixel error. */
 			msg->target.data.yaw = msg->status.data.yaw +
 				(float)msg->vision.data.front_x * TASK_BUOY_YAW_GAIN;
