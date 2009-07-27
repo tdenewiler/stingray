@@ -329,17 +329,23 @@ int main( int argc, char *argv[] )
 				printf("Bouy Status: %d\n", status);
 				msg.vision.data.status = TASK_BUOY_DETECTED;
 				
-				xrot =  dotx * cos( angleFrontCam ) + doty * sin( angleFrontCam );
-				yrot = -dotx * sin( angleFrontCam ) + doty * cos( angleFrontCam );
-				
 				/* The subtractions are opposite of each other on purpose. This
 				 * is so that they match the way the depth sensor and yaw sensor
 				 * work. */
-				msg.vision.data.front_x = xrot - (img->width / 2);
-				msg.vision.data.front_y = (img->height / 2) - yrot;
+				msg.vision.data.front_x = dotx - (img->width / 2);
+				msg.vision.data.front_y = (img->height / 2) - doty;
 
+				xrot =  msg.vision.data.front_x * cos( angleFrontCam ) + 
+						msg.vision.data.front_y * sin( angleFrontCam );
+				yrot = -msg.vision.data.front_x * sin( angleFrontCam ) + 
+						msg.vision.data.front_y * cos( angleFrontCam );
+						
+				msg.vision.data.front_x = xrot;
+				msg.vision.data.front_y = yrot;
+				
+				
 				/* Draw a circle at the centroid location. */
-				cvCircle( img, cvPoint(xrot, yrot),
+				cvCircle( img, cvPoint(dotx, doty),
 					10, cvScalar(255, 0, 0), 5, 8 );
 
 				if( status == 2 ) {
