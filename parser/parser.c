@@ -519,6 +519,11 @@ void parse_line( CONF_VARS *config )
 			sscanf( tokens[2], "%d", &config->course_start );
 		}
 	}
+	else if( strncmp( tokens[0], "dock", STRING_SIZE ) == 0 ) {
+		if( strncmp( tokens[1], "time", STRING_SIZE ) == 0 ) {
+			sscanf( tokens[2], "%d", &config->dock_time );
+		}
+	}
 	/* end task start values */
 } /* end parse_line() */
 
@@ -849,6 +854,7 @@ void parse_default_config( CONF_VARS *config )
     config->debug_level = 5;
     config->op_mode = 1;
     config->enable_log = FALSE;
+	config->dock_time = 0;
 } /* end parse_default_config() */
 
 
@@ -906,8 +912,6 @@ void parse_print_config( CONF_VARS *config )
     printf("PARSE_PRINT_CONFIG: kp_fy = %lf\n", config->kp_fy);
     printf("PARSE_PRINT_CONFIG: ki_fy = %lf\n", config->ki_fy);
     printf("PARSE_PRINT_CONFIG: kd_fy = %lf\n", config->kd_fy);
-    
-    
     printf("PARSE_PRINT_CONFIG: target_pitch = %f\n", config->target_pitch);
     printf("PARSE_PRINT_CONFIG: target_roll = %f\n", config->target_roll);
     printf("PARSE_PRINT_CONFIG: target_yaw = %f\n", config->target_yaw);
@@ -975,4 +979,5 @@ void parse_print_config( CONF_VARS *config )
 	printf("PARSE_PRINT_CONFIG: task_start = %d\n", config->task_start);
 	printf("PARSE_PRINT_CONFIG: subtask_start = %d\n", config->subtask_start);
 	printf("PARSE_PRINT_CONFIG: course_start = %d\n", config->course_start);
+	printf("PARSE_PRINT_CONFIG: dock_time = %d\n", config->dock_time);
 } /* end parse_default_config() */
