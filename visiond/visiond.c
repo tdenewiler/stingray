@@ -318,10 +318,10 @@ int main( int argc, char *argv[] )
 			/* Look for the buoy. */
 			status = vision_find_dot( &dotx, &doty, cf.vision_angle, f_cam,
 				img, bin_img, &buoy );
-			if( status == 1 ) {
-				/* Set the detection status of vision */
+			if( status == 1 || status == 2 ) {
+				/* We have detected the buoy. */
 				msg.vision.data.status = TASK_BOUY_DETECTED;
-
+				
 				/* The subtractions are opposite of each other on purpose. This
 				 * is so that they match the way the depth sensor and yaw sensor
 				 * work. */
@@ -332,7 +332,10 @@ int main( int argc, char *argv[] )
 				cvCircle( img, cvPoint(dotx, doty),
 					10, cvScalar(255, 0, 0), 5, 8 );
 
-				/* Requires some sore of exit criteria. */
+				if( status == 2 ) {
+					/* We have touched the buoy. */
+					msg.vision.data.status = TASK_BOUY_TOUCHED;
+				}
 			}
 		} /* end TASK_BUOY */
 
