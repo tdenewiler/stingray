@@ -149,7 +149,7 @@ int main( int argc, char *argv[] )
 	HSV pipe;
 	HSV fence;
 	int bouyTouchCount = 0;
-	const int bouyTouchCountThreshold = 5;
+	const int bouyTouchCountThreshold = 10;
 
 	/* Temporary variable to make it easier to switch between using HSV
 	 *  olding or boxes to try and find pipe. HSV = 1, Boxes = 2. */
@@ -338,10 +338,7 @@ int main( int argc, char *argv[] )
 					10, cvScalar(255, 0, 0), 5, 8 );
 
 				if( status == 2 ) {
-					bouyTouchCount++;
-					/* We have touched the buoy. */
-					if( bouyTouchCount >= bouyTouchCountThreshold )
-						msg.vision.data.status = TASK_BUOY_TOUCHED;
+					msg.vision.data.status = TASK_BUOY_TOUCHED;
 				}
 			}
 		} /* end TASK_BUOY */

@@ -238,7 +238,7 @@ int task_buoy( MSG_DATA *msg, CONF_VARS *cf, int dt, int subtask_dt )
 			}
 		}
 		
-		if( msg->vision.data.status == TASK_BUOY_DETECTED ) {
+		if( msg->vision.data.status == TASK_BUOY_TOUCHED ) {
 			if( !hasSuccess ) {
 				printf( "Planner: Bouy Touched\n" );
 				hasSuccess = TRUE;
