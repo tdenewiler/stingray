@@ -185,7 +185,7 @@ int task_buoy( MSG_DATA *msg, CONF_VARS *cf, int dt, int subtask_dt )
 	else { /* Non-Course Mode */
 		
 		/* Check to see if we have a previous value from the pipe routine. */
-		if( msg->target.data.yaw_previous == TASK_YAW_PREVIOUS_NOT_SET ) {
+		if( util_fequals( msg->target.data.yaw_previous , TASK_YAW_PREVIOUS_NOT_SET ) ) {
 			msg->target.data.yaw_previous = msg->status.data.yaw;
 		}
 
@@ -225,7 +225,7 @@ int task_buoy( MSG_DATA *msg, CONF_VARS *cf, int dt, int subtask_dt )
 
 			/* Check to see if we had a previous detection.
 			 * If we do not have a previous detection, start sweeping. */
-			if( msg->target.data.yaw_detected == TASK_YAW_DETECTED_NOT_SET ) {
+			if( util_fequals( msg->target.data.yaw_detected , TASK_YAW_DETECTED_NOT_SET ) ) {
 
 				/* If we don't have any detections, keep the previous bearing */
 				msg->target.data.yaw = msg->target.data.yaw_previous;

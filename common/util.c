@@ -164,3 +164,26 @@ float util_sign_value( float value )
 		return 1.0;
 	}
 } /* end util_sign_value() */
+
+
+/******************************************************************************
+ *
+ * Title:       float util_fequals( float value1 , float value2 )
+ *
+ * Description: Determines whether or not two floats are equal
+ *
+ * Input:       value1: First value to compare.
+ * 				value2: Second value to compare
+ *
+ * Output:      TRUE or FALSE depending on equality or not respectively.
+ *
+ *****************************************************************************/
+
+float util_fequals( float value1 , float value2 )
+{
+	if( fabsf( value1 - value2 ) < UTIL_FEQUALS_EPSILON )
+		return TRUE;
+		
+	return FALSE;
+	
+} /* end util_sign_value() */

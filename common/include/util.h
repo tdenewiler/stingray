@@ -29,6 +29,8 @@
 #define GUI 2
 #endif /* GUI */
 
+#define UTIL_FEQUALS_EPSILON 0.00001
+
 
 /******************************
 **
@@ -66,5 +68,10 @@ int util_calc_dt( int *time1s, int *time1ms, int *time2s, int *time2ms );
 //! \return Either 1 or -1 depeding on sign.
 float util_sign_value( float value );
 
+//! Determines whether or not two floats are equal
+//! \param value1 first value for equality check
+//! \param value2 second value for equality check
+//! \return Either TRUE for equality, FALSE otherwise
+float util_fequals( float value1 , float value2 );
 
 #endif /* _UTIL_H_ */
