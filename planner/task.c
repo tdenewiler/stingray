@@ -626,7 +626,6 @@ int task_fence( MSG_DATA *msg, CONF_VARS *cf, int dt, int subtask_dt )
 {
 	/* TODO: Fill this function in like task_buoy() and task_pipe(). */
 	if( msg->task.data.course == TASK_COURSE_ON ) {
-
 		switch( msg->task.data.subtask ) {
 
 		case SUBTASK_SEARCH_DEPTH:
@@ -642,8 +641,8 @@ int task_fence( MSG_DATA *msg, CONF_VARS *cf, int dt, int subtask_dt )
 			else {
 				return SUBTASK_CONTINUING;
 			}
-		case SUBTASK_SEARCH:
 
+		case SUBTASK_SEARCH:
 			/* Start moving forward. */
 			msg->target.data.fy = POLOLU_MOVE_FORWARD;
 			/* TODO: Fix this magic number. */
@@ -656,19 +655,22 @@ int task_fence( MSG_DATA *msg, CONF_VARS *cf, int dt, int subtask_dt )
 			else {
 				return SUBTASK_CONTINUING;
 			}
+
 		case SUBTASK_CORRECT:
 			/* Set target values based on current orientation and pixel error. */
-			msg->target.data.yaw   = msg->status.data.yaw + (float)msg->vision.data.front_x * TASK_FENCE_YAW_GAIN;
-			msg->target.data.depth = msg->status.data.depth + (float)msg->vision.data.front_y * TASK_FENCE_DEPTH_GAIN;
+			msg->target.data.yaw   = msg->status.data.yaw +
+				(float)msg->vision.data.front_x * TASK_FENCE_YAW_GAIN;
 
 			/* TODO: Need a way to check for SUCCESS or FAILURE in this case. */
 			return SUBTASK_CONTINUING;
 		}
 	}
+
 	else {
 		/* Set the values based on current orientation and pixel error. */
-		//msg->target.data.yaw   = msg->status.data.yaw + (float)msg->vision.data.front_x * TASK_FENCE_YAW_GAIN;
-		msg->target.data.depth = msg->status.data.depth + (float)msg->vision.data.front_y * TASK_FENCE_DEPTH_GAIN;
+		msg->target.data.yaw   = msg->status.data.yaw +
+			msg->vision.data.front_x * TASK_FENCE_YAW_GAIN;
+		msg->target.data.depth = cf->depth_fence;
 
 		return TASK_CONTINUING;
 	}
@@ -747,6 +749,9 @@ int task_surface( MSG_DATA *msg, CONF_VARS *cf, int dt, int subtask_dt )
 
 int task_course( MSG_DATA *msg, CONF_VARS *cf, int dt, int subtask_dt )
 {
+	/* Nothing to do here. Everything is taken care of in main planner function
+	 * by incrementing the task and subtask values. The order that the course
+	 * is performed in the order specified by the #define numbers in task.h. */
 
 	return TASK_CONTINUING;
 } /* end task_course() */

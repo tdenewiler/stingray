@@ -354,15 +354,15 @@ int main( int argc, char *argv[] )
 			}
 		} /* end TASK_BUOY */
 
-		else if( task == TASK_PIPE && f_cam && pipe_type == VISION_PIPE_HSV ) {
+		else if( task == TASK_PIPE && b_cam && pipe_type == VISION_PIPE_HSV ) {
 			/* Set to not detected to start and reset if we get a hit. */
 			msg.vision.data.status = TASK_NOT_DETECTED;
 
 			/* Get a new image. */
-			img = cvQueryFrame( f_cam );
+			img = cvQueryFrame( b_cam );
 
 			/* Look for the pipe. */
-			status = vision_find_pipe( &pipex, &pipey, &bearing, f_cam,
+			status = vision_find_pipe( &pipex, &pipey, &bearing, b_cam,
 				img, bin_img, &pipe );
 
 			/* If we get a positive status message, render the box
@@ -403,15 +403,15 @@ int main( int argc, char *argv[] )
 			
 		} /* end TASK_PIPE */
 
-		else if( task == TASK_PIPE && f_cam && pipe_type == VISION_PIPE_BOX ) {
+		else if( task == TASK_PIPE && b_cam && pipe_type == VISION_PIPE_BOX ) {
 			/* Set to not detected to start and reset if we get a hit. */
 			msg.vision.data.status = TASK_NOT_DETECTED;
 
 			/* Get a new image. */
-			img = cvQueryFrame( f_cam );
+			img = cvQueryFrame( b_cam );
 
 			/* Look for the pipe. */
-			status = vision_find_boxes( f_cam, img, boxes, squares, VISION_PIPE,
+			status = vision_find_boxes( b_cam, img, boxes, squares, VISION_PIPE,
 				&msg.vision.data.bearing );
 
 			/* If we get a positive status message, render the box
@@ -495,12 +495,12 @@ int main( int argc, char *argv[] )
         	msg.vision.data.status = TASK_NOT_DETECTED;
 		} /* end TASK_GATE */
 
-		else if( task == TASK_BOXES && f_cam ) {
+		else if( task == TASK_BOXES && b_cam ) {
 			/* Set to not detected to start and reset if we get a hit. */
 			msg.vision.data.status = TASK_NOT_DETECTED;
 
 			/* Look for the boxes. */
-			status = vision_find_boxes( f_cam, img, boxes, squares, VISION_BOX,
+			status = vision_find_boxes( b_cam, img, boxes, squares, VISION_BOX,
 				&msg.vision.data.bearing );
 
 			/* If we get a positive status message, render the box
@@ -543,7 +543,6 @@ int main( int argc, char *argv[] )
 				cvClearSeq( boxes );
 				cvClearSeq( squares );
 			}
-
 		} /* end TASK_BOXES */
 
 		else if( task == TASK_SUITCASE && b_cam ) {
