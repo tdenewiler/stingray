@@ -143,7 +143,9 @@ int task_buoy( MSG_DATA *msg, CONF_VARS *cf, int dt, int subtask_dt )
 		switch( msg->task.data.subtask ) {
 
 		case SUBTASK_SEARCH_DEPTH:
+			/* Set depth to configuration file value. */
 			msg->target.data.depth = cf->depth_buoy;
+			
 			/* Check to see if we have reached the target depth. */
 			if( fabsf(msg->status.data.depth - msg->target.data.depth) < SUBTASK_DEPTH_MARGIN ) {
 				return SUBTASK_SUCCESS;
@@ -194,76 +196,19 @@ int task_buoy( MSG_DATA *msg, CONF_VARS *cf, int dt, int subtask_dt )
 			}
 		}
 	}
-	else { /* Non-Course Mode */
-		
-		/* Check to see if we have a previous value from the pipe routine. */
-		if( util_fequals( msg->target.data.yaw_previous , TASK_YAW_PREVIOUS_NOT_SET ) ) {
-			msg->target.data.yaw_previous = msg->status.data.yaw;
-		}
 
-		/* Check for timeout */
-		if( dt > TASK_BUOY_MAX_SEARCH_TIME ) {
-			/* Reset yaw to our initial yaw if we have a timeout. */
-			msg->target.data.yaw = TASK_PIPE2_YAW;
-
-			/* Set yaw detect to undetected value. */
-			msg->target.data.yaw_detected = TASK_YAW_DETECTED_NOT_SET;
-
-			/* We have failed ... */
-			return TASK_FAILURE;
-			
-		} /* End if timeout */
-
-		/*  If the bouy was detected ..*/
+	/* Non-course mode. */
+	else {
+		/* Check to see if we have detected the buoy. Else don't change yaw or
+		 * depth, just keep old values. */
 		if( msg->vision.data.status == TASK_BUOY_DETECTED ) {
-
 			/* Set target values based on current orientation and pixel error. */
-			msg->target.data.yaw = msg->status.data.yaw + (float)msg->vision.data.front_x * TASK_BUOY_YAW_GAIN;
-
-			/* Save the current detection in case we lose it. */
-			msg->target.data.yaw_detected = msg->target.data.yaw;
-
-
-			/* Need to divide the depth target by a largish number because the gain works
-			 * for yaw in degrees but not for depth in volts. The pixel error needs to
-			 * be converted so that it is meaningful for volts as well. */
-			msg->target.data.depth = msg->status.data.depth + (float)msg->vision.data.front_y * TASK_BUOY_DEPTH_GAIN;
-
-
-			//printf("TASK_BUOY:     %f    %f\n", msg->target.data.depth,
-				//(float)msg->vision.data.front_y * TASK_BUOY_DEPTH_GAIN);
+			msg->target.data.yaw = msg->status.data.yaw +
+				(float)msg->vision.data.front_x * TASK_BUOY_YAW_GAIN;
+			msg->target.data.depth = msg->status.data.depth +
+				(float)msg->vision.data.front_y * TASK_BUOY_DEPTH_GAIN;
 		}
-		else { /* If the bouy is not detected */
-
-			/* Check to see if we had a previous detection.
-			 * If we do not have a previous detection, start sweeping. */
-			if( util_fequals( msg->target.data.yaw_detected , TASK_YAW_DETECTED_NOT_SET ) ) {
-
-				/* If we don't have any detections, keep the previous bearing */
-				msg->target.data.yaw = msg->target.data.yaw_previous;
-			}
-			else {
-				/* If we had a detection, use it. */
-				msg->target.data.yaw = msg->target.data.yaw_detected;
-			}
-
-		}/* End if bouy detected/not detected */
-
-		/* Success criteria. */
-		if( msg->vision.data.status == TASK_BUOY_TOUCHED ) {
-			/* Set the target yaw to the anticipated pipe2 yaw */
-			msg->target.data.yaw = TASK_PIPE2_YAW;
-
-			/* Set yaw detect to undetected value */
-			msg->target.data.yaw_detected = TASK_YAW_DETECTED_NOT_SET;
-			return TASK_SUCCESS;
-		}
-
-		/* No events ( timeout or success ) indicate to switch tasks,
-		 * lets continue. */
-		return TASK_CONTINUING;
-
-	}/* end Non-Course Mode */
+	}
 
 	return TASK_CONTINUING;
 } /* end task_buoy() */
