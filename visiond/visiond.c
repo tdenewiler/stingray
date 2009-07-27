@@ -641,19 +641,27 @@ int main( int argc, char *argv[] )
 			switch( vision_mode ) {
 			case VISIOND_FCOLOR:
 				cvShowImage( win, img );
-				cvShowImage( binwin, bin_img );
+				if( task != TASK_NONE ) {
+					cvShowImage( binwin, bin_img );
+				}
 				break;
 			case VISIOND_FBINARY:
 				cvShowImage( win, bin_img );
-				cvShowImage( binwin, bin_img );
+				if( task != TASK_NONE ) {
+					cvShowImage( binwin, bin_img );
+				}
 				break;
 			case VISIOND_BCOLOR:
 				cvShowImage( win, img );
-				cvShowImage( binwin, bin_img );
+				if( task != TASK_NONE ) {
+					cvShowImage( binwin, bin_img );
+				}
 				break;
 			case VISIOND_BBINARY:
 				cvShowImage( win, bin_img );
-				cvShowImage( binwin, bin_img );
+				if( task != TASK_NONE ) {
+					cvShowImage( binwin, bin_img );
+				}
 				break;
 			case VISIOND_NONE:
 				break;
@@ -664,12 +672,10 @@ int main( int argc, char *argv[] )
 				case VISIOND_FCOLOR:
 					img = cvQueryFrame( f_cam );
 					cvShowImage( win, img );
-					cvShowImage( binwin, bin_img );
 					break;
 				case VISIOND_BCOLOR:
 					img = cvQueryFrame( b_cam );
 					cvShowImage( win, img );
-					cvShowImage( binwin, bin_img );
 					break;
 				}
 			}
