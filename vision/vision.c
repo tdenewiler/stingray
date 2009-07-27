@@ -96,8 +96,7 @@ int vision_find_dot( int *dotx,
 
 	/* Check to see how many pixels are detected in the image. */
 	num_pix = cvCountNonZero( binImg );
-	
-	printf( "Num Count: %d\n" , num_pix );
+	printf("VISION_FIND_DOT: num_pix = %d\n" , num_pix);
 	
 	if( num_pix > touch_thresh ) {
 		return 2;
@@ -150,7 +149,7 @@ int vision_find_pipe( int *pipex,
     IplImage *outImg = NULL;
     IplConvKernel *wS = cvCreateStructuringElementEx( 2, 2,
             (int)floor( ( 2.0 ) / 2 ), (int)floor( ( 2.0 ) / 2 ), CV_SHAPE_RECT );
-	int touch_thresh = 200;
+	int detect_thresh = 200;
 	int num_pix = 0;
 	
     /* Initialize to impossible values. */
@@ -194,7 +193,7 @@ int vision_find_pipe( int *pipex,
 
 	/* Check to see how many pixels are detected in the image. */
 	num_pix = cvCountNonZero( binImg );
-	if( num_pix < touch_thresh ) {
+	if( num_pix < detect_thresh ) {
 		return 0;
 	}
 
@@ -463,6 +462,8 @@ int vision_find_fence( int *fence_center,
             (int)floor( ( 2.0 ) / 2 ), (int)floor( ( 2.0 ) / 2 ), CV_SHAPE_RECT );
     CvSize sz = cvSize( srcImg->width & -2, srcImg->height & -2 );
     IplImage *hsv_clone = NULL;
+	int num_pix = 0;
+	int detect_thresh = 100;
 
 	/* Create intermediate images for scratch space. */
     hsvImg = cvCreateImage( cvGetSize(srcImg), IPL_DEPTH_8U, 3 );
@@ -477,9 +478,6 @@ int vision_find_fence( int *fence_center,
     /* Segment the flipped image into a binary image. */
     cvCvtColor( srcImg, hsvImg, CV_RGB2HSV );
 
-	/* Smooth the image with a Gaussian filter. */
-	//vision_smooth( hsvImg );
-
 	/* Equalize the histograms of each channel. */
 	vision_hist_eq( hsvImg );
 
@@ -491,18 +489,12 @@ int vision_find_fence( int *fence_center,
 	cvSmooth( binImg, outImg, CV_MEDIAN, 5, 5, 0. ,0. );
 	cvErode( outImg, binImg, wS );
 
-    //cvConvertScale( outImg, binImg, 255.0 );
-
-	/* Perform erosion, dilation, and conversion. */
-    //cvConvertScale( binImg, outImg, 255.0 );
-
-	/* Filter the image. */
-    //vision_window_filter( outImg, binImg, &center, 11, 11 );
-	//vision_threshold( outImg, binImg, VISION_ADAPTIVE, 11, 0.91 );
-	//cvErode( binImg, binImg, wL );
-
     /* Process the image. */
-    *y_max = vision_get_fence_bottom( outImg, &center );
+    *y_max = vision_get_fence_bottom( binImg, &center );
+	
+	/* Check to see how many pixels are detected in the image. */
+	num_pix = cvCountNonZero( binImg );
+	printf("VISION_FIND_FENCE: num_pix = %d\n" , num_pix);
 
     /* Compute Centroid. */
     for( ii = 0; ii < binImg->height; ii++ ) {
@@ -513,11 +505,7 @@ int vision_find_fence( int *fence_center,
 			}
 		}
 	}
-	/* We were getting a floating point exception and OpenCV was crashing. I
-	 * believe it is because we can divide by 0 here if we are not careful.
-	 * I am setting kk = 1 for now but is there a better value we should use?
-	 * I think we will be fine because if kk = 0 then sum_x = 0 and
-	 * sum_x / kk = 0 no matter what we set kk equal to. */
+	/* Make sure we don't divide by 0 here. */
 	if( kk == 0 ) {
 		kk = 1;
 	}
@@ -528,7 +516,12 @@ int vision_find_fence( int *fence_center,
     cvReleaseImage( &outImg );
     cvReleaseImage( &hsv_clone );
 
-    return 1;
+	if( num_pix > detect_thresh ) {
+		/* We have found enough pixels to qualify as detecting the fence. */
+		return 1;
+	}
+
+    return 0;
 } /* end vision_find_pipe() */
 
 
