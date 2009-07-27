@@ -28,6 +28,9 @@
 #define PIPE_MODE_PIPE  		 0
 #define PIPE_MODE_LOOK_AHEAD	 1
 
+static int hasPrinted  = FALSE;
+static int hasDetected = FALSE;
+
 
 /******************************************************************************
  *
@@ -210,14 +213,28 @@ int task_buoy( MSG_DATA *msg, CONF_VARS *cf, int dt, int subtask_dt )
 
 	/* Non-course mode. */
 	else {
+		
+		if( !hasPrinted ) {
+			printf( "Planner: Looking for Bouy\n" );
+			hasPrinted = TRUE;
+		}
+			
+		
 		/* Check to see if we have detected the buoy. Else don't change yaw or
 		 * depth, just keep old values. */
 		if( msg->vision.data.status == TASK_BUOY_DETECTED ) {
+			
 			/* Set target values based on current position and pixel error. */
 			msg->target.data.yaw = msg->status.data.yaw +
 				(float)msg->vision.data.front_x * TASK_BUOY_YAW_GAIN;
+				
 			msg->target.data.depth = msg->status.data.depth +
 				(float)msg->vision.data.front_y * TASK_BUOY_DEPTH_GAIN;
+				
+			if( !hasDetected ) {
+				printf( "Planner: Bouy Detected\n" );
+				hasPrinted = TRUE;
+		}
 		}
 	}
 
@@ -474,6 +491,8 @@ int task_square( MSG_DATA *msg, CONF_VARS *cf, int dt, int subtask_dt )
 int task_none( MSG_DATA *msg, CONF_VARS *cf, int dt, int subtask_dt )
 {
 	/* Do nothing here. */
+	hasPrinted = FALSE;
+	hasDetected = FALSE;
 	
 	return TASK_SUCCESS;
 } /* end task_none() */
