@@ -126,6 +126,8 @@ int main( int argc, char *argv[] )
     MSG_DATA msg;
     int dotx = -1;
     int doty = -1;
+    int xrot = -1;
+    int yrot = -1;
     int fence_center = -1;
 	int y_max = -1;
     int ii = 0;
@@ -149,7 +151,7 @@ int main( int argc, char *argv[] )
 	HSV pipe;
 	HSV fence;
 	int bouyTouchCount = 0;
-	const int bouyTouchCountThreshold = 10;
+	double angleFrontCam = VISIOND_FRONT_CAM_ANGLE_OFFSET * M_PI /  180;
 
 	/* Temporary variable to make it easier to switch between using HSV
 	 *  olding or boxes to try and find pipe. HSV = 1, Boxes = 2. */
@@ -327,14 +329,17 @@ int main( int argc, char *argv[] )
 				printf("Bouy Status: %d\n", status);
 				msg.vision.data.status = TASK_BUOY_DETECTED;
 				
+				xrot =  dotx * cos( angleFrontCam ) + doty * sin( angleFrontCam );
+				yrot = -dotx * sin( angleFrontCam ) + doty * cos( angleFrontCam );
+				
 				/* The subtractions are opposite of each other on purpose. This
 				 * is so that they match the way the depth sensor and yaw sensor
 				 * work. */
-				msg.vision.data.front_x = dotx - (img->width / 2);
-				msg.vision.data.front_y = (img->height / 2) - doty;
+				msg.vision.data.front_x = xrot - (img->width / 2);
+				msg.vision.data.front_y = (img->height / 2) - yrot;
 
 				/* Draw a circle at the centroid location. */
-				cvCircle( img, cvPoint(dotx, doty),
+				cvCircle( img, cvPoint(xrot, yrot),
 					10, cvScalar(255, 0, 0), 5, 8 );
 
 				if( status == 2 ) {
