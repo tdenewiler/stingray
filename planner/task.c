@@ -591,8 +591,9 @@ int task_boxes( MSG_DATA *msg, CONF_VARS *cf, int dt, int subtask_dt )
 			break;
 		}
 	}
-	else { /* Non-course mode. */
 
+	/* Non-course mode. */
+	else {
 		/* Set fx and fy targets if we get a detection. */
 		if( msg->vision.data.status == TASK_BOXES_DETECTED ) {
 
@@ -649,7 +650,8 @@ int task_fence( MSG_DATA *msg, CONF_VARS *cf, int dt, int subtask_dt )
 		case SUBTASK_SEARCH_DEPTH:
 			msg->target.data.depth = cf->depth_fence;
 			/* Check to see if we have reached the target depth. */
-			if( fabsf(msg->status.data.depth - msg->target.data.depth) < SUBTASK_DEPTH_MARGIN ) {
+			if( fabsf(msg->status.data.depth - msg->target.data.depth) <
+				SUBTASK_DEPTH_MARGIN ) {
 				return TASK_SUCCESS;
 			}
 			/* Check to see if too much time has elapsed. */
@@ -675,11 +677,11 @@ int task_fence( MSG_DATA *msg, CONF_VARS *cf, int dt, int subtask_dt )
 			}
 
 		case SUBTASK_CORRECT:
-			/* Set target values based on current orientation and pixel error. */
+			/* Set target values based on current position and pixel error. */
 			msg->target.data.yaw   = msg->status.data.yaw +
 				(float)msg->vision.data.front_x * TASK_FENCE_YAW_GAIN;
 
-			/* TODO: Need a way to check for SUCCESS or FAILURE in this case. */
+			/* TODO: Need a way to check SUCCESS or FAILURE in this case. */
 			return SUBTASK_CONTINUING;
 		}
 	}
