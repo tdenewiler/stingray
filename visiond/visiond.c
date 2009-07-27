@@ -147,11 +147,15 @@ int main( int argc, char *argv[] )
     char write_time[80] = {0};
 	int vision_mode = VISIOND_NONE;
 	int task = TASK_NONE;
-	HSV buoy;
-	HSV pipe;
-	HSV fence;
+	HSV hsv_buoy;
+	HSV hsv_pipe;
+	HSV hsv_fence;
 	int bouyTouchCount = 0;
 	double angleFrontCam = VISIOND_FRONT_CAM_ANGLE_OFFSET * M_PI /  180;
+	int capture_file = TRUE;
+	const char *video_file = "../../../../pics/stingrayCanyonView/out.avi";
+	//const char *image_file =
+		//"../../../../pics/stingrayBackup/images/b20090717_135344.719209.jpg";
 
 	/* Temporary variable to make it easier to switch between using HSV
 	 *  olding or boxes to try and find pipe. HSV = 1, Boxes = 2. */
@@ -221,24 +225,24 @@ int main( int argc, char *argv[] )
     msg.vsetting.data.fence_hsv.vH = cf.fence_vH;
 
 	/* Initialize HSV structs to configuration values. */
-    pipe.hL = cf.pipe_hL;
-    pipe.hH = cf.pipe_hH;
-    pipe.sL = cf.pipe_sL;
-    pipe.sH = cf.pipe_sH;
-    pipe.vL = cf.pipe_vL;
-    pipe.vH = cf.pipe_vH;
-    buoy.hL = cf.buoy_hL;
-    buoy.hH = cf.buoy_hH;
-    buoy.sL = cf.buoy_sL;
-    buoy.sH = cf.buoy_sH;
-    buoy.vL = cf.buoy_vL;
-    buoy.vH = cf.buoy_vH;
-    fence.hL = cf.fence_hL;
-    fence.hH = cf.fence_hH;
-    fence.sL = cf.fence_sL;
-    fence.sH = cf.fence_sH;
-    fence.vL = cf.fence_vL;
-    fence.vH = cf.fence_vH;
+    hsv_pipe.hL = cf.pipe_hL;
+    hsv_pipe.hH = cf.pipe_hH;
+    hsv_pipe.sL = cf.pipe_sL;
+    hsv_pipe.sH = cf.pipe_sH;
+    hsv_pipe.vL = cf.pipe_vL;
+    hsv_pipe.vH = cf.pipe_vH;
+    hsv_buoy.hL = cf.buoy_hL;
+    hsv_buoy.hH = cf.buoy_hH;
+    hsv_buoy.sL = cf.buoy_sL;
+    hsv_buoy.sH = cf.buoy_sH;
+    hsv_buoy.vL = cf.buoy_vL;
+    hsv_buoy.vH = cf.buoy_vH;
+    hsv_fence.hL = cf.fence_hL;
+    hsv_fence.hH = cf.fence_hH;
+    hsv_fence.sL = cf.fence_sL;
+    hsv_fence.sH = cf.fence_sH;
+    hsv_fence.vL = cf.fence_vL;
+    hsv_fence.vH = cf.fence_vH;
 
     /* Set up server. */
     if( cf.enable_server ) {
@@ -259,14 +263,20 @@ int main( int argc, char *argv[] )
 	}
 	else {
 		/* Open front camera. */
-		f_cam = cvCaptureFromCAM( camera );
+		if( capture_file ) {
+			printf("MAIN: Trying to open file for front camera.\n");
+			f_cam = cvCreateFileCapture( video_file );
+		}
+		else {
+			f_cam = cvCaptureFromCAM( camera );
+		}
 		if( !f_cam ) {
 			cvReleaseCapture( &f_cam );
 			printf("MAIN: WARNING!!! Could not open f_cam.\n");
 		}
 		else {
 			img = cvQueryFrame( f_cam );
-			//img = cvLoadImage( "../../../../pics/stingrayBackup/images/b20090717_135344.719209.jpg" );
+			//img = cvLoadImage( image_file );
 			bin_img = cvCreateImage( cvGetSize(img), IPL_DEPTH_8U, 1 );
 			img_eq  = cvCreateImage( cvGetSize(img), IPL_DEPTH_8U, 3 );
 			fence_center = img->width / 2;
@@ -275,7 +285,12 @@ int main( int argc, char *argv[] )
 
 		/* Open bottom camera. */
 		camera = 1;
-		b_cam = cvCaptureFromCAM( camera );
+		if( capture_file ) {
+			b_cam = cvCreateFileCapture( video_file );
+		}
+		else {
+			b_cam = cvCaptureFromCAM( camera );
+		}
 		if( !b_cam ) {
 			cvReleaseCapture( &b_cam );
 			printf("MAIN: WARNING!!! Could not open b_cam.\n");
@@ -323,7 +338,7 @@ int main( int argc, char *argv[] )
 
 			/* Look for the buoy. */
 			status = vision_find_dot( &dotx, &doty, cf.vision_angle, f_cam,
-				img, bin_img, &buoy );
+				img, bin_img, &hsv_buoy );
 			if( status == 1 || status == 2 ) {
 				/* We have detected the buoy. */
 				printf("Bouy Status: %d\n", status);
@@ -363,10 +378,10 @@ int main( int argc, char *argv[] )
 
 			/* Look for the pipe. */
 			status = vision_find_pipe( &pipex, &pipey, &bearing, b_cam,
-				img, bin_img, &pipe );
+				img, bin_img, &hsv_pipe );
 
-			/* If we get a positive status message, render the box
-			 * and populate the network message. */
+			/* If we get a positive status message, render the box and populate
+			 * the network message. */
 			if( status == 1 || status == 2 ) {
 				/* Set the detection status of vision */
 				printf("Bouy Status: %d\n", status);
@@ -382,25 +397,25 @@ int main( int argc, char *argv[] )
 
 				/* Draw the bearing if it is there. */
 				if( bearing != 0 ) {
-					cvCircle( img,
-							cvPoint( img->width / 2 + ((int)(bearing * ii)),
-								(img->width / 2) + ii ),
-								2, cvScalar(255, 255, 0), 2 );
+					for( ii = 0; ii < 25; ii++ ) {
+						cvCircle( img,
+							cvPoint(img->width / 2 + ((int)(bearing * ii)),
+							img->width / 2 + ii), 2, cvScalar(255, 255, 0), 2 );
+					}
 				}
 				else {
-					cvCircle( img,
-							cvPoint( img->width / 2 + ((int)(bearing * ii)),
-								(img->width / 2) + ii ),
-								2, cvScalar(0, 0, 255), 2 );
+					for( ii = 0; ii < 25; ii++ ) {
+						cvCircle( img,
+							cvPoint(img->width / 2 + ((int)(bearing * ii)),
+							img->width / 2 + ii), 2, cvScalar(0, 0, 255), 2 );
+					}
 				}
 				
 				if( status == 2 ) {
 					msg.vision.data.status = TASK_PIPE_CENTERED;
 				}
-				
 			}
-			
-		} /* end TASK_PIPE */
+		} /* end TASK_PIPE -- hsv */
 
 		else if( task == TASK_PIPE && b_cam && pipe_type == VISION_PIPE_BOX ) {
 			/* Set to not detected to start and reset if we get a hit. */
@@ -452,8 +467,7 @@ int main( int argc, char *argv[] )
 				cvClearSeq( boxes );
 				cvClearSeq( squares );
 			}
-
-		} /* end TASK_PIPE */
+		} /* end TASK_PIPE -- boxes */
 
 		else if( task == TASK_FENCE && f_cam ) {
 			/* Set to not detected to start and reset if we get a hit. */
@@ -464,7 +478,7 @@ int main( int argc, char *argv[] )
 
 			/* Look for the fence. */
             status = vision_find_fence( &fence_center, &y_max, f_cam, img,
-				bin_img, &fence );
+				bin_img, &hsv_fence );
             if( status == 1 ) {
             	/* Set the detection status of vision. */
 				msg.vision.data.status = TASK_FENCE_DETECTED;
@@ -484,11 +498,10 @@ int main( int argc, char *argv[] )
 				msg.vision.data.front_x = fence_center - img->width / 2;
 				msg.vision.data.front_y = y_max - img->height / 4;
             }
-
         } /* end TASK_FENCE */
 
         else if( task == TASK_GATE && f_cam ) {
-        	/* Look for the gate */
+        	/* Look for the gate. */
 
         	/* Default to fail detection until code is written. */
         	msg.vision.data.status = TASK_NOT_DETECTED;
@@ -502,8 +515,8 @@ int main( int argc, char *argv[] )
 			status = vision_find_boxes( b_cam, img, boxes, squares, VISION_BOX,
 				&msg.vision.data.bearing );
 
-			/* If we get a positive status message, render the box
-			 * and populate the network message. */
+			/* If we get a positive status message, render the box and populate
+			 * the network message. */
 			if( status > 0 ) {
 				/* Initialize the centroid sequence reader. */
 				cvStartReadSeq( boxes, &reader1, 0 );
@@ -612,24 +625,24 @@ int main( int argc, char *argv[] )
 
 				/* Update local variable using network variables. */
                 task = msg.task.data.task;
-				pipe.hL = msg.vsetting.data.pipe_hsv.hL;
-				pipe.hH = msg.vsetting.data.pipe_hsv.hH;
-				pipe.sL = msg.vsetting.data.pipe_hsv.sL;
-				pipe.sH = msg.vsetting.data.pipe_hsv.sH;
-				pipe.vL = msg.vsetting.data.pipe_hsv.vL;
-				pipe.vH = msg.vsetting.data.pipe_hsv.vH;
-				buoy.hL = msg.vsetting.data.buoy_hsv.hL;
-				buoy.hH = msg.vsetting.data.buoy_hsv.hH;
-				buoy.sL = msg.vsetting.data.buoy_hsv.sL;
-				buoy.sH = msg.vsetting.data.buoy_hsv.sH;
-				buoy.vL = msg.vsetting.data.buoy_hsv.vL;
-				buoy.vH = msg.vsetting.data.buoy_hsv.vH;
-				fence.hL = msg.vsetting.data.fence_hsv.hL;
-				fence.hH = msg.vsetting.data.fence_hsv.hH;
-				fence.sL = msg.vsetting.data.fence_hsv.sL;
-				fence.sH = msg.vsetting.data.fence_hsv.sH;
-				fence.vL = msg.vsetting.data.fence_hsv.vL;
-				fence.vH = msg.vsetting.data.fence_hsv.vH;
+				hsv_pipe.hL = msg.vsetting.data.pipe_hsv.hL;
+				hsv_pipe.hH = msg.vsetting.data.pipe_hsv.hH;
+				hsv_pipe.sL = msg.vsetting.data.pipe_hsv.sL;
+				hsv_pipe.sH = msg.vsetting.data.pipe_hsv.sH;
+				hsv_pipe.vL = msg.vsetting.data.pipe_hsv.vL;
+				hsv_pipe.vH = msg.vsetting.data.pipe_hsv.vH;
+				hsv_buoy.hL = msg.vsetting.data.buoy_hsv.hL;
+				hsv_buoy.hH = msg.vsetting.data.buoy_hsv.hH;
+				hsv_buoy.sL = msg.vsetting.data.buoy_hsv.sL;
+				hsv_buoy.sH = msg.vsetting.data.buoy_hsv.sH;
+				hsv_buoy.vL = msg.vsetting.data.buoy_hsv.vL;
+				hsv_buoy.vH = msg.vsetting.data.buoy_hsv.vH;
+				hsv_fence.hL = msg.vsetting.data.fence_hsv.hL;
+				hsv_fence.hH = msg.vsetting.data.fence_hsv.hH;
+				hsv_fence.sL = msg.vsetting.data.fence_hsv.sL;
+				hsv_fence.sH = msg.vsetting.data.fence_hsv.sH;
+				hsv_fence.vL = msg.vsetting.data.fence_hsv.vL;
+				hsv_fence.vH = msg.vsetting.data.fence_hsv.vH;
 
                 /* Force vision to look for the pipe no matter which pipe
 			     * subtask we are currently searching for. */
