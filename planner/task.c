@@ -462,12 +462,8 @@ int task_square( MSG_DATA *msg, CONF_VARS *cf, int dt, int subtask_dt )
 
 int task_none( MSG_DATA *msg, CONF_VARS *cf, int dt, int subtask_dt )
 {
-	/* Reset the yaw_previous variable */
-	msg->target.data.yaw_previous = TASK_YAW_PREVIOUS_NOT_SET;
-
-	/* Reset the yaw_detected variable */
-	msg->target.data.yaw_detected = TASK_YAW_PREVIOUS_NOT_SET;
-
+	/* Do nothing here. */
+	
 	return TASK_SUCCESS;
 } /* end task_none() */
 
