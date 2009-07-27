@@ -30,6 +30,7 @@
 
 static int hasPrinted  = FALSE;
 static int hasDetected = FALSE;
+static int hasSuccess = FALSE;
 
 
 /******************************************************************************
@@ -233,8 +234,15 @@ int task_buoy( MSG_DATA *msg, CONF_VARS *cf, int dt, int subtask_dt )
 				
 			if( !hasDetected ) {
 				printf( "Planner: Bouy Detected\n" );
-				hasPrinted = TRUE;
+				hasDetected = TRUE;
+			}
 		}
+		
+		if( msg->vision.data.status == TASK_BUOY_DETECTED ) {
+			if( !hasSuccess ) {
+				printf( "Planner: Bouy Touched\n" );
+				hasSuccess = TRUE;
+			}
 		}
 	}
 
@@ -493,6 +501,7 @@ int task_none( MSG_DATA *msg, CONF_VARS *cf, int dt, int subtask_dt )
 	/* Do nothing here. */
 	hasPrinted = FALSE;
 	hasDetected = FALSE;
+	hasSuccess = FALSE;
 	
 	return TASK_SUCCESS;
 } /* end task_none() */
