@@ -322,6 +322,7 @@ int main( int argc, char *argv[] )
 				img, bin_img, &buoy );
 			if( status == 1 || status == 2 ) {
 				/* We have detected the buoy. */
+				printf("Bouy Status: %d\n", status);
 				msg.vision.data.status = TASK_BUOY_DETECTED;
 				
 				/* The subtractions are opposite of each other on purpose. This
