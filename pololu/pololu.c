@@ -47,7 +47,7 @@ int pololuSetup( char *portname,
 	// if fd<0 setup_serial failed
 	// NOTE THAT THIS IS FAILURE VALUE FROM setup_serial
 	if( fd < 0 ) {
-		return fd;
+		return POLOLU_FAILURE;
 	}
 	else {
 		// initialize channels
@@ -55,7 +55,7 @@ int pololuSetup( char *portname,
 		// if the channels don't initialize then failure
 
 		if( result < 0 ) {
-			close( fd );
+		//	close( fd );
 			return POLOLU_FAILURE;
 		}
 
@@ -465,11 +465,11 @@ int pololuInitializeChannels( int fd )
 	if( fd < 0 ) {
 		return POLOLU_FAILURE;
 	}
-	
+
 	/* THIS IS OUR DEFAULT PROFILE */
-	
+
 	/* ======= Left Voith ======== */
-	
+
 	/* Left Voith Speed */
 	result += pololuSetParameters( fd, POLOLU_LEFT_VOITH_MOTOR, POLOLU_ON, POLOLU_FORWARD, POLOLU_DEFAULT_RANGE );
 	result += pololuSetSpeed( fd, POLOLU_LEFT_VOITH_MOTOR, POLOLU_SPEED_VOITH );
@@ -482,9 +482,9 @@ int pololuInitializeChannels( int fd )
 	result += pololuSetParameters( fd, POLOLU_LEFT_SERVO2, POLOLU_ON, POLOLU_FORWARD, POLOLU_DEFAULT_RANGE );
 	result += pololuSetNeutral( fd, POLOLU_LEFT_SERVO2, POLOLU_CH2_NEUTRAL );
 	result += pololuSetPosition7Bit( fd, POLOLU_LEFT_SERVO2, POLOLU_NEUTRAL );
-	
+
 	/* ======= Right Voith ======== */
-	
+
 	/* Right Voith Speed */
 	result += pololuSetParameters( fd, POLOLU_RIGHT_VOITH_MOTOR, POLOLU_ON, POLOLU_FORWARD, POLOLU_DEFAULT_RANGE );
 	result += pololuSetSpeed( fd, POLOLU_RIGHT_VOITH_MOTOR, POLOLU_SPEED_VOITH );
@@ -497,9 +497,9 @@ int pololuInitializeChannels( int fd )
 	result += pololuSetParameters( fd, POLOLU_RIGHT_SERVO2, POLOLU_ON, POLOLU_FORWARD, POLOLU_DEFAULT_RANGE );
 	result += pololuSetNeutral( fd, POLOLU_RIGHT_SERVO2, POLOLU_CH5_NEUTRAL );
 	result += pololuSetPosition7Bit( fd, POLOLU_RIGHT_SERVO2, POLOLU_NEUTRAL );
-	
+
 	/* ======= Attidude and Depth ======== */
-	
+
 	/* Left Wing Thruster */
 	result += pololuSetParameters( fd, POLOLU_LEFT_WING_MOTOR, POLOLU_ON, POLOLU_FORWARD, POLOLU_DEFAULT_RANGE );
 	result += pololuSetSpeed( fd, POLOLU_LEFT_WING_MOTOR, POLOLU_SPEED_INSTANT );
@@ -512,17 +512,17 @@ int pololuInitializeChannels( int fd )
 	result += pololuSetParameters( fd, POLOLU_TAIL_MOTOR, POLOLU_ON, POLOLU_FORWARD, POLOLU_DEFAULT_RANGE );
 	result += pololuSetSpeed( fd, POLOLU_TAIL_MOTOR, POLOLU_SPEED_INSTANT );
 	result += pololuSetPosition7Bit( fd, POLOLU_TAIL_MOTOR, POLOLU_NEUTRAL );
-	
+
 	/* ======= Other Actuators ======== */
-	
+	//usleep( POLOLU_SLEEP );
 	/* Dropper Servo */
 	result += pololuSetParameters( fd, POLOLU_DROPPER, POLOLU_ON, POLOLU_FORWARD, POLOLU_DROPPER_RANGE );
 	result += pololuSetNeutral( fd, POLOLU_DROPPER, POLOLU_DROPPER_NEUTRAL );
-	result += pololuSetPosition7Bit( fd, POLOLU_DROPPER, POLOLU_DROPPER_NEUTRAL );
-	
+	result += pololuSetPosition7Bit( fd, POLOLU_DROPPER, POLOLU_NEUTRAL );
+
 	// the total number of bytes sent
 	// 5 for each normal command and 6 for each pololuSetNeutral command
-	if( result == POLOLU_RESULT_SUM ) {
+	if( result == 155 ) {
 		result = POLOLU_SUCCESS;
 	}
 	else {
@@ -596,22 +596,22 @@ int pololuControlVoiths( int fd,
 	 * The yaw torque input is normalized by POLOLU_MAX_YAW_TORQUE and scaled
 	 * to POLOLU_YAW_CORRECTION. This result is modulated by the sin of the thrust angle. */
 	float yawAngleCorrection = yawTorque * ( POLOLU_YAW_CORRECTION / POLOLU_MAX_YAW_TORQUE ) * sin( angle ) * ( M_PI / 180 );
-	
+
 	/* Calculate the commands to send to the servos to control Voith direction. */
 	int leftCmd1  = (int)( POLOLU_SERVO_NEUTRAL + POLOLU_SERVO_GAIN * radius1 * cos(angle - yawAngleCorrection + leftAngleOffset) );
 	int leftCmd2  = (int)( POLOLU_SERVO_NEUTRAL + POLOLU_SERVO_GAIN * radius1 * sin(angle - yawAngleCorrection + leftAngleOffset) );
 	int rightCmd1 = (int)( POLOLU_SERVO_NEUTRAL - POLOLU_SERVO_GAIN * radius2 * cos(angle + yawAngleCorrection + rightAngleOffset) );
 	int rightCmd2 = (int)( POLOLU_SERVO_NEUTRAL - POLOLU_SERVO_GAIN * radius2 * sin(angle + yawAngleCorrection + rightAngleOffset) );
 
-	/* There is differential thrust in the voiths 
+	/* There is differential thrust in the voiths
 	 * The left and right scaling done here tries to account for this */
 	int voithThrustLeft   = voithThrust * POLOLU_VOITH_LEFT_SCALE;
 	int voithThrustRight  = voithThrust * POLOLU_VOITH_RIGHT_SCALE;
-	
+
 	/* Scale the Voith thrust value. */
 	int scaledVoithThrustLeft  = voithThrustLeft * POLOLU_VOITH_GAIN + POLOLU_VOITH_NEUTRAL;
 	int scaledVoithThrustRight = voithThrustRight * POLOLU_VOITH_GAIN + POLOLU_VOITH_NEUTRAL;
-	
+
 
 	/* Send the commands to the Pololu to control servo and motor positions. */
 	bytes += pololuSetPosition7Bit( fd, POLOLU_LEFT_SERVO1, leftCmd1 );

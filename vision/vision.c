@@ -52,8 +52,8 @@ int vision_find_dot( int *dotx,
     CvPoint center;
     IplImage *hsvImg = NULL;
     IplImage *outImg = NULL;
-    IplConvKernel *wL = cvCreateStructuringElementEx( 5, 5,
-            (int)floor( ( 5.0 ) / 2 ), (int)floor( ( 5.0 ) / 2 ), CV_SHAPE_RECT );
+    IplConvKernel *wS = cvCreateStructuringElementEx( 2, 2,
+            (int)floor( ( 2.0 ) / 2 ), (int)floor( ( 2.0 ) / 2 ), CV_SHAPE_RECT );
 	int num_pix = 0;
 	int touch_thresh = 100;
 
@@ -67,29 +67,29 @@ int vision_find_dot( int *dotx,
 
 	/* Enhance the red channel of the source image. */
 	vision_white_balance( srcImg );
-	
+
     /* Flip the source image. */
-    //cvFlip( srcImg, srcImg );
-	
+    cvFlip( srcImg, srcImg );
+
     /* Segment the flipped image into a binary image. */
     cvCvtColor( srcImg, hsvImg, CV_RGB2HSV );
 
 	/* Smooth the image with a Gaussian filter. */
-	vision_smooth( hsvImg );
-	
+	//vision_smooth( hsvImg );
+
 	/* Equalize the histograms of each channel. */
 	vision_hist_eq( hsvImg );
 
 	/* Threshold all three channels using our own values. */
     cvInRangeS( hsvImg, cvScalar(hsv->hL, hsv->sL, hsv->vL),
 		cvScalar(hsv->hH, hsv->sH, hsv->vH), binImg );
-	
+
 	/* Median filter image to remove outliers */
-	cvSmooth( binImg, outImg, CV_MEDIAN, 9, 9, 0. ,0. );
-	cvErode( outImg, binImg, wL );
-	
+	cvSmooth( binImg, outImg, CV_MEDIAN, 5, 5, 0. ,0. );
+	cvErode( outImg, binImg, wS );
+
     //cvConvertScale( outImg, binImg, 255.0 );
-    
+
 	/* Perform erosion, dilation, and conversion. */
     //cvConvertScale( binImg, outImg, 255.0 );
 
@@ -109,15 +109,15 @@ int vision_find_dot( int *dotx,
 
 	/* Check to see how many pixels are detected in the image. */
 	num_pix = cvCountNonZero( binImg );
-	if( num_pix > touch_thresh ) {
-		return 2;
-	}
-	
+	//if( num_pix > touch_thresh ) {
+		//return 2;
+	//}
+
 	/* Check that the values of dotx & doty are not negative */
 	if( dotx < 0 || doty < 0 ) {
 		return 0;
 	}
-	
+
     return 1;
 } /* end vision_find_dot() */
 
@@ -155,46 +155,49 @@ int vision_find_pipe( int *pipex,
 	double bearing_delta_min = 0.000001;
 
     CvPoint center;
-    IplImage *hsv_image = NULL;
+    IplImage *hsvImg = NULL;
     IplImage *hsv_clone = NULL;
     IplImage *outImg = NULL;
-    //IplConvKernel *wL = cvCreateStructuringElementEx( 7, 7,
-    //        (int)floor( ( 7.0 ) / 2 ), (int)floor( ( 7.0 ) / 2 ), CV_SHAPE_ELLIPSE );
+    IplConvKernel *wS = cvCreateStructuringElementEx( 2, 2,
+            (int)floor( ( 2.0 ) / 2 ), (int)floor( ( 2.0 ) / 2 ), CV_SHAPE_RECT );
 
     /* Initialize to impossible values. */
     center.x = -10000;
     center.y = -10000;
-	
-	/* Create intermediate images for scratch space. */
-    hsv_image = cvCreateImage( cvGetSize(srcImg), IPL_DEPTH_8U, 3 );
-    outImg = cvCreateImage( cvGetSize(srcImg), IPL_DEPTH_8U, 1 );
 
-    /* Convert to HSV and clone image for smoothing */
-    cvCvtColor( srcImg, hsv_image, CV_RGB2HSV );
-	hsv_clone = cvCloneImage( hsv_image );
+	/* Create intermediate images for scratch space. */
+    hsvImg = cvCreateImage( cvGetSize(srcImg), IPL_DEPTH_8U, 3 );
+    outImg = cvCreateImage( cvGetSize(srcImg), IPL_DEPTH_8U, 1 );
 
 	/* Enhance the red channel of the source image. */
 	vision_white_balance( srcImg );
 
+    /* Flip the source image. */
+    cvFlip( srcImg, srcImg );
+
     /* Segment the flipped image into a binary image. */
-    cvCvtColor( srcImg, hsv_image, CV_RGB2HSV );
+    cvCvtColor( srcImg, hsvImg, CV_RGB2HSV );
 
 	/* Smooth the image with a Gaussian filter. */
-	vision_smooth( hsv_image );
-	
+	//vision_smooth( hsvImg );
+
 	/* Equalize the histograms of each channel. */
-	vision_hist_eq( hsv_image );
+	vision_hist_eq( hsvImg );
 
 	/* Threshold all three channels using our own values. */
-    cvInRangeS( hsv_image, cvScalar(hsv->hL, hsv->sL, hsv->vL),
+    cvInRangeS( hsvImg, cvScalar(hsv->hL, hsv->sL, hsv->vL),
 		cvScalar(hsv->hH, hsv->sH, hsv->vH), binImg );
 
+	/* Median filter image to remove outliers */
+	cvSmooth( binImg, outImg, CV_MEDIAN, 5, 5, 0. ,0. );
+	cvErode( outImg, binImg, wS );
+
     /* Perform erosion, dilation, and conversion. */
-    cvConvertScale( binImg, outImg, 255.0 );
+    //cvConvertScale( binImg, outImg, 255.0 );
 
 	/* Filter the image. */
     //vision_window_filter( outImg, binImg, &center, 11, 11 );
-	vision_threshold( outImg, binImg, VISION_ADAPTIVE, 1, 5. );
+	//vision_threshold( outImg, binImg, VISION_ADAPTIVE, 1, 5. );
 	//cvErode( binImg, binImg, wL );
 
     /* Process the image to get the bearing and centroid. */
@@ -204,7 +207,7 @@ int vision_find_pipe( int *pipex,
     *pipey = center.y;
 
     /* Clear variables to free memory. */
-    cvReleaseImage( &hsv_image );
+    cvReleaseImage( &hsvImg );
     cvReleaseImage( &hsv_clone );
     cvReleaseImage( &outImg );
 
@@ -467,48 +470,49 @@ int vision_find_fence( int *fence_center,
     int ii = 0;
     int jj = 0;
     int kk = 0;
-    IplImage *hsv_image = NULL;
+    IplImage *hsvImg = NULL;
     IplImage *outImg = NULL;
-    IplConvKernel *wL = cvCreateStructuringElementEx( 7, 7,
-            (int)floor( ( 7.0 ) / 2 ), (int)floor( ( 7.0 ) / 2 ), CV_SHAPE_ELLIPSE );
+    IplConvKernel *wS = cvCreateStructuringElementEx( 2, 2,
+            (int)floor( ( 2.0 ) / 2 ), (int)floor( ( 2.0 ) / 2 ), CV_SHAPE_RECT );
     CvSize sz = cvSize( srcImg->width & -2, srcImg->height & -2 );
     IplImage *hsv_clone = NULL;
 
-    /* Flip the source image. */
-  	cvFlip( srcImg, srcImg );
-    center = srcImg->width / 2;
-
 	/* Create intermediate images for scratch space. */
-    hsv_image = cvCreateImage( cvGetSize( srcImg ), IPL_DEPTH_8U, 3 );
-    outImg = cvCreateImage( cvGetSize( srcImg ), IPL_DEPTH_8U, 1 );
-
-    /* Convert to HSV and clone image for smoothing */
-    cvCvtColor( srcImg, hsv_image, CV_RGB2HSV );
-	hsv_clone = cvCloneImage( hsv_image );
+    hsvImg = cvCreateImage( cvGetSize(srcImg), IPL_DEPTH_8U, 3 );
+    outImg = cvCreateImage( cvGetSize(srcImg), IPL_DEPTH_8U, 1 );
 
 	/* Enhance the red channel of the source image. */
 	vision_white_balance( srcImg );
 
+    /* Flip the source image. */
+    cvFlip( srcImg, srcImg );
+
     /* Segment the flipped image into a binary image. */
-    cvCvtColor( srcImg, hsv_image, CV_RGB2HSV );
+    cvCvtColor( srcImg, hsvImg, CV_RGB2HSV );
 
 	/* Smooth the image with a Gaussian filter. */
-	vision_smooth( hsv_image );
-	
+	//vision_smooth( hsvImg );
+
 	/* Equalize the histograms of each channel. */
-	vision_hist_eq( hsv_image );
+	vision_hist_eq( hsvImg );
 
 	/* Threshold all three channels using our own values. */
-    cvInRangeS( hsv_image, cvScalar(hsv->hL, hsv->sL, hsv->vL),
+    cvInRangeS( hsvImg, cvScalar(hsv->hL, hsv->sL, hsv->vL),
 		cvScalar(hsv->hH, hsv->sH, hsv->vH), binImg );
 
-    /* Perform erosion, dilation, and conversion. */
-    cvConvertScale( binImg, outImg, 255.0 );
+	/* Median filter image to remove outliers */
+	cvSmooth( binImg, outImg, CV_MEDIAN, 5, 5, 0. ,0. );
+	cvErode( outImg, binImg, wS );
+
+    //cvConvertScale( outImg, binImg, 255.0 );
+
+	/* Perform erosion, dilation, and conversion. */
+    //cvConvertScale( binImg, outImg, 255.0 );
 
 	/* Filter the image. */
     //vision_window_filter( outImg, binImg, &center, 11, 11 );
-	vision_threshold( outImg, binImg, VISION_ADAPTIVE, 11, 0.91 );
-	cvErode( binImg, binImg, wL );
+	//vision_threshold( outImg, binImg, VISION_ADAPTIVE, 11, 0.91 );
+	//cvErode( binImg, binImg, wL );
 
     /* Process the image. */
     *y_max = vision_get_fence_bottom( outImg, &center );
@@ -533,7 +537,7 @@ int vision_find_fence( int *fence_center,
     *fence_center = floor(sum_x / kk);
 
     /* Clear variables to free memory. */
-    cvReleaseImage( &hsv_image );
+    cvReleaseImage( &hsvImg );
     cvReleaseImage( &outImg );
     cvReleaseImage( &hsv_clone );
 
@@ -650,7 +654,7 @@ int vision_find_boxes( CvCapture *cap,
 
 	/* Smooth the image with a Gaussian filter. */
 	vision_smooth( img );
-	
+
 	/* Equalize the histograms of each channel. */
 	vision_hist_eq( img );
 
@@ -1086,7 +1090,7 @@ int vision_window_filter( IplImage *img,
 
 	/* Release elements to free memory. */
 	cvReleaseImage( &timg );
-	
+
 	if( retval > 0. ) {
 		return 1;
 	}
@@ -1117,7 +1121,7 @@ void vision_smooth( IplImage *img )
     IplImage *tgray3 = NULL;
     CvSize sz = cvSize( img->width & -2, img->height & -2 );
     int smooth_size = 9;
-	
+
 	/* Clone the original image. */
 	clone = cvCloneImage( img );
 
@@ -1171,7 +1175,7 @@ void vision_hist_eq( IplImage *img )
     IplImage *tgray2eq = NULL;
     IplImage *tgray3eq = NULL;
     CvSize sz = cvSize( img->width & -2, img->height & -2 );
-	
+
 	/* Clone the original image. */
 	clone = cvCloneImage( img );
 
@@ -1236,7 +1240,7 @@ void vision_saturate( IplImage *img )
 	int jj = 0;
 	double power = 0.99;
 	CvScalar val;
-	
+
 	/* Clone the original image. */
 	clone = cvCloneImage( img );
 
@@ -1244,7 +1248,7 @@ void vision_saturate( IplImage *img )
     tgray1 = cvCreateImage( sz, 8, 1 );
 	tgray2 = cvCreateImage( sz, 8, 1 );
 	tgray3 = cvCreateImage( sz, 8, 1 );
-	
+
 	/* Split the three channel image into three grayscale images using set
 	 * channel of interest. */
     cvSetImageCOI( clone, 1 );
@@ -1304,7 +1308,7 @@ void vision_white_balance( IplImage *img )
 	int ii = 0;
 	int jj = 0;
 	uchar *temp_ptr;
-	double scale = 0.8;
+	double scale = 0.65;
 	double rscale = 255. / 193. * scale;
 	double bscale = 255. / 218. * scale;
 	double gscale = 255. / 198. * scale;
@@ -1352,7 +1356,7 @@ void vision_threshold( IplImage *img,
 	int jj = 0;
 	double maxval = 255.;
 	CvMat *kernel = NULL;
-	
+
 	/* Create a matrix to replace my ASCII art. */
 	kernel = cvCreateMat( size, size, CV_32FC1 );
 	for( ii = 0; ii < size; ii++ ) {
@@ -1376,14 +1380,14 @@ void vision_threshold( IplImage *img,
 	else {
 		cvAdaptiveThreshold( img, bin_img, maxval, CV_ADAPTIVE_THRESH_MEAN_C, CV_THRESH_BINARY_INV, 3, 5 );
 	}
-	
+
 	//int t = 0;
 	//for( ii = 0; ii < img->height; ii++ ) {
 		//for( jj = 0; jj < img->width; jj++ ) {
 			//t = ((uchar *)(img->imageData + img->widthStep * ii))[jj];
 			//if(t>0){
 				//printf("FILTERED IMAGE VALUES %d \n", t);
-			//}	
+			//}
 		//}
 	//}
 } /* end vision_threshold() */
@@ -1397,7 +1401,7 @@ void vision_threshold( IplImage *img,
  * 				RGB thresholds
  *
  * Input:       img: The binary image to perform filter upon.
- *				rgb_thresh: rgb thresholds for filtering. Format - 
+ *				rgb_thresh: rgb thresholds for filtering. Format -
  * 					{ rmin , rmax , gmin , gmax , bmin , bmax }
  *
  * Output:      None.
@@ -1410,7 +1414,7 @@ void vision_rgb_ratio_filter( IplImage *img , double * rgb_thresh ) {
 	int ii = 0;
 	int jj = 0;
 	enum rgb_index { b , g , r };
-	
+
 	uchar *pixel;
 	double rg = 0.0;
 	double rb = 0.0;
@@ -1421,25 +1425,25 @@ void vision_rgb_ratio_filter( IplImage *img , double * rgb_thresh ) {
 		fprintf( stderr , "vision_rgb_ratio_filter () - \n "
 				"Input image is null!\n");
 	}
-	
+
 	if( rgb_thresh == NULL ) {
 		fprintf( stderr , "vision_rgb_ratio_filter () - \n "
 				"Incoming rgb threshold param is null!\n");
 	}
-	
+
 	/* For each channel in the original image modify the RGB values. */
 	for( ii = 0; ii < img->height; ii++ )
 	{
 		for( jj = 0; jj < img->width; jj++ )
 		{
 			pixel = &((uchar *)(img->imageData + img->widthStep * ii))[jj * 3];
-			
+
 			/* Compute ratios. Check for div/0. */
 			if( pixel[g] != 0 )
 				rg = (double)pixel[r] / pixel[g];
 			else
 				rg = 0;
-			
+
 			if( pixel[b] != 0 )
 			{
 				rb = (double)pixel[r] / pixel[b];
@@ -1450,13 +1454,13 @@ void vision_rgb_ratio_filter( IplImage *img , double * rgb_thresh ) {
 				rb = 0;
 				gb = 0;
 			}
-			
+
 			/* If the pixel is outside the threshold, turn it to black */
 			if( !( rg >= rgb_thresh[0] && rg <= rgb_thresh[1] &&
 				   rb >= rgb_thresh[2] && rb <= rgb_thresh[3] &&
 				   gb >= rgb_thresh[4] && gb <= rgb_thresh[5] ) )
 			{
-				
+
 				pixel[b] =
 				pixel[g] =
 				pixel[r] = 0;
@@ -1465,7 +1469,7 @@ void vision_rgb_ratio_filter( IplImage *img , double * rgb_thresh ) {
 			{
 				/* If the product of the ratios is too small when the sum
 				 * is below a certain threshold, throw away pixel */
-				if( (rg*rb*gb) < rgb_thresh[6] && 
+				if( (rg*rb*gb) < rgb_thresh[6] &&
 					 (pixel[r]+pixel[g]+pixel[b]) <= rgb_thresh[7] )
 				{
 				  	pixel[b] =
@@ -1479,7 +1483,7 @@ void vision_rgb_ratio_filter( IplImage *img , double * rgb_thresh ) {
 
 /******************************************************************************
  *
- * Title:       void vision_rgb_sum_filter( IplImage *img , 
+ * Title:       void vision_rgb_sum_filter( IplImage *img ,
  * 											double * rgb_sum  )
  *
  * Description: Turns any pixel black that doesn't match the input
@@ -1498,7 +1502,7 @@ void vision_rgb_sum_filter( IplImage *img , short * rgb_sum ) {
 	int ii = 0;
 	int jj = 0;
 	enum rgb_index { b , g , r };
-	
+
 	uchar *pixel;
 	short sum;
 
@@ -1507,21 +1511,21 @@ void vision_rgb_sum_filter( IplImage *img , short * rgb_sum ) {
 		fprintf( stderr , "vision_rgb_sum_filter () - \n "
 				"Input image is null!\n");
 	}
-	
+
 	if( rgb_sum == NULL ) {
 		fprintf( stderr , "vision_rgb_sum_filter () - \n "
 				"Incoming rgb sum param is null!\n");
 	}
-	
+
 	/* For each channel in the original image modify the RGB values. */
 	for( ii = 0; ii < img->height; ii++ )
 	{
 		for( jj = 0; jj < img->width; jj++ )
 		{
 			pixel = &((uchar *)(img->imageData + img->widthStep * ii))[jj * 3];
-			
+
 			sum = pixel[r] + pixel[g] + pixel[b];
-			
+
 			/* If the pixel is outside the threshold, turn it to black */
 			if( sum <= rgb_sum[0] || sum >= rgb_sum[1] )
 			{
