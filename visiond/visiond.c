@@ -369,6 +369,7 @@ int main( int argc, char *argv[] )
 			 * and populate the network message. */
 			if( status == 1 || status == 2 ) {
 				/* Set the detection status of vision */
+				printf("Bouy Status: %d\n", status);
 				msg.vision.data.status = TASK_PIPE_DETECTED;
 
 				msg.vision.data.bearing = bearing;
@@ -396,9 +397,7 @@ int main( int argc, char *argv[] )
 				if( status == 2 ) {
 					msg.vision.data.status = TASK_PIPE_CENTERED;
 				}
-				else {
-					msg.vision.data.status = TASK_PIPE_DETECTED;
-				}
+				
 			}
 			
 		} /* end TASK_PIPE */
