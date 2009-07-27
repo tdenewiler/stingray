@@ -1348,7 +1348,7 @@ void events_target_fy( GtkWidget *widget,
 {
     /* Set the target values to the spin buttons. */
     msg.target.data.fy = gtk_spin_button_get_value_as_float(
-                             (GtkSpinButton *)widget ) * -1;
+                             (GtkSpinButton *)widget );
 
     /* Send the state of the button to the server if not in MANUAL mode. */
     if( msg.target.data.mode != MANUAL ) {
