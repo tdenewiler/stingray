@@ -48,7 +48,7 @@
 #define VISIOND_NONE	6
 #endif /* VISIOND_MODES */
 
-#define VISIOND_FRONT_CAM_ANGLE_OFFSET  8
+#define VISIOND_FRONT_CAM_ANGLE_OFFSET  (-8)
 
 
 /******************************
