@@ -202,7 +202,7 @@ int task_buoy( MSG_DATA *msg, CONF_VARS *cf, int dt, int subtask_dt )
 		/* Check to see if we have detected the buoy. Else don't change yaw or
 		 * depth, just keep old values. */
 		if( msg->vision.data.status == TASK_BUOY_DETECTED ) {
-			/* Set target values based on current orientation and pixel error. */
+			/* Set target values based on current position and pixel error. */
 			msg->target.data.yaw = msg->status.data.yaw +
 				(float)msg->vision.data.front_x * TASK_BUOY_YAW_GAIN;
 			msg->target.data.depth = msg->status.data.depth +
@@ -239,7 +239,8 @@ int task_gate( MSG_DATA *msg, CONF_VARS *cf, int dt, int subtask_dt )
 			msg->target.data.depth = cf->depth_buoy;
 
 			/* Check to see if we have reached the target depth. */
-			if( fabsf(msg->status.data.depth - msg->target.data.depth) < SUBTASK_DEPTH_MARGIN ) {
+			if( fabsf(msg->status.data.depth - msg->target.data.depth) <
+				SUBTASK_DEPTH_MARGIN ) {
 				return SUBTASK_SUCCESS;
 			}
 			/* Check to see if too much time has elapsed. */
@@ -255,7 +256,8 @@ int task_gate( MSG_DATA *msg, CONF_VARS *cf, int dt, int subtask_dt )
 			msg->target.data.yaw = cf->heading_gate;
 			
 			/* Check to see if we have reached the target heading. */
-			if( fabsf(msg->status.data.yaw - msg->target.data.yaw) < SUBTASK_YAW_MARGIN ) {
+			if( fabsf(msg->status.data.yaw - msg->target.data.yaw) <
+				SUBTASK_YAW_MARGIN ) {
 				return SUBTASK_SUCCESS;
 			}
 			/* Check to see if too much time has elapsed. */
@@ -268,7 +270,7 @@ int task_gate( MSG_DATA *msg, CONF_VARS *cf, int dt, int subtask_dt )
 		
 		case SUBTASK_CORRECT:
 			/* Move forward for a set amount of time. Multiply by 1,000,000 to
-			 * move from seconds to microseconds because dt is in
+			 * convert from seconds to microseconds because dt is in
 			 * microseconds. */
 			if( subtask_dt < SUBTASK_GATE_MOVE_TIME * 1000000 ) {
 				msg->target.data.fy = POLOLU_MOVE_FORWARD;
@@ -282,6 +284,8 @@ int task_gate( MSG_DATA *msg, CONF_VARS *cf, int dt, int subtask_dt )
 			}
 		}
 	}
+	
+	/* Non-course mode. */
 	else {
 		/* Use the known direction from the start dock to the gate here. */
 		msg->target.data.yaw = cf->heading_buoy;
@@ -315,27 +319,16 @@ int task_gate( MSG_DATA *msg, CONF_VARS *cf, int dt, int subtask_dt )
 
 int task_pipe( MSG_DATA *msg, CONF_VARS *cf, int dt, int subtask_dt )
 {
-	/* Temporary for testing of non course "else" */
-	const static int NON_COURSE_SUBTASK_CENTER 		= 0;
-	const static int NON_COURSE_SUBTASK_YAW_CORRECT = 1;
-	const static int NON_COURSE_SUBTASK_DRIVE 		= 2;
-
-	/* Holds the place of msg->task.data.subtask */
-	static int non_course_subtask = NON_COURSE_SUBTASK_CENTER;
-
-	/* Timers for centering and bearing correction */
-	static int time_ref_center  = SUBTASK_TIME_REF_NOT_SET;
-	static int time_ref_bearing = SUBTASK_TIME_REF_NOT_SET;
-	static int time_ref_drive   = SUBTASK_TIME_REF_NOT_SET;
-
 	if( msg->task.data.course == TASK_COURSE_ON ) {
-
 		switch( msg->task.data.subtask ) {
 
 		case SUBTASK_SEARCH_DEPTH:
+			/* Set depth to configuration file value. */
 			msg->target.data.depth = cf->depth_pipe;
+			
 			/* Check to see if we have reached the target depth. */
-			if( fabsf(msg->status.data.depth - msg->target.data.depth) < SUBTASK_DEPTH_MARGIN ) {
+			if( fabsf(msg->status.data.depth - msg->target.data.depth) <
+				SUBTASK_DEPTH_MARGIN ) {
 				return TASK_SUCCESS;
 			}
 			/* Check to see if too much time has elapsed. */
@@ -351,6 +344,27 @@ int task_pipe( MSG_DATA *msg, CONF_VARS *cf, int dt, int subtask_dt )
 			msg->target.data.fy = POLOLU_MOVE_FORWARD;
 
 			if( msg->vision.data.status == TASK_PIPE_DETECTED ) {
+				/* Set forward speed to zero. If we are not at the centroid the
+				 * next subtask will correct for it. */
+				msg->target.data.fy = 0;
+				return SUBTASK_SUCCESS;
+			}
+			/* Check to see if too much time has elapsed. */
+			else if( subtask_dt > SUBTASK_MAX_SEARCH_TIME ) {
+				return SUBTASK_FAILURE;
+			}
+			else {
+				return SUBTASK_CONTINUING;
+			}
+
+		case SUBTASK_CORRECT:
+			/* Set fx and fy based on centroid pixel error. */
+			msg->target.data.fx = msg->vision.data.bottom_x * TASK_PIPE_FX_GAIN;
+			msg->target.data.fy = msg->vision.data.bottom_y * TASK_PIPE_FY_GAIN;
+
+			/* Check to see if we are over the centroid. */
+			if( msg->vision.data.bottom_x < TASK_PIPE_X_THRESH &&
+				msg->vision.data.bottom_y < TASK_PIPE_Y_THRESH ) {
 				return SUBTASK_SUCCESS;
 			}
 			else if( subtask_dt > SUBTASK_MAX_SEARCH_TIME ) {
@@ -360,154 +374,45 @@ int task_pipe( MSG_DATA *msg, CONF_VARS *cf, int dt, int subtask_dt )
 				return SUBTASK_CONTINUING;
 			}
 
-		case SUBTASK_CORRECT:
-			/* Set target values based on current orientation and pixel error. */
-			msg->target.data.yaw    = msg->status.data.yaw + (float)msg->vision.data.bottom_y * TASK_PIPE_YAW_GAIN;
-			msg->target.data.fx     = msg->vision.data.bottom_x * TASK_PIPE_FX_GAIN;
-			if( msg->target.data.fx > TASK_PIPE_FX_MAX ) {
-				msg->target.data.fx = TASK_PIPE_FX_MAX;
-			}
-			else if( msg->target.data.fx < -1 * TASK_PIPE_FX_MAX ) {
-				msg->target.data.fx = -1 * TASK_PIPE_FX_MAX;
-			}
-
-			/* TODO: Need a way to check for SUCCESS or FAILURE in this case. */
-			return SUBTASK_CONTINUING;
-
 		case SUBTASK_PIPE_END:
-			/* TODO: Add in details for this case. */
-			/* To implement this correctly, the interface between having
-			 * control in this method vs the next method needs to be worked out
-			 * for each transition */
-			/* A return value in this case to allow transition (ie success or failure)
-			 * must be added here*/
-			break;
+			/* Set heading base on pixel error. */
+			msg->target.data.yaw = msg->status.data.yaw +
+				msg->vision.data.bearing * TASK_PIPE_YAW_GAIN;
+			
+			/* Check to see if we are at pipe heading. */
+			if( fabsf(msg->target.data.yaw - msg->status.data.yaw) <
+				TASK_PIPE_YAW_THRESH ) {
+				return TASK_SUCCESS;
+			}
+			/* Check to see if too much time has elapsed. */
+			else if( subtask_dt > SUBTASK_MAX_SEARCH_TIME ) {
+				return SUBTASK_FAILURE;
+			}
+			else {
+				return SUBTASK_CONTINUING;
+			}
 		}
 	}
+	
+	/* Non-course mode. */
 	else {
-		/* Non-course mode */
-		/* If the pipe is detected, make course correction */
-		if( msg->vision.data.status == TASK_PIPE_DETECTED ) {
-
-
-			/* ======== CENTERING ============ */
-			/* Get the x & y fixed correctly */
-			/* Set the values based on current orientation and pixel error. */
-			if( non_course_subtask == NON_COURSE_SUBTASK_CENTER ) {
-
-				/* Set the new targets then check for bounds */
-				msg->target.data.fx = msg->vision.data.bottom_x * TASK_PIPE_FX_GAIN;
-				msg->target.data.fy = msg->vision.data.bottom_y * TASK_PIPE_FY_GAIN;
-
-				/* fx & fy bound check */
-				if( fabsf(msg->target.data.fx) > TASK_PIPE_FX_MAX ) {
-					msg->target.data.fx = util_sign_value( msg->target.data.fx ) * TASK_PIPE_FX_MAX;
-				}
-				if( fabsf(msg->target.data.fy) > TASK_PIPE_FY_MAX ) {
-					msg->target.data.fy = util_sign_value( msg->target.data.fy ) * TASK_PIPE_FY_MAX;
-				}
-
-				/* If we are in the window, we are done centering */
-				if( abs(msg->vision.data.bottom_x) < SUBTASK_PIPE_WINDOW_X &&
-				    abs(msg->vision.data.bottom_y) < SUBTASK_PIPE_WINDOW_Y ) {
-
-				    /* Start the centering timer */
-				    if( time_ref_center == SUBTASK_TIME_REF_NOT_SET ) {
-				    	time_ref_center = dt;
-					}
-
-					/* Check if we have waited long enough for the centering timeout*/
-					if( ( dt - time_ref_center ) > SUBTASK_TIME_WAIT_CENTER ) {
-
-						/* Reset the centering timer to the "not set" value so it can
-						 * be reused */
-						time_ref_center = SUBTASK_TIME_REF_NOT_SET;
-
-						/* Increment the subtask. This is where we should return subtask success. */
-						non_course_subtask++;
-
-						/* Print that we are done with this to the screen */
-						printf( "Done Centering over Pipe" );
-					}
-				}
-			}/* ======== END CENTERING ============ */
-
-
-
-			/* ======== BEARING CORRECT ============ */
-			/* Now that we are centered, correct the yaw and fx */
-			if( non_course_subtask == NON_COURSE_SUBTASK_YAW_CORRECT ) {
-
-				/* Set the values based on current orientation and pixel error. */
-				msg->target.data.yaw = msg->status.data.yaw + msg->vision.data.bearing * TASK_PIPE_YAW_GAIN;
-				msg->target.data.fx  = msg->vision.data.bottom_x * TASK_PIPE_FX_GAIN;
-
-				/* Check the bounds of fx */
-				if( fabsf(msg->target.data.fx) > TASK_PIPE_FX_MAX ) {
-					msg->target.data.fx = util_sign_value( msg->target.data.fx ) * TASK_PIPE_FX_MAX;
-				}
-
-				/* If we are in the bearing range, we are done setting the bearing */
-				if(  abs (msg->vision.data.bottom_x ) < SUBTASK_PIPE_WINDOW_X &&
-				    fabsf(msg->status.data.yaw_perr ) < SUBTASK_PIPE_ANGLE_MARGIN ) {
-
-				    /* Start the centering timer */
-				    if( time_ref_bearing == SUBTASK_TIME_REF_NOT_SET ) {
-				    	time_ref_bearing = dt;
-					}
-
-					/* Check if we have waited long enough for the centering timeout*/
-					if( ( dt - time_ref_bearing ) > SUBTASK_TIME_WAIT_BEARING ) {
-
-						/* Reset the centering timer to the "not set" value so it can
-						 * be reused */
-						time_ref_bearing = SUBTASK_TIME_REF_NOT_SET;
-
-						/* Increment the subtask. This is where we should return subtask success. */
-						non_course_subtask++;
-
-						/* Print that we are done with this to the screen */
-						printf( "Done Correcting the bearing over Pipe" );
-					}
-				}
-			}/* ======== END BEARING CORRECT ============ */
-
-
-			/* ======== DRIVE FORWARDS ============ */
-			/* Drive forward once we have our bearing */
-			if( non_course_subtask == NON_COURSE_SUBTASK_DRIVE ) {
-
-				/* Set the timer if it hasn't been set */
-				if( time_ref_drive == SUBTASK_TIME_REF_NOT_SET ) {
-					time_ref_drive = dt;
-				}
-
-				/* If there is a timeout, we are done, reset everything */
-				if( ( dt - time_ref_drive ) > SUBTASK_PIPE_DRIVE_TIMEOUT ) {
-
-					/* Reset the reference time */
-					time_ref_drive = SUBTASK_TIME_REF_NOT_SET;
-
-					/* Reset the subtask number */
-					non_course_subtask = NON_COURSE_SUBTASK_CENTER;
-
-					/* This will get annoying */
-					printf( "Done with pipe.\n" );
-
-					/* In course mode, return success */
-				}
-			}/* ======== END DRIVE FORWARDS ============ */
-
-			return SUBTASK_CONTINUING;
+		/* Move forward until pipe is detected. */
+		if( msg->vision.data.status != TASK_PIPE_CENTERED ||
+			msg->vision.data.status != TASK_PIPE_DETECTED ) {
+			msg->target.data.fy = POLOLU_MOVE_FORWARD;
 		}
-		else { /* If we lose the pipe, reset wait times for centering & cearing correct */
-
-			time_ref_center  = SUBTASK_TIME_REF_NOT_SET;
-			time_ref_bearing = SUBTASK_TIME_REF_NOT_SET;
-			time_ref_drive   = SUBTASK_TIME_REF_NOT_SET;
+		/* Move fx and fy until we are centered. */
+		else if( msg->vision.data.status == TASK_PIPE_DETECTED ) {
+			msg->target.data.fx = msg->vision.data.bottom_x * TASK_PIPE_FX_GAIN;
+			msg->target.data.fy = msg->vision.data.bottom_y * TASK_PIPE_FY_GAIN;
 		}
-
-		return TASK_CONTINUING;
+		/* Correct yaw. */
+		else {
+			msg->target.data.fx = 0;
+			msg->target.data.fy = 0;
+			msg->target.data.yaw = msg->status.data.yaw +
+				msg->vision.data.bearing * TASK_PIPE_YAW_GAIN;
+		}
 	}
 
 	return TASK_CONTINUING;

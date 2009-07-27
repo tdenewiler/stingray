@@ -377,13 +377,19 @@ int main( int argc, char *argv[] )
 								(img->width / 2) + ii ),
 								2, cvScalar(0, 0, 255), 2 );
 				}
-
-				/* Requires some sore of exit criteria. */
+				
+				if( status == 2 ) {
+					msg.vision.data.status = TASK_PIPE_CENTERED;
+				}
+				else {
+					msg.vision.data.status = TASK_PIPE_DETECTED;
+				}
 			}
 			else {
 				/* No positive detection. */
 				msg.vision.data.status = TASK_NOT_DETECTED;
 			}
+
 			if( status == 2 ) {
 				msg.vision.data.status = TASK_BUOY_TOUCHED;
 			}
