@@ -136,6 +136,7 @@ int main( int argc, char *argv[] )
     IplImage *img = NULL;
     IplImage *img_eq = NULL;
 	const char *win = "Image";
+	const char *binwin = "Binary";
     CvVideoWriter *f_writer = 0;
     CvVideoWriter *b_writer = 0;
     int is_color = TRUE;
@@ -286,6 +287,7 @@ int main( int argc, char *argv[] )
     /* Create windows to display video if set in configuration file. */
 	if( cf.vision_window ) {
 		cvNamedWindow( win, CV_WINDOW_AUTOSIZE );
+		cvNamedWindow( binwin, CV_WINDOW_AUTOSIZE );
 	}
     printf("MAIN: Vision server running now.\n");
 
@@ -638,16 +640,20 @@ int main( int argc, char *argv[] )
 			/* Determine which image to show in which window. */
 			switch( vision_mode ) {
 			case VISIOND_FCOLOR:
-			cvShowImage( win, img );
+				cvShowImage( win, img );
+				cvShowImage( binwin, bin_img );
 				break;
 			case VISIOND_FBINARY:
 				cvShowImage( win, bin_img );
+				cvShowImage( binwin, bin_img );
 				break;
 			case VISIOND_BCOLOR:
 				cvShowImage( win, img );
+				cvShowImage( binwin, bin_img );
 				break;
 			case VISIOND_BBINARY:
 				cvShowImage( win, bin_img );
+				cvShowImage( binwin, bin_img );
 				break;
 			case VISIOND_NONE:
 				break;
@@ -658,10 +664,12 @@ int main( int argc, char *argv[] )
 				case VISIOND_FCOLOR:
 					img = cvQueryFrame( f_cam );
 					cvShowImage( win, img );
+					cvShowImage( binwin, bin_img );
 					break;
 				case VISIOND_BCOLOR:
 					img = cvQueryFrame( b_cam );
 					cvShowImage( win, img );
+					cvShowImage( binwin, bin_img );
 					break;
 				}
 			}
