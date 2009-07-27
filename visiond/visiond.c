@@ -334,10 +334,6 @@ int main( int argc, char *argv[] )
 
 				/* Requires some sore of exit criteria. */
 			}
-			else {
-				/* No positive detection. */
-				msg.vision.data.status = TASK_NOT_DETECTED;
-			}
 		} /* end TASK_BUOY */
 
 		else if( task == TASK_PIPE && f_cam && pipe_type == VISION_PIPE_HSV ) {

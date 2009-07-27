@@ -210,6 +210,7 @@ void events_tasks( GtkWidget *widget,
     }
     else if( widget == button_task_none ) {
         msg.task.data.task     = TASK_NONE;
+        
 		msg.target.data.pitch = msg.status.data.pitch;
 		msg.target.data.roll  = msg.status.data.roll;
 		msg.target.data.yaw   = msg.status.data.yaw;

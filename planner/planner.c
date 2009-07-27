@@ -466,6 +466,14 @@ int main( int argc, char *argv[] )
 				gettimeofday( &subtask_start, NULL);
 			}
 		}
+		else { /* If we are not in course mode and get a status of
+				* something other than task continue, reset the timers */
+			if( status == TASK_SUCCESS || status == TASK_FAILURE ) {
+				gettimeofday( &task_start, NULL );
+				gettimeofday( &subtask_start, NULL );
+			}
+			
+		}
 
 		/* Update timers. */
 		gettimeofday( &vision_time, NULL );
