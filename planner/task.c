@@ -440,37 +440,11 @@ int task_pipe( MSG_DATA *msg, CONF_VARS *cf, int dt, int subtask_dt )
 		}
 		
 		/* Move forward until pipe is detected. */
-		if( msg->vision.data.status != TASK_PIPE_CENTERED ||
+		if( msg->vision.data.status != TASK_PIPE_CENTERED &&
 			msg->vision.data.status != TASK_PIPE_DETECTED ) {
 			msg->target.data.fy = POLOLU_MOVE_FORWARD;
 		}
-		
-		if( msg->vision.data.status == TASK_PIPE_CENTERED ) {
-			msg->target.data.fx = 0;
-			msg->target.data.fy = 0;
-			msg->target.data.yaw = msg->status.data.yaw +
-				msg->vision.data.bearing * TASK_PIPE_YAW_GAIN;
-				
-			if( !hasCentered ) {
-				printf( "Planner: Pipe Centered\n" );
-				hasCentered = TRUE;
-			}
-		}
-		else if( msg->vision.data.status == TASK_PIPE_DETECTED ) {
-			
-			msg->target.data.fx = msg->vision.data.bottom_x * TASK_PIPE_FX_GAIN;
-			msg->target.data.fy = msg->vision.data.bottom_y * TASK_PIPE_FY_GAIN;
-			
-			if( !hasDetected ) {
-				printf( "Planner: Pipe Detected\n" );
-				hasDetected = TRUE;
-			}
-		}
-		
-		
-		
-		
-		/* Move fx and fy until we are centered. *
+		/* Move fx and fy until we are centered. */
 		else if( msg->vision.data.status == TASK_PIPE_DETECTED ) {
 			msg->target.data.fx = msg->vision.data.bottom_x * TASK_PIPE_FX_GAIN;
 			msg->target.data.fy = msg->vision.data.bottom_y * TASK_PIPE_FY_GAIN;
@@ -480,7 +454,7 @@ int task_pipe( MSG_DATA *msg, CONF_VARS *cf, int dt, int subtask_dt )
 				hasDetected = TRUE;
 			}
 		}
-		/* Correct yaw. ( status ==  TASK_PIPE_CENTERED ) *
+		/* Correct yaw. ( status ==  TASK_PIPE_CENTERED ) */
 		else {
 			msg->target.data.fx = 0;
 			msg->target.data.fy = 0;
@@ -492,8 +466,6 @@ int task_pipe( MSG_DATA *msg, CONF_VARS *cf, int dt, int subtask_dt )
 				hasCentered = TRUE;
 			}
 		}
-		* 
-		*/
 	}
 
 	return TASK_CONTINUING;
