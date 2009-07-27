@@ -436,6 +436,11 @@ void parse_line( CONF_VARS *config )
         else if( strncmp( tokens[1], "vH", STRING_SIZE ) == 0 ) {
             sscanf( tokens[2], "%f", &config->buoy_vH );
         }
+		else if( strncmp( tokens[1], "blind", STRING_SIZE ) == 0 ) {
+			if( strncmp( tokens[2], "time", STRING_SIZE ) == 0 ) {
+				sscanf( tokens[3], "%d", &config->buoy_blind_time );
+			}
+		}
     }
     else if( strncmp( tokens[0], "fence", STRING_SIZE ) == 0 ) {
         if( strncmp( tokens[1], "hL", STRING_SIZE ) == 0 ) {
@@ -855,6 +860,7 @@ void parse_default_config( CONF_VARS *config )
     config->op_mode = 1;
     config->enable_log = FALSE;
 	config->dock_time = 0;
+	config->buoy_blind_time = 0;
 } /* end parse_default_config() */
 
 
@@ -980,4 +986,5 @@ void parse_print_config( CONF_VARS *config )
 	printf("PARSE_PRINT_CONFIG: subtask_start = %d\n", config->subtask_start);
 	printf("PARSE_PRINT_CONFIG: course_start = %d\n", config->course_start);
 	printf("PARSE_PRINT_CONFIG: dock_time = %d\n", config->dock_time);
+	printf("PARSE_PRINT_CONFIG: buoy_blind_time = %d\n", config->buoy_blind_time);
 } /* end parse_default_config() */

@@ -159,6 +159,7 @@ typedef struct _CONF_VARS {
 	int			subtask_start;
 	int			course_start;
 	int			dock_time;
+	int			buoy_blind_time;
 } CONF_VARS;
 
 #endif /* _CONF_VARS_ */
