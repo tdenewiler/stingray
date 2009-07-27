@@ -55,10 +55,17 @@
 #endif /* VISION_TASK */
 
 #ifndef VISION_PIPE_TYPE
-#define VISION_PIPE_TYPE	1
+#define VISION_PIPE_TYPE
 #define VISION_PIPE_HSV		1
 #define VISION_PIPE_BOX		2
 #endif /* VISION_PIPE_TYPE */
+
+#ifndef VISION_CHANNELS
+#define VISION_CHANNELS
+#define VISION_CHANNEL1	1
+#define VISION_CHANNEL2	2
+#define VISION_CHANNEL3	4
+#endif /* VISION_CHANNELS */
 
 
 /******************************
@@ -177,11 +184,17 @@ int vision_window_filter( IplImage *img,
 
 //! Performs Gaussian smoothing on an image.
 //! \param img The image to smooth.
-void vision_smooth( IplImage *img );
+//! \param mode Sort of a mask to figure out which channels to operate on. Set
+//! channel 1 = 1, channel 2 = 2, channel 3 = 4. Then add the channels that are
+//! to be operated on.
+void vision_smooth( IplImage *img, int mode );
 
 //! Performs histogram equalization on an image.
 //! \param img The image to equalize histogram of.
-void vision_hist_eq( IplImage *img );
+//! \param mode Sort of a mask to figure out which channels to operate on. Set
+//! channel 1 = 1, channel 2 = 2, channel 3 = 4. Then add the channels that are
+//! to be operated on.
+void vision_hist_eq( IplImage *img, int mode );
 
 //! Balances the colors in an image.
 //! \param img The image to modify.

@@ -75,7 +75,8 @@ int vision_find_dot( int *dotx,
     cvCvtColor( srcImg, hsvImg, CV_RGB2HSV );
 
 	/* Equalize the histograms of each channel. */
-	vision_hist_eq( hsvImg );
+	vision_hist_eq( hsvImg,
+		VISION_CHANNEL1 + VISION_CHANNEL2 + VISION_CHANNEL3 );
 
 	/* Threshold all three channels using our own values. */
     cvInRangeS( hsvImg, cvScalar(hsv->hL, hsv->sL, hsv->vL),
@@ -170,7 +171,8 @@ int vision_find_pipe( int *pipex,
     cvCvtColor( srcImg, hsvImg, CV_RGB2HSV );
 
 	/* Equalize the histograms of each channel. */
-	vision_hist_eq( hsvImg );
+	vision_hist_eq( hsvImg,
+		VISION_CHANNEL1 + VISION_CHANNEL2 + VISION_CHANNEL3 );
 
 	/* Threshold all three channels using our own values. */
     cvInRangeS( hsvImg, cvScalar(hsv->hL, hsv->sL, hsv->vL),
@@ -479,7 +481,8 @@ int vision_find_fence( int *fence_center,
     cvCvtColor( srcImg, hsvImg, CV_RGB2HSV );
 
 	/* Equalize the histograms of each channel. */
-	vision_hist_eq( hsvImg );
+	vision_hist_eq( hsvImg,
+		VISION_CHANNEL1 + VISION_CHANNEL2 + VISION_CHANNEL3 );
 
 	/* Threshold all three channels using our own values. */
     cvInRangeS( hsvImg, cvScalar(hsv->hL, hsv->sL, hsv->vL),
@@ -490,7 +493,7 @@ int vision_find_fence( int *fence_center,
 	cvErode( outImg, binImg, wS );
 
     /* Process the image. */
-    *y_max = vision_get_fence_bottom( binImg, &center );
+    //*y_max = vision_get_fence_bottom( binImg, &center );
 	
 	/* Check to see how many pixels are detected in the image. */
 	num_pix = cvCountNonZero( binImg );
@@ -632,11 +635,13 @@ int vision_find_boxes( CvCapture *cap,
 	 * source image needs to be kept clean so that we can display it later. */
 	img = cvCloneImage( srcImg );
 
-	/* Smooth the image with a Gaussian filter. */
-	vision_smooth( img );
+	/* Smooth the image with a Gaussian filter. Add the channels to smooth to
+	 * the second argument. */
+	vision_smooth( img, VISION_CHANNEL3 );
 
 	/* Equalize the histograms of each channel. */
-	vision_hist_eq( img );
+	vision_hist_eq( img,
+		VISION_CHANNEL1 + VISION_CHANNEL2 + VISION_CHANNEL3 );
 
 	/* Look for boxes in the image. */
 	status = vision_find_squares( img, storage, result, squares, task, angle );
@@ -1082,17 +1087,20 @@ int vision_window_filter( IplImage *img,
 
 /******************************************************************************
  *
- * Title:       void vision_smooth(  IplImage *img )
+ * Title:       void vision_smooth(  IplImage *img, int mode )
  *
  * Description: Performs Gaussian smoothing on an image.
  *
  * Input:       img: The image to smooth.
+ *              mode: Sort of a mask to figure out which channels to operate
+ * 				on. Set channel 1 = 1, channel 2 = 2, channel 3 = 4. Then add
+ * 				the channels that are to be operated on.
  *
  * Output:      None.
  *
  *****************************************************************************/
 
-void vision_smooth( IplImage *img )
+void vision_smooth( IplImage *img, int mode )
 {
 	/* Declare variables. */
     IplImage *clone = NULL;
@@ -1113,15 +1121,21 @@ void vision_smooth( IplImage *img )
     /* Filter each plane with a Gaussian and merge back to original image.  */
     cvSetImageCOI( clone, 1 );
     cvCopy( clone, tgray1, 0 );
-	//cvSmooth( tgray1, tgray1, CV_GAUSSIAN, smooth_size, smooth_size );
+	if( mode == 1 || mode == 3 || mode == 5 || mode == 7 ) {
+		cvSmooth( tgray1, tgray1, CV_GAUSSIAN, smooth_size, smooth_size );
+	}
 
 	cvSetImageCOI( clone, 2 );
     cvCopy( clone, tgray2, 0 );
-	//cvSmooth( tgray2, tgray2, CV_GAUSSIAN, smooth_size, smooth_size );
+	if( mode == 2 || mode == 3 || mode == 6 || mode == 7 ) {
+		//cvSmooth( tgray2, tgray2, CV_GAUSSIAN, smooth_size, smooth_size );
+	}
 
 	cvSetImageCOI( clone, 3 );
     cvCopy( clone, tgray3, 0 );
-	cvSmooth( tgray3, tgray3, CV_GAUSSIAN, smooth_size, smooth_size );
+	if( mode == 4 || mode == 5 || mode == 6 || mode == 7 ) {
+		cvSmooth( tgray3, tgray3, CV_GAUSSIAN, smooth_size, smooth_size );
+	}
 
 	cvMerge( tgray1, tgray2, tgray3, NULL, img );
 
@@ -1134,17 +1148,20 @@ void vision_smooth( IplImage *img )
 
 /******************************************************************************
  *
- * Title:       void vision_hist_eq(  IplImage *img )
+ * Title:       void vision_hist_eq(  IplImage *img, int mode )
  *
  * Description: Performs histogram equalization on an image.
  *
  * Input:       img: The image to equalize histogram of.
+ *              mode: Sort of a mask to figure out which channels to operate
+ * 				on. Set channel 1 = 1, channel 2 = 2, channel 3 = 4. Then add
+ * 				the channels that are to be operated on.
  *
  * Output:      None.
  *
  *****************************************************************************/
 
-void vision_hist_eq( IplImage *img )
+void vision_hist_eq( IplImage *img, int mode )
 {
 	/* Declare variables. */
     IplImage *clone = NULL;
@@ -1179,9 +1196,15 @@ void vision_hist_eq( IplImage *img )
     cvCopy( clone, tgray3, 0 );
 
 	/* Equalize the histograms of each channel. */
-	cvEqualizeHist( tgray1, tgray1eq );
-	cvEqualizeHist( tgray2, tgray2eq );
-	cvEqualizeHist( tgray3, tgray3eq );
+	if( mode == 1 || mode == 3 || mode == 5 || mode == 7 ) {
+		cvEqualizeHist( tgray1, tgray1eq );
+	}
+	if( mode == 2 || mode == 3 || mode == 6 || mode == 7 ) {
+		cvEqualizeHist( tgray2, tgray2eq );
+	}
+	if( mode == 4 || mode == 5 || mode == 6 || mode == 7 ) {
+		cvEqualizeHist( tgray3, tgray3eq );
+	}
 
 	cvMerge( tgray1eq, tgray2eq, tgray3eq, NULL, img );
 
@@ -1351,8 +1374,8 @@ void vision_threshold( IplImage *img,
 	}
     /* Filter the image using convolution. */
     cvFilter2D( img, bin_img, kernel, cvPoint(floor(size/2),floor(size/2)) );
-	//cvEqualizeHist(bin_img,img);
 	img = cvCloneImage(bin_img);
+
 	/* Threshold the image based on type of threshold -- normal else adaptive. */
 	if( type == VISION_BINARY ) {
 		cvThreshold( img, bin_img, thresh, maxval, CV_THRESH_BINARY );
@@ -1360,17 +1383,8 @@ void vision_threshold( IplImage *img,
 	else {
 		cvAdaptiveThreshold( img, bin_img, maxval, CV_ADAPTIVE_THRESH_MEAN_C, CV_THRESH_BINARY_INV, 3, 5 );
 	}
-
-	//int t = 0;
-	//for( ii = 0; ii < img->height; ii++ ) {
-		//for( jj = 0; jj < img->width; jj++ ) {
-			//t = ((uchar *)(img->imageData + img->widthStep * ii))[jj];
-			//if(t>0){
-				//printf("FILTERED IMAGE VALUES %d \n", t);
-			//}
-		//}
-	//}
 } /* end vision_threshold() */
+
 
 /******************************************************************************
  *
@@ -1412,46 +1426,40 @@ void vision_rgb_ratio_filter( IplImage *img , double * rgb_thresh ) {
 	}
 
 	/* For each channel in the original image modify the RGB values. */
-	for( ii = 0; ii < img->height; ii++ )
-	{
-		for( jj = 0; jj < img->width; jj++ )
-		{
+	for( ii = 0; ii < img->height; ii++ ) {
+		for( jj = 0; jj < img->width; jj++ ) {
 			pixel = &((uchar *)(img->imageData + img->widthStep * ii))[jj * 3];
 
 			/* Compute ratios. Check for div/0. */
-			if( pixel[g] != 0 )
+			if( pixel[g] != 0 ) {
 				rg = (double)pixel[r] / pixel[g];
-			else
+			}
+			else {
 				rg = 0;
-
-			if( pixel[b] != 0 )
-			{
+			}
+			if( pixel[b] != 0 ) {
 				rb = (double)pixel[r] / pixel[b];
 				gb = (double)pixel[g] / pixel[b];
 			}
-			else
-			{
+			else {
 				rb = 0;
 				gb = 0;
 			}
 
-			/* If the pixel is outside the threshold, turn it to black */
+			/* If the pixel is outside the threshold, turn it to black. */
 			if( !( rg >= rgb_thresh[0] && rg <= rgb_thresh[1] &&
 				   rb >= rgb_thresh[2] && rb <= rgb_thresh[3] &&
-				   gb >= rgb_thresh[4] && gb <= rgb_thresh[5] ) )
-			{
+				   gb >= rgb_thresh[4] && gb <= rgb_thresh[5] ) ) {
 
 				pixel[b] =
 				pixel[g] =
 				pixel[r] = 0;
 			}
-			else
-			{
+			else {
 				/* If the product of the ratios is too small when the sum
-				 * is below a certain threshold, throw away pixel */
+				 * is below a certain threshold, throw away pixel. */
 				if( (rg*rb*gb) < rgb_thresh[6] &&
-					 (pixel[r]+pixel[g]+pixel[b]) <= rgb_thresh[7] )
-				{
+					 (pixel[r]+pixel[g]+pixel[b]) <= rgb_thresh[7] ) {
 				  	pixel[b] =
 					pixel[g] =
 					pixel[r] = 0;
@@ -1460,6 +1468,7 @@ void vision_rgb_ratio_filter( IplImage *img , double * rgb_thresh ) {
 		}
 	}
 } /* end vision_rgb_ratio_filter() */
+
 
 /******************************************************************************
  *
@@ -1482,35 +1491,19 @@ void vision_rgb_sum_filter( IplImage *img , short * rgb_sum ) {
 	int ii = 0;
 	int jj = 0;
 	enum rgb_index { b , g , r };
-
 	uchar *pixel;
 	short sum;
 
-	/* Validity check incoming parameters */
-	if( img == NULL ) {
-		fprintf( stderr , "vision_rgb_sum_filter () - \n "
-				"Input image is null!\n");
-	}
-
-	if( rgb_sum == NULL ) {
-		fprintf( stderr , "vision_rgb_sum_filter () - \n "
-				"Incoming rgb sum param is null!\n");
-	}
-
 	/* For each channel in the original image modify the RGB values. */
-	for( ii = 0; ii < img->height; ii++ )
-	{
-		for( jj = 0; jj < img->width; jj++ )
-		{
+	for( ii = 0; ii < img->height; ii++ ) {
+		for( jj = 0; jj < img->width; jj++ ) {
 			pixel = &((uchar *)(img->imageData + img->widthStep * ii))[jj * 3];
-
 			sum = pixel[r] + pixel[g] + pixel[b];
 
-			/* If the pixel is outside the threshold, turn it to black */
-			if( sum < rgb_sum[0] || sum > rgb_sum[1] )
-			{
-				pixel[b] =
-				pixel[g] =
+			/* If the pixel is outside the threshold, turn it to black. */
+			if( sum < rgb_sum[0] || sum > rgb_sum[1] ) {
+				pixel[b] = 0;
+				pixel[g] = 0;
 				pixel[r] = 0;
 			}
 		}
