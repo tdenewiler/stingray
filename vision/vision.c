@@ -74,9 +74,6 @@ int vision_find_dot( int *dotx,
     /* Segment the flipped image into a binary image. */
     cvCvtColor( srcImg, hsvImg, CV_RGB2HSV );
 
-	/* Smooth the image with a Gaussian filter. */
-	//vision_smooth( hsvImg );
-
 	/* Equalize the histograms of each channel. */
 	vision_hist_eq( hsvImg );
 
@@ -84,19 +81,9 @@ int vision_find_dot( int *dotx,
     cvInRangeS( hsvImg, cvScalar(hsv->hL, hsv->sL, hsv->vL),
 		cvScalar(hsv->hH, hsv->sH, hsv->vH), binImg );
 
-	/* Median filter image to remove outliers */
+	/* Use a median filter image to remove outliers. */
 	cvSmooth( binImg, outImg, CV_MEDIAN, 5, 5, 0. ,0. );
 	cvErode( outImg, binImg, wS );
-
-    //cvConvertScale( outImg, binImg, 255.0 );
-
-	/* Perform erosion, dilation, and conversion. */
-    //cvConvertScale( binImg, outImg, 255.0 );
-
-	/* Filter the image. */
-    //vision_window_filter( outImg, binImg, &center, 11, 11 );
-	//vision_threshold( outImg, binImg, VISION_ADAPTIVE, 11, 0.91 );
-	//cvErode( binImg, binImg, wL );
 
     /* Find the centroid. */
     center = vision_find_centroid( binImg, 5 );
@@ -109,9 +96,9 @@ int vision_find_dot( int *dotx,
 
 	/* Check to see how many pixels are detected in the image. */
 	num_pix = cvCountNonZero( binImg );
-	//if( num_pix > touch_thresh ) {
-		//return 2;
-	//}
+	if( num_pix > touch_thresh ) {
+		return 2;
+	}
 
 	/* Check that the values of dotx & doty are not negative */
 	if( dotx < 0 || doty < 0 ) {
