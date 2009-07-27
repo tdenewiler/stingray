@@ -152,8 +152,8 @@ int main( int argc, char *argv[] )
 	HSV hsv_fence;
 	int bouyTouchCount = 0;
 	double angleFrontCam = VISIOND_FRONT_CAM_ANGLE_OFFSET * M_PI /  180;
-	int capture_file = TRUE;
-	const char *video_file = "../../../../pics/stingrayCanyonView/out.avi";
+	int use_file = FALSE;
+	const char *video_file = "../../../../pics/stingrayCanyonView/out1.avi";
 	//const char *image_file =
 		//"../../../../pics/stingrayBackup/images/b20090717_135344.719209.jpg";
 
@@ -263,8 +263,11 @@ int main( int argc, char *argv[] )
 	}
 	else {
 		/* Open front camera. */
-		if( capture_file ) {
+		if( use_file ) {
 			printf("MAIN: Trying to open file for front camera.\n");
+			/* This isn't going to work for now in Linux according to
+			 * discussion groups. Seems to be an issue with codecs similar to
+			 * trying to write video to file. */
 			f_cam = cvCreateFileCapture( video_file );
 		}
 		else {
@@ -285,7 +288,7 @@ int main( int argc, char *argv[] )
 
 		/* Open bottom camera. */
 		camera = 1;
-		if( capture_file ) {
+		if( use_file ) {
 			b_cam = cvCreateFileCapture( video_file );
 		}
 		else {
