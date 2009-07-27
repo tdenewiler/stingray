@@ -61,7 +61,7 @@ void gui_update_status_text( )
     char sbuff[2048];
 
     sprintf( sbuff,
-             "Pitch, Roll, Yaw, Depth, Fx, Fy:\t[ %.3f\t%.3f\t%.3f\t%.3f ]\n"
+             "Pitch, Roll, Yaw, Depth:\t[ %.3f\t%.3f\t%.3f\t%.3f ]\n"
 			 "Fx, Fy, FPS:\t\t\t\t\t[ %.3f\t%.3f\t%.3lf ]\n"
              "Accel X, Y, Z:\t\t\t[ %.3f\t%.3f\t%.3f ]\n"
              "Ang Rate X, Y, Z:\t\t[ %.3f\t%.3f\t%.3f ]\n"
