@@ -387,14 +387,7 @@ int main( int argc, char *argv[] )
 					msg.vision.data.status = TASK_PIPE_DETECTED;
 				}
 			}
-			else {
-				/* No positive detection. */
-				msg.vision.data.status = TASK_NOT_DETECTED;
-			}
-
-			if( status == 2 ) {
-				msg.vision.data.status = TASK_BUOY_TOUCHED;
-			}
+			
 		} /* end TASK_PIPE */
 
 		else if( task == TASK_PIPE && f_cam && pipe_type == VISION_PIPE_BOX ) {
@@ -447,10 +440,7 @@ int main( int argc, char *argv[] )
 				cvClearSeq( boxes );
 				cvClearSeq( squares );
 			}
-		        else {
-				/* No positive detection. */
-				msg.vision.data.status = TASK_NOT_DETECTED;
-			}
+
 		} /* end TASK_PIPE */
 
 		else if( task == TASK_FENCE && f_cam ) {
@@ -588,6 +578,10 @@ int main( int argc, char *argv[] )
 		} /* end TASK_SUITCASE */
 
 		else {
+			
+			/* Clear the detection status */
+			msg.vision.data.status = TASK_NOT_DETECTED;
+			
 			/* No mode or no valid cameras -- Simulate. */
 			if( loop_counter % 100 == 0 ) {
 				msg.vision.data.front_x = loop_counter;

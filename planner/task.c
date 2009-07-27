@@ -417,7 +417,7 @@ int task_pipe( MSG_DATA *msg, CONF_VARS *cf, int dt, int subtask_dt )
 			msg->target.data.fx = msg->vision.data.bottom_x * TASK_PIPE_FX_GAIN;
 			msg->target.data.fy = msg->vision.data.bottom_y * TASK_PIPE_FY_GAIN;
 		}
-		/* Correct yaw. */
+		/* Correct yaw. ( status ==  TASK_PIPE_CENTERED ) */
 		else {
 			msg->target.data.fx = 0;
 			msg->target.data.fy = 0;
@@ -569,10 +569,6 @@ int task_boxes( MSG_DATA *msg, CONF_VARS *cf, int dt, int subtask_dt )
 				/* Print that we are done with this to the screen */
 				printf( "Centered over boxes." );
 			}
-		}
-		else {
-			//msg->target.data.fx = 0;
-			//msg->target.data.fy = 0;
 		}
 
 		return TASK_CONTINUING;
