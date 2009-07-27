@@ -148,6 +148,8 @@ int main( int argc, char *argv[] )
 	HSV buoy;
 	HSV pipe;
 	HSV fence;
+	int bouyTouchCount = 0;
+	const int bouyTouchCountThreshold = 5;
 
 	/* Temporary variable to make it easier to switch between using HSV
 	 *  olding or boxes to try and find pipe. HSV = 1, Boxes = 2. */
@@ -336,8 +338,10 @@ int main( int argc, char *argv[] )
 					10, cvScalar(255, 0, 0), 5, 8 );
 
 				if( status == 2 ) {
+					bouyTouchCount++;
 					/* We have touched the buoy. */
-					msg.vision.data.status = TASK_BUOY_TOUCHED;
+					if( bouyTouchCount >= bouyTouchCountThreshold )
+						msg.vision.data.status = TASK_BUOY_TOUCHED;
 				}
 			}
 		} /* end TASK_BUOY */
@@ -582,6 +586,9 @@ int main( int argc, char *argv[] )
 			
 			/* Clear the detection status */
 			msg.vision.data.status = TASK_NOT_DETECTED;
+			
+			/* Clear the bouy touch count */
+			bouyTouchCount = 0;
 			
 			/* No mode or no valid cameras -- Simulate. */
 			if( loop_counter % 100 == 0 ) {
