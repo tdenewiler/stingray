@@ -26,16 +26,17 @@
 //@{
 #define TASKS							1
 #define TASK_NONE						0
-#define TASK_GATE   					1
-#define TASK_PIPE1   					2
-#define TASK_BUOY   					3
-#define TASK_PIPE2   					4
-#define TASK_FENCE						5
-#define TASK_PIPE3   					6
-#define TASK_BOXES						7
-#define TASK_PIPE4   					8
-#define TASK_SUITCASE					9
-#define TASK_SURFACE					10
+#define TASK_DOCK						1
+#define TASK_GATE   					2
+#define TASK_PIPE1   					3
+#define TASK_BUOY   					4
+#define TASK_PIPE2   					5
+#define TASK_FENCE						6
+#define TASK_PIPE3   					7
+#define TASK_BOXES						8
+#define TASK_PIPE4   					9
+#define TASK_SUITCASE					10
+#define TASK_SURFACE					11
 #define TASK_COURSE						100
 #define TASK_COURSE_ON					TRUE
 #define TASK_COURSE_OFF					FALSE
@@ -250,5 +251,14 @@ int task_spin( MSG_DATA *msg, CONF_VARS *cf, int dt, int subtask_dt );
 //! \param subtask_dt The subtask time.
 //! \return Task status: Success, failure, continuing.
 int task_sweep( MSG_DATA *msg, CONF_VARS *cf, int dt, int subtask_dt );
+
+//! Operations to perform at the dock.
+//! \param msg The current message data.
+//! \param cf Configuration file variables.
+//! \param dt The task time.
+//! \param subtask_dt The subtask time.
+//! \return Task status: Success, failure, continuing.
+int task_dock( MSG_DATA *msg, CONF_VARS *cf, int dt, int subtask_dt );
+
 
 #endif /* _TASK_H_ */

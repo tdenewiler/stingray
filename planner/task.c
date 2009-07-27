@@ -139,9 +139,7 @@ int task_run( MSG_DATA *msg, CONF_VARS *cf, int dt, int subtask_dt )
 
 int task_buoy( MSG_DATA *msg, CONF_VARS *cf, int dt, int subtask_dt )
 {
-
 	if( msg->task.data.course == TASK_COURSE_ON ) {
-
 		switch( msg->task.data.subtask ) {
 
 		case SUBTASK_SEARCH_DEPTH:
@@ -158,7 +156,11 @@ int task_buoy( MSG_DATA *msg, CONF_VARS *cf, int dt, int subtask_dt )
 			else {
 				return SUBTASK_CONTINUING;
 			}
+			
 		case SUBTASK_SEARCH:
+			/* Set search yaw to configuration file value. */
+			msg->target.data.yaw = cf->heading_buoy;
+			
 			/* Start moving forward. */
 			msg->target.data.fy = POLOLU_MOVE_FORWARD;
 
@@ -275,18 +277,15 @@ int task_buoy( MSG_DATA *msg, CONF_VARS *cf, int dt, int subtask_dt )
 int task_gate( MSG_DATA *msg, CONF_VARS *cf, int dt, int subtask_dt )
 {
 	if( msg->task.data.course == TASK_COURSE_ON ) {
-
 		switch( msg->task.data.subtask ) {
 
 		case SUBTASK_SEARCH_DEPTH:
-			msg->target.data.depth = cf->depth_pipe;
-			msg->target.data.depth = cf->heading_gate;
+			/* Set depth to configuration file value. */
+			msg->target.data.depth = cf->depth_buoy;
 
 			/* Check to see if we have reached the target depth. */
 			if( fabsf(msg->status.data.depth - msg->target.data.depth) < SUBTASK_DEPTH_MARGIN ) {
-				if( fabsf(msg->status.data.yaw - msg->target.data.yaw) < SUBTASK_YAW_MARGIN ) {
-					return TASK_SUCCESS;
-				}
+				return SUBTASK_SUCCESS;
 			}
 			/* Check to see if too much time has elapsed. */
 			else if( subtask_dt > SUBTASK_MAX_SEARCH_TIME ) {
@@ -295,9 +294,30 @@ int task_gate( MSG_DATA *msg, CONF_VARS *cf, int dt, int subtask_dt )
 			else {
 				return SUBTASK_CONTINUING;
 			}
-		case SUBTASK_GATE_MOVE:
-			if( subtask_dt < SUBTASK_GATE_MOVE_TIME ) {
+		
+		case SUBTASK_SEARCH:
+			/* Set heading to configuration file value. */
+			msg->target.data.yaw = cf->heading_gate;
+			
+			/* Check to see if we have reached the target heading. */
+			if( fabsf(msg->status.data.yaw - msg->target.data.yaw) < SUBTASK_YAW_MARGIN ) {
+				return SUBTASK_SUCCESS;
+			}
+			/* Check to see if too much time has elapsed. */
+			else if( subtask_dt > SUBTASK_MAX_SEARCH_TIME ) {
+				return TASK_FAILURE;
+			}
+			else {
+				return SUBTASK_CONTINUING;
+			}
+		
+		case SUBTASK_CORRECT:
+			/* Move forward for a set amount of time. Multiply by 1,000,000 to
+			 * move from seconds to microseconds because dt is in
+			 * microseconds. */
+			if( subtask_dt < SUBTASK_GATE_MOVE_TIME * 1000000 ) {
 				msg->target.data.fy = POLOLU_MOVE_FORWARD;
+				return SUBTASK_CONTINUING;
 			}
 			else if( dt > SUBTASK_MAX_SEARCH_TIME ) {
 				return TASK_FAILURE;
@@ -308,12 +328,12 @@ int task_gate( MSG_DATA *msg, CONF_VARS *cf, int dt, int subtask_dt )
 		}
 	}
 	else {
-		/* Use the known direction from the start dock to the validation gate here. */
+		/* Use the known direction from the start dock to the gate here. */
 		msg->target.data.yaw = cf->heading_buoy;
 
 		/* Use a nominal starting depth for getting through the gate. It will
-		 * probably be equal to the depth of the buoy so that we can start looking
-		 * for the buoy right away. */
+		 * probably be equal to the depth of the buoy so that we can start
+		 * looking for the buoy right away. */
 		msg->target.data.depth = cf->depth_gate;
 
 		return TASK_CONTINUING;
@@ -923,3 +943,71 @@ int task_sweep( MSG_DATA *msg, CONF_VARS *cf, int dt, int subtask_dt )
 
 	return TASK_CONTINUING;
 } /* end task_spin() */
+
+
+/******************************************************************************
+ *
+ * Title:       int task_dock( MSG_DATA *msg, CONF_VARS *cf, int dt, int subtask, int subtask_dt )
+ *
+ * Description: Operations to perform at dock.
+ *
+ * Input:       msg: Current message data.
+ * 				cf: Configuration variables.
+ *              dt: The task time.
+ * 				subtask_dt: The subtask time.
+ *
+ * Output:      Task status: Success, failure, continuing.
+ *
+ *****************************************************************************/
+
+int task_dock( MSG_DATA *msg, CONF_VARS *cf, int dt, int subtask_dt )
+{
+	/* This task should be the same whether we are running the competition or
+	 * just testing the individual task. */
+
+	/* Check to see if we have time limit. */
+	if( subtask_dt > cf->dock_time ) {
+		/* Set gains and speed to configuration file values. */
+		msg->target.data.fx           = 0;
+		msg->target.data.fy           = 0;
+		msg->target.data.speed        = cf->target_speed;
+		msg->gain.data.kp_pitch       = cf->kp_pitch;
+		msg->gain.data.ki_pitch       = cf->ki_pitch;
+		msg->gain.data.kd_pitch       = cf->kd_pitch;
+		msg->gain.data.kp_roll        = cf->kp_roll;
+		msg->gain.data.ki_roll        = cf->ki_roll;
+		msg->gain.data.kd_roll        = cf->kd_roll;
+		msg->gain.data.kp_yaw         = cf->kp_yaw;
+		msg->gain.data.ki_yaw         = cf->ki_yaw;
+		msg->gain.data.kd_yaw         = cf->kd_yaw;
+		msg->gain.data.kp_depth       = cf->kp_depth;
+		msg->gain.data.ki_depth       = cf->ki_depth;
+		msg->gain.data.kd_depth       = cf->kd_depth;
+		msg->target.data.yaw_previous = TASK_YAW_PREVIOUS_NOT_SET;
+		msg->target.data.yaw_detected = TASK_YAW_DETECTED_NOT_SET;
+		
+		return TASK_SUCCESS;
+	}
+	else {
+		/* Set gains and speed to zero. */
+		msg->target.data.fx           = 0;
+		msg->target.data.fy           = 0;
+		msg->target.data.speed        = 0;
+		msg->gain.data.kp_pitch       = 0;
+		msg->gain.data.ki_pitch       = 0;
+		msg->gain.data.kd_pitch       = 0;
+		msg->gain.data.kp_roll        = 0;
+		msg->gain.data.ki_roll        = 0;
+		msg->gain.data.kd_roll        = 0;
+		msg->gain.data.kp_yaw         = 0;
+		msg->gain.data.ki_yaw         = 0;
+		msg->gain.data.kd_yaw         = 0;
+		msg->gain.data.kp_depth       = 0;
+		msg->gain.data.ki_depth       = 0;
+		msg->gain.data.kd_depth       = 0;
+		msg->target.data.yaw_previous = TASK_YAW_PREVIOUS_NOT_SET;
+		msg->target.data.yaw_detected = TASK_YAW_DETECTED_NOT_SET;
+
+		return TASK_CONTINUING;
+	}
+} /* end task_dock() */
