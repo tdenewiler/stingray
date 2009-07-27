@@ -96,7 +96,9 @@ int vision_find_dot( int *dotx,
 
 	/* Check to see how many pixels are detected in the image. */
 	num_pix = cvCountNonZero( binImg );
+	
 	printf( "Num Count: %d\n" , num_pix );
+	
 	if( num_pix > touch_thresh ) {
 		return 2;
 	}
