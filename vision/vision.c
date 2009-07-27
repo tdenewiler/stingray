@@ -147,7 +147,9 @@ int vision_find_pipe( int *pipex,
     IplImage *outImg = NULL;
     IplConvKernel *wS = cvCreateStructuringElementEx( 2, 2,
             (int)floor( ( 2.0 ) / 2 ), (int)floor( ( 2.0 ) / 2 ), CV_SHAPE_RECT );
-
+	int touch_thresh = 200;
+	int num_pix = 0;
+	
     /* Initialize to impossible values. */
     center.x = -10000;
     center.y = -10000;
@@ -165,9 +167,6 @@ int vision_find_pipe( int *pipex,
     /* Segment the flipped image into a binary image. */
     cvCvtColor( srcImg, hsvImg, CV_RGB2HSV );
 
-	/* Smooth the image with a Gaussian filter. */
-	//vision_smooth( hsvImg );
-
 	/* Equalize the histograms of each channel. */
 	vision_hist_eq( hsvImg );
 
@@ -179,14 +178,6 @@ int vision_find_pipe( int *pipex,
 	cvSmooth( binImg, outImg, CV_MEDIAN, 5, 5, 0. ,0. );
 	cvErode( outImg, binImg, wS );
 
-    /* Perform erosion, dilation, and conversion. */
-    //cvConvertScale( binImg, outImg, 255.0 );
-
-	/* Filter the image. */
-    //vision_window_filter( outImg, binImg, &center, 11, 11 );
-	//vision_threshold( outImg, binImg, VISION_ADAPTIVE, 1, 5. );
-	//cvErode( binImg, binImg, wL );
-
     /* Process the image to get the bearing and centroid. */
     *bearing = vision_get_bearing( outImg );
     center = vision_find_centroid( outImg, 0 );
@@ -197,6 +188,12 @@ int vision_find_pipe( int *pipex,
     cvReleaseImage( &hsvImg );
     cvReleaseImage( &hsv_clone );
     cvReleaseImage( &outImg );
+
+	/* Check to see how many pixels are detected in the image. */
+	num_pix = cvCountNonZero( binImg );
+	if( num_pix < touch_thresh ) {
+		return 0;
+	}
 
     /* No detection condition, only using bearing - not centroid. */
     if( fabs(*bearing) < bearing_delta_min )
