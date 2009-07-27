@@ -464,8 +464,8 @@ int main( int argc, char *argv[] )
 			img = cvQueryFrame( f_cam );
 
 			/* Look for the fence. */
-            status = vision_find_fence( &fence_center, &y_max, f_cam, img, bin_img,
-                    &fence );
+            status = vision_find_fence( &fence_center, &y_max, f_cam, img,
+				bin_img, &fence );
             if( status == 1 ) {
             	/* Set the detection status of vision. */
 				msg.vision.data.status = TASK_FENCE_DETECTED;
