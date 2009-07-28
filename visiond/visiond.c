@@ -178,9 +178,11 @@ int main( int argc, char *argv[] )
 	CvPoint *rect = pt;
 	int count = 4;
 
-	/* Timer. */
+	/* Timers. */
 	struct timeval fps_time = {0, 0};
 	struct timeval fps_start = {0, 0};
+	struct timeval save_time = {0, 0};
+	struct timeval save_start = {0, 0};
 	int time1s = 0;
 	int time1ms = 0;
 	int time2s = 0;
@@ -192,6 +194,8 @@ int main( int argc, char *argv[] )
 	/* Initialize timers. */
 	gettimeofday( &fps_time, NULL );
 	gettimeofday( &fps_start, NULL );
+	gettimeofday( &save_time, NULL );
+	gettimeofday( &save_start, NULL );
 
     printf( "MAIN: Starting Vision daemon ...\n" );
 
@@ -514,6 +518,9 @@ int main( int argc, char *argv[] )
 			/* Set to not detected to start and reset if we get a hit. */
 			msg.vision.data.status = TASK_NOT_DETECTED;
 
+			/* Get a new image. */
+			img = cvQueryFrame( f_cam );
+
 			/* Look for the boxes. */
 			status = vision_find_boxes( b_cam, img, boxes, squares, VISION_BOX,
 				&msg.vision.data.bearing );
@@ -563,6 +570,9 @@ int main( int argc, char *argv[] )
 		else if( task == TASK_SUITCASE && b_cam ) {
 			/* Set to not detected to start and reset if we get a hit. */
 			msg.vision.data.status = TASK_NOT_DETECTED;
+
+			/* Get a new image. */
+			img = cvQueryFrame( f_cam );
 
 			/* Look for the suitcase. */
 			status = vision_suitcase( b_cam, img, boxes, squares );
@@ -626,7 +636,7 @@ int main( int argc, char *argv[] )
                 recv_buf[recv_bytes] = '\0';
                 messages_decode( server_fd, recv_buf, &msg, recv_bytes );
 
-				/* Update local variable using network variables. */
+				/* Update local variables using network variables. */
                 task = msg.task.data.task;
 				hsv_pipe.hL = msg.vsetting.data.pipe_hsv.hL;
 				hsv_pipe.hH = msg.vsetting.data.pipe_hsv.hH;
@@ -707,43 +717,54 @@ int main( int argc, char *argv[] )
 
 		/* Calculate frames per second. */
 		nframes++;
-		time1s =    fps_time.tv_sec;
-		time1ms =   fps_time.tv_usec;
-		time2s =    fps_start.tv_sec;
-		time2ms =   fps_start.tv_usec;
+		time1s =  fps_time.tv_sec;
+		time1ms = fps_time.tv_usec;
+		time2s =  fps_start.tv_sec;
+		time2ms = fps_start.tv_usec;
 		dt = util_calc_dt( &time1s, &time1ms, &time2s, &time2ms );
 
 		if( dt > 1000000 ) {
-			fps = (double)nframes / (dt / 1000000);
+			fps = (double)nframes * (1000000 / dt);
 			gettimeofday( &fps_start, NULL );
 			nframes = 0;
 			msg.vision.data.fps = fps;
 			printf("MAIN: fps = %lf\n", fps);
 		}
 
-		/* Update timer. */
-		gettimeofday( &fps_time, NULL );
+		/* Save an image from both the front and bottom cameras using timer. */
+		if( cf.save_image_rate == 0 ) {
+			/* Do nothing. */
+		}
+		else {
+			/* Check save frame timer. */
+			time1s =  save_time.tv_sec;
+			time1ms = save_time.tv_usec;
+			time2s =  save_start.tv_sec;
+			time2ms = save_start.tv_usec;
+			dt = util_calc_dt( &time1s, &time1ms, &time2s, &time2ms );
+			if( dt > 1000000 / cf.save_image_rate ) {
+				if( f_cam ) {
+					img = cvQueryFrame( f_cam );
+					vision_save_frame( img );
+				}
+				if( b_cam ) {
+					img = cvQueryFrame( b_cam );
+					vision_save_frame( img );
+				}
+				gettimeofday( &save_start, NULL );
+			}
+		}
 
         /* Check state of save frames and video messages. */
         if( msg.vsetting.data.save_fframe && f_cam ) {
-            /* Get a timestamp and use for filename. */
-            gettimeofday( &ctime, NULL );
-            ct = *( localtime ((const time_t*) &ctime.tv_sec) );
-            strftime( write_time, sizeof(write_time), "images/f20%y%m%d_%H%M%S", &ct);
-            snprintf( write_time + strlen(write_time),
-            		strlen(write_time), ".%03ld.jpg", ctime.tv_usec );
-            cvSaveImage( write_time, img );
-            msg.vsetting.data.save_fframe = FALSE;
+            /* Save image to disk. */
+			vision_save_frame( img );
+			msg.vsetting.data.save_fframe = FALSE;
         }
         if( msg.vsetting.data.save_bframe && b_cam ) {
-            /* Get a timestamp and use for filename. */
-            gettimeofday( &ctime, NULL );
-            ct = *( localtime ((const time_t*) &ctime.tv_sec) );
-            strftime( write_time, sizeof(write_time), "images/b20%y%m%d_%H%M%S", &ct);
-            snprintf( write_time + strlen(write_time),
-            		strlen(write_time), ".%03ld.jpg", ctime.tv_usec );
-            cvSaveImage( write_time, img );
-            msg.vsetting.data.save_bframe = FALSE;
+            /* Save image to disk. */
+			vision_save_frame( img );
+			msg.vsetting.data.save_bframe = FALSE;
         }
         if( msg.vsetting.data.save_fvideo && !saving_fvideo && f_cam ) {
             /* Get a timestamp and use for filename. */
@@ -783,6 +804,10 @@ int main( int argc, char *argv[] )
 		else if( msg.vsetting.data.save_bvideo && saving_bvideo ) {
 			cvWriteFrame( b_writer, img );
 		}
+
+		/* Update timers. */
+		gettimeofday( &fps_time, NULL );
+		gettimeofday( &save_time, NULL );
     }
 
     exit( 0 );
