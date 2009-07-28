@@ -217,5 +217,9 @@ void vision_rgb_ratio_filter( IplImage *img , double * rgb_thresh );
 //! Thresholds an image with rgb sums.
 void vision_rgb_sum_filter( IplImage *img , short * rgb_sum );
 
+//! Saves an image to disk.
+//! \param img The image to save to disk.
+void vision_save_frame( IplImage *img );
+
 
 #endif /* _VISION_H_ */

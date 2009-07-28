@@ -10,6 +10,8 @@
 #include <stdio.h>
 #include <unistd.h>
 #include <string.h>
+#include <time.h>
+#include <sys/time.h>
 #include <cv.h>
 #include <cxcore.h>
 #include <highgui.h>
@@ -453,7 +455,6 @@ int vision_find_fence( int *fence_center,
                     )
 {
 	/* Declare variables. */
-	int center = 0;
 	int sum_x = 0;
     int ii = 0;
     int jj = 0;
@@ -492,9 +493,6 @@ int vision_find_fence( int *fence_center,
 	cvSmooth( binImg, outImg, CV_MEDIAN, 5, 5, 0. ,0. );
 	cvErode( outImg, binImg, wS );
 
-    /* Process the image. */
-    //*y_max = vision_get_fence_bottom( binImg, &center );
-	
 	/* Check to see how many pixels are detected in the image. */
 	num_pix = cvCountNonZero( binImg );
 	printf("VISION_FIND_FENCE: num_pix = %d\n" , num_pix);
@@ -1402,8 +1400,8 @@ void vision_threshold( IplImage *img,
  *
  *****************************************************************************/
 
-void vision_rgb_ratio_filter( IplImage *img , double * rgb_thresh ) {
-
+void vision_rgb_ratio_filter( IplImage *img , double * rgb_thresh )
+{
 	/* Declare variables. */
 	int ii = 0;
 	int jj = 0;
@@ -1413,17 +1411,6 @@ void vision_rgb_ratio_filter( IplImage *img , double * rgb_thresh ) {
 	double rg = 0.0;
 	double rb = 0.0;
 	double gb = 0.0;
-
-	/* Validity check incoming parameters */
-	if( img == NULL ) {
-		fprintf( stderr , "vision_rgb_ratio_filter () - \n "
-				"Input image is null!\n");
-	}
-
-	if( rgb_thresh == NULL ) {
-		fprintf( stderr , "vision_rgb_ratio_filter () - \n "
-				"Incoming rgb threshold param is null!\n");
-	}
 
 	/* For each channel in the original image modify the RGB values. */
 	for( ii = 0; ii < img->height; ii++ ) {
@@ -1473,7 +1460,7 @@ void vision_rgb_ratio_filter( IplImage *img , double * rgb_thresh ) {
 /******************************************************************************
  *
  * Title:       void vision_rgb_sum_filter( IplImage *img ,
- * 											double * rgb_sum  )
+ * 											double * rgb_sum )
  *
  * Description: Turns any pixel black that doesn't match the input
  * 				RGB thresholds
@@ -1485,8 +1472,8 @@ void vision_rgb_ratio_filter( IplImage *img , double * rgb_thresh ) {
  *
  *****************************************************************************/
 
-void vision_rgb_sum_filter( IplImage *img , short * rgb_sum ) {
-
+void vision_rgb_sum_filter( IplImage *img , short * rgb_sum )
+{
 	/* Declare variables. */
 	int ii = 0;
 	int jj = 0;
@@ -1509,3 +1496,32 @@ void vision_rgb_sum_filter( IplImage *img , short * rgb_sum ) {
 		}
 	}
 } /* end vision_rgb_ratio_filter() */
+
+
+/******************************************************************************
+ *
+ * Title:       void vision_save_frame( IplImage *img )
+ *
+ * Description: Saves an image to disk.
+ *
+ * Input:       img: The image to save to disk.
+ *
+ * Output:      None.
+ *
+ *****************************************************************************/
+
+void vision_save_frame( IplImage *img )
+{
+	/* Declare variables. */
+    struct timeval ctime;
+    struct tm ct;
+    char write_time[80] = {0};
+
+	/* Get a timestamp and use for filename. */
+	gettimeofday( &ctime, NULL );
+	ct = *( localtime ((const time_t*) &ctime.tv_sec) );
+	strftime( write_time, sizeof(write_time), "images/20%y%m%d_%H%M%S", &ct);
+	snprintf( write_time + strlen(write_time),
+			strlen(write_time), ".%03ld.jpg", ctime.tv_usec );
+	cvSaveImage( write_time, img );
+} /* end vision_save_frame() */

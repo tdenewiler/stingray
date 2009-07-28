@@ -77,7 +77,15 @@ void parse_line( CONF_VARS *config )
         else if( strncmp( tokens[1], "port", STRING_SIZE ) == 0 ) {
             sscanf( tokens[2], "%hd", &config->vision_port );
         }
-    } /* end vision parameters */
+    }
+	if( strncmp( tokens[0], "save", STRING_SIZE ) == 0 ) {
+		if( strncmp( tokens[1], "image", STRING_SIZE ) == 0 ) {
+			if( strncmp( tokens[2], "rate", STRING_SIZE ) == 0 ) {
+				sscanf( tokens[3], "%d", &config->save_image_rate );
+			}
+		}
+	}
+	/* end vision parameters */
 
     /* Planner parameters */
     if( strncmp( tokens[0], "planner", STRING_SIZE ) == 0 ) {
@@ -854,6 +862,7 @@ void parse_default_config( CONF_VARS *config )
 	/* vision */
 	config->vision_window = FALSE;
 	config->vision_angle = 0;
+	config->save_image_rate = 0;
 
     /* other */
     config->debug_level = 5;
@@ -987,4 +996,5 @@ void parse_print_config( CONF_VARS *config )
 	printf("PARSE_PRINT_CONFIG: course_start = %d\n", config->course_start);
 	printf("PARSE_PRINT_CONFIG: dock_time = %d\n", config->dock_time);
 	printf("PARSE_PRINT_CONFIG: buoy_blind_time = %d\n", config->buoy_blind_time);
+	printf("PARSE_PRINT_CONFIG: save_image_rate = %d\n", config->save_image_rate);
 } /* end parse_default_config() */
