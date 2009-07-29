@@ -7,7 +7,8 @@ INCLUDES    += -I../../libs/microstrain/include
 INCLUDES    += -I../../libs/labjack/include
 INCLUDES    += -I../../libs/pololu/include
 INCLUDES    += -I../../libs/ssa/src
-INCLUDES	+= -I../labjackd/include
+INCLUDES    += -I../labjackd/include
+INCLUDES    += -I../planner/include/
 
 # compiler and flags
 CC          = g++

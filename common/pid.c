@@ -18,6 +18,7 @@
 #include "labjack.h"
 #include "pololu.h"
 #include "util.h"
+#include "task.h"
 
 
 /******************************************************************************
@@ -144,11 +145,13 @@ void pid_loop( int pololu_fd,
 	 * depend on the target values reported from those sensor systems.
 	 * Reference: float atan2f(float y, float x); theta = atan( y / x ) */
 
+	float depth_perr_old = pid->depth.perr;
+	
 	if( msg->task.data.task == TASK_BOXES ) {
 		
 		float fx_perr_old = pid->fx.perr;
 		float fy_perr_old = pid->fy.perr;
-		float depth_perr_old = pid->depth.perr;
+		
 
 		/* Update the gains. */
 		pid->fx.kp		= msg->gain.data.kp_fx;
