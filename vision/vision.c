@@ -1522,6 +1522,6 @@ void vision_save_frame( IplImage *img )
 	ct = *( localtime ((const time_t*) &ctime.tv_sec) );
 	strftime( write_time, sizeof(write_time), "images/20%y%m%d_%H%M%S", &ct);
 	snprintf( write_time + strlen(write_time),
-			strlen(write_time), ".%03ld.jpg", ctime.tv_usec );
+			strlen(write_time), ".%.03ld.jpg", ctime.tv_usec );
 	cvSaveImage( write_time, img );
 } /* end vision_save_frame() */

@@ -161,6 +161,7 @@ typedef struct _CONF_VARS {
 	int			dock_time;
 	int			buoy_blind_time;
 	int			save_image_rate;
+	int			open_rate;
 } CONF_VARS;
 
 #endif /* _CONF_VARS_ */
