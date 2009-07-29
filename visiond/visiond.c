@@ -911,6 +911,8 @@ int main( int argc, char *argv[] )
 		gettimeofday( &save_time, NULL );
 		gettimeofday( &open_time, NULL );
     }
+    
+    /* CHRIS: Should we release storage1, storage2, bin_img, and img_eq? */
 
     exit( 0 );
 } /* end main() */
