@@ -14,6 +14,7 @@
 #include <string.h>
 #include <time.h>
 #include <sys/time.h>
+#include <dirent.h>
 #include <cv.h>
 #include <cxcore.h>
 #include <highgui.h>
@@ -34,6 +35,7 @@ int server_fd;
 CvCapture *f_cam;
 CvCapture *b_cam;
 IplImage *bin_img;
+DIR *dirp;
 
 
 /******************************************************************************
@@ -88,6 +90,7 @@ void visiond_exit( )
     }
 
     cvReleaseImage( &bin_img );
+    closedir( dirp );
 
     printf("<OK>\n\n");
 } /* end visiond_exit() */
@@ -183,6 +186,8 @@ int main( int argc, char *argv[] )
 	struct timeval fps_start = {0, 0};
 	struct timeval save_time = {0, 0};
 	struct timeval save_start = {0, 0};
+	struct timeval open_time = {0, 0};
+	struct timeval open_start = {0, 0};
 	int time1s = 0;
 	int time1ms = 0;
 	int time2s = 0;
@@ -190,6 +195,11 @@ int main( int argc, char *argv[] )
 	int dt = 0;
 	int nframes = 0;
     double fps = 0.0;
+	
+	/* Variables for opening, reading and using directories and files. */
+	struct dirent *dptr;
+	const char *dirname = "images/buoy";
+	int diropen = FALSE;
 
 	/* Initialize timers. */
 	gettimeofday( &fps_time, NULL );
@@ -247,6 +257,13 @@ int main( int argc, char *argv[] )
     hsv_fence.sH = cf.fence_sH;
     hsv_fence.vL = cf.fence_vL;
     hsv_fence.vH = cf.fence_vH;
+
+	/* Open directory. */
+	if( cf.open_rate ) {
+		if( (dirp = opendir(dirname)) ) {
+			diropen = TRUE;
+		}
+	}
 
     /* Set up server. */
     if( cf.enable_server ) {
@@ -327,6 +344,38 @@ int main( int argc, char *argv[] )
 			loop_counter++;
 		}
 
+		/* Look for a file. Check for NULL. */
+		if( cf.open_rate && diropen ) {
+			/* Check timer. */
+			time1s =  fps_time.tv_sec;
+			time1ms = fps_time.tv_usec;
+			time2s =  fps_start.tv_sec;
+			time2ms = fps_start.tv_usec;
+			dt = util_calc_dt( &time1s, &time1ms, &time2s, &time2ms );
+
+			if( dt > cf.open_rate * 1000000 ) {
+				dptr = readdir( dirp );
+				if( dptr == NULL ) {
+					closedir( dirp );
+					dirp = opendir( dirname );
+				}
+				else {
+					if( strncmp( dptr->d_name, ".", 1 ) == 0 ) {
+						dptr = readdir( dirp );
+					}
+					else if( strncmp( dptr->d_name, "..", 2 ) == 0 ) {
+						dptr = readdir( dirp );
+					}
+					else {
+						/* Load image here. */
+						img = cvLoadImage( dptr->d_name );
+						printf("Loading %s\n", dptr->d_name);
+					}
+				}
+				gettimeofday( &open_start, NULL );
+			}
+		}
+
     	/* Do vision processing based on task */
     	if( task == TASK_NONE ) {
     		/* Do nothing and give cleared values. */
@@ -341,7 +390,9 @@ int main( int argc, char *argv[] )
 			msg.vision.data.status = TASK_NOT_DETECTED;
 
 			/* Get a new image. */
-			img = cvQueryFrame( f_cam );
+			if( !cf.open_rate ) {
+				img = cvQueryFrame( f_cam );
+			}
 
 			/* Look for the buoy. */
 			status = vision_find_dot( &dotx, &doty, cf.vision_angle, f_cam,
@@ -381,7 +432,9 @@ int main( int argc, char *argv[] )
 			msg.vision.data.status = TASK_NOT_DETECTED;
 
 			/* Get a new image. */
-			img = cvQueryFrame( b_cam );
+			if( !cf.open_rate ) {
+				img = cvQueryFrame( b_cam );
+			}
 
 			/* Look for the pipe. */
 			status = vision_find_pipe( &pipex, &pipey, &bearing, b_cam,
@@ -429,7 +482,9 @@ int main( int argc, char *argv[] )
 			msg.vision.data.status = TASK_NOT_DETECTED;
 
 			/* Get a new image. */
-			img = cvQueryFrame( b_cam );
+			if( !cf.open_rate ) {
+				img = cvQueryFrame( b_cam );
+			}
 
 			/* Look for the pipe. */
 			status = vision_find_boxes( b_cam, img, boxes, squares, VISION_PIPE,
@@ -481,7 +536,9 @@ int main( int argc, char *argv[] )
 			msg.vision.data.status = TASK_NOT_DETECTED;
 
 			/* Get a new image. */
-			img = cvQueryFrame( f_cam );
+			if( !cf.open_rate ) {
+				img = cvQueryFrame( f_cam );
+			}
 
 			/* Look for the fence. */
             status = vision_find_fence( &fence_center, &y_max, f_cam, img,
@@ -519,7 +576,9 @@ int main( int argc, char *argv[] )
 			msg.vision.data.status = TASK_NOT_DETECTED;
 
 			/* Get a new image. */
-			img = cvQueryFrame( f_cam );
+			if( !cf.open_rate ) {
+				img = cvQueryFrame( f_cam );
+			}
 
 			/* Look for the boxes. */
 			status = vision_find_boxes( b_cam, img, boxes, squares, VISION_BOX,
@@ -572,7 +631,9 @@ int main( int argc, char *argv[] )
 			msg.vision.data.status = TASK_NOT_DETECTED;
 
 			/* Get a new image. */
-			img = cvQueryFrame( f_cam );
+			if( !cf.open_rate ) {
+				img = cvQueryFrame( f_cam );
+			}
 
 			/* Look for the suitcase. */
 			status = vision_suitcase( b_cam, img, boxes, squares );
@@ -754,7 +815,11 @@ int main( int argc, char *argv[] )
 				gettimeofday( &save_start, NULL );
 			}
 		}
-
+		
+		/* Check to see if we should load an image from disk for simulation. */
+		if( cf.open_rate ) {
+		}
+		
         /* Check state of save frames and video messages. */
         if( msg.vsetting.data.save_fframe && f_cam ) {
             /* Save image to disk. */
@@ -808,6 +873,7 @@ int main( int argc, char *argv[] )
 		/* Update timers. */
 		gettimeofday( &fps_time, NULL );
 		gettimeofday( &save_time, NULL );
+		gettimeofday( &open_time, NULL );
     }
 
     exit( 0 );
