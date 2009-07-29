@@ -155,10 +155,6 @@ int main( int argc, char *argv[] )
 	HSV hsv_fence;
 	int bouyTouchCount = 0;
 	double angleFrontCam = VISIOND_FRONT_CAM_ANGLE_OFFSET * M_PI /  180;
-	int use_file = FALSE;
-	const char *video_file = "../../../../pics/stingrayCanyonView/out1.avi";
-	//const char *image_file =
-		//"../../../../pics/stingrayBackup/images/b20090717_135344.719209.jpg";
 
 	/* Temporary variable to make it easier to switch between using HSV
 	 *  olding or boxes to try and find pipe. HSV = 1, Boxes = 2. */
@@ -198,8 +194,9 @@ int main( int argc, char *argv[] )
 	
 	/* Variables for opening, reading and using directories and files. */
 	struct dirent *dptr;
-	const char *dirname = "images/buoy";
+	const char *dirname = "images/buoy/";
 	int diropen = FALSE;
+	char filename[STRING_SIZE];
 
 	/* Initialize timers. */
 	gettimeofday( &fps_time, NULL );
@@ -261,7 +258,11 @@ int main( int argc, char *argv[] )
 	/* Open directory. */
 	if( cf.open_rate ) {
 		if( (dirp = opendir(dirname)) ) {
+			printf("MAIN: Image directory opened OK.\n");
 			diropen = TRUE;
+		}
+		else {
+			printf("MAIN: WARNING!!! Image directory not opened.\n");
 		}
 	}
 
@@ -276,54 +277,71 @@ int main( int argc, char *argv[] )
 		}
     }
 
-    /* Need to have a config about what cameras if any to open */
+    /* Need to have a config about what cameras if any to open. */
     if( cf.op_mode == 99 ) {
     	/* Special case for bad camera. */
     	printf("MAIN: Skipping camera opening because op mode = 99 in "
 			   "configuration file.\n");
 	}
 	else {
-		/* Open front camera. */
-		if( use_file ) {
-			printf("MAIN: Trying to open file for front camera.\n");
-			/* This isn't going to work for now in Linux according to
-			 * discussion groups. Seems to be an issue with codecs similar to
-			 * trying to write video to file. */
-			f_cam = cvCreateFileCapture( video_file );
+		if( diropen ) {
+			/* Load an image from disk. */
+			dptr = readdir( dirp );
+			if( dptr == NULL ) {
+				closedir( dirp );
+				dirp = opendir( dirname );
+			}
+			else {
+				/* Check that we don't try to open directories. */
+				if( strncmp( dptr->d_name, ".", 1 ) == 0 ) {
+					dptr = readdir( dirp );
+				}
+				if( strncmp( dptr->d_name, "..", 2 ) == 0 ) {
+					dptr = readdir( dirp );
+				}
+				/* Load image here and set up other images. */
+				strncpy( filename, dirname, STRING_SIZE / 2 );
+				strncat( filename, dptr->d_name, STRING_SIZE / 2 );
+				img = cvLoadImage( filename );
+				bin_img = cvCreateImage( cvGetSize(img), IPL_DEPTH_8U, 1 );
+				img_eq  = cvCreateImage( cvGetSize(img), IPL_DEPTH_8U, 3 );
+				fence_center = img->width / 2;
+				if( img ) {
+					printf("MAIN: img created OK.\n");
+				}
+				if( bin_img ) {
+					printf("MAIN: bin_img created OK.\n");
+				}
+			}
 		}
 		else {
+			/* Open front camera. */
 			f_cam = cvCaptureFromCAM( camera );
-		}
-		if( !f_cam ) {
-			cvReleaseCapture( &f_cam );
-			printf("MAIN: WARNING!!! Could not open f_cam.\n");
-		}
-		else {
-			img = cvQueryFrame( f_cam );
-			//img = cvLoadImage( image_file );
-			bin_img = cvCreateImage( cvGetSize(img), IPL_DEPTH_8U, 1 );
-			img_eq  = cvCreateImage( cvGetSize(img), IPL_DEPTH_8U, 3 );
-			fence_center = img->width / 2;
-			printf("MAIN: Front camera opened OK.\n");
-		}
+			if( !f_cam ) {
+				cvReleaseCapture( &f_cam );
+				printf("MAIN: WARNING!!! Could not open f_cam.\n");
+			}
+			else {
+				img = cvQueryFrame( f_cam );
+				bin_img = cvCreateImage( cvGetSize(img), IPL_DEPTH_8U, 1 );
+				img_eq  = cvCreateImage( cvGetSize(img), IPL_DEPTH_8U, 3 );
+				fence_center = img->width / 2;
+				printf("MAIN: Front camera opened OK.\n");
+			}
 
-		/* Open bottom camera. */
-		camera = 1;
-		if( use_file ) {
-			b_cam = cvCreateFileCapture( video_file );
-		}
-		else {
+			/* Open bottom camera. */
+			camera = 1;
 			b_cam = cvCaptureFromCAM( camera );
-		}
-		if( !b_cam ) {
-			cvReleaseCapture( &b_cam );
-			printf("MAIN: WARNING!!! Could not open b_cam.\n");
-		}
-		else {
-			img = cvQueryFrame( b_cam );
-			bin_img = cvCreateImage( cvGetSize(img), IPL_DEPTH_8U, 1 );
-			img_eq  = cvCreateImage( cvGetSize(img), IPL_DEPTH_8U, 3 );
-			printf("MAIN: Bottom camera opened OK.\n");
+			if( !b_cam ) {
+				cvReleaseCapture( &b_cam );
+				printf("MAIN: WARNING!!! Could not open b_cam.\n");
+			}
+			else {
+				img = cvQueryFrame( b_cam );
+				bin_img = cvCreateImage( cvGetSize(img), IPL_DEPTH_8U, 1 );
+				img_eq  = cvCreateImage( cvGetSize(img), IPL_DEPTH_8U, 3 );
+				printf("MAIN: Bottom camera opened OK.\n");
+			}
 		}
 	}
 
@@ -345,17 +363,19 @@ int main( int argc, char *argv[] )
 		}
 
 		/* Look for a file. Check for NULL. */
-		if( cf.open_rate && diropen ) {
+		if( diropen ) {
 			/* Check timer. */
 			time1s =  fps_time.tv_sec;
 			time1ms = fps_time.tv_usec;
 			time2s =  fps_start.tv_sec;
 			time2ms = fps_start.tv_usec;
 			dt = util_calc_dt( &time1s, &time1ms, &time2s, &time2ms );
+			//printf("MAIN: dt = %d\n", dt);
 
-			if( dt > cf.open_rate * 1000000 ) {
+			if( dt > (1000000 * cf.open_rate) ) {
 				dptr = readdir( dirp );
 				if( dptr == NULL ) {
+					/* Start over at the beginning of the directory. */
 					closedir( dirp );
 					dirp = opendir( dirname );
 				}
@@ -363,17 +383,24 @@ int main( int argc, char *argv[] )
 					if( strncmp( dptr->d_name, ".", 1 ) == 0 ) {
 						dptr = readdir( dirp );
 					}
-					else if( strncmp( dptr->d_name, "..", 2 ) == 0 ) {
+					if( strncmp( dptr->d_name, "..", 2 ) == 0 ) {
 						dptr = readdir( dirp );
 					}
-					else {
-						/* Load image here. */
-						img = cvLoadImage( dptr->d_name );
-						printf("Loading %s\n", dptr->d_name);
+					if( dptr == NULL ) {
+						/* Start over at the beginning of the directory. */
+						closedir( dirp );
+						dirp = opendir( dirname );
+						dptr = readdir( dirp );
 					}
 				}
+				/* Reset the timer. */
 				gettimeofday( &open_start, NULL );
 			}
+			/* Load image here. */
+			strncpy( filename, dirname, STRING_SIZE / 2 );
+			strncat( filename, dptr->d_name, STRING_SIZE / 2 );
+			//strncat( filename, "f20090717_161532.231909.jpg", STRING_SIZE / 2 );
+			img = cvLoadImage( filename );
 		}
 
     	/* Do vision processing based on task */
@@ -385,21 +412,23 @@ int main( int argc, char *argv[] )
     		msg.vision.data.bottom_y = 0.0;
 		} /* end TASK_NONE */
 
-        else if( task == TASK_BUOY && f_cam ) {
+        else if( task == TASK_BUOY && (f_cam || diropen) ) {
 			/* Set to not detected to start and reset if we get a hit. */
 			msg.vision.data.status = TASK_NOT_DETECTED;
 
 			/* Get a new image. */
-			if( !cf.open_rate ) {
+			if( !diropen ) {
 				img = cvQueryFrame( f_cam );
+				/* Flip the source image. */
+				//cvFlip( img, img );
 			}
 
 			/* Look for the buoy. */
-			status = vision_find_dot( &dotx, &doty, cf.vision_angle, f_cam,
-				img, bin_img, &hsv_buoy );
+			status = vision_find_dot( &dotx, &doty, cf.vision_angle, img,
+				bin_img, &hsv_buoy );
 			if( status == 1 || status == 2 ) {
 				/* We have detected the buoy. */
-				printf("Bouy Status: %d\n", status);
+				//printf("MAIN: Bouy Status = %d\n", status);
 				msg.vision.data.status = TASK_BUOY_DETECTED;
 				
 				/* The subtractions are opposite of each other on purpose. This
@@ -416,10 +445,9 @@ int main( int argc, char *argv[] )
 				msg.vision.data.front_x = xrot;
 				msg.vision.data.front_y = yrot;
 				
-				
 				/* Draw a circle at the centroid location. */
 				cvCircle( img, cvPoint(dotx, doty),
-					10, cvScalar(255, 0, 0), 5, 8 );
+					10, cvScalar(0, 255, 0), 5, 8 );
 
 				if( status == 2 ) {
 					msg.vision.data.status = TASK_BUOY_TOUCHED;
@@ -427,24 +455,25 @@ int main( int argc, char *argv[] )
 			}
 		} /* end TASK_BUOY */
 
-		else if( task == TASK_PIPE && b_cam && pipe_type == VISION_PIPE_HSV ) {
+		else if( task == TASK_PIPE && (b_cam || diropen) &&
+			pipe_type == VISION_PIPE_HSV ) {
 			/* Set to not detected to start and reset if we get a hit. */
 			msg.vision.data.status = TASK_NOT_DETECTED;
 
 			/* Get a new image. */
-			if( !cf.open_rate ) {
+			if( !diropen ) {
 				img = cvQueryFrame( b_cam );
 			}
 
 			/* Look for the pipe. */
-			status = vision_find_pipe( &pipex, &pipey, &bearing, b_cam,
-				img, bin_img, &hsv_pipe );
+			status = vision_find_pipe( &pipex, &pipey, &bearing, img, bin_img,
+				&hsv_pipe );
 
 			/* If we get a positive status message, render the box and populate
 			 * the network message. */
 			if( status == 1 || status == 2 ) {
 				/* Set the detection status of vision */
-				printf("Bouy Status: %d\n", status);
+				//printf("MAIN Pipe Status = %d\n", status);
 				msg.vision.data.status = TASK_PIPE_DETECTED;
 
 				msg.vision.data.bearing = bearing;
@@ -477,17 +506,18 @@ int main( int argc, char *argv[] )
 			}
 		} /* end TASK_PIPE -- hsv */
 
-		else if( task == TASK_PIPE && b_cam && pipe_type == VISION_PIPE_BOX ) {
+		else if( task == TASK_PIPE && (b_cam || diropen) &&
+			pipe_type == VISION_PIPE_BOX ) {
 			/* Set to not detected to start and reset if we get a hit. */
 			msg.vision.data.status = TASK_NOT_DETECTED;
 
 			/* Get a new image. */
-			if( !cf.open_rate ) {
+			if( !diropen ) {
 				img = cvQueryFrame( b_cam );
 			}
 
 			/* Look for the pipe. */
-			status = vision_find_boxes( b_cam, img, boxes, squares, VISION_PIPE,
+			status = vision_find_boxes( img, boxes, squares, VISION_PIPE,
 				&msg.vision.data.bearing );
 
 			/* If we get a positive status message, render the box
@@ -531,18 +561,20 @@ int main( int argc, char *argv[] )
 			}
 		} /* end TASK_PIPE -- boxes */
 
-		else if( task == TASK_FENCE && f_cam ) {
+		else if( task == TASK_FENCE && (f_cam || diropen) ) {
 			/* Set to not detected to start and reset if we get a hit. */
 			msg.vision.data.status = TASK_NOT_DETECTED;
 
 			/* Get a new image. */
-			if( !cf.open_rate ) {
+			if( !diropen ) {
 				img = cvQueryFrame( f_cam );
+				/* Flip the source image. */
+				//cvFlip( img, img );
 			}
 
 			/* Look for the fence. */
-            status = vision_find_fence( &fence_center, &y_max, f_cam, img,
-				bin_img, &hsv_fence );
+            status = vision_find_fence( &fence_center, &y_max, img,	bin_img,
+				&hsv_fence );
             if( status == 1 ) {
             	/* Set the detection status of vision. */
 				msg.vision.data.status = TASK_FENCE_DETECTED;
@@ -564,24 +596,24 @@ int main( int argc, char *argv[] )
             }
         } /* end TASK_FENCE */
 
-        else if( task == TASK_GATE && f_cam ) {
+        else if( task == TASK_GATE && (f_cam || diropen) ) {
         	/* Look for the gate. */
 
         	/* Default to fail detection until code is written. */
         	msg.vision.data.status = TASK_NOT_DETECTED;
 		} /* end TASK_GATE */
 
-		else if( task == TASK_BOXES && b_cam ) {
+		else if( task == TASK_BOXES && (b_cam || diropen) ) {
 			/* Set to not detected to start and reset if we get a hit. */
 			msg.vision.data.status = TASK_NOT_DETECTED;
 
 			/* Get a new image. */
-			if( !cf.open_rate ) {
+			if( !diropen ) {
 				img = cvQueryFrame( f_cam );
 			}
 
 			/* Look for the boxes. */
-			status = vision_find_boxes( b_cam, img, boxes, squares, VISION_BOX,
+			status = vision_find_boxes( img, boxes, squares, VISION_BOX,
 				&msg.vision.data.bearing );
 
 			/* If we get a positive status message, render the box and populate
@@ -626,17 +658,17 @@ int main( int argc, char *argv[] )
 			}
 		} /* end TASK_BOXES */
 
-		else if( task == TASK_SUITCASE && b_cam ) {
+		else if( task == TASK_SUITCASE && (b_cam || diropen) ) {
 			/* Set to not detected to start and reset if we get a hit. */
 			msg.vision.data.status = TASK_NOT_DETECTED;
 
 			/* Get a new image. */
-			if( !cf.open_rate ) {
+			if( !diropen ) {
 				img = cvQueryFrame( f_cam );
 			}
 
 			/* Look for the suitcase. */
-			status = vision_suitcase( b_cam, img, boxes, squares );
+			status = vision_suitcase( img, boxes, squares );
 			if( status > 0 ) {
 
 				/* Initialize the centroid sequence reader. */
@@ -676,7 +708,6 @@ int main( int argc, char *argv[] )
 		} /* end TASK_SUITCASE */
 
 		else {
-			
 			/* Clear the detection status */
 			msg.vision.data.status = TASK_NOT_DETECTED;
 			
@@ -765,11 +796,15 @@ int main( int argc, char *argv[] )
 			if( msg.task.data.task == TASK_NONE ) {
 				switch( vision_mode ) {
 				case VISIOND_FCOLOR:
-					img = cvQueryFrame( f_cam );
+					if( !diropen ) {
+						img = cvQueryFrame( f_cam );
+					}
 					cvShowImage( win, img );
 					break;
 				case VISIOND_BCOLOR:
-					img = cvQueryFrame( b_cam );
+					if( !diropen ) {
+						img = cvQueryFrame( b_cam );
+					}
 					cvShowImage( win, img );
 					break;
 				}
@@ -789,14 +824,14 @@ int main( int argc, char *argv[] )
 			gettimeofday( &fps_start, NULL );
 			nframes = 0;
 			msg.vision.data.fps = fps;
-			printf("MAIN: fps = %lf\n", fps);
+			//printf("MAIN: fps = %lf\n", fps);
 		}
 
 		/* Save an image from both the front and bottom cameras using timer. */
 		if( cf.save_image_rate == 0 ) {
 			/* Do nothing. */
 		}
-		else {
+		else if( !diropen ) {
 			/* Check save frame timer. */
 			time1s =  save_time.tv_sec;
 			time1ms = save_time.tv_usec;
