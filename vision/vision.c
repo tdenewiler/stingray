@@ -73,7 +73,8 @@ int vision_find_dot( int *dotx,
 
 	/* Equalize the histograms of each channel. */
 	vision_hist_eq( hsvImg,
-		VISION_CHANNEL1 + VISION_CHANNEL2 + VISION_CHANNEL3 );
+		VISION_CHANNEL2 + VISION_CHANNEL3 );
+		//VISION_CHANNEL1 + VISION_CHANNEL2 + VISION_CHANNEL3 );
 
 	/* Threshold all three channels using our own values. */
     cvInRangeS( hsvImg, cvScalar(hsv->hL, hsv->sL, hsv->vL),
