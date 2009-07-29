@@ -58,69 +58,73 @@ int task_run( MSG_DATA *msg, CONF_VARS *cf, int dt, int subtask_dt )
 
 	switch ( msg->task.data.task ) {
 		
-		case TASK_BUOY:
-			status = task_buoy( msg, cf, dt, subtask_dt );
-			break;
+	case TASK_BUOY:
+		status = task_buoy( msg, cf, dt, subtask_dt );
+		break;
 
-		case TASK_GATE:
-			status = task_gate( msg, cf, dt, subtask_dt );
-			break;
+	case TASK_GATE:
+		status = task_gate( msg, cf, dt, subtask_dt );
+		break;
 
-		case TASK_PIPE:
-			status = task_pipe( msg, cf, dt, subtask_dt );
-			break;
+	case TASK_PIPE:
+		status = task_pipe( msg, cf, dt, subtask_dt );
+		break;
 
-		case TASK_PIPE1:
-			status = task_pipe( msg, cf, dt, subtask_dt );
-			break;
+	case TASK_PIPE1:
+		status = task_pipe( msg, cf, dt, subtask_dt );
+		break;
 
-		case TASK_PIPE2:
-			status = task_pipe( msg, cf, dt, subtask_dt );
-			break;
+	case TASK_PIPE2:
+		status = task_pipe( msg, cf, dt, subtask_dt );
+		break;
 
-		case TASK_PIPE3:
-			status = task_pipe( msg, cf, dt, subtask_dt );
-			break;
+	case TASK_PIPE3:
+		status = task_pipe( msg, cf, dt, subtask_dt );
+		break;
 
-		case TASK_PIPE4:
-			status = task_pipe( msg, cf, dt, subtask_dt );
-			break;
+	case TASK_PIPE4:
+		status = task_pipe( msg, cf, dt, subtask_dt );
+		break;
 
-		case TASK_SQUARE:
-			status = task_square( msg, cf, dt, subtask_dt );
-			break;
+	case TASK_SQUARE:
+		status = task_square( msg, cf, dt, subtask_dt );
+		break;
 
-		case TASK_NONE:
-			status = task_none( msg, cf, dt, subtask_dt );
-			break;
+	case TASK_NONE:
+		status = task_none( msg, cf, dt, subtask_dt );
+		break;
 
-		case TASK_BOXES:
-			status = task_boxes( msg, cf, dt, subtask_dt );
-			break;
+	case TASK_BOXES:
+		status = task_boxes( msg, cf, dt, subtask_dt );
+		break;
 
-		case TASK_FENCE:
-			status = task_fence( msg, cf, dt, subtask_dt );
-			break;
+	case TASK_FENCE:
+		status = task_fence( msg, cf, dt, subtask_dt );
+		break;
 
-		case TASK_SURFACE:
-			status = task_surface( msg, cf, dt, subtask_dt );
-			break;
+	case TASK_SURFACE:
+		status = task_surface( msg, cf, dt, subtask_dt );
+		break;
 
-		case TASK_SUITCASE:
-			status = task_suitcase( msg, cf, dt, subtask_dt );
-			break;
+	case TASK_SUITCASE:
+		status = task_suitcase( msg, cf, dt, subtask_dt );
+		break;
 
-		case TASK_NOD:
-			status = task_nod( msg, cf, dt, subtask_dt );
-			break;
+	case TASK_NOD:
+		status = task_nod( msg, cf, dt, subtask_dt );
+		break;
 
-		case TASK_SPIN:
-			status = task_spin( msg, cf, dt, subtask_dt );
-			break;
+	case TASK_SPIN:
+		status = task_spin( msg, cf, dt, subtask_dt );
+		break;
 
-		case TASK_COURSE:
-			status = task_course( msg, cf, dt, subtask_dt );
-			break;
+	case TASK_COURSE:
+		status = task_course( msg, cf, dt, subtask_dt );
+		break;
+		
+	case TASK_DOCK:
+		status = task_dock( msg, cf, dt, subtask_dt );
+		break;
 	}
 
 	return status;
@@ -144,7 +148,7 @@ int task_run( MSG_DATA *msg, CONF_VARS *cf, int dt, int subtask_dt )
 
 int task_buoy( MSG_DATA *msg, CONF_VARS *cf, int dt, int subtask_dt )
 {
-	if( msg->task.data.course == TASK_COURSE_ON ) {
+	if( msg->task.data.course ) {
 		switch( msg->task.data.subtask ) {
 
 		case SUBTASK_SEARCH_DEPTH:
@@ -167,7 +171,7 @@ int task_buoy( MSG_DATA *msg, CONF_VARS *cf, int dt, int subtask_dt )
 		case SUBTASK_SEARCH:
 			/* Go forward without visual feedback for an amount of time set in
 			 * configuration file. */
-			if( subtask_dt < cf->buoy_blind_time * 1000000 ) {
+			if( subtask_dt < cf->buoy_blind_time ) {
 				msg->target.data.fy = POLOLU_MOVE_FORWARD;
 				return SUBTASK_CONTINUING;
 			}
@@ -205,7 +209,7 @@ int task_buoy( MSG_DATA *msg, CONF_VARS *cf, int dt, int subtask_dt )
 				return TASK_SUCCESS;
 			}
 			else if( subtask_dt > SUBTASK_MAX_SEARCH_TIME ) {
-				return SUBTASK_FAILURE;
+				return TASK_FAILURE;
 			}
 			else {
 				return SUBTASK_CONTINUING;
@@ -220,7 +224,6 @@ int task_buoy( MSG_DATA *msg, CONF_VARS *cf, int dt, int subtask_dt )
 			printf( "Planner: Looking for Bouy\n" );
 			hasPrinted = TRUE;
 		}
-			
 		
 		/* Check to see if we have detected the buoy. Else don't change yaw or
 		 * depth, just keep old values. */
@@ -268,7 +271,7 @@ int task_buoy( MSG_DATA *msg, CONF_VARS *cf, int dt, int subtask_dt )
 
 int task_gate( MSG_DATA *msg, CONF_VARS *cf, int dt, int subtask_dt )
 {
-	if( msg->task.data.course == TASK_COURSE_ON ) {
+	if( msg->task.data.course ) {
 		switch( msg->task.data.subtask ) {
 
 		case SUBTASK_SEARCH_DEPTH:
@@ -282,7 +285,7 @@ int task_gate( MSG_DATA *msg, CONF_VARS *cf, int dt, int subtask_dt )
 			}
 			/* Check to see if too much time has elapsed. */
 			else if( subtask_dt > SUBTASK_MAX_SEARCH_TIME ) {
-				return TASK_FAILURE;
+				return SUBTASK_FAILURE;
 			}
 			else {
 				return SUBTASK_CONTINUING;
@@ -306,10 +309,8 @@ int task_gate( MSG_DATA *msg, CONF_VARS *cf, int dt, int subtask_dt )
 			}
 		
 		case SUBTASK_CORRECT:
-			/* Move forward for a set amount of time. Multiply by 1,000,000 to
-			 * convert from seconds to microseconds because dt is in
-			 * microseconds. */
-			if( subtask_dt < SUBTASK_GATE_MOVE_TIME * 1000000 ) {
+			/* Move forward for a set amount of time. */
+			if( subtask_dt < SUBTASK_GATE_MOVE_TIME ) {
 				msg->target.data.fy = POLOLU_MOVE_FORWARD;
 				return SUBTASK_CONTINUING;
 			}
@@ -356,7 +357,7 @@ int task_gate( MSG_DATA *msg, CONF_VARS *cf, int dt, int subtask_dt )
 
 int task_pipe( MSG_DATA *msg, CONF_VARS *cf, int dt, int subtask_dt )
 {
-	if( msg->task.data.course == TASK_COURSE_ON ) {
+	if( msg->task.data.course ) {
 		switch( msg->task.data.subtask ) {
 
 		case SUBTASK_SEARCH_DEPTH:
@@ -543,7 +544,7 @@ int task_none( MSG_DATA *msg, CONF_VARS *cf, int dt, int subtask_dt )
 int task_boxes( MSG_DATA *msg, CONF_VARS *cf, int dt, int subtask_dt )
 {
 	/* TODO: Fill this function in like task_buoy() and task_pipe(). */
-	if( msg->task.data.course == TASK_COURSE_ON ) {
+	if( msg->task.data.course ) {
 
 		switch( msg->task.data.subtask ) {
 
@@ -644,7 +645,7 @@ int task_boxes( MSG_DATA *msg, CONF_VARS *cf, int dt, int subtask_dt )
 int task_fence( MSG_DATA *msg, CONF_VARS *cf, int dt, int subtask_dt )
 {
 	/* TODO: Fill this function in like task_buoy() and task_pipe(). */
-	if( msg->task.data.course == TASK_COURSE_ON ) {
+	if( msg->task.data.course ) {
 		switch( msg->task.data.subtask ) {
 
 		case SUBTASK_SEARCH_DEPTH:

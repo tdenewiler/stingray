@@ -193,7 +193,7 @@ int main( int argc, char *argv[] )
     double fps = 0.0;
 	
 	/* Variables for opening, reading and using directories and files. */
-	struct dirent *dptr;
+	struct dirent *dptr = NULL;
 	const char *dirname = "images/buoy/";
 	int diropen = FALSE;
 	char filename[STRING_SIZE];
@@ -362,17 +362,16 @@ int main( int argc, char *argv[] )
 			loop_counter++;
 		}
 
-		/* Look for a file. Check for NULL. */
+		/* Look for a file. Check for NULL or directory. */
 		if( diropen ) {
 			/* Check timer. */
-			time1s =  fps_time.tv_sec;
-			time1ms = fps_time.tv_usec;
-			time2s =  fps_start.tv_sec;
-			time2ms = fps_start.tv_usec;
-			dt = util_calc_dt( &time1s, &time1ms, &time2s, &time2ms );
-			//printf("MAIN: dt = %d\n", dt);
+			time1s =  open_time.tv_sec;
+			time1ms = open_time.tv_usec;
+			time2s =  open_start.tv_sec;
+			time2ms = open_start.tv_usec;
+			dt = util_calc_dt( &time1s, &time1ms, &time2s, &time2ms ) / 1000000;
 
-			if( dt > (1000000 * cf.open_rate) ) {
+			if( dt > cf.open_rate ) {
 				dptr = readdir( dirp );
 				if( dptr == NULL ) {
 					/* Start over at the beginning of the directory. */
@@ -393,7 +392,7 @@ int main( int argc, char *argv[] )
 						dptr = readdir( dirp );
 					}
 				}
-				/* Reset the timer. */
+				/* Reset the open image timer. */
 				gettimeofday( &open_start, NULL );
 			}
 			/* Load image here. */

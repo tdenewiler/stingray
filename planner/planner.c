@@ -213,14 +213,15 @@ int main( int argc, char *argv[] )
     msg.gain.data.ki_depth  	 = cf.ki_depth;
     msg.gain.data.kd_depth  	 = cf.kd_depth;
 
-    /* Initialize tasks */
-    /* Never used because of lines ~332  -- FIX ME */
+    /* Initialize tasks. */
     task = cf.task_start;
+	old_task = task;
     subtask = cf.subtask_start;
+	old_subtask = subtask;
 
 	msg.task.data.task = task;
 	msg.task.data.subtask = subtask;
-	msg.task.data.course = TASK_COURSE_OFF;
+	msg.task.data.course = cf.course_start;
 
     /* Set up Kalman filter. */
     bKF = init_kalman();
@@ -333,7 +334,6 @@ int main( int argc, char *argv[] )
 		}
 
 		/* If there is a new task then send to vision. */
-		/* This will break the algorithm below */
 		task = msg.task.data.task;
 		subtask = msg.task.data.subtask;
 		if( old_task != msg.task.data.task ) {
@@ -350,6 +350,7 @@ int main( int argc, char *argv[] )
 				messages_send( vision_fd, TASK_MSGID, &msg );
 			}
 			old_subtask = msg.task.data.subtask;
+			gettimeofday( &subtask_start, NULL );
 		}
 
         /* Get nav data. */
@@ -416,7 +417,7 @@ int main( int argc, char *argv[] )
             snprintf( write_time + strlen(write_time),
             		strlen(write_time), ".%06ld", ctime.tv_usec );
 
-			/* Log every (enable_log) seconds. */
+			/* Log enable_log times every second. */
 			if( dt > (cf.enable_log * 100000) ) {
 				STAT cs = msg.status.data;
 				TARGET target = msg.target.data;
@@ -448,12 +449,13 @@ int main( int argc, char *argv[] )
 
 		/* Run the current task. */
 		status = task_run( &msg, &cf, task_dt, subtask_dt );
-		if( msg.task.data.course == TASK_COURSE_ON ) {
+		if( msg.task.data.course ) {
 			/* Set the subtask in the network message. */
 			msg.task.data.subtask = subtask;
 			if( status == TASK_SUCCESS || status == TASK_FAILURE ) {
 				/* Move on to the next task. Initialize the subtask. */
 				msg.task.data.task++;
+				task++;
 				msg.task.data.subtask = SUBTASK_SEARCH_DEPTH;
 				/* Re-initialize the task and subtask timers. */
 				gettimeofday( &task_start, NULL );
@@ -462,17 +464,18 @@ int main( int argc, char *argv[] )
 			else if( status == SUBTASK_SUCCESS || status == SUBTASK_FAILURE ) {
 				/* Move on to the next subtask. */
 				msg.task.data.subtask++;
+				subtask++;
 				/* Re-initialize the subtask timer. */
 				gettimeofday( &subtask_start, NULL);
 			}
 		}
-		else { /* If we are not in course mode and get a status of
-				* something other than task continue, reset the timers */
+		else { 
+			/* If we are not in course mode and get a status of something other
+			 * than task continue, reset the timers. */
 			if( status == TASK_SUCCESS || status == TASK_FAILURE ) {
 				gettimeofday( &task_start, NULL );
 				gettimeofday( &subtask_start, NULL );
 			}
-			
 		}
 
 		/* Update timers. */
