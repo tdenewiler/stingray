@@ -26,7 +26,6 @@
  * Title:       int vision_find_dot(    int *dotx,
  *                                      int *doty,
  *                                      int amt,
- *                                      CvCapture *cap,
  *                                      IplImage *srcImg,
  *                                      IplImage *outImg
  *                                  )
@@ -45,7 +44,6 @@
 int vision_find_dot( int *dotx,
                      int *doty,
                      int angle,
-                     CvCapture *cap,
                      IplImage *srcImg,
                      IplImage *binImg,
 					 HSV *hsv
@@ -69,9 +67,6 @@ int vision_find_dot( int *dotx,
 
 	/* Enhance the red channel of the source image. */
 	vision_white_balance( srcImg );
-
-    /* Flip the source image. */
-    cvFlip( srcImg, srcImg );
 
     /* Segment the flipped image into a binary image. */
     cvCvtColor( srcImg, hsvImg, CV_RGB2HSV );
@@ -99,7 +94,7 @@ int vision_find_dot( int *dotx,
 
 	/* Check to see how many pixels are detected in the image. */
 	num_pix = cvCountNonZero( binImg );
-	printf("VISION_FIND_DOT: num_pix = %d\n" , num_pix);
+	//printf("VISION_FIND_DOT: num_pix = %d\n" , num_pix);
 	
 	if( num_pix > touch_thresh ) {
 		return 2;
@@ -119,7 +114,6 @@ int vision_find_dot( int *dotx,
  * Title:       int vision_find_pipe(   int *pipex,
  * 									    int *pipey,
  *                                      float *bearing,
- *                                      CvCapture *cap,
  *                                      IplImage *srcImg,
  *                                      IplImage *outImg
  *                                   )
@@ -138,7 +132,6 @@ int vision_find_dot( int *dotx,
 int vision_find_pipe( int *pipex,
 					  int *pipey,
                       double *bearing,
-                      CvCapture *cap,
                       IplImage *srcImg,
                       IplImage *binImg,
                       HSV *hsv
@@ -431,7 +424,6 @@ CvPoint vision_find_centroid( IplImage *binImage, int thresh )
  *
  * Title:       int vision_find_fence(   int *pipex,
  *                                      float *bearing,
- *                                      CvCapture *cap,
  *                                      IplImage *srcImg,
  *                                      IplImage *outImg
  *                                   )
@@ -448,7 +440,6 @@ CvPoint vision_find_centroid( IplImage *binImage, int thresh )
 
 int vision_find_fence( int *fence_center,
                       int *y_max,
-                      CvCapture *cap,
                       IplImage *srcImg,
                       IplImage *binImg,
 					  HSV *hsv
@@ -474,9 +465,6 @@ int vision_find_fence( int *fence_center,
 
 	/* Enhance the red channel of the source image. */
 	vision_white_balance( srcImg );
-
-    /* Flip the source image. */
-    cvFlip( srcImg, srcImg );
 
     /* Segment the flipped image into a binary image. */
     cvCvtColor( srcImg, hsvImg, CV_RGB2HSV );
@@ -600,8 +588,7 @@ int vision_get_fence_bottom( IplImage *inputBinImg, int *center )
 
 /******************************************************************************
  *
- * Title:       int vision_find_boxes(  CvCapture *cap,
- * 					   			        IplImage *srcImg,
+ * Title:       int vision_find_boxes(  IplImage *srcImg,
  * 										CvSeq *boxes
  *                                    )
  *
@@ -614,8 +601,7 @@ int vision_get_fence_bottom( IplImage *inputBinImg, int *center )
  *
  *****************************************************************************/
 
-int vision_find_boxes( CvCapture *cap,
-                       IplImage *srcImg,
+int vision_find_boxes( IplImage *srcImg,
 					   CvSeq *result,
 					   CvSeq *squares,
 					   int task,
@@ -934,8 +920,7 @@ int vision_find_squares( IplImage *img, CvMemStorage *storage,
 
 /******************************************************************************
  *
- * Title:       int vision_suitcase(  CvCapture *cap,
- * 					   			      IplImage *srcImg,
+ * Title:       int vision_suitcase(  IplImage *srcImg,
  * 									  CvSeq *result,
  * 									  CvSeq *squares
  *                                  )
@@ -949,8 +934,7 @@ int vision_find_squares( IplImage *img, CvMemStorage *storage,
  *
  *****************************************************************************/
 
-int vision_suitcase( CvCapture *cap,
-					 IplImage *srcImg,
+int vision_suitcase( IplImage *srcImg,
 					 CvSeq *result,
 					 CvSeq *squares )
 {
@@ -978,8 +962,7 @@ int vision_suitcase( CvCapture *cap,
 
 /******************************************************************************
  *
- * Title:       int vision_find_circle(  CvCapture *cap,
- * 					   			         IplImage *srcImg,
+ * Title:       int vision_find_circle(  IplImage *srcImg,
  * 										 CvSeq *circles
  *                                     )
  *
@@ -993,8 +976,7 @@ int vision_suitcase( CvCapture *cap,
  *
  *****************************************************************************/
 
-int vision_find_circle( CvCapture *cap,
-					    IplImage *srcImg,
+int vision_find_circle( IplImage *srcImg,
 						CvSeq *circles )
 {
 	/* Declare variables. */

@@ -101,12 +101,10 @@ CvPoint vision_find_centroid( IplImage *binImage, int thresh );
 //! \param dotx Pointer to variable for x position of dot.
 //! \param doty Pointer to variable for y position of dot.
 //! \param angle The angle to rotate the image by.
-//! \param cam A pointer to an open camera.
 //! \param srcImg The unprocessed image.
 int vision_find_dot( int *dotx,
                      int *doty,
                      int angle,
-                     CvCapture *cam,
                      IplImage *srcImg,
                      IplImage *binImg,
                      HSV *hsv
@@ -116,12 +114,10 @@ int vision_find_dot( int *dotx,
 //! \param pipex Pointer to variable for x position of pipe.
 //! \param pipey Pointer to variable for y position of pipe.
 //! \param bearing Pointer to variable for bearing of pipe.
-//! \param cam A pointer to an open camera.
 //! \param srcImg The unprocessed image.
 int vision_find_pipe( int *pipex,
 					  int *pipey,
                       double *bearing,
-                      CvCapture *cam,
                       IplImage *srcImg,
                       IplImage *binImg,
                       HSV *hsv
@@ -137,26 +133,23 @@ int vision_get_fence_bottom( IplImage *inputBinImg, int *center );
 //! Finds a fence object from a camera.
 //! \param pipex Pointer to variable for x position of pipe.
 //! \param bearing Pointer to variable for bearing of pipe.
-//! \param cam A pointer to an open camera.
 //! \param srcImg The unprocessed image.
 int vision_find_fence( int *pipex,
                       int *y_max,
-                      CvCapture *cam,
                       IplImage *srcImg,
                       IplImage *binImg,
 					  HSV *hsv
                     );
 
 //! Finds the centroid of the suitcase structure in an image.
-//! \param cap The camera to capture images from.
 //! \param srcImg The binary image to find the suitcase in.
 //! \param result A sequence containing the centroids of the rectangles found.
 //! \param squares A sequence containing the vertices of the rectangles found.
 //! \return 1 if suitcase found, 0 otherwise.
-int vision_suitcase( CvCapture *cap, IplImage *srcImg, CvSeq *result, CvSeq *squares );
+int vision_suitcase( IplImage *srcImg, CvSeq *result, CvSeq *squares );
 
 //! Captures an image, calls findSquares.
-int vision_find_boxes( CvCapture *cap, IplImage *srcImg, CvSeq *result,
+int vision_find_boxes( IplImage *srcImg, CvSeq *result,
 					   CvSeq *squares, int task, float *angle );
 
 //! Helper function for finding boxes (angle calculations)
@@ -172,7 +165,7 @@ int vision_find_squares( IplImage *img, CvMemStorage *storage, CvSeq *box_center
 //! \param srcImg The binary image to find the suitcase in.
 //! \param circles A sequence to store detected circle data in.
 //! \return 1 if circle found, 0 otherwise.
-int vision_find_circle( CvCapture *cap, IplImage *srcImg, CvSeq *circles );
+int vision_find_circle( IplImage *srcImg, CvSeq *circles );
 
 //! Finds the centroid in a binary image using the sum of a window.
 //! \return 1 if circle found, 0 otherwise.
