@@ -92,7 +92,6 @@ int vision_find_dot( int *dotx,
     /* Clear variables to free memory. */
     cvReleaseImage( &hsvImg );
     cvReleaseImage( &outImg );
-    /* CHRIS: Do we need to release IplConvKernel *wS? */
 
 	/* Check to see how many pixels are detected in the image. */
 	num_pix = cvCountNonZero( binImg );
@@ -143,7 +142,6 @@ int vision_find_pipe( int *pipex,
 
     CvPoint center;
     IplImage *hsvImg = NULL;
-    IplImage *hsv_clone = NULL;
     IplImage *outImg = NULL;
     IplConvKernel *wS = cvCreateStructuringElementEx( 2, 2,
             (int)floor( ( 2.0 ) / 2 ), (int)floor( ( 2.0 ) / 2 ), CV_SHAPE_RECT );
@@ -187,9 +185,7 @@ int vision_find_pipe( int *pipex,
 
     /* Clear variables to free memory. */
     cvReleaseImage( &hsvImg );
-    cvReleaseImage( &hsv_clone );	/* CHRIS: Do we need to do this since we never did create? */
     cvReleaseImage( &outImg );
-    /* CHRIS: Do we need to release IplConvKernel *wS? */
 
 	/* Check to see how many pixels are detected in the image. */
 	num_pix = cvCountNonZero( binImg );
@@ -327,7 +323,9 @@ double vision_get_bearing( IplImage *inputBinImg )
 
     /* If estimate is really poor, do not update bearing. */
     if( (Right_STD.val[0] > maxSTD) && (Left_STD.val[0] > maxSTD) ) {
-    	/* CHRIS: Need to delete and release storage if we return. Or do if/else. */
+		delete left_line;
+		delete right_line;
+		cvReleaseMemStorage( &storage );
         return m;
     }
 
@@ -347,7 +345,6 @@ double vision_get_bearing( IplImage *inputBinImg )
 
     delete left_line;
     delete right_line;
-    /* CHRIS: Should we also do cvClearMemStorage( &storage ) ? */
     cvReleaseMemStorage( &storage );
 
     return m;
@@ -460,8 +457,7 @@ int vision_find_fence( int *fence_center,
     IplConvKernel *wS = cvCreateStructuringElementEx( 2, 2,
             (int)floor( ( 2.0 ) / 2 ), (int)floor( ( 2.0 ) / 2 ), CV_SHAPE_RECT );
     CvSize sz = cvSize( srcImg->width & -2, srcImg->height & -2 );
-    IplImage *hsv_clone = NULL;
-	int num_pix = 0;
+ 	int num_pix = 0;
 	int detect_thresh = 100;
 
 	/* Create intermediate images for scratch space. */
@@ -508,9 +504,7 @@ int vision_find_fence( int *fence_center,
     /* Clear variables to free memory. */
     cvReleaseImage( &hsvImg );
     cvReleaseImage( &outImg );
-    cvReleaseImage( &hsv_clone );	/* CHRIS: Do we need to do this since we never create? */
-    /* CHRIS: Do we need to release IplConvKernel *wS? */
-
+ 
 	if( num_pix > detect_thresh ) {
 		/* We have found enough pixels to qualify as detecting the fence. */
 		return 1;
@@ -960,8 +954,7 @@ int vision_suitcase( IplImage *srcImg,
 
     /* Clear memory storage and reset free space position. */
     cvReleaseImage( &img );
-    cvClearMemStorage( storage );
-    /* CHRIS: Do we need to Release also? */
+    cvReleaseMemStorage( &storage );
 
     return status;
 } /* end vision_suitcase() */
@@ -1004,8 +997,7 @@ int vision_find_circle( IplImage *srcImg,
 
     /* Clear memory storage and reset free space position. */
     cvReleaseImage( &gray );
-    cvClearMemStorage( storage );
-    /* CHRIS: Do we need to Release also? */
+    cvReleaseMemStorage( &storage );
 
     return circles->total;
 } /* end vision_find_circle() */
@@ -1371,8 +1363,6 @@ void vision_threshold( IplImage *img,
 	else {
 		cvAdaptiveThreshold( img, bin_img, maxval, CV_ADAPTIVE_THRESH_MEAN_C, CV_THRESH_BINARY_INV, 3, 5 );
 	}
-	
-	/* CHRIS: Do we need to release img because its cloned and kernal because of Create? */
 	
 } /* end vision_threshold() */
 
