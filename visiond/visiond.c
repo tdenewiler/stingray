@@ -193,7 +193,7 @@ int main( int argc, char *argv[] )
     double fps = 0.0;
 	
 	/* Variables for opening, reading and using directories and files. */
-	struct dirent *dptr = NULL;
+	struct dirent *dfile = NULL;
 	const char *dirname = "images/buoy/";
 	int diropen = FALSE;
 	char filename[STRING_SIZE];
@@ -203,6 +203,8 @@ int main( int argc, char *argv[] )
 	gettimeofday( &fps_start, NULL );
 	gettimeofday( &save_time, NULL );
 	gettimeofday( &save_start, NULL );
+	gettimeofday( &open_time, NULL );
+	gettimeofday( &open_start, NULL );
 
     printf( "MAIN: Starting Vision daemon ...\n" );
 
@@ -286,22 +288,22 @@ int main( int argc, char *argv[] )
 	else {
 		if( diropen ) {
 			/* Load an image from disk. */
-			dptr = readdir( dirp );
-			if( dptr == NULL ) {
+			dfile = readdir( dirp );
+			if( dfile == NULL ) {
 				closedir( dirp );
 				dirp = opendir( dirname );
 			}
 			else {
 				/* Check that we don't try to open directories. */
-				if( strncmp( dptr->d_name, ".", 1 ) == 0 ) {
-					dptr = readdir( dirp );
+				if( strncmp( dfile->d_name, ".", 1 ) == 0 ) {
+					dfile = readdir( dirp );
 				}
-				if( strncmp( dptr->d_name, "..", 2 ) == 0 ) {
-					dptr = readdir( dirp );
+				if( strncmp( dfile->d_name, "..", 2 ) == 0 ) {
+					dfile = readdir( dirp );
 				}
 				/* Load image here and set up other images. */
 				strncpy( filename, dirname, STRING_SIZE / 2 );
-				strncat( filename, dptr->d_name, STRING_SIZE / 2 );
+				strncat( filename, dfile->d_name, STRING_SIZE / 2 );
 				img = cvLoadImage( filename );
 				bin_img = cvCreateImage( cvGetSize(img), IPL_DEPTH_8U, 1 );
 				img_eq  = cvCreateImage( cvGetSize(img), IPL_DEPTH_8U, 3 );
@@ -372,24 +374,24 @@ int main( int argc, char *argv[] )
 			dt = util_calc_dt( &time1s, &time1ms, &time2s, &time2ms ) / 1000000;
 
 			if( dt > cf.open_rate ) {
-				dptr = readdir( dirp );
-				if( dptr == NULL ) {
+				dfile = readdir( dirp );
+				if( dfile == NULL ) {
 					/* Start over at the beginning of the directory. */
 					closedir( dirp );
 					dirp = opendir( dirname );
 				}
 				else {
-					if( strncmp( dptr->d_name, ".", 1 ) == 0 ) {
-						dptr = readdir( dirp );
+					if( strncmp( dfile->d_name, ".", 1 ) == 0 ) {
+						dfile = readdir( dirp );
 					}
-					if( strncmp( dptr->d_name, "..", 2 ) == 0 ) {
-						dptr = readdir( dirp );
+					if( strncmp( dfile->d_name, "..", 2 ) == 0 ) {
+						dfile = readdir( dirp );
 					}
-					if( dptr == NULL ) {
+					if( dfile == NULL ) {
 						/* Start over at the beginning of the directory. */
 						closedir( dirp );
 						dirp = opendir( dirname );
-						dptr = readdir( dirp );
+						dfile = readdir( dirp );
 					}
 				}
 				/* Reset the open image timer. */
@@ -397,7 +399,7 @@ int main( int argc, char *argv[] )
 			}
 			/* Load image here. */
 			strncpy( filename, dirname, STRING_SIZE / 2 );
-			strncat( filename, dptr->d_name, STRING_SIZE / 2 );
+			strncat( filename, dfile->d_name, STRING_SIZE / 2 );
 			//strncat( filename, "f20090717_161532.231909.jpg", STRING_SIZE / 2 );
 			img = cvLoadImage( filename );
 		}
