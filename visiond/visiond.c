@@ -910,9 +910,13 @@ int main( int argc, char *argv[] )
 		gettimeofday( &fps_time, NULL );
 		gettimeofday( &save_time, NULL );
 		gettimeofday( &open_time, NULL );
+		
+		/* If image was loaded from file, release it. Don't need to release if
+		 * image is captured from camera. */
+		if( diropen ) {
+			cvReleaseImage( &img );
+		}
     }
     
-    /* CHRIS: Should we release storage1, storage2, bin_img, and img_eq? */
-
     exit( 0 );
 } /* end main() */
