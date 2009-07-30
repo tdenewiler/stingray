@@ -55,7 +55,7 @@ int vision_find_dot( int *dotx,
     IplConvKernel *wS = cvCreateStructuringElementEx( 2, 2,
             (int)floor( ( 2.0 ) / 2 ), (int)floor( ( 2.0 ) / 2 ), CV_SHAPE_RECT );
 	int num_pix = 0;
-	int touch_thresh = 7000;
+	int touch_thresh = 150000;
 
     /* Initialize to impossible values. */
     center.x = -10000;
@@ -66,24 +66,25 @@ int vision_find_dot( int *dotx,
     outImg = cvCreateImage( cvGetSize(srcImg), IPL_DEPTH_8U, 1 );
 
 	/* Enhance the red channel of the source image. */
-	vision_white_balance( srcImg );
+	//vision_white_balance( srcImg );
 
     /* Segment the flipped image into a binary image. */
     cvCvtColor( srcImg, hsvImg, CV_RGB2HSV );
 
 	/* Equalize the histograms of each channel. */
-	vision_hist_eq( hsvImg,
-		VISION_CHANNEL2 + VISION_CHANNEL3 );
+	//vision_hist_eq( hsvImg, VISION_CHANNEL3 );
 		//VISION_CHANNEL1 + VISION_CHANNEL2 + VISION_CHANNEL3 );
-
+     
 	/* Threshold all three channels using our own values. */
     cvInRangeS( hsvImg, cvScalar(hsv->hL, hsv->sL, hsv->vL),
 		cvScalar(hsv->hH, hsv->sH, hsv->vH), binImg );
 
 	/* Use a median filter image to remove outliers. */
 	cvSmooth( binImg, outImg, CV_MEDIAN, 5, 5, 0. ,0. );
-	cvErode( outImg, binImg, wS );
-
+	cvDilate( outImg, binImg, 0, 2 );
+	cvErode( outImg, binImg, 0, 4 );
+	cvDilate( outImg, binImg, 0, 2 );
+	
     /* Find the centroid. */
     center = vision_find_centroid( binImg, 5 );
     *dotx = center.x;
@@ -93,10 +94,9 @@ int vision_find_dot( int *dotx,
     cvReleaseImage( &hsvImg );
     cvReleaseImage( &outImg );
 
-	/* Check to see how many pixels are detected in the image. */
+	/* Check to see how many pixels of are detected in the image. */
 	num_pix = cvCountNonZero( binImg );
-	//printf("VISION_FIND_DOT: num_pix = %d\n" , num_pix);
-	
+	printf("VISION_FIND_DOT: num_pix = %d\n" , num_pix);
 	if( num_pix > touch_thresh ) {
 		return 2;
 	}
@@ -145,7 +145,7 @@ int vision_find_pipe( int *pipex,
     IplImage *outImg = NULL;
     IplConvKernel *wS = cvCreateStructuringElementEx( 2, 2,
             (int)floor( ( 2.0 ) / 2 ), (int)floor( ( 2.0 ) / 2 ), CV_SHAPE_RECT );
-	int detect_thresh = 200;
+	int detect_thresh = 1600;
 	int num_pix = 0;
 	
     /* Initialize to impossible values. */
@@ -157,7 +157,7 @@ int vision_find_pipe( int *pipex,
     outImg = cvCreateImage( cvGetSize(srcImg), IPL_DEPTH_8U, 1 );
 
 	/* Enhance the red channel of the source image. */
-	vision_white_balance( srcImg );
+	//vision_white_balance( srcImg );
 
     /* Flip the source image. */
     cvFlip( srcImg, srcImg );
@@ -166,8 +166,8 @@ int vision_find_pipe( int *pipex,
     cvCvtColor( srcImg, hsvImg, CV_RGB2HSV );
 
 	/* Equalize the histograms of each channel. */
-	vision_hist_eq( hsvImg,
-		VISION_CHANNEL1 + VISION_CHANNEL2 + VISION_CHANNEL3 );
+	//vision_hist_eq( hsvImg,
+	//	VISION_CHANNEL1 + VISION_CHANNEL2 + VISION_CHANNEL3 );
 
 	/* Threshold all three channels using our own values. */
     cvInRangeS( hsvImg, cvScalar(hsv->hL, hsv->sL, hsv->vL),
@@ -175,8 +175,10 @@ int vision_find_pipe( int *pipex,
 
 	/* Median filter image to remove outliers */
 	cvSmooth( binImg, outImg, CV_MEDIAN, 5, 5, 0. ,0. );
-	cvErode( outImg, binImg, wS );
-
+	//cvDilate( outImg, binImg, 0, 2 );
+	//cvErode( outImg, binImg, 0, 4 );
+	//cvDilate( outImg, binImg, 0, 2 );
+	
     /* Process the image to get the bearing and centroid. */
     *bearing = vision_get_bearing( outImg );
     center = vision_find_centroid( outImg, 0 );
@@ -189,6 +191,7 @@ int vision_find_pipe( int *pipex,
 
 	/* Check to see how many pixels are detected in the image. */
 	num_pix = cvCountNonZero( binImg );
+	printf("VISION_FIND_PIPE: num_pix = %d\n" , num_pix);
 	if( num_pix < detect_thresh ) {
 		return 0;
 	}
