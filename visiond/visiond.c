@@ -194,9 +194,10 @@ int main( int argc, char *argv[] )
 	
 	/* Variables for opening, reading and using directories and files. */
 	struct dirent *dfile = NULL;
-	const char *dirname = "images/buoy/";
+	//const char *dirname = "images/buoy/";
+	const char *dirname = "../../../pics/practice_side_wed_1pm/images/pipe/";
 	int diropen = FALSE;
-	char filename[STRING_SIZE];
+	char filename[STRING_SIZE * 2];
 
 	/* Initialize timers. */
 	gettimeofday( &fps_time, NULL );
@@ -302,8 +303,12 @@ int main( int argc, char *argv[] )
 					dfile = readdir( dirp );
 				}
 				/* Load image here and set up other images. */
-				strncpy( filename, dirname, STRING_SIZE / 2 );
-				strncat( filename, dfile->d_name, STRING_SIZE / 2 );
+				strncpy( filename, dirname, STRING_SIZE );
+				printf("MAIN: Loading dir %s\n", filename);
+				//strncat( filename, dfile->d_name, STRING_SIZE );
+				//strncat( filename, "20090729_132701.311970.jpg", STRING_SIZE );
+				strncat( filename, "20090729_132735.775676.jpg", STRING_SIZE );
+				printf("MAIN: Loading file %s\n", filename);
 				img = cvLoadImage( filename );
 				bin_img = cvCreateImage( cvGetSize(img), IPL_DEPTH_8U, 1 );
 				img_eq  = cvCreateImage( cvGetSize(img), IPL_DEPTH_8U, 3 );
@@ -398,9 +403,15 @@ int main( int argc, char *argv[] )
 				gettimeofday( &open_start, NULL );
 			}
 			/* Load image here. */
-			strncpy( filename, dirname, STRING_SIZE / 2 );
-			strncat( filename, dfile->d_name, STRING_SIZE / 2 );
-			//strncat( filename, "f20090717_161532.231909.jpg", STRING_SIZE / 2 );
+			strncpy( filename, dirname, STRING_SIZE );
+			//strncat( filename, dfile->d_name, STRING_SIZE );
+			//strncat( filename, "20090729_132701.311970.jpg", STRING_SIZE );
+			//strncat( filename, "20090729_132610.207982.jpg", STRING_SIZE );
+			//strncat( filename, "20090729_132919.103967.jpg", STRING_SIZE );
+            //strncat( filename, "20090729_132634.713840.jpg", STRING_SIZE );
+			//strncat( filename, "20090729_132709.129376.jpg", STRING_SIZE );
+			strncat( filename, "20090729_132735.775676.jpg", STRING_SIZE );
+					
 			img = cvLoadImage( filename );
 		}
 
