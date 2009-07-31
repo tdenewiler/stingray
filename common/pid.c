@@ -69,7 +69,7 @@ int pid_init( PID *pid, CONF_VARS *cf )
 	pid->fy.kp			= cf->kp_fy;
 	pid->fy.ki			= cf->ki_fy;
 	pid->fy.kd			= cf->kd_fy;
-	
+
 	pid->kp_roll_lateral  = cf->kp_roll_lateral;
 	pid->kp_depth_forward = cf->kp_depth_forward;
 	pid->kp_place_holder  = cf->kp_place_holder;
@@ -146,12 +146,10 @@ void pid_loop( int pololu_fd,
 	 * Reference: float atan2f(float y, float x); theta = atan( y / x ) */
 
 	float depth_perr_old = pid->depth.perr;
-	
+
 	if( msg->task.data.task == TASK_BOXES ) {
-		
 		float fx_perr_old = pid->fx.perr;
 		float fy_perr_old = pid->fy.perr;
-		
 
 		/* Update the gains. */
 		pid->fx.kp		= msg->gain.data.kp_fx;
@@ -165,7 +163,7 @@ void pid_loop( int pololu_fd,
 		pid->kp_roll_lateral   = msg->gain.data.kp_roll_lateral;
 		pid->kp_depth_forward  = msg->gain.data.kp_depth_forward;
 		pid->kp_place_holder   = msg->gain.data.kp_place_holder;
-		
+
 		/* Calculate the errors for fx and fy. */
 		pid->fx.ref		= msg->target.data.fx;
 		pid->fx.cval	= 0;
@@ -204,8 +202,7 @@ void pid_loop( int pololu_fd,
 		pid->lateral_thrust = msg->target.data.fx;
 		pid->forward_thrust = msg->target.data.fy;
 	}
-	
-					   		
+
 	/* Check bounds. */
 	if( fabsf( pid->forward_thrust ) > PID_TOTAL_FY_THRUST ) {
 		pid->forward_thrust = util_sign_value( pid->forward_thrust ) * PID_TOTAL_FY_THRUST;
@@ -304,6 +301,13 @@ void pid_loop( int pololu_fd,
 		pid->yaw.kp		= msg->gain.data.kp_yaw;
 		pid->yaw.ki		= msg->gain.data.ki_yaw;
 		pid->yaw.kd		= msg->gain.data.kd_yaw;
+
+		/* Use different gains for buoy task. */
+		if( msg->target.data.task == TASK_BUOY ) {
+			pid->yaw.kp = cf->kp_buoy;
+			pid->yaw.ki = cf->ki_buoy;
+			pid->yaw.kd = cf->kd_buoy;
+		}
 
 		/* Calculate the errors. */
 		pid->yaw.ref	= msg->target.data.yaw;

@@ -345,6 +345,13 @@ int main( int argc, char *argv[] )
 					if( dt > POLOLU_INIT_TIME ) {
 						pololu_initialized = TRUE;
 						pololu_starting = FALSE;
+						pid.pitch.ierr = 0;
+						pid.roll.ierr = 0;
+						pid.yaw.ierr = 0;
+						pid.depth.ierr = 0;
+						pid.fx.ierr = 0;
+						pid.fy.ierr = 0;
+						msg.target.data.yaw = msg.status.data.yaw;
 						printf("MAIN: Pololu initialized.\n");
 					}
 				}

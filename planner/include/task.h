@@ -27,9 +27,9 @@
 #define TASKS							1
 #define TASK_NONE						0
 #define TASK_DOCK						1
-#define TASK_GATE   					2
-#define TASK_PIPE1   					3
-#define TASK_BUOY   					4
+#define TASK_GATE   					3
+#define TASK_PIPE1   					4
+#define TASK_BUOY   					2
 #define TASK_PIPE2   					5
 #define TASK_FENCE						6
 #define TASK_PIPE3   					7
@@ -49,8 +49,8 @@
 #define TASK_SWEEP_YAW_ANGLE			2.5
 #define TASK_SWEEP_YAW_TIMEOUT			180
 #define TASK_SWEEP_YAW_PERIOD			4
-#define TASK_BUOY_YAW_GAIN				0.25
-#define TASK_BUOY_DEPTH_GAIN			0.0025
+#define TASK_BUOY_YAW_GAIN				0.1
+#define TASK_BUOY_DEPTH_GAIN			0.25
 #define TASK_BUOY_DEPTH					6.5
 #define TASK_BUOY_HEADING				0.0
 #define TASK_BUOY_MAX_SEARCH_TIME		100
@@ -58,9 +58,9 @@
 #define TASK_FENCE_YAW_GAIN				0.25
 #define TASK_FENCE_DEPTH_GAIN			0.01
 #define TASK_MAX_TIME					300
-#define TASK_PIPE_YAW_GAIN				0.5
-#define TASK_PIPE_FX_GAIN				0.25
-#define TASK_PIPE_FY_GAIN				0.25
+#define TASK_PIPE_YAW_GAIN				0.1
+#define TASK_PIPE_FX_GAIN				0.15
+#define TASK_PIPE_FY_GAIN				0.15
 #define TASK_PIPE_FX_MAX				75
 #define TASK_PIPE_FY_MAX				75
 #define TASK_PIPE_X_THRESH				50
@@ -84,7 +84,8 @@
 #define SUBTASK_SEARCH					2
 #define SUBTASK_CORRECT					3
 #define SUBTASK_GATE_MOVE				2
-#define SUBTASK_PIPE_END				4
+#define SUBTASK_PIPE_CORRECT			1
+#define SUBTASK_PIPE_END				2
 #define SUBTASK_PIPE_ANGLE_MARGIN		2
 #define SUBTASK_PIPE_WINDOW_X			15
 #define SUBTASK_PIPE_WINDOW_Y			15
@@ -102,7 +103,7 @@
 #define SUBTASK_DEPTH_MARGIN			2
 #define SUBTASK_YAW_MARGIN				3.0
 #define SUBTASK_MAX_SEARCH_TIME			180
-#define SUBTASK_GATE_MOVE_TIME			15
+#define SUBTASK_GATE_MOVE_TIME			2
 #define SUBTASK_SUCCESS					2
 #define SUBTASK_FAILURE					-2
 #define SUBTASK_CONTINUING				0

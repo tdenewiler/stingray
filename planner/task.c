@@ -57,7 +57,7 @@ int task_run( MSG_DATA *msg, CONF_VARS *cf, int dt, int subtask_dt )
 	int status = TASK_CONTINUING;
 
 	switch ( msg->task.data.task ) {
-		
+
 	case TASK_BUOY:
 		status = task_buoy( msg, cf, dt, subtask_dt );
 		break;
@@ -121,7 +121,7 @@ int task_run( MSG_DATA *msg, CONF_VARS *cf, int dt, int subtask_dt )
 	case TASK_COURSE:
 		status = task_course( msg, cf, dt, subtask_dt );
 		break;
-		
+
 	case TASK_DOCK:
 		status = task_dock( msg, cf, dt, subtask_dt );
 		break;
@@ -154,7 +154,7 @@ int task_buoy( MSG_DATA *msg, CONF_VARS *cf, int dt, int subtask_dt )
 		case SUBTASK_SEARCH_DEPTH:
 			/* Set depth to configuration file value. */
 			msg->target.data.depth = cf->depth_buoy;
-			
+
 			/* Check to see if we have reached the target depth. */
 			if( fabsf(msg->status.data.depth - msg->target.data.depth) < SUBTASK_DEPTH_MARGIN ) {
 				return SUBTASK_SUCCESS;
@@ -167,24 +167,26 @@ int task_buoy( MSG_DATA *msg, CONF_VARS *cf, int dt, int subtask_dt )
 			else {
 				return SUBTASK_CONTINUING;
 			}
-			
+
 		case SUBTASK_SEARCH:
 			/* Go forward without visual feedback for an amount of time set in
 			 * configuration file. */
 			if( subtask_dt < cf->buoy_blind_time ) {
 				msg->target.data.fy = POLOLU_MOVE_FORWARD;
+				msg->target.data.speed = 65;
 				return SUBTASK_CONTINUING;
 			}
 			else {
 				return SUBTASK_SUCCESS;
 			}
-			
+
 		case SUBTASK_CORRECT:
 			/* Set search yaw to configuration file value. */
-			msg->target.data.yaw = cf->heading_buoy;
-			
+			//msg->target.data.yaw = cf->heading_buoy;
+
 			/* Start moving forward. */
 			msg->target.data.fy = POLOLU_MOVE_FORWARD;
+			msg->target.data.speed = 65;
 
 			/* Check to see if we think we have detected the buoy. */
 			if( msg->vision.data.status == TASK_BUOY_DETECTED ) {
@@ -194,15 +196,16 @@ int task_buoy( MSG_DATA *msg, CONF_VARS *cf, int dt, int subtask_dt )
 				return SUBTASK_FAILURE;
 			}
 			else {
+				msg->target.data.yaw = msg->status.data.yaw;
 				return SUBTASK_CONTINUING;
 			}
-		
+
 		case SUBTASK_BUOY_TOUCH:
 			/* Set target values based on current orientation and pixel error. */
 			msg->target.data.yaw = msg->status.data.yaw +
 				(float)msg->vision.data.front_x * TASK_BUOY_YAW_GAIN;
-			msg->target.data.depth = msg->status.data.depth +
-				(float)msg->vision.data.front_y * TASK_BUOY_DEPTH_GAIN;
+			//msg->target.data.depth = msg->status.data.depth +
+				//(float)msg->vision.data.front_y * TASK_BUOY_DEPTH_GAIN;
 
 			/* Check to see if we think we have touched the buoy. */
 			if( msg->vision.data.status == TASK_BUOY_TOUCHED ) {
@@ -212,6 +215,7 @@ int task_buoy( MSG_DATA *msg, CONF_VARS *cf, int dt, int subtask_dt )
 				return TASK_FAILURE;
 			}
 			else {
+				msg->target.data.yaw = msg->status.data.yaw;
 				return SUBTASK_CONTINUING;
 			}
 		}
@@ -219,34 +223,23 @@ int task_buoy( MSG_DATA *msg, CONF_VARS *cf, int dt, int subtask_dt )
 
 	/* Non-course mode. */
 	else {
-		
-		if( !hasPrinted ) {
-			printf( "Planner: Looking for Bouy\n" );
-			hasPrinted = TRUE;
-		}
-		
 		/* Check to see if we have detected the buoy. Else don't change yaw or
 		 * depth, just keep old values. */
-		if( msg->vision.data.status == TASK_BUOY_DETECTED ) {
-			
+		if( msg->vision.data.status == TASK_BUOY_DETECTED ||
+			msg->vision.data.status == TASK_BUOY_TOUCHED ) {
+
 			/* Set target values based on current position and pixel error. */
 			msg->target.data.yaw = msg->status.data.yaw +
 				(float)msg->vision.data.front_x * TASK_BUOY_YAW_GAIN;
-				
-			msg->target.data.depth = msg->status.data.depth +
-				(float)msg->vision.data.front_y * TASK_BUOY_DEPTH_GAIN;
-				
-			if( !hasDetected ) {
-				printf( "Planner: Bouy Detected\n" );
-				hasDetected = TRUE;
-			}
+
+			//msg->target.data.depth = msg->status.data.depth +
+				//(float)msg->vision.data.front_y * TASK_BUOY_DEPTH_GAIN;
 		}
-		
-		if( msg->vision.data.status == TASK_BUOY_TOUCHED ) {
-			if( !hasSuccess ) {
-				printf( "Planner: Bouy Touched\n" );
-				hasSuccess = TRUE;
-			}
+
+		/* CHRIS: Keep yaw if we don't see buoy. */
+		else {
+			/* Set target values based on current position and pixel error. */
+			msg->target.data.yaw = msg->status.data.yaw;
 		}
 	}
 
@@ -276,7 +269,7 @@ int task_gate( MSG_DATA *msg, CONF_VARS *cf, int dt, int subtask_dt )
 
 		case SUBTASK_SEARCH_DEPTH:
 			/* Set depth to configuration file value. */
-			msg->target.data.depth = cf->depth_buoy;
+			msg->target.data.depth = cf->depth_pipe;
 
 			/* Check to see if we have reached the target depth. */
 			if( fabsf(msg->status.data.depth - msg->target.data.depth) <
@@ -290,25 +283,8 @@ int task_gate( MSG_DATA *msg, CONF_VARS *cf, int dt, int subtask_dt )
 			else {
 				return SUBTASK_CONTINUING;
 			}
-		
+
 		case SUBTASK_SEARCH:
-			/* Set heading to configuration file value. */
-			msg->target.data.yaw = cf->heading_gate;
-			
-			/* Check to see if we have reached the target heading. */
-			if( fabsf(msg->status.data.yaw - msg->target.data.yaw) <
-				SUBTASK_YAW_MARGIN ) {
-				return SUBTASK_SUCCESS;
-			}
-			/* Check to see if too much time has elapsed. */
-			else if( subtask_dt > SUBTASK_MAX_SEARCH_TIME ) {
-				return TASK_FAILURE;
-			}
-			else {
-				return SUBTASK_CONTINUING;
-			}
-		
-		case SUBTASK_CORRECT:
 			/* Move forward for a set amount of time. */
 			if( subtask_dt < SUBTASK_GATE_MOVE_TIME ) {
 				msg->target.data.fy = POLOLU_MOVE_FORWARD;
@@ -322,7 +298,7 @@ int task_gate( MSG_DATA *msg, CONF_VARS *cf, int dt, int subtask_dt )
 			}
 		}
 	}
-	
+
 	/* Non-course mode. */
 	else {
 		/* Use the known direction from the start dock to the gate here. */
@@ -360,42 +336,42 @@ int task_pipe( MSG_DATA *msg, CONF_VARS *cf, int dt, int subtask_dt )
 	if( msg->task.data.course ) {
 		switch( msg->task.data.subtask ) {
 
-		case SUBTASK_SEARCH_DEPTH:
-			/* Set depth to configuration file value. */
-			msg->target.data.depth = cf->depth_pipe;
-			
-			/* Check to see if we have reached the target depth. */
-			if( fabsf(msg->status.data.depth - msg->target.data.depth) <
-				SUBTASK_DEPTH_MARGIN ) {
-				return TASK_SUCCESS;
-			}
-			/* Check to see if too much time has elapsed. */
-			else if( subtask_dt > SUBTASK_MAX_SEARCH_TIME ) {
-				return TASK_FAILURE;
-			}
-			else {
-				return SUBTASK_CONTINUING;
-			}
+		//case SUBTASK_SEARCH_DEPTH:
+			///* Set depth to configuration file value. */
+			//msg->target.data.depth = cf->depth_pipe;
 
-		case SUBTASK_SEARCH:
-			/* Start moving forward. */
-			msg->target.data.fy = POLOLU_MOVE_FORWARD;
+			///* Check to see if we have reached the target depth. */
+			//if( fabsf(msg->status.data.depth - msg->target.data.depth) <
+				//SUBTASK_DEPTH_MARGIN ) {
+				//return TASK_SUCCESS;
+			//}
+			///* Check to see if too much time has elapsed. */
+			//else if( subtask_dt > SUBTASK_MAX_SEARCH_TIME ) {
+				//return TASK_FAILURE;
+			//}
+			//else {
+				//return SUBTASK_CONTINUING;
+			//}
 
-			if( msg->vision.data.status == TASK_PIPE_DETECTED ) {
-				/* Set forward speed to zero. If we are not at the centroid the
-				 * next subtask will correct for it. */
-				msg->target.data.fy = 0;
-				return SUBTASK_SUCCESS;
-			}
-			/* Check to see if too much time has elapsed. */
-			else if( subtask_dt > SUBTASK_MAX_SEARCH_TIME ) {
-				return SUBTASK_FAILURE;
-			}
-			else {
-				return SUBTASK_CONTINUING;
-			}
+		//case SUBTASK_SEARCH:
+			///* Start moving forward. */
+			//msg->target.data.fy = POLOLU_MOVE_FORWARD;
 
-		case SUBTASK_CORRECT:
+			//if( msg->vision.data.status == TASK_PIPE_DETECTED ) {
+				///* Set forward speed to zero. If we are not at the centroid the
+				 //* next subtask will correct for it. */
+				//msg->target.data.fy = 0;
+				//return SUBTASK_SUCCESS;
+			//}
+			///* Check to see if too much time has elapsed. */
+			//else if( subtask_dt > SUBTASK_MAX_SEARCH_TIME ) {
+				//return SUBTASK_FAILURE;
+			//}
+			//else {
+				//return SUBTASK_CONTINUING;
+			//}
+
+		case SUBTASK_PIPE_CORRECT:
 			/* Set fx and fy based on centroid pixel error. */
 			msg->target.data.fx = msg->vision.data.bottom_x * TASK_PIPE_FX_GAIN;
 			msg->target.data.fy = msg->vision.data.bottom_y * TASK_PIPE_FY_GAIN;
@@ -416,7 +392,11 @@ int task_pipe( MSG_DATA *msg, CONF_VARS *cf, int dt, int subtask_dt )
 			/* Set heading base on pixel error. */
 			msg->target.data.yaw = msg->status.data.yaw +
 				msg->vision.data.bearing * TASK_PIPE_YAW_GAIN;
-			
+
+			/* Set fx and fy based on centroid pixel error. */
+			msg->target.data.fx = msg->vision.data.bottom_x * TASK_PIPE_FX_GAIN;
+			msg->target.data.fy = msg->vision.data.bottom_y * TASK_PIPE_FY_GAIN;
+
 			/* Check to see if we are at pipe heading. */
 			if( fabsf(msg->target.data.yaw - msg->status.data.yaw) <
 				TASK_PIPE_YAW_THRESH ) {
@@ -431,15 +411,15 @@ int task_pipe( MSG_DATA *msg, CONF_VARS *cf, int dt, int subtask_dt )
 			}
 		}
 	}
-	
+
 	/* Non-course mode. */
 	else {
-		
+
 		if( !hasPrinted ) {
 			printf( "Planner: Looking for Pipe\n" );
 			hasPrinted = TRUE;
 		}
-		
+
 		/* Move forward until pipe is detected. */
 		if( msg->vision.data.status != TASK_PIPE_CENTERED &&
 			msg->vision.data.status != TASK_PIPE_DETECTED ) {
@@ -449,7 +429,7 @@ int task_pipe( MSG_DATA *msg, CONF_VARS *cf, int dt, int subtask_dt )
 		else if( msg->vision.data.status == TASK_PIPE_DETECTED ) {
 			msg->target.data.fx = msg->vision.data.bottom_x * TASK_PIPE_FX_GAIN;
 			msg->target.data.fy = msg->vision.data.bottom_y * TASK_PIPE_FY_GAIN;
-			
+
 			if( !hasDetected ) {
 				printf( "Planner: Pipe Detected\n" );
 				hasDetected = TRUE;
@@ -461,7 +441,7 @@ int task_pipe( MSG_DATA *msg, CONF_VARS *cf, int dt, int subtask_dt )
 			msg->target.data.fy = 0;
 			msg->target.data.yaw = msg->status.data.yaw +
 				msg->vision.data.bearing * TASK_PIPE_YAW_GAIN;
-				
+
 			if( !hasCentered ) {
 				printf( "Planner: Pipe Centered\n" );
 				hasCentered = TRUE;
@@ -521,7 +501,7 @@ int task_none( MSG_DATA *msg, CONF_VARS *cf, int dt, int subtask_dt )
 	hasDetected = FALSE;
 	hasSuccess = FALSE;
 	hasCentered = FALSE;
-	
+
 	return TASK_SUCCESS;
 } /* end task_none() */
 
@@ -902,7 +882,7 @@ int task_dock( MSG_DATA *msg, CONF_VARS *cf, int dt, int subtask_dt )
 		msg->gain.data.kd_depth       = cf->kd_depth;
 		msg->target.data.yaw_previous = TASK_YAW_PREVIOUS_NOT_SET;
 		msg->target.data.yaw_detected = TASK_YAW_DETECTED_NOT_SET;
-		
+
 		return TASK_SUCCESS;
 	}
 	else {

@@ -108,12 +108,14 @@ void messages_send( int fd,
 
             /* Use network byte order. */
             msg->target.data.mode  = htonl( msg->target.data.mode );
+            msg->target.data.task  = htonl( msg->target.data.task );
 
             /* Actually send message here. */
             net_send( fd, &msg->target, sizeof(TARGET_MSG) );
 
             /* Convert the values back to host byte order. */
             msg->target.data.mode  = ntohl( msg->target.data.mode );
+            msg->target.data.task  = ntohl( msg->target.data.task );
             break;
 
         case GAIN_MSGID:
@@ -185,16 +187,16 @@ void messages_send( int fd,
 
         case TASK_MSGID:
             msg->task.hdr.msgid = TASK_MSGID;
-			
+
 			/* Use network byte order. */
 			/*msg->task.data.num = htonl( msg->task.data.num );*/
 			msg->task.data.task = htonl( msg->task.data.task );
 			msg->task.data.subtask = htonl( msg->task.data.subtask );
 			msg->task.data.course = htonl( msg->task.data.course );
-			
+
             /* Actually send message here. */
             net_send( fd, &msg->task, sizeof(TASK_MSG) );
-			
+
 			/* Convert the values back to host byte order. */
 			/*msg->task.data.num = ntohl( msg->task.data.num );*/
 			msg->task.data.task = ntohl( msg->task.data.task );
@@ -346,6 +348,7 @@ int messages_decode( int fd, char *buf, MSG_DATA *msg, int bytes )
 
 			/* Convert from network to host byte order. */
 			msg->target.data.mode  = ntohl( msg->target.data.mode );
+			msg->target.data.task  = ntohl( msg->target.data.task );
 
 			bytes -= sizeof(TARGET_MSG);
 			memmove( msg, msg, sizeof(TARGET_MSG) );
@@ -395,7 +398,7 @@ int messages_decode( int fd, char *buf, MSG_DATA *msg, int bytes )
 			msg->task.data.task = ntohl( msg->task.data.task);
 			msg->task.data.subtask = ntohl( msg->task.data.subtask);
 			msg->task.data.course = ntohl( msg->task.data.course);
-			
+
 			bytes -= sizeof(TASK_MSG);
 			memmove( msg, msg, sizeof(TASK_MSG) );
 			break;

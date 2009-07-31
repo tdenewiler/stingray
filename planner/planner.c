@@ -355,6 +355,7 @@ int main( int argc, char *argv[] )
 
         /* Get nav data. */
 		if( nav_fd > 0 ) {
+			msg.target.data.task = msg.task.data.task;
 			recv_bytes = net_client( nav_fd, nav_buf, &msg, MODE_PLANNER );
 			nav_buf[recv_bytes] = '\0';
 			if( recv_bytes > 0 ) {
@@ -456,6 +457,7 @@ int main( int argc, char *argv[] )
 				/* Move on to the next task. Initialize the subtask. */
 				msg.task.data.task++;
 				task++;
+				printf("MAIN: task = %d\n", task);
 				msg.task.data.subtask = SUBTASK_SEARCH_DEPTH;
 				/* Re-initialize the task and subtask timers. */
 				gettimeofday( &task_start, NULL );
@@ -465,11 +467,12 @@ int main( int argc, char *argv[] )
 				/* Move on to the next subtask. */
 				msg.task.data.subtask++;
 				subtask++;
+				printf("MAIN: subtask = %d\n", subtask);
 				/* Re-initialize the subtask timer. */
 				gettimeofday( &subtask_start, NULL);
 			}
 		}
-		else { 
+		else {
 			/* If we are not in course mode and get a status of something other
 			 * than task continue, reset the timers. */
 			if( status == TASK_SUCCESS || status == TASK_FAILURE ) {
