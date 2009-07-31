@@ -91,6 +91,9 @@ typedef struct _CONF_VARS {
     double      kp_buoy;
     double      ki_buoy;
     double      kd_buoy;
+    double      kp_buoy_depth;
+    double      ki_buoy_depth;
+    double      kd_buoy_depth;
     double 		kp_roll_lateral;
     double 		kp_depth_forward;
     double 		kp_place_holder;

@@ -74,14 +74,14 @@ int vision_find_dot( int *dotx,
 	/* Equalize the histograms of each channel. */
 	//vision_hist_eq( hsvImg, VISION_CHANNEL3 );
 		//VISION_CHANNEL1 + VISION_CHANNEL2 + VISION_CHANNEL3 );
-     
+
 	/* Threshold all three channels using our own values. */
     cvInRangeS( hsvImg, cvScalar(hsv->hL, hsv->sL, hsv->vL),
 		cvScalar(hsv->hH, hsv->sH, hsv->vH), binImg );
 
 	/* Use a median filter image to remove outliers. */
 	cvSmooth( binImg, outImg, CV_MEDIAN, 7, 7, 0. ,0. );
-	
+
     /* Find the centroid. */
     center = vision_find_centroid( binImg, 5 );
     *dotx = center.x;
@@ -93,7 +93,7 @@ int vision_find_dot( int *dotx,
 
 	/* Check to see how many pixels of are detected in the image. */
 	num_pix = cvCountNonZero( binImg );
-	printf("VISION_FIND_DOT: num_pix = %d\n" , num_pix);
+	//printf("VISION_FIND_DOT: num_pix = %d\n" , num_pix);
 	if( num_pix > touch_thresh ) {
 		return 2;
 	}
@@ -146,7 +146,7 @@ int vision_find_pipe( int *pipex,
             (int)floor( ( 2.0 ) / 2 ), (int)floor( ( 2.0 ) / 2 ), CV_SHAPE_RECT );
 	int detect_thresh = 1600;
 	int num_pix = 0;
-	
+
     /* Initialize to impossible values. */
     center.x = -10000;
     center.y = -10000;
@@ -177,7 +177,7 @@ int vision_find_pipe( int *pipex,
 	//cvDilate( outImg, binImg, 0, 2 );
 	//cvErode( outImg, binImg, 0, 4 );
 	//cvDilate( outImg, binImg, 0, 2 );
-	
+
     /* Process the image to get the bearing and centroid. */
     *bearing = vision_get_bearing( outImg );
     center = vision_find_centroid( outImg, 0 );
@@ -190,7 +190,7 @@ int vision_find_pipe( int *pipex,
 
 	/* Check to see how many pixels are detected in the image. */
 	num_pix = cvCountNonZero( binImg );
-	printf("VISION_FIND_PIPE: num_pix = %d\n" , num_pix);
+	//printf("VISION_FIND_PIPE: num_pix = %d\n" , num_pix);
 	if( num_pix < detect_thresh ) {
 		return 0;
 	}
@@ -462,11 +462,11 @@ int vision_find_fence( int *fence_center,
     CvSize sz = cvSize( srcImg->width & -2, srcImg->height & -2 );
  	int num_pix = 0;
 	int detect_thresh = 1;
-    
-	/* Initialize center to impossible value. */ 
+
+	/* Initialize center to impossible value. */
 	center.x = -1000;
 	center.y = -1000;
-	
+
 	/* Create intermediate images for scratch space. */
     hsvImg = cvCreateImage( cvGetSize(srcImg), IPL_DEPTH_8U, 3 );
     outImg = cvCreateImage( cvGetSize(srcImg), IPL_DEPTH_8U, 1 );
@@ -491,8 +491,8 @@ int vision_find_fence( int *fence_center,
 
 	/* Check to see how many pixels are detected in the image. */
 	num_pix = cvCountNonZero( binImg );
-	printf("VISION_FIND_FENCE: num_pix = %d\n" , num_pix);
-    
+	//printf("VISION_FIND_FENCE: num_pix = %d\n" , num_pix);
+
 	/* Find the centroid. */
     center = vision_find_centroid( binImg, 5 );
     *fence_center = floor(center.x);
@@ -516,7 +516,7 @@ int vision_find_fence( int *fence_center,
     /* Clear variables to free memory. */
     cvReleaseImage( &hsvImg );
     cvReleaseImage( &outImg );
- 
+
 	if( num_pix > detect_thresh ) {
 		/* We have found enough pixels to qualify as detecting the fence. */
 		return 1;
@@ -545,7 +545,7 @@ int vision_get_fence_bottom( IplImage *inputBinImg)
     int imWidth = inputBinImg->width;
     int minPipeWidth = 2;
     int edgeThreshold = 2;
-    
+
     /* Edge vectors, first element = x, second = y. */
     int leftEdge[imHeight];
     int rightEdge[imHeight];
@@ -1365,7 +1365,7 @@ void vision_threshold( IplImage *img,
 	else {
 		cvAdaptiveThreshold( img, bin_img, maxval, CV_ADAPTIVE_THRESH_MEAN_C, CV_THRESH_BINARY_INV, 3, 5 );
 	}
-	
+
 } /* end vision_threshold() */
 
 

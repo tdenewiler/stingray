@@ -293,7 +293,12 @@ void parse_line( CONF_VARS *config )
             sscanf( tokens[2], "%lf", &config->kp_fy );
         }
         else if( strncmp( tokens[1], "buoy", STRING_SIZE ) == 0 ) {
-            sscanf( tokens[2], "%lf", &config->kp_buoy );
+        	if( strncmp( tokens[2], "depth", STRING_SIZE ) == 0 ) {
+        		sscanf( tokens[3], "%lf", &config->kp_buoy_depth );
+			}
+			else {
+	            sscanf( tokens[2], "%lf", &config->kp_buoy );
+			}
         }
         else if( strncmp( tokens[1], "depth", STRING_SIZE ) == 0 ) {
         	if( strncmp( tokens[2], "lateral", STRING_SIZE ) == 0 ) {
@@ -325,7 +330,12 @@ void parse_line( CONF_VARS *config )
             sscanf( tokens[2], "%lf", &config->ki_depth );
         }
         else if( strncmp( tokens[1], "buoy", STRING_SIZE ) == 0 ) {
-            sscanf( tokens[2], "%lf", &config->ki_buoy );
+        	if( strncmp( tokens[2], "depth", STRING_SIZE ) == 0 ) {
+        		sscanf( tokens[3], "%lf", &config->ki_buoy_depth );
+			}
+			else {
+	            sscanf( tokens[2], "%lf", &config->ki_buoy );
+			}
         }
     }
 
@@ -349,7 +359,12 @@ void parse_line( CONF_VARS *config )
             sscanf( tokens[2], "%lf", &config->kd_depth );
         }
         else if( strncmp( tokens[1], "buoy", STRING_SIZE ) == 0 ) {
-            sscanf( tokens[2], "%lf", &config->kd_buoy );
+        	if( strncmp( tokens[2], "depth", STRING_SIZE ) == 0 ) {
+        		sscanf( tokens[3], "%lf", &config->kd_buoy_depth );
+			}
+			else {
+	            sscanf( tokens[2], "%lf", &config->kd_buoy );
+			}
         }
     }
 
@@ -801,6 +816,9 @@ void parse_default_config( CONF_VARS *config )
     config->kp_buoy = 0;
     config->ki_buoy = 0;
     config->kd_buoy = 0;
+    config->kp_buoy_depth = 0;
+    config->ki_buoy_depth = 0;
+    config->kd_buoy_depth = 0;
     config->kp_roll_lateral = 0;
     config->kp_depth_forward = 0;
     config->kp_place_holder = 0;
@@ -1020,4 +1038,7 @@ void parse_print_config( CONF_VARS *config )
 	printf("PARSE_PRINT_CONFIG: kp_buoy = %lf\n", config->kp_buoy);
 	printf("PARSE_PRINT_CONFIG: ki_buoy = %lf\n", config->ki_buoy);
 	printf("PARSE_PRINT_CONFIG: kd_buoy = %lf\n", config->kd_buoy);
+	printf("PARSE_PRINT_CONFIG: kp_buoy = %lf\n", config->kp_buoy_depth);
+	printf("PARSE_PRINT_CONFIG: ki_buoy = %lf\n", config->ki_buoy_depth);
+	printf("PARSE_PRINT_CONFIG: kd_buoy = %lf\n", config->kd_buoy_depth);
 } /* end parse_default_config() */
