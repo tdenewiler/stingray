@@ -195,7 +195,7 @@ int main( int argc, char *argv[] )
 	/* Variables for opening, reading and using directories and files. */
 	struct dirent *dfile = NULL;
 	//const char *dirname = "images/buoy/";
-	const char *dirname = "../../../pics/practice_side_wed_1pm/images/pipe/";
+	const char *dirname = "../../../pics/practice_side_wed_1pm/images/buoy/";
 	int diropen = FALSE;
 	char filename[STRING_SIZE * 2];
 
@@ -305,9 +305,10 @@ int main( int argc, char *argv[] )
 				/* Load image here and set up other images. */
 				strncpy( filename, dirname, STRING_SIZE );
 				printf("MAIN: Loading dir %s\n", filename);
-				//strncat( filename, dfile->d_name, STRING_SIZE );
+				strncat( filename, dfile->d_name, STRING_SIZE );
 				//strncat( filename, "20090729_132701.311970.jpg", STRING_SIZE );
-				strncat( filename, "20090729_132735.775676.jpg", STRING_SIZE );
+				//strncat( filename, "20090729_182640.641758.jpg", STRING_SIZE );
+				
 				printf("MAIN: Loading file %s\n", filename);
 				img = cvLoadImage( filename );
 				bin_img = cvCreateImage( cvGetSize(img), IPL_DEPTH_8U, 1 );
@@ -404,14 +405,15 @@ int main( int argc, char *argv[] )
 			}
 			/* Load image here. */
 			strncpy( filename, dirname, STRING_SIZE );
-			//strncat( filename, dfile->d_name, STRING_SIZE );
+			strncat( filename, dfile->d_name, STRING_SIZE );
 			//strncat( filename, "20090729_132701.311970.jpg", STRING_SIZE );
 			//strncat( filename, "20090729_132610.207982.jpg", STRING_SIZE );
 			//strncat( filename, "20090729_132919.103967.jpg", STRING_SIZE );
             //strncat( filename, "20090729_132634.713840.jpg", STRING_SIZE );
 			//strncat( filename, "20090729_132709.129376.jpg", STRING_SIZE );
-			strncat( filename, "20090729_132735.775676.jpg", STRING_SIZE );
-					
+			//strncat( filename, "20090729_132735.775676.jpg", STRING_SIZE );
+			//strncat( filename, "20090729_182640.641758.jpg", STRING_SIZE );
+						
 			img = cvLoadImage( filename );
 		}
 
@@ -432,7 +434,7 @@ int main( int argc, char *argv[] )
 			if( !diropen ) {
 				img = cvQueryFrame( f_cam );
 				/* Flip the source image. */
-				//cvFlip( img, img );
+				cvFlip( img, img );
 			}
 
 			/* Look for the buoy. */
@@ -581,7 +583,7 @@ int main( int argc, char *argv[] )
 			if( !diropen ) {
 				img = cvQueryFrame( f_cam );
 				/* Flip the source image. */
-				//cvFlip( img, img );
+				cvFlip( img, img );
 			}
 
 			/* Look for the fence. */
@@ -592,13 +594,15 @@ int main( int argc, char *argv[] )
 				msg.vision.data.status = TASK_FENCE_DETECTED;
 
 				/* Draw a circle at the centroid. */
-				cvCircle( img, cvPoint(fence_center, img->height / 2),
+				cvCircle( img, cvPoint(fence_center, y_max),
 					10, cvScalar(0, 0, 255), 5, 8 );
+				
 				/* Draw a horizontal line indicating the lowest point of the
 				 * fence. */
+				y_max = vision_get_fence_bottom(bin_img);
 				for( ii = 0; ii < lineWidth; ii++ ) {
 					cvCircle( img, cvPoint(img->width / 2 + ii, y_max),
-						2, cvScalar(0, 255, 0), 2 );
+						2, cvScalar(100, 255, 20), 2 );
 				}
 				/* Set target offsets in network message. The subtractions are
 				 * opposite of each other on purpose. This is so that they
