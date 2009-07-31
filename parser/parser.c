@@ -292,6 +292,9 @@ void parse_line( CONF_VARS *config )
         else if( strncmp( tokens[1], "fy", STRING_SIZE ) == 0 ) {
             sscanf( tokens[2], "%lf", &config->kp_fy );
         }
+        else if( strncmp( tokens[1], "buoy", STRING_SIZE ) == 0 ) {
+            sscanf( tokens[2], "%lf", &config->kp_buoy );
+        }
         else if( strncmp( tokens[1], "depth", STRING_SIZE ) == 0 ) {
         	if( strncmp( tokens[2], "lateral", STRING_SIZE ) == 0 ) {
         		sscanf( tokens[3], "%lf", &config->kp_depth_forward );
@@ -321,6 +324,9 @@ void parse_line( CONF_VARS *config )
         else if( strncmp( tokens[1], "depth", STRING_SIZE ) == 0 ) {
             sscanf( tokens[2], "%lf", &config->ki_depth );
         }
+        else if( strncmp( tokens[1], "buoy", STRING_SIZE ) == 0 ) {
+            sscanf( tokens[2], "%lf", &config->ki_buoy );
+        }
     }
 
     else if( strncmp( tokens[0], "kd", STRING_SIZE ) == 0 ) {
@@ -342,7 +348,11 @@ void parse_line( CONF_VARS *config )
         else if( strncmp( tokens[1], "depth", STRING_SIZE ) == 0 ) {
             sscanf( tokens[2], "%lf", &config->kd_depth );
         }
+        else if( strncmp( tokens[1], "buoy", STRING_SIZE ) == 0 ) {
+            sscanf( tokens[2], "%lf", &config->kd_buoy );
+        }
     }
+
     else if( strncmp( tokens[0], "period", STRING_SIZE ) == 0 ) {
         if( strncmp( tokens[1], "pitch", STRING_SIZE ) == 0 ) {
             sscanf( tokens[2], "%d", &config->period_pitch );
@@ -788,6 +798,9 @@ void parse_default_config( CONF_VARS *config )
     config->kp_fy = 1;
     config->ki_fy = 0;
     config->kd_fy = 0;
+    config->kp_buoy = 0;
+    config->ki_buoy = 0;
+    config->kd_buoy = 0;
     config->kp_roll_lateral = 0;
     config->kp_depth_forward = 0;
     config->kp_place_holder = 0;
@@ -1004,4 +1017,7 @@ void parse_print_config( CONF_VARS *config )
 	printf("PARSE_PRINT_CONFIG: buoy_blind_time = %d\n", config->buoy_blind_time);
 	printf("PARSE_PRINT_CONFIG: save_image_rate = %d\n", config->save_image_rate);
 	printf("PARSE_PRINT_CONFIG: open_rate = %d\n", config->open_rate);
+	printf("PARSE_PRINT_CONFIG: kp_buoy = %lf\n", config->kp_buoy);
+	printf("PARSE_PRINT_CONFIG: ki_buoy = %lf\n", config->ki_buoy);
+	printf("PARSE_PRINT_CONFIG: kd_buoy = %lf\n", config->kd_buoy);
 } /* end parse_default_config() */
