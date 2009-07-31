@@ -27,9 +27,10 @@
 #define TASKS							1
 #define TASK_NONE						0
 #define TASK_DOCK						1
-#define TASK_GATE   					3
-#define TASK_PIPE1   					4
-#define TASK_BUOY   					2
+#define TASK_GATE   					2
+#define TASK_PIPE1   					123
+#define TASK_SKIP   					3
+#define TASK_BUOY   					4
 #define TASK_PIPE2   					5
 #define TASK_FENCE						6
 #define TASK_PIPE3   					7
@@ -53,11 +54,11 @@
 #define TASK_BUOY_DEPTH_GAIN			0.25
 #define TASK_BUOY_DEPTH					6.5
 #define TASK_BUOY_HEADING				0.0
-#define TASK_BUOY_MAX_SEARCH_TIME		100
+#define TASK_BUOY_MAX_SEARCH_TIME		10 //100
 #define TASK_PIPE2_YAW					0
 #define TASK_FENCE_YAW_GAIN				0.25
 #define TASK_FENCE_DEPTH_GAIN			0.01
-#define TASK_MAX_TIME					300
+#define TASK_MAX_TIME					10 //300
 #define TASK_PIPE_YAW_GAIN				0.1
 #define TASK_PIPE_FX_GAIN				0.15
 #define TASK_PIPE_FY_GAIN				0.15
@@ -102,7 +103,7 @@
 #define SUBTASK_SURFACE_RISE			4
 #define SUBTASK_DEPTH_MARGIN			2
 #define SUBTASK_YAW_MARGIN				3.0
-#define SUBTASK_MAX_SEARCH_TIME			180
+#define SUBTASK_MAX_SEARCH_TIME			10 //180
 #define SUBTASK_GATE_MOVE_TIME			2
 #define SUBTASK_SUCCESS					2
 #define SUBTASK_FAILURE					-2
@@ -265,6 +266,10 @@ int task_sweep( MSG_DATA *msg, CONF_VARS *cf, int dt, int subtask_dt );
 //! \param subtask_dt The subtask time.
 //! \return Task status: Success, failure, continuing.
 int task_dock( MSG_DATA *msg, CONF_VARS *cf, int dt, int subtask_dt );
+
+//! A placeholder task to make editing order of course task easier.
+//! \return TASK_SUCCESS.
+int task_skip( );
 
 
 #endif /* _TASK_H_ */

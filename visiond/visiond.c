@@ -191,7 +191,7 @@ int main( int argc, char *argv[] )
 	int dt = 0;
 	int nframes = 0;
     double fps = 0.0;
-	
+
 	/* Variables for opening, reading and using directories and files. */
 	struct dirent *dfile = NULL;
 	//const char *dirname = "images/buoy/";
@@ -308,7 +308,7 @@ int main( int argc, char *argv[] )
 				strncat( filename, dfile->d_name, STRING_SIZE );
 				//strncat( filename, "20090729_132701.311970.jpg", STRING_SIZE );
 				//strncat( filename, "20090729_182640.641758.jpg", STRING_SIZE );
-				
+
 				printf("MAIN: Loading file %s\n", filename);
 				img = cvLoadImage( filename );
 				bin_img = cvCreateImage( cvGetSize(img), IPL_DEPTH_8U, 1 );
@@ -413,7 +413,7 @@ int main( int argc, char *argv[] )
 			//strncat( filename, "20090729_132709.129376.jpg", STRING_SIZE );
 			//strncat( filename, "20090729_132735.775676.jpg", STRING_SIZE );
 			//strncat( filename, "20090729_182640.641758.jpg", STRING_SIZE );
-						
+
 			img = cvLoadImage( filename );
 		}
 
@@ -444,21 +444,21 @@ int main( int argc, char *argv[] )
 				/* We have detected the buoy. */
 				//printf("MAIN: Bouy Status = %d\n", status);
 				msg.vision.data.status = TASK_BUOY_DETECTED;
-				
+
 				/* The subtractions are opposite of each other on purpose. This
 				 * is so that they match the way the depth sensor and yaw sensor
 				 * work. */
 				msg.vision.data.front_x = dotx - (img->width / 2);
 				msg.vision.data.front_y = (img->height / 2) - doty;
 
-				xrot =  msg.vision.data.front_x * cos( angleFrontCam ) + 
+				xrot =  msg.vision.data.front_x * cos( angleFrontCam ) +
 						msg.vision.data.front_y * sin( angleFrontCam );
-				yrot = -msg.vision.data.front_x * sin( angleFrontCam ) + 
+				yrot = -msg.vision.data.front_x * sin( angleFrontCam ) +
 						msg.vision.data.front_y * cos( angleFrontCam );
-						
+
 				msg.vision.data.front_x = xrot;
 				msg.vision.data.front_y = yrot;
-				
+
 				/* Draw a circle at the centroid location. */
 				cvCircle( img, cvPoint(dotx, doty),
 					10, cvScalar(0, 255, 0), 5, 8 );
@@ -513,7 +513,7 @@ int main( int argc, char *argv[] )
 							img->width / 2 + ii), 2, cvScalar(0, 0, 255), 2 );
 					}
 				}
-				
+
 				if( status == 2 ) {
 					msg.vision.data.status = TASK_PIPE_CENTERED;
 				}
@@ -596,7 +596,7 @@ int main( int argc, char *argv[] )
 				/* Draw a circle at the centroid. */
 				cvCircle( img, cvPoint(fence_center, y_max),
 					10, cvScalar(0, 0, 255), 5, 8 );
-				
+
 				/* Draw a horizontal line indicating the lowest point of the
 				 * fence. */
 				y_max = vision_get_fence_bottom(bin_img);
@@ -625,7 +625,7 @@ int main( int argc, char *argv[] )
 
 			/* Get a new image. */
 			if( !diropen ) {
-				img = cvQueryFrame( f_cam );
+				img = cvQueryFrame( b_cam );
 			}
 
 			/* Look for the boxes. */
@@ -726,10 +726,10 @@ int main( int argc, char *argv[] )
 		else {
 			/* Clear the detection status */
 			msg.vision.data.status = TASK_NOT_DETECTED;
-			
+
 			/* Clear the bouy touch count */
 			bouyTouchCount = 0;
-			
+
 			/* No mode or no valid cameras -- Simulate. */
 			if( loop_counter % 100 == 0 ) {
 				msg.vision.data.front_x = loop_counter;
@@ -866,11 +866,11 @@ int main( int argc, char *argv[] )
 				gettimeofday( &save_start, NULL );
 			}
 		}
-		
+
 		/* Check to see if we should load an image from disk for simulation. */
 		if( cf.open_rate ) {
 		}
-		
+
         /* Check state of save frames and video messages. */
         if( msg.vsetting.data.save_fframe && f_cam ) {
             /* Save image to disk. */
@@ -925,13 +925,13 @@ int main( int argc, char *argv[] )
 		gettimeofday( &fps_time, NULL );
 		gettimeofday( &save_time, NULL );
 		gettimeofday( &open_time, NULL );
-		
+
 		/* If image was loaded from file, release it. Don't need to release if
 		 * image is captured from camera. */
 		if( diropen ) {
 			cvReleaseImage( &img );
 		}
     }
-    
+
     exit( 0 );
 } /* end main() */

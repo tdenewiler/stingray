@@ -125,6 +125,10 @@ int task_run( MSG_DATA *msg, CONF_VARS *cf, int dt, int subtask_dt )
 	case TASK_DOCK:
 		status = task_dock( msg, cf, dt, subtask_dt );
 		break;
+
+	case TASK_SKIP:
+		status = task_skip( );
+		break;
 	}
 
 	return status;
@@ -157,10 +161,12 @@ int task_buoy( MSG_DATA *msg, CONF_VARS *cf, int dt, int subtask_dt )
 
 			/* Check to see if we have reached the target depth. */
 			if( fabsf(msg->status.data.depth - msg->target.data.depth) < SUBTASK_DEPTH_MARGIN ) {
+				printf("TASK_BUOY: subtask %d success.\n", msg->task.data.subtask);
 				return SUBTASK_SUCCESS;
 			}
 			/* Check to see if too much time has elapsed. */
 			else if( subtask_dt > SUBTASK_MAX_SEARCH_TIME ) {
+				printf("TASK_BUOY: subtask %d failure.\n", msg->task.data.subtask);
 				return SUBTASK_FAILURE;
 			}
 			/* Otherwise we are continuing. */
@@ -177,6 +183,10 @@ int task_buoy( MSG_DATA *msg, CONF_VARS *cf, int dt, int subtask_dt )
 				return SUBTASK_CONTINUING;
 			}
 			else {
+				printf("TASK_BUOY: subtask %d speed %lf fy %lf\n",
+					msg->task.data.subtask, msg->target.data.speed,
+					msg->target.data.fy);
+				printf("TASK_BUOY: subtask %d success.\n", msg->task.data.subtask);
 				return SUBTASK_SUCCESS;
 			}
 
@@ -190,9 +200,14 @@ int task_buoy( MSG_DATA *msg, CONF_VARS *cf, int dt, int subtask_dt )
 
 			/* Check to see if we think we have detected the buoy. */
 			if( msg->vision.data.status == TASK_BUOY_DETECTED ) {
+				printf("TASK_BUOY: subtask %d speed %lf fy %lf\n",
+					msg->task.data.subtask, msg->target.data.speed,
+					msg->target.data.fy);
+				printf("TASK_BUOY: subtask %d success.\n", msg->task.data.subtask);
 				return SUBTASK_SUCCESS;
 			}
 			else if( subtask_dt > SUBTASK_MAX_SEARCH_TIME ) {
+				printf("TASK_BUOY: subtask %d failure.\n", msg->task.data.subtask);
 				return SUBTASK_FAILURE;
 			}
 			else {
@@ -204,18 +219,24 @@ int task_buoy( MSG_DATA *msg, CONF_VARS *cf, int dt, int subtask_dt )
 			/* Set target values based on current orientation and pixel error. */
 			msg->target.data.yaw = msg->status.data.yaw +
 				(float)msg->vision.data.front_x * TASK_BUOY_YAW_GAIN;
-			//msg->target.data.depth = msg->status.data.depth +
-				//(float)msg->vision.data.front_y * TASK_BUOY_DEPTH_GAIN;
+			msg->target.data.depth = msg->status.data.depth +
+				(float)msg->vision.data.front_y * TASK_BUOY_DEPTH_GAIN;
 
 			/* Check to see if we think we have touched the buoy. */
 			if( msg->vision.data.status == TASK_BUOY_TOUCHED ) {
+				printf("TASK_BUOY: subtask %d success.\n", msg->task.data.subtask);
 				return TASK_SUCCESS;
 			}
 			else if( subtask_dt > SUBTASK_MAX_SEARCH_TIME ) {
+				printf("TASK_BUOY: subtask %d failure.\n", msg->task.data.subtask);
 				return TASK_FAILURE;
 			}
 			else {
 				msg->target.data.yaw = msg->status.data.yaw;
+				msg->target.data.depth = msg->status.data.depth;
+				printf("TASK_BUOY: subtask %d speed %lf fy %lf yaw %lf\n",
+					msg->task.data.subtask, msg->target.data.speed,
+					msg->target.data.fy, msg->target.data.yaw);
 				return SUBTASK_CONTINUING;
 			}
 		}
@@ -908,3 +929,23 @@ int task_dock( MSG_DATA *msg, CONF_VARS *cf, int dt, int subtask_dt )
 		return TASK_CONTINUING;
 	}
 } /* end task_dock() */
+
+
+/******************************************************************************
+ *
+ * Title:       int task_skip( )
+ *
+ * Description: A placeholder task to make editing order of course task easier.
+ *
+ * Input:       None.
+ *
+ * Output:      TASK_SUCCESS.
+ *
+ *****************************************************************************/
+
+int task_skip( )
+{
+	printf("TASK_SKIP: returning success.\n");
+
+	return TASK_SUCCESS;
+} /* end task_skip() */

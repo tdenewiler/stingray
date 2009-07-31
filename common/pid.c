@@ -345,6 +345,13 @@ void pid_loop( int pololu_fd,
 		pid->depth.ki	= msg->gain.data.ki_depth;
 		pid->depth.kd	= msg->gain.data.kd_depth;
 
+		/* Use different gains for buoy task. */
+		if( msg->target.data.task == TASK_BUOY ) {
+			pid->depth.kp = cf->kp_buoy_depth;
+			pid->depth.ki = cf->ki_buoy_depth;
+			pid->depth.kd = cf->kd_buoy_depth;
+		}
+
 		/* Calculate the errors. */
 		pid->depth.ref	= msg->target.data.depth;
 		pid->depth.cval = msg->lj.data.pressure;
