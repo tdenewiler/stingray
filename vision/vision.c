@@ -56,7 +56,7 @@ int vision_find_dot( int *dotx,
             (int)floor( ( 2.0 ) / 2 ), (int)floor( ( 2.0 ) / 2 ), CV_SHAPE_RECT );
 	int num_pix = 0;
 	int touch_thresh = 150000;
-
+    int detect_thresh = 75;
     /* Initialize to impossible values. */
     center.x = -10000;
     center.y = -10000;
@@ -80,10 +80,7 @@ int vision_find_dot( int *dotx,
 		cvScalar(hsv->hH, hsv->sH, hsv->vH), binImg );
 
 	/* Use a median filter image to remove outliers. */
-	cvSmooth( binImg, outImg, CV_MEDIAN, 5, 5, 0. ,0. );
-	cvDilate( outImg, binImg, 0, 2 );
-	cvErode( outImg, binImg, 0, 4 );
-	cvDilate( outImg, binImg, 0, 2 );
+	cvSmooth( binImg, outImg, CV_MEDIAN, 7, 7, 0. ,0. );
 	
     /* Find the centroid. */
     center = vision_find_centroid( binImg, 5 );
@@ -100,7 +97,9 @@ int vision_find_dot( int *dotx,
 	if( num_pix > touch_thresh ) {
 		return 2;
 	}
-
+    if( num_pix < detect_thresh) {
+		return 0;
+	}
 	/* Check that the values of dotx & doty are not negative */
 	if( dotx < 0 || doty < 0 ) {
 		return 0;
@@ -451,58 +450,68 @@ int vision_find_fence( int *fence_center,
                     )
 {
 	/* Declare variables. */
-	int sum_x = 0;
-    int ii = 0;
-    int jj = 0;
-    int kk = 0;
-    IplImage *hsvImg = NULL;
+	//int sum_x = 0;
+    //int ii = 0;
+    //int jj = 0;
+    //int kk = 0;
+    CvPoint center;
+	IplImage *hsvImg = NULL;
     IplImage *outImg = NULL;
     IplConvKernel *wS = cvCreateStructuringElementEx( 2, 2,
             (int)floor( ( 2.0 ) / 2 ), (int)floor( ( 2.0 ) / 2 ), CV_SHAPE_RECT );
     CvSize sz = cvSize( srcImg->width & -2, srcImg->height & -2 );
  	int num_pix = 0;
-	int detect_thresh = 100;
-
+	int detect_thresh = 1;
+    
+	/* Initialize center to impossible value. */ 
+	center.x = -1000;
+	center.y = -1000;
+	
 	/* Create intermediate images for scratch space. */
     hsvImg = cvCreateImage( cvGetSize(srcImg), IPL_DEPTH_8U, 3 );
     outImg = cvCreateImage( cvGetSize(srcImg), IPL_DEPTH_8U, 1 );
 
 	/* Enhance the red channel of the source image. */
-	vision_white_balance( srcImg );
+	//vision_white_balance( srcImg );
 
     /* Segment the flipped image into a binary image. */
     cvCvtColor( srcImg, hsvImg, CV_RGB2HSV );
 
 	/* Equalize the histograms of each channel. */
-	vision_hist_eq( hsvImg,
-		VISION_CHANNEL1 + VISION_CHANNEL2 + VISION_CHANNEL3 );
+	//vision_hist_eq( hsvImg,
+	//	VISION_CHANNEL1 + VISION_CHANNEL2 + VISION_CHANNEL3 );
 
 	/* Threshold all three channels using our own values. */
     cvInRangeS( hsvImg, cvScalar(hsv->hL, hsv->sL, hsv->vL),
 		cvScalar(hsv->hH, hsv->sH, hsv->vH), binImg );
 
 	/* Median filter image to remove outliers */
-	cvSmooth( binImg, outImg, CV_MEDIAN, 5, 5, 0. ,0. );
-	cvErode( outImg, binImg, wS );
+	cvSmooth( binImg, outImg, CV_MEDIAN, 5, 11, 0. ,0. );
+	//cvErode( outImg, binImg, wS );
 
 	/* Check to see how many pixels are detected in the image. */
 	num_pix = cvCountNonZero( binImg );
 	printf("VISION_FIND_FENCE: num_pix = %d\n" , num_pix);
+    
+	/* Find the centroid. */
+    center = vision_find_centroid( binImg, 5 );
+    *fence_center = floor(center.x);
+    *y_max = floor(center.y);
 
-    /* Compute Centroid. */
-    for( ii = 0; ii < binImg->height; ii++ ) {
-        for( jj = 0; jj < binImg->width; jj++ ) {
-        	if( cvGet2D(binImg, ii, jj).val[0] != 0 ) {
-        		sum_x += jj;
-        		kk++;
-			}
-		}
-	}
+    ///* Compute Centroid. */
+    //for( ii = 0; ii < binImg->height; ii++ ) {
+        //for( jj = 0; jj < binImg->width; jj++ ) {
+        	//if( cvGet2D(binImg, ii, jj).val[0] != 0 ) {
+        		//sum_x += jj;
+        		//kk++;
+			//}
+		//}
+	//}
 	/* Make sure we don't divide by 0 here. */
-	if( kk == 0 ) {
-		kk = 1;
-	}
-    *fence_center = floor(sum_x / kk);
+//	if( kk == 0 ) {
+//		kk = 1;
+//	}
+//    *fence_center = floor(sum_x / kk);
 
     /* Clear variables to free memory. */
     cvReleaseImage( &hsvImg );
@@ -514,7 +523,7 @@ int vision_find_fence( int *fence_center,
 	}
 
     return 0;
-} /* end vision_find_pipe() */
+} /* end vision_find_fence() */
 
 
 /******************************************************************************
@@ -529,22 +538,20 @@ int vision_find_fence( int *fence_center,
  *
  *****************************************************************************/
 
-int vision_get_fence_bottom( IplImage *inputBinImg, int *center )
+int vision_get_fence_bottom( IplImage *inputBinImg)
 {
     int y_max = 0;
     int imHeight = inputBinImg->height;
     int imWidth = inputBinImg->width;
-    int minPipeWidth = 10;
+    int minPipeWidth = 2;
     int edgeThreshold = 2;
-    int c= 0;
-    int k=0;
-
+    
     /* Edge vectors, first element = x, second = y. */
     int leftEdge[imHeight];
     int rightEdge[imHeight];
     int i = 0; /* rows */
     int j = 0; /* columns */
-
+    int k = 0;
     /* Initialize edge arrays, memset may be better. */
     memset( &leftEdge, 0, sizeof(leftEdge) );
     memset( &rightEdge, 0, sizeof(rightEdge) );
@@ -576,18 +583,10 @@ int vision_get_fence_bottom( IplImage *inputBinImg, int *center )
 
     /* We found a fence. */
     if( y_max > edgeThreshold ) {
-    	for( i = 0; i < k; i++ ) {
-        		c += rightEdge[i] - leftEdge[i];
-		}
-	}
-	if( k == 0 ) {
-		k = 1;
-	}
-	*center = c / k;
-
-    return y_max;
+		return y_max;
+    }
+	return -1;
 } /* end vision_get_fence_bottom() */
-
 
 /******************************************************************************
  *
@@ -1295,9 +1294,9 @@ void vision_white_balance( IplImage *img )
 	int jj = 0;
 	uchar *temp_ptr;
 	double scale = 0.65;
-	double rscale = 255. / 193. * scale;
-	double bscale = 255. / 218. * scale;
-	double gscale = 255. / 198. * scale;
+	double rscale = 255. / 255.;
+	double bscale = 255. / 245.;
+	double gscale = 255. / 255.;
 
 	/* For each channel in the original image modify the RGB values. */
 	for( ii = 0; ii < img->height; ii++ ) {
