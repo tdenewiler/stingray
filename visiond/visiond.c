@@ -307,7 +307,7 @@ int main( int argc, char *argv[] )
 				printf("MAIN: Loading dir %s\n", filename);
 				//strncat( filename, dfile->d_name, STRING_SIZE );
 				//strncat( filename, "20090730_135401.54264.jpg", STRING_SIZE );
-				strncat( filename, "20090730_135359.819759.jpg", STRING_SIZE );
+				strncat( filename, "20090730_135402.489205.jpg", STRING_SIZE );
 
 				printf("MAIN: Loading file %s\n", filename);
 				img = cvLoadImage( filename );
@@ -406,7 +406,7 @@ int main( int argc, char *argv[] )
 			/* Load image here. */
 			strncpy( filename, dirname, STRING_SIZE );
 			//strncat( filename, dfile->d_name, STRING_SIZE );
-			strncat( filename, "20090730_135359.819759.jpg", STRING_SIZE );
+			strncat( filename, "20090730_135402.489205.jpg", STRING_SIZE );
 
 			img = cvLoadImage( filename );
 		}
