@@ -216,6 +216,7 @@ typedef struct _TARGET {
     float fy;       	//!< Desired force in y direction
     float speed;    	//!< Desired speed.
     int task;			//!< Current task.
+    int vision_status;	//!< Current vision status.
 } TARGET;
 
 /*! API message to change the uuv operational mode. */

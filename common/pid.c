@@ -303,7 +303,8 @@ void pid_loop( int pololu_fd,
 		pid->yaw.kd		= msg->gain.data.kd_yaw;
 
 		/* Use different gains for buoy task. */
-		if( msg->target.data.task == TASK_BUOY ) {
+		if( msg->target.data.task == TASK_BUOY &&
+			msg->target.data.vision_status != TASK_NOT_DETECTED ) {
 			pid->yaw.kp = cf->kp_buoy;
 			pid->yaw.ki = cf->ki_buoy;
 			pid->yaw.kd = cf->kd_buoy;
@@ -346,11 +347,11 @@ void pid_loop( int pololu_fd,
 		pid->depth.kd	= msg->gain.data.kd_depth;
 
 		/* Use different gains for buoy task. */
-		if( msg->target.data.task == TASK_BUOY ) {
-			pid->depth.kp = cf->kp_buoy_depth;
-			pid->depth.ki = cf->ki_buoy_depth;
-			pid->depth.kd = cf->kd_buoy_depth;
-		}
+		//if( msg->target.data.task == TASK_BUOY ) {
+			//pid->depth.kp = cf->kp_buoy_depth;
+			//pid->depth.ki = cf->ki_buoy_depth;
+			//pid->depth.kd = cf->kd_buoy_depth;
+		//}
 
 		/* Calculate the errors. */
 		pid->depth.ref	= msg->target.data.depth;

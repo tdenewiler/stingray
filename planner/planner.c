@@ -149,6 +149,7 @@ int main( int argc, char *argv[] )
 	int task = TASK_NONE;
 	int subtask = SUBTASK_CONTINUING;
 	int status = TASK_CONTINUING;
+	int ks_closed = FALSE;
 
 	struct timeval vision_time = {0, 0};
 	struct timeval vision_start = {0, 0};
@@ -356,6 +357,7 @@ int main( int argc, char *argv[] )
         /* Get nav data. */
 		if( nav_fd > 0 ) {
 			msg.target.data.task = msg.task.data.task;
+			msg.target.data.vision_status = msg.vision.data.status;
 			recv_bytes = net_client( nav_fd, nav_buf, &msg, MODE_PLANNER );
 			nav_buf[recv_bytes] = '\0';
 			if( recv_bytes > 0 ) {
@@ -366,6 +368,26 @@ int main( int argc, char *argv[] )
 			if( msg.client.data.dropper != old_dropper ) {
 				messages_send( nav_fd, CLIENT_MSGID, &msg );
 				old_dropper = msg.client.data.dropper;
+			}
+			if( !ks_closed ) {
+				if( msg.lj.data.battery1 > 5 ) {
+					ks_closed = TRUE;
+					gettimeofday( &task_start, NULL );
+					task = TASK_BUOY;
+					msg.task.data.task = task;
+					cf.target_yaw = msg.status.data.yaw;
+					printf("MAIN: task = %d     %lf\n", task, cf.target_yaw);
+				}
+				else {
+					ks_closed = FALSE;
+				}
+			}
+			if( ks_closed ) {
+				if( msg.lj.data.battery1 < 5 ) {
+					ks_closed = FALSE;
+					task = TASK_NONE;
+					msg.task.data.task = task;
+				}
 			}
 		}
 

@@ -109,6 +109,7 @@ void messages_send( int fd,
             /* Use network byte order. */
             msg->target.data.mode  = htonl( msg->target.data.mode );
             msg->target.data.task  = htonl( msg->target.data.task );
+            msg->target.data.vision_status  = htonl( msg->target.data.vision_status );
 
             /* Actually send message here. */
             net_send( fd, &msg->target, sizeof(TARGET_MSG) );
@@ -116,6 +117,7 @@ void messages_send( int fd,
             /* Convert the values back to host byte order. */
             msg->target.data.mode  = ntohl( msg->target.data.mode );
             msg->target.data.task  = ntohl( msg->target.data.task );
+            msg->target.data.vision_status = ntohl( msg->target.data.vision_status );
             break;
 
         case GAIN_MSGID:
@@ -349,6 +351,7 @@ int messages_decode( int fd, char *buf, MSG_DATA *msg, int bytes )
 			/* Convert from network to host byte order. */
 			msg->target.data.mode  = ntohl( msg->target.data.mode );
 			msg->target.data.task  = ntohl( msg->target.data.task );
+			msg->target.data.vision_status  = ntohl( msg->target.data.vision_status );
 
 			bytes -= sizeof(TARGET_MSG);
 			memmove( msg, msg, sizeof(TARGET_MSG) );
