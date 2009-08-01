@@ -26,18 +26,17 @@
 //@{
 #define TASKS							1
 #define TASK_NONE						0
-#define TASK_DOCK						1
-#define TASK_GATE   					2
-#define TASK_PIPE1   					123
-#define TASK_SKIP   					3
-#define TASK_BUOY   					4
-#define TASK_PIPE2   					5
-#define TASK_FENCE						6
-#define TASK_PIPE3   					7
-#define TASK_BOXES						8
-#define TASK_PIPE4   					9
-#define TASK_SUITCASE					10
-#define TASK_SURFACE					11
+#define TASK_DOCK						134
+#define TASK_GATE   					1
+#define TASK_PIPE1   					2
+#define TASK_BUOY   					3
+#define TASK_PIPE2   					4
+#define TASK_FENCE						5
+#define TASK_PIPE3   					6
+#define TASK_BOXES						7
+#define TASK_PIPE4   					8
+#define TASK_SURFACE					9
+#define TASK_SUITCASE					11
 #define TASK_COURSE						100
 #define TASK_COURSE_ON					TRUE
 #define TASK_COURSE_OFF					FALSE
@@ -53,12 +52,15 @@
 #define TASK_BUOY_YAW_GAIN				0.1
 #define TASK_BUOY_DEPTH_GAIN			0.25
 #define TASK_BUOY_DEPTH					6.5
+#define TASK_BUOY_MAX_DEPTH_DELTA		0.75
+#define TASK_BUOY_WAIT_TIME				3
 #define TASK_BUOY_HEADING				0.0
-#define TASK_BUOY_MAX_SEARCH_TIME		100
+#define TASK_BUOY_MAX_SEARCH_TIME		60
 #define TASK_PIPE2_YAW					0
 #define TASK_FENCE_YAW_GAIN				0.25
 #define TASK_FENCE_DEPTH_GAIN			0.01
-#define TASK_MAX_TIME					250
+#define TASK_FENCE_MAX_TIME				100
+#define TASK_MAX_TIME					120
 #define TASK_PIPE_YAW_GAIN				0.1
 #define TASK_PIPE_FX_GAIN				0.15
 #define TASK_PIPE_FY_GAIN				0.15
@@ -67,10 +69,13 @@
 #define TASK_PIPE_X_THRESH				50
 #define TASK_PIPE_Y_THRESH				50
 #define TASK_PIPE_YAW_THRESH			10
+#define TASK_PIPE_MAX_TIME				10
 #define TASK_BOXES_FX_GAIN				0.25
 #define TASK_BOXES_FY_GAIN				0.25
 #define TASK_BOXES_FX_MAX				75
 #define TASK_BOXES_FY_MAX				75
+#define TASK_GATE_MAX_TIME				25
+#define TASK_GATE_MAX_YAW				30
 #define TASK_SUCCESS					1
 #define TASK_FAILURE					-1
 #define TASK_CONTINUING					0
@@ -103,7 +108,7 @@
 #define SUBTASK_SURFACE_RISE			4
 #define SUBTASK_DEPTH_MARGIN			1.5
 #define SUBTASK_YAW_MARGIN				3.0
-#define SUBTASK_MAX_SEARCH_TIME			200
+#define SUBTASK_MAX_SEARCH_TIME			3 //200
 #define SUBTASK_GATE_MOVE_TIME			2
 #define SUBTASK_SUCCESS					2
 #define SUBTASK_FAILURE					-2
@@ -121,15 +126,19 @@
 #define TASK_FENCE_DETECTED		3
 #define	TASK_BOXES_DETECTED		4
 #define	TASK_SUITCASE_DETECTED	5
-#define TASK_GATE_DETECTED      6
+#define TASK_GATE_DETECTED	    6
 #define TASK_BUOY_TOUCHED       101
 #define TASK_PIPE_CENTERED		102
 #define TASK_FENCE_CLEARED		103
 #define TASK_BOXES_DROPPED		104
 #define TASK_SUITCASE_ACQUIRED  105
-#define TASK_GATE_TOUCHED       106
+#define TASK_GATE_CLEARED       106
 //@}
 #endif /* TASK_STATUS */
+
+#ifndef TASK_SKIP
+#define TASK_SKIP 1000
+#endif /* TASK_SKIP */
 
 
 /******************************

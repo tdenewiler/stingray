@@ -308,7 +308,7 @@ int main( int argc, char *argv[] )
 				//strncat( filename, dfile->d_name, STRING_SIZE );
 				//strncat( filename, "20090730_135401.54264.jpg", STRING_SIZE );
 				strncat( filename, "20090730_135359.819759.jpg", STRING_SIZE );
-				
+
 				printf("MAIN: Loading file %s\n", filename);
 				img = cvLoadImage( filename );
 				bin_img = cvCreateImage( cvGetSize(img), IPL_DEPTH_8U, 1 );
@@ -406,15 +406,8 @@ int main( int argc, char *argv[] )
 			/* Load image here. */
 			strncpy( filename, dirname, STRING_SIZE );
 			//strncat( filename, dfile->d_name, STRING_SIZE );
-			//strncat( filename, "20090729_132701.311970.jpg", STRING_SIZE );
-			//strncat( filename, "20090729_132610.207982.jpg", STRING_SIZE );
-			//strncat( filename, "20090729_132919.103967.jpg", STRING_SIZE );
-            //strncat( filename, "20090729_132634.713840.jpg", STRING_SIZE );
-			//strncat( filename, "20090729_132709.129376.jpg", STRING_SIZE );
-			//strncat( filename, "20090729_132735.775676.jpg", STRING_SIZE );
-			//strncat( filename, "20090729_132917.996193.jpg", STRING_SIZE );
 			strncat( filename, "20090730_135359.819759.jpg", STRING_SIZE );
-				
+
 			img = cvLoadImage( filename );
 		}
 
@@ -427,48 +420,48 @@ int main( int argc, char *argv[] )
     		msg.vision.data.bottom_y = 0.0;
 		} /* end TASK_NONE */
 
-        //else if( task == TASK_GATE && (f_cam || diropen) ) {
-			///* Set to not detected to start and reset if we get a hit. */
-			//msg.vision.data.status = TASK_NOT_DETECTED;
+        else if( task == TASK_GATE && (f_cam || diropen) ) {
+			/* Set to not detected to start and reset if we get a hit. */
+			msg.vision.data.status = TASK_NOT_DETECTED;
 
-			///* Get a new image. */
-			//if( !diropen ) {
-				//img = cvQueryFrame( f_cam );
-				///* Flip the source image. */
-				//cvFlip( img, img );
-			//}
+			/* Get a new image. */
+			if( !diropen ) {
+				img = cvQueryFrame( f_cam );
+				/* Flip the source image. */
+				cvFlip( img, img );
+			}
 
-			///* Look for the gate . */
-			//status = vision_find_gate( &dotx, &doty, cf.vision_angle, img,
-				//bin_img, &hsv_buoy );
-			//if( status == 1 || status == 2 ) {
-				///* We have detected the gate. */
-				////printf("MAIN: Gate Status = %d\n", status);
-				//msg.vision.data.status = TASK_GATE_DETECTED;
+			/* Look for the gate . */
+			status = vision_find_gate( &dotx, &doty, cf.vision_angle, img,
+				bin_img, &hsv_buoy );
+			if( status == 1 || status == 2 ) {
+				/* We have detected the gate. */
+				//printf("MAIN: Gate Status = %d\n", status);
+				msg.vision.data.status = TASK_GATE_DETECTED;
 
-				///* The subtractions are opposite of each other on purpose. This
-				 //* is so that they match the way the depth sensor and yaw sensor
-				 //* work. */
-				//msg.vision.data.front_x = dotx - (img->width / 2);
-				//msg.vision.data.front_y = (img->height / 2) - doty;
+				/* The subtractions are opposite of each other on purpose. This
+				 * is so that they match the way the depth sensor and yaw sensor
+				 * work. */
+				msg.vision.data.front_x = dotx - (img->width / 2);
+				msg.vision.data.front_y = (img->height / 2) - doty;
 
-				//xrot =  msg.vision.data.front_x * cos( angleFrontCam ) +
-						//msg.vision.data.front_y * sin( angleFrontCam );
-				//yrot = -msg.vision.data.front_x * sin( angleFrontCam ) +
-						//msg.vision.data.front_y * cos( angleFrontCam );
+				xrot =  msg.vision.data.front_x * cos( angleFrontCam ) +
+						msg.vision.data.front_y * sin( angleFrontCam );
+				yrot = -msg.vision.data.front_x * sin( angleFrontCam ) +
+						msg.vision.data.front_y * cos( angleFrontCam );
 
-				//msg.vision.data.front_x = xrot;
-				//msg.vision.data.front_y = yrot;
+				msg.vision.data.front_x = xrot;
+				msg.vision.data.front_y = yrot;
 
-				///* Draw a circle at the centroid location. */
-				//cvCircle( img, cvPoint(dotx, doty),
-					//10, cvScalar(0, 255, 0), 5, 8 );
+				/* Draw a circle at the centroid location. */
+				cvCircle( img, cvPoint(dotx, doty),
+					10, cvScalar(0, 255, 0), 5, 8 );
 
-				//if( status == 2 ) {
-					//msg.vision.data.status = TASK_GATE_TOUCHED;
-				//}
-			//}
-		//} /* end TASK_GATE */
+				if( status == 2 ) {
+					msg.vision.data.status = TASK_GATE_CLEARED;
+				}
+			}
+		} /* end TASK_GATE */
 
         else if( task == TASK_BUOY && (f_cam || diropen) ) {
 			/* Set to not detected to start and reset if we get a hit. */
@@ -529,7 +522,7 @@ int main( int argc, char *argv[] )
 
 			/* If we get a positive status message, render the box and populate
 			 * the network message. */
-			if( status == 1 || status == 2 ) {
+			if( status == 1 ) {
 				/* Set the detection status of vision */
 				//printf("MAIN Pipe Status = %d\n", status);
 				msg.vision.data.status = TASK_PIPE_DETECTED;
@@ -556,10 +549,6 @@ int main( int argc, char *argv[] )
 							cvPoint(img->width / 2 + ((int)(bearing * ii)),
 							img->width / 2 + ii), 2, cvScalar(0, 0, 255), 2 );
 					}
-				}
-
-				if( status == 2 ) {
-					msg.vision.data.status = TASK_PIPE_CENTERED;
 				}
 			}
 		} /* end TASK_PIPE -- hsv */

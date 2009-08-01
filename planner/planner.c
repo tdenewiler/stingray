@@ -140,8 +140,6 @@ int main( int argc, char *argv[] )
 	MSG_DATA msg;
 	PID pid;
 	LABJACK_DATA lj;
-	//float accel_count = 0.0;
-	//float accel_inc = 0.1;
 	int old_task = 0;
 	int old_dropper = 0;
 	int old_subtask = 0;
@@ -150,6 +148,8 @@ int main( int argc, char *argv[] )
 	int subtask = SUBTASK_CONTINUING;
 	int status = TASK_CONTINUING;
 	int ks_closed = FALSE;
+	int buoy_touched = FALSE;
+	int buoy_success = FALSE;
 
 	struct timeval vision_time = {0, 0};
 	struct timeval vision_start = {0, 0};
@@ -375,8 +375,8 @@ int main( int argc, char *argv[] )
 					gettimeofday( &task_start, NULL );
 					task = TASK_BUOY;
 					msg.task.data.task = task;
-					cf.target_yaw = msg.status.data.yaw;
-					printf("MAIN: task = %d     %lf\n", task, cf.target_yaw);
+					cf.task_init_yaw = msg.status.data.yaw;
+					printf("MAIN: task = %d     %lf\n", task, cf.task_init_yaw);
 				}
 				else {
 					ks_closed = FALSE;
@@ -476,22 +476,51 @@ int main( int argc, char *argv[] )
 			/* Set the subtask in the network message. */
 			msg.task.data.subtask = subtask;
 			if( status == TASK_SUCCESS || status == TASK_FAILURE ) {
-				/* Move on to the next task. Initialize the subtask. */
-				msg.task.data.task++;
-				task++;
-				printf("MAIN: task = %d\n", task);
-				msg.task.data.subtask = SUBTASK_SEARCH_DEPTH;
-				/* Re-initialize the task and subtask timers. */
-				gettimeofday( &task_start, NULL );
-				gettimeofday( &subtask_start, NULL );
+				if( task == TASK_BUOY && buoy_success ) {
+					if( !buoy_touched ) {
+						buoy_touched = TRUE;
+					}
+					else if( buoy_touched && subtask_dt < TASK_BUOY_WAIT_TIME ) {
+						/* Do nothing here. */
+					}
+					else {
+						msg.task.data.task++;
+						task++;
+						printf("MAIN: task = %d\n", task);
+						msg.task.data.subtask = SUBTASK_SEARCH_DEPTH;
+						/* Re-initialize the task and subtask timers. */
+						gettimeofday( &task_start, NULL );
+						gettimeofday( &subtask_start, NULL );
+					}
+				}
+				else if( task == TASK_BUOY && status == TASK_SUCCESS ) {
+					buoy_success = TRUE;
+					gettimeofday( &subtask_start, NULL );
+				}
+				else {
+					/* Move on to the next task. Initialize the subtask. */
+					msg.task.data.task++;
+					task++;
+					printf("MAIN: task = %d\n", task);
+					msg.task.data.subtask = SUBTASK_SEARCH_DEPTH;
+					/* Re-initialize the task and subtask timers. */
+					gettimeofday( &task_start, NULL );
+					gettimeofday( &subtask_start, NULL );
+				}
 			}
-			else if( status == SUBTASK_SUCCESS || status == SUBTASK_FAILURE ) {
-				/* Move on to the next subtask. */
-				msg.task.data.subtask++;
-				subtask++;
-				printf("MAIN: subtask = %d\n", subtask);
-				/* Re-initialize the subtask timer. */
-				gettimeofday( &subtask_start, NULL);
+			else if( task == TASK_BUOY && buoy_success ) {
+				if( subtask_dt < TASK_BUOY_WAIT_TIME ) {
+					/* Do nothing here. */
+				}
+				else {
+					msg.task.data.task++;
+					task++;
+					printf("MAIN: task = %d\n", task);
+					msg.task.data.subtask = SUBTASK_SEARCH_DEPTH;
+					/* Re-initialize the task and subtask timers. */
+					gettimeofday( &task_start, NULL );
+					gettimeofday( &subtask_start, NULL );
+				}
 			}
 		}
 		else {
