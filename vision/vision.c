@@ -56,7 +56,7 @@ int vision_find_dot( int *dotx,
             (int)floor( ( 2.0 ) / 2 ), (int)floor( ( 2.0 ) / 2 ), CV_SHAPE_RECT );
 	int num_pix = 0;
 	int touch_thresh = 150000;
-    int detect_thresh = 75;
+    int detect_thresh = 40;
     /* Initialize to impossible values. */
     center.x = -10000;
     center.y = -10000;
