@@ -394,30 +394,33 @@ int main( int argc, char *argv[] )
         //}
 
         /* Check for assisted teleop commands. */
-        if( msg.target.data.mode == MANUAL ) {
-            msg.target.data.pitch   += msg.teleop.data.pitch;
-            msg.target.data.roll    += msg.teleop.data.roll;
-            msg.target.data.yaw     += msg.teleop.data.yaw;
-            msg.target.data.depth   += msg.teleop.data.depth;
-            msg.target.data.fx      += msg.teleop.data.fx;
-            msg.target.data.fy      += msg.teleop.data.fy;
-            msg.target.data.speed   += msg.teleop.data.speed;
+        //if( msg.target.data.mode == MANUAL ) {
+            //msg.target.data.pitch   += msg.teleop.data.pitch;
+            //msg.target.data.roll    += msg.teleop.data.roll;
+            //msg.target.data.yaw     += msg.teleop.data.yaw;
+            //msg.target.data.depth   += msg.teleop.data.depth;
+            //msg.target.data.fx      += msg.teleop.data.fx;
+            //msg.target.data.fy      += msg.teleop.data.fy;
+            //msg.target.data.speed   += msg.teleop.data.speed;
 
-            /* Reset the target change values back to zero. */
-            msg.teleop.data.pitch = 0;
-            msg.teleop.data.roll = 0;
-            msg.teleop.data.yaw = 0;
-            msg.teleop.data.depth = 0;
-            msg.teleop.data.fx = 0;
-            msg.teleop.data.fy = 0;
-            msg.teleop.data.speed = 0;
-        }
+            ///* Reset the target change values back to zero. */
+            //msg.teleop.data.pitch = 0;
+            //msg.teleop.data.roll = 0;
+            //msg.teleop.data.yaw = 0;
+            //msg.teleop.data.depth = 0;
+            //msg.teleop.data.fx = 0;
+            //msg.teleop.data.fy = 0;
+            //msg.teleop.data.speed = 0;
+        //}
 
-        /* Get Microstrain data. */
+         /* Get Microstrain data. */
         if( (cf.enable_imu) && (imu_fd > 0) ) {
-            recv_bytes = mstrain_euler_vectors( imu_fd, &msg.mstrain.data.pitch,
-				&msg.mstrain.data.roll, &msg.mstrain.data.yaw, msg.mstrain.data.accel,
-				msg.mstrain.data.ang_rate );
+            recv_bytes = mstrain_euler_angles( imu_fd, &msg.mstrain.data.pitch,
+				&msg.mstrain.data.roll, &msg.mstrain.data.yaw );
+				//&msg.mstrain.data.roll, &msg.mstrain.data.yaw, msg.mstrain.data.accel,
+				//msg.mstrain.data.ang_rate );
+			recv_bytes = mstrain_vectors( imu_fd, 0, msg.mstrain.data.mag,
+				msg.mstrain.data.accel, msg.mstrain.data.ang_rate );
         }
 		else {
 			/* Simulation Mode. This is where the simulated data is generated. */

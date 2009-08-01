@@ -373,9 +373,10 @@ int main( int argc, char *argv[] )
 				if( msg.lj.data.battery1 > 5 ) {
 					ks_closed = TRUE;
 					gettimeofday( &task_start, NULL );
-					task = TASK_BUOY;
-					msg.task.data.task = task;
+					//task = TASK_BUOY;
+					//msg.task.data.task = task;
 					cf.task_init_yaw = msg.status.data.yaw;
+					msg.target.data.yaw = cf.task_init_yaw;
 					printf("MAIN: task = %d     %lf\n", task, cf.task_init_yaw);
 				}
 				else {
@@ -385,8 +386,8 @@ int main( int argc, char *argv[] )
 			if( ks_closed ) {
 				if( msg.lj.data.battery1 < 5 ) {
 					ks_closed = FALSE;
-					task = TASK_NONE;
-					msg.task.data.task = task;
+					//task = TASK_NONE;
+					//msg.task.data.task = task;
 				}
 			}
 		}
