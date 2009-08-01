@@ -307,7 +307,14 @@ int mstrain_euler_angles( int fd,
 	char cmd = (char)IMU_GYRO_STAB_EULER_ANGLES;
 	/* Conversion factor from the 3DM-GX1 manual. */
 	float euler_convert_factor = 360.0 / 65536.0;
-	
+
+	/* Temporary variables for checksum calculation. The checksum is
+	 * found by adding up all of the values of the short ints that are
+	 * returned by the IMU. */
+	short int cs_pitch = 0;
+	short int cs_roll = 0;
+	short int cs_yaw = 0;
+
 	/* Send request to and receive data from IMU. */
 	status = send_serial( fd, &cmd, sizeof(cmd) );
 
@@ -320,9 +327,26 @@ int mstrain_euler_angles( int fd,
 		return 0;
 	}
 
-	*roll  = convert2short( &response[1] ) * euler_convert_factor;
-	*pitch = convert2short( &response[3] ) * euler_convert_factor;
-	*yaw   = convert2short( &response[5] ) * euler_convert_factor;
+	/* Convert bytes to short ints. */
+	cs_roll  = convert2short( &response[1] );
+	cs_pitch = convert2short( &response[3] );
+	cs_yaw   = convert2short( &response[5] );
+
+	/* Set argument pointers to the temp values. */
+	*roll = cs_roll * euler_convert_factor;
+	*pitch = cs_pitch * euler_convert_factor;
+	*yaw = cs_yaw * euler_convert_factor;
+
+	/* Convert the Euler angles from (-180,180] to (0,360]. */
+	if( *roll < 0 ) {
+		*roll += 360;
+	}
+	if( *pitch < 0 ) {
+		*pitch += 360;
+	}
+	if( *yaw < 0 ) {
+		*yaw += 360;
+	}
 
 	return 1;
 } /* end mstrain_euler_angles() */
@@ -494,12 +518,13 @@ int mstrain_euler_vectors( int fd,
                            float *ang_rate
                          )
 {
-	int response_length = (int)IMU_LENGTH_31;
+	//int response_length = (int)IMU_LENGTH_31;
+	int response_length = (int)IMU_LENGTH_0D;
 	int status = 0;
 	int ii = 0;
 	char response[response_length];
 	char cmd = 0;
-	
+
 	/* Temporary variables for checksum calculation. The checksum is
 	 * found by adding up all of the values of the short ints that are
 	 * returned by the IMU. */
@@ -516,7 +541,8 @@ int mstrain_euler_vectors( int fd,
 	float ang_rate_convert_factor = 32768000.0 / 8500.0;
 	float euler_convert_factor = 360.0 / 65536.0;
 
-	cmd = IMU_GYRO_STAB_EULER_VECTORS;
+	//cmd = IMU_GYRO_STAB_EULER_VECTORS;
+	cmd = IMU_INST_EULER_ANGLES;
 
 	/* Send request to and receive data from IMU. */
 	status = send_serial( fd, &cmd, sizeof(cmd) );
@@ -524,14 +550,15 @@ int mstrain_euler_vectors( int fd,
 	if( status > 0 ) {
 		usleep( MSTRAIN_SERIAL_DELAY );
 		status = recv_serial( fd, response, response_length );
-		if( response[0] != IMU_GYRO_STAB_EULER_VECTORS ) {
-			//printf("MSTRAIN_EULER_VECTORS: ***** HEADER *****\n");
+		//if( response[0] != IMU_GYRO_STAB_EULER_VECTORS ) {
+		if( response[0] != cmd ) {
+			printf("MSTRAIN_EULER_VECTORS: ***** HEADER *****\n");
 			return IMU_ERROR_HEADER;
 		}
 	}
 
 	if( status != response_length ) {
-		//printf("MSTRAIN_EULER_VECTORS: ***** LENGTH *****\n");
+		printf("MSTRAIN_EULER_VECTORS: ***** LENGTH *****\n");
 		return IMU_ERROR_LENGTH;
 	}
 
@@ -544,9 +571,9 @@ int mstrain_euler_vectors( int fd,
 		cs_accel[ii]    = convert2short( &response[7 + ii * 2] );
 		cs_ang_rate[ii] = convert2short( &response[13 + ii * 2] );
 	}
-	
+
 	cs_timer_ticks =  convert2short( &response[19] );
-	
+
 	/* Calculate the checksum. */
 	cs_total = response[0] + cs_roll + cs_pitch + cs_yaw + cs_accel[0] +
 		cs_accel[1] + cs_accel[2] + cs_ang_rate[0] + cs_ang_rate[1] +
@@ -555,13 +582,13 @@ int mstrain_euler_vectors( int fd,
 		//printf("MSTRAIN_EULER_VECTORS: ***** CHECKSUM *****\n");
 		return IMU_ERROR_CHECKSUM;
 	}
-	
+
 	/* Try the checksum function. */
 	if( !mstrain_calc_checksum( response, response_length ) ) {
 		//printf("MSTRAIN_EULER_VECTORS: ***** CHECKSUM FUNCTION *****\n");
 		//return IMU_ERROR_CHECKSUM;
 	}
-		
+
 	/* Set argument pointers to the temp values. */
 	*roll = cs_roll * euler_convert_factor;
 	*pitch = cs_pitch * euler_convert_factor;
@@ -605,10 +632,10 @@ int mstrain_set_tare( int fd )
 	int status = 0;
 	char response[response_length];
 	char cmd[4];
-	
+
 	/* Set the command byte. */
 	cmd[0] = IMU_TARE_COORDINATE_SYSTEM;
-	
+
 	/* Set the command data bytes. */
 	cmd[1] = IMU_TARE_BYTE1;
 	cmd[2] = IMU_TARE_BYTE2;
@@ -651,10 +678,10 @@ int mstrain_remove_tare( int fd )
 	int status = 0;
 	char response[response_length];
 	char cmd[4];
-	
+
 	/* Set the command byte. */
 	cmd[0] = IMU_REMOVE_TARE;
-	
+
 	/* Set the command data bytes. */
 	cmd[1] = IMU_TARE_BYTE1;
 	cmd[2] = IMU_TARE_BYTE2;
@@ -696,21 +723,21 @@ int mstrain_calc_checksum( char *buffer, int length )
 {
 	int ii = 0;
 	short int cs_total = 0;
-	
+
 	/* Set total to the header byte. */
 	cs_total = buffer[0];
-	
+
 	/* Calculate the values of the remaining bytes in the buffer excluding the
 	 * checksum byte. */
 	for( ii = 1; ii < length - 2; ii++ ) {
 		cs_total += convert2short( &buffer[ii] );
 		ii++;
 	}
-	
+
 	if( cs_total != convert2short( &buffer[length - 2] ) ) {
 		return IMU_ERROR_CHECKSUM;
 	}
-	
+
 	return IMU_SUCCESS;
 } /* end mstrain_calc_checksum() */
 
