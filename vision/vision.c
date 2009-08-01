@@ -52,8 +52,8 @@ int vision_find_dot( int *dotx,
     CvPoint center;
     IplImage *hsvImg = NULL;
     IplImage *outImg = NULL;
-    IplConvKernel *wS = cvCreateStructuringElementEx( 2, 2,
-            (int)floor( ( 2.0 ) / 2 ), (int)floor( ( 2.0 ) / 2 ), CV_SHAPE_RECT );
+    IplConvKernel *wS = cvCreateStructuringElementEx( 3, 3,
+            (int)floor( ( 3.0 ) / 2 ), (int)floor( ( 3.0 ) / 2 ), CV_SHAPE_RECT );
 	int num_pix = 0;
 	int touch_thresh = 150000;
     int detect_thresh = 40;
@@ -81,6 +81,7 @@ int vision_find_dot( int *dotx,
 
 	/* Use a median filter image to remove outliers. */
 	cvSmooth( binImg, outImg, CV_MEDIAN, 7, 7, 0. ,0. );
+	cvMorphologyEx( binImg, binImg, wS, NULL, CV_MOP_CLOSE, 1); 
 
     /* Find the centroid. */
     center = vision_find_centroid( binImg, 5 );
@@ -1537,8 +1538,8 @@ int vision_find_gate( int *dotx,
     CvPoint center;
     IplImage *hsvImg = NULL;
     IplImage *outImg = NULL;
-    IplConvKernel *wS = cvCreateStructuringElementEx( 2, 2,
-            (int)floor( ( 2.0 ) / 2 ), (int)floor( ( 2.0 ) / 2 ), CV_SHAPE_RECT );
+    IplConvKernel *wS = cvCreateStructuringElementEx( 3, 3,
+            (int)floor( ( 3.0 ) / 2 ), (int)floor( ( 3.0 ) / 2 ), CV_SHAPE_RECT );
 	int num_pix = 0;
 	int touch_thresh = 150000;
     int detect_thresh = 40;
@@ -1565,7 +1566,8 @@ int vision_find_gate( int *dotx,
 		cvScalar(hsv->hH, hsv->sH, hsv->vH), binImg );
 
 	/* Use a median filter image to remove outliers. */
-	cvSmooth( binImg, outImg, CV_MEDIAN, 7, 7, 0. ,0. );
+	cvSmooth( binImg, outImg, CV_MEDIAN, 11, 11, 0. ,0. );
+	cvMorphologyEx( binImg, binImg, wS, NULL, CV_MOP_CLOSE, 1); 
 
     /* Find the centroid. */
     center = vision_find_centroid( binImg, 5 );
@@ -1578,7 +1580,7 @@ int vision_find_gate( int *dotx,
 
 	/* Check to see how many pixels of are detected in the image. */
 	num_pix = cvCountNonZero( binImg );
-	//printf("VISION_FIND_DOT: num_pix = %d\n" , num_pix);
+	printf("VISION_FIND_DOT: num_pix = %d\n" , num_pix);
 	if( num_pix > touch_thresh ) {
 		return 2;
 	}
