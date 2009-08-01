@@ -503,6 +503,26 @@ void parse_line( CONF_VARS *config )
             sscanf( tokens[2], "%f", &config->fence_min );
         }
     }
+    else if( strncmp( tokens[0], "gate", STRING_SIZE ) == 0 ) {
+        if( strncmp( tokens[1], "hL", STRING_SIZE ) == 0 ) {
+            sscanf( tokens[2], "%f", &config->gate_hL );
+        }
+        else if( strncmp( tokens[1], "hH", STRING_SIZE ) == 0 ) {
+            sscanf( tokens[2], "%f", &config->gate_hH );
+        }
+        else if( strncmp( tokens[1], "sL", STRING_SIZE ) == 0 ) {
+            sscanf( tokens[2], "%f", &config->gate_sL );
+        }
+        else if( strncmp( tokens[1], "sH", STRING_SIZE ) == 0 ) {
+            sscanf( tokens[2], "%f", &config->gate_sH );
+        }
+        else if( strncmp( tokens[1], "vL", STRING_SIZE ) == 0 ) {
+            sscanf( tokens[2], "%f", &config->gate_vL );
+        }
+        else if( strncmp( tokens[1], "vH", STRING_SIZE ) == 0 ) {
+            sscanf( tokens[2], "%f", &config->gate_vH );
+        }
+    }
     /* end vision HSV values */
 
 	/* depth values */
@@ -565,6 +585,13 @@ void parse_line( CONF_VARS *config )
 	else if( strncmp( tokens[0], "dock", STRING_SIZE ) == 0 ) {
 		if( strncmp( tokens[1], "time", STRING_SIZE ) == 0 ) {
 			sscanf( tokens[2], "%d", &config->dock_time );
+		}
+	}
+	else if( strncmp( tokens[0], "task", STRING_SIZE ) == 0 ) {
+		if( strncmp( tokens[1], "init", STRING_SIZE ) == 0 ) {
+			if( strncmp( tokens[2], "yaw", STRING_SIZE ) == 0 ) {
+				sscanf( tokens[3], "%f", &config->task_init_yaw );
+			}
 		}
 	}
 	/* end task start values */
@@ -834,6 +861,7 @@ void parse_default_config( CONF_VARS *config )
     config->target_fx = 0.0;
     config->target_fy = 0.0;
     config->target_speed = 0.0;
+    config->task_init_yaw = 0.0;
 
 	/* hsv values */
     config->pipe_hL = 0.0;
@@ -854,6 +882,12 @@ void parse_default_config( CONF_VARS *config )
     config->fence_sH = 0.0;
     config->fence_vL = 0.0;
     config->fence_vH = 0.0;
+    config->gate_hL = 0.0;
+    config->gate_hH = 0.0;
+    config->gate_sL = 0.0;
+    config->gate_sH = 0.0;
+    config->gate_vL = 0.0;
+    config->gate_vH = 0.0;
 
 	/* depths */
 	config->depth_boxes = 0.600;
@@ -1004,6 +1038,12 @@ void parse_print_config( CONF_VARS *config )
     printf("PARSE_PRINT_CONFIG: fence_sH = %f\n", config->fence_sH);
     printf("PARSE_PRINT_CONFIG: fence_vL = %f\n", config->fence_vL);
     printf("PARSE_PRINT_CONFIG: fence_vH = %f\n", config->fence_vH);
+    printf("PARSE_PRINT_CONFIG: buoy_hL = %f\n", config->gate_hL);
+    printf("PARSE_PRINT_CONFIG: buoy_hH = %f\n", config->gate_hH);
+    printf("PARSE_PRINT_CONFIG: buoy_sL = %f\n", config->gate_sL);
+    printf("PARSE_PRINT_CONFIG: buoy_sH = %f\n", config->gate_sH);
+    printf("PARSE_PRINT_CONFIG: buoy_vL = %f\n", config->gate_vL);
+    printf("PARSE_PRINT_CONFIG: buoy_vH = %f\n", config->gate_vH);
     printf("PARSE_PRINT_CONFIG: enable_gui = %d\n", config->enable_gui);
     printf("PARSE_PRINT_CONFIG: window_height = %d\n", config->window_height);
     printf("PARSE_PRINT_CONFIG: window_width = %d\n", config->window_width);
@@ -1041,4 +1081,5 @@ void parse_print_config( CONF_VARS *config )
 	printf("PARSE_PRINT_CONFIG: kp_buoy = %lf\n", config->kp_buoy_depth);
 	printf("PARSE_PRINT_CONFIG: ki_buoy = %lf\n", config->ki_buoy_depth);
 	printf("PARSE_PRINT_CONFIG: kd_buoy = %lf\n", config->kd_buoy_depth);
+	printf("PARSE_PRINT_CONFIG: task_init_yaw = %f\n", config->task_init_yaw);
 } /* end parse_default_config() */

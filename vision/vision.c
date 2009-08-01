@@ -137,8 +137,6 @@ int vision_find_pipe( int *pipex,
                       HSV *hsv
                     )
 {
-	double bearing_delta_min = 0.000001;
-
     CvPoint center;
     IplImage *hsvImg = NULL;
     IplImage *outImg = NULL;
@@ -194,10 +192,6 @@ int vision_find_pipe( int *pipex,
 	if( num_pix < detect_thresh ) {
 		return 0;
 	}
-
-    /* No detection condition, only using bearing - not centroid. */
-    if( fabs(*bearing) > bearing_delta_min )
-    	return 2;
 
     return 1;
 } /* end vision_find_pipe() */
@@ -328,7 +322,7 @@ double vision_get_bearing( IplImage *inputBinImg )
 		delete left_line;
 		delete right_line;
 		cvReleaseMemStorage( &storage );
-        return m;
+        return 0.0;
     }
 
     /* Only a left edge, ignore right. */
@@ -1571,7 +1565,7 @@ int vision_find_gate( int *dotx,
 		cvScalar(hsv->hH, hsv->sH, hsv->vH), binImg );
 
 	/* Use a median filter image to remove outliers. */
-	cvSmooth( binImg, outImg, CV_MEDIAN, 8, 8, 0. ,0. );
+	cvSmooth( binImg, outImg, CV_MEDIAN, 7, 7, 0. ,0. );
 
     /* Find the centroid. */
     center = vision_find_centroid( binImg, 5 );
@@ -1598,4 +1592,3 @@ int vision_find_gate( int *dotx,
 
     return 1;
 } /* end vision_find_gate() */
-

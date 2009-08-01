@@ -137,6 +137,12 @@ typedef struct _CONF_VARS {
     float       fence_sH;
     float       fence_vL;
     float       fence_vH;
+    float       gate_hL;
+    float       gate_hH;
+    float       gate_sL;
+    float       gate_sH;
+    float       gate_vL;
+    float       gate_vH;
     int         enable_gui;
     int         window_height;
     int         window_width;
@@ -168,6 +174,7 @@ typedef struct _CONF_VARS {
 	int			buoy_blind_time;
 	int			save_image_rate;
 	int			open_rate;
+	float		task_init_yaw;
 } CONF_VARS;
 
 #endif /* _CONF_VARS_ */
