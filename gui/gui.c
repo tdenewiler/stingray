@@ -62,7 +62,7 @@ void gui_update_status_text( )
 
     sprintf( sbuff,
              "Pitch, Roll, Yaw, Depth:\t[ %.3f\t%.3f\t%.3f\t%.3f ]\n"
-			 "Fx, Fy, FPS:\t\t\t\t\t[ %.3f\t%.3f\t%.3lf ]\n"
+			 "Fx, Fy, FPS:\t\t\t[ %.3f\t%.3f\t%.3lf ]\n"
              "Accel X, Y, Z:\t\t\t[ %.3f\t%.3f\t%.3f ]\n"
              "Ang Rate X, Y, Z:\t\t[ %.3f\t%.3f\t%.3f ]\n"
              "Labjack (B1 B2 D W):\t[ %.3fV\t%.3fV\t%.3f\t%.3f ]\n"
