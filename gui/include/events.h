@@ -170,6 +170,15 @@ void events_target_current( GtkWidget *widget,
                           gpointer data
                         );
 
+//! Sends all the target values from the target buttons.
+//! \param widget A pointer to the button widget.
+//! \param event A pointer to the event that triggered the callback.
+//! \param data A pointer to data that can be manipulated.
+void events_targets( GtkWidget *widget,
+                     GdkEvent *event,
+                     gpointer data
+                    );
+
 //! Sets the target mode to ZERO_PID_ERRORS.
 //! \param widget A pointer to the button widget.
 //! \param event A pointer to the event that triggered the callback.

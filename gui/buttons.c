@@ -829,35 +829,35 @@ int buttons_targets( GtkWidget *box )
     /* Create the spin buttons. */
     adj = ( GtkAdjustment * )gtk_adjustment_new( cf.target_pitch, 0, 360, 0.1, 10, 0 );
     button_target_pitch = buttons_make_spin( "Pitch",
-		GTK_SIGNAL_FUNC( events_target_pitch ), hbox, adj );
+		GTK_SIGNAL_FUNC( events_targets ), hbox, adj );
     gtk_spin_button_set_wrap( (GtkSpinButton *)button_target_pitch, TRUE );
 
     adj = ( GtkAdjustment * )gtk_adjustment_new( cf.target_roll, 0, 360, 0.1, 10, 0 );
     button_target_roll = buttons_make_spin( "Roll",
-		GTK_SIGNAL_FUNC( events_target_roll ), hbox, adj );
+		GTK_SIGNAL_FUNC( events_targets ), hbox, adj );
     gtk_spin_button_set_wrap( ( GtkSpinButton * )button_target_roll, TRUE );
 
     adj = ( GtkAdjustment * )gtk_adjustment_new( cf.target_yaw, 0, 360, 0.1, 10, 0 );
     button_target_yaw = buttons_make_spin( "Yaw",
-		GTK_SIGNAL_FUNC( events_target_yaw ), hbox, adj );
+		GTK_SIGNAL_FUNC( events_targets ), hbox, adj );
     gtk_spin_button_set_wrap( ( GtkSpinButton * )button_target_yaw, TRUE );
 
-    adj = ( GtkAdjustment * )gtk_adjustment_new( cf.target_depth, -100, 100, 0.001, 10, 0 );
+    adj = ( GtkAdjustment * )gtk_adjustment_new( cf.target_depth, 0, 100, 0.2, 10, 0 );
     button_target_depth = buttons_make_spin( "Depth",
-		GTK_SIGNAL_FUNC( events_target_depth ), hbox, adj );
+		GTK_SIGNAL_FUNC( events_targets ), hbox, adj );
     gtk_spin_button_set_wrap( ( GtkSpinButton * )button_target_depth, TRUE );
 
     adj = ( GtkAdjustment * )gtk_adjustment_new( msg.target.data.fx, -100, 100, 1, 10, 0 );
     button_target_fx = buttons_make_spin( "Fx",
-		GTK_SIGNAL_FUNC( events_target_fx ), hbox, adj );
+		GTK_SIGNAL_FUNC( events_targets ), hbox, adj );
 
     adj = ( GtkAdjustment * )gtk_adjustment_new( msg.target.data.fy, -100, 100, 1, 10, 0 );
     button_target_fy = buttons_make_spin( "Fy",
-		GTK_SIGNAL_FUNC( events_target_fy ), hbox, adj );
+		GTK_SIGNAL_FUNC( events_targets ), hbox, adj );
 
     adj = ( GtkAdjustment * )gtk_adjustment_new( msg.target.data.speed, 0, 100, 1, 10, 0 );
     button_target_speed = buttons_make_spin( "Speed",
-		GTK_SIGNAL_FUNC( events_target_speed ), hbox, adj );
+		GTK_SIGNAL_FUNC( events_targets ), hbox, adj );
 	
 	/* Create normal buttons. */
     button_target_current = gtk_button_new_with_label( "Set Targets to Current Status" );

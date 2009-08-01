@@ -1456,6 +1456,57 @@ void events_target_current( GtkWidget *widget,
 
 /******************************************************************************
  *
+ * Title:       void events_targets( GtkWidget *widget,
+ *                                   GdkEvent *event,
+ *                                   gpointer data )
+ *
+ * Description: Sends all the target values from the target buttons.
+ *
+ * Input:       widget: A pointer to the button widget.
+ *              event: A pointer to the event that triggered the callback.
+ *              data: A pointer to data that can be manipulated.
+ *
+ * Output:      None.
+ *
+ * Globals:     None.
+ *
+ *****************************************************************************/
+
+void events_targets( GtkWidget *widget,
+                     GdkEvent *event,
+                     gpointer data
+                    )
+{
+    /* Set the target values to the spin buttons. */
+    msg.target.data.pitch = gtk_spin_button_get_value_as_float(
+		(GtkSpinButton *)button_target_pitch );
+    msg.target.data.roll = gtk_spin_button_get_value_as_float(
+		(GtkSpinButton *)button_target_roll );
+    msg.target.data.yaw = gtk_spin_button_get_value_as_float(
+		(GtkSpinButton *)button_target_yaw );
+    msg.target.data.depth = gtk_spin_button_get_value_as_float(
+		(GtkSpinButton *)button_target_depth );
+    msg.target.data.fx = gtk_spin_button_get_value_as_float(
+		(GtkSpinButton *)button_target_fx );
+    msg.target.data.fy = gtk_spin_button_get_value_as_float(
+		(GtkSpinButton *)button_target_fy );
+    msg.target.data.speed = gtk_spin_button_get_value_as_float(
+		(GtkSpinButton *)button_target_speed );
+
+    /* Send the state of the button to the server if not in MANUAL mode. */
+    if( msg.target.data.mode != MANUAL ) {
+		if( planner_fd > 0 ) {
+			messages_send( planner_fd, TARGET_MSGID, &msg );
+		}
+		if( nav_fd > 0 ) {
+			messages_send( nav_fd, TARGET_MSGID, &msg );
+		}
+    }
+} /* end events_targets() */
+
+
+/******************************************************************************
+ *
  * Title:       void events_zero_pid( GtkWidget *widget,
  *                                      GdkEvent *event,
  *                                      gpointer data )

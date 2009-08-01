@@ -63,18 +63,6 @@ int main( int argc, char *argv[] )
     msg.target.data.fx      = cf.target_fx;
     msg.target.data.fy      = cf.target_fy;
     msg.target.data.speed   = cf.target_speed;
-    //msg.gain.data.kp_pitch  = cf.kp_pitch;
-    //msg.gain.data.ki_pitch  = cf.ki_pitch;
-    //msg.gain.data.kd_pitch  = cf.kd_pitch;
-    //msg.gain.data.kp_roll   = cf.kp_roll;
-    //msg.gain.data.ki_roll   = cf.ki_roll;
-    //msg.gain.data.kd_roll   = cf.kd_roll;
-    //msg.gain.data.kp_yaw    = cf.kp_yaw;
-    //msg.gain.data.ki_yaw    = cf.ki_yaw;
-    //msg.gain.data.kd_yaw    = cf.kd_yaw;
-    //msg.gain.data.kp_depth  = cf.kp_depth;
-    //msg.gain.data.ki_depth  = cf.ki_depth;
-    //msg.gain.data.kd_depth  = cf.kd_depth;
     msg.vsetting.data.pipe_hsv.hL = cf.pipe_hL;
     msg.vsetting.data.pipe_hsv.hH = cf.pipe_hH;
     msg.vsetting.data.pipe_hsv.sL = cf.pipe_sL;
@@ -126,6 +114,14 @@ int main( int argc, char *argv[] )
 			printf( "MAIN: WARNING!!! Nav client setup failed.\n" );
 		}
     }
+
+    /* Send the targets to the server if not in MANUAL mode. */
+	if( planner_fd > 0 ) {
+		messages_send( planner_fd, TARGET_MSGID, &msg );
+	}
+	if( nav_fd > 0 ) {
+		messages_send( nav_fd, TARGET_MSGID, &msg );
+	}
 
     /* Set up the GUI. */
     gtk_init( &argc, &argv );
