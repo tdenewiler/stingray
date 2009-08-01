@@ -140,6 +140,20 @@ int vision_find_fence( int *pipex,
                       IplImage *binImg,
 					  HSV *hsv
                     );
+					
+//! Finds the centroid of the gate using the smae logic of find dot
+//! \param dotx Pointer to variable for x position of gate centroid.
+//! \param doty Pointer to variable for y position of gate centroid.
+//! \param angle The angle to rotate the image by.
+//! \param srcImg The unprocessed image.
+
+int vision_find_gate( int *dotx,
+                      int *doty,
+                      int angle,
+                      IplImage *srcImg,
+                      IplImage *binImg,
+					  HSV *hsv
+                   );
 
 //! Finds the centroid of the suitcase structure in an image.
 //! \param srcImg The binary image to find the suitcase in.

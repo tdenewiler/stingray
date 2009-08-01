@@ -1510,3 +1510,92 @@ void vision_save_frame( IplImage *img )
 			strlen(write_time), ".%.03ld.jpg", ctime.tv_usec );
 	cvSaveImage( write_time, img );
 } /* end vision_save_frame() */
+
+
+/******************************************************************************
+ *
+ * Title:       int vision_find_gate(    int *dotx,
+ *                                       int *doty,
+ *                                       int amt,
+ *                                       IplImage *srcImg,
+ *                                       IplImage *outImg
+ *                                   )
+ *
+ * Description: Finds a circular object from a camera.
+ *
+ * Input:       dotx: Pointer to variable for x position of dot.
+ *              doty: Pointer to variable for y position of dot.
+ *              amt: The amount of erosion/dilation to perform.
+ *              cap: A pointer to an open camera.
+ *
+ * Output:      status: 1 on success, 0 on failure.
+ *
+ *****************************************************************************/
+
+int vision_find_gate( int *dotx,
+                      int *doty,
+                      int angle,
+                      IplImage *srcImg,
+                      IplImage *binImg,
+					  HSV *hsv
+                   )
+{
+    CvPoint center;
+    IplImage *hsvImg = NULL;
+    IplImage *outImg = NULL;
+    IplConvKernel *wS = cvCreateStructuringElementEx( 2, 2,
+            (int)floor( ( 2.0 ) / 2 ), (int)floor( ( 2.0 ) / 2 ), CV_SHAPE_RECT );
+	int num_pix = 0;
+	int touch_thresh = 150000;
+    int detect_thresh = 40;
+    /* Initialize to impossible values. */
+    center.x = -10000;
+    center.y = -10000;
+
+	/* Create intermediate images for scratch space. */
+    hsvImg = cvCreateImage( cvGetSize(srcImg), IPL_DEPTH_8U, 3 );
+    outImg = cvCreateImage( cvGetSize(srcImg), IPL_DEPTH_8U, 1 );
+
+	/* Enhance the red channel of the source image. */
+	//vision_white_balance( srcImg );
+
+    /* Segment the flipped image into a binary image. */
+    cvCvtColor( srcImg, hsvImg, CV_RGB2HSV );
+
+	/* Equalize the histograms of each channel. */
+	//vision_hist_eq( hsvImg, VISION_CHANNEL3 );
+		//VISION_CHANNEL1 + VISION_CHANNEL2 + VISION_CHANNEL3 );
+
+	/* Threshold all three channels using our own values. */
+    cvInRangeS( hsvImg, cvScalar(hsv->hL, hsv->sL, hsv->vL),
+		cvScalar(hsv->hH, hsv->sH, hsv->vH), binImg );
+
+	/* Use a median filter image to remove outliers. */
+	cvSmooth( binImg, outImg, CV_MEDIAN, 8, 8, 0. ,0. );
+
+    /* Find the centroid. */
+    center = vision_find_centroid( binImg, 5 );
+    *dotx = center.x;
+    *doty = center.y;
+
+    /* Clear variables to free memory. */
+    cvReleaseImage( &hsvImg );
+    cvReleaseImage( &outImg );
+
+	/* Check to see how many pixels of are detected in the image. */
+	num_pix = cvCountNonZero( binImg );
+	//printf("VISION_FIND_DOT: num_pix = %d\n" , num_pix);
+	if( num_pix > touch_thresh ) {
+		return 2;
+	}
+    if( num_pix < detect_thresh) {
+		return 0;
+	}
+	/* Check that the values of dotx & doty are not negative */
+	if( dotx < 0 || doty < 0 ) {
+		return 0;
+	}
+
+    return 1;
+} /* end vision_find_gate() */
+
