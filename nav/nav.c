@@ -228,6 +228,9 @@ int main( int argc, char *argv[] )
     int time2s = 0;
     int time2ms = 0;
     int dt = 0;
+	short int accel_gain = 0;
+	short int mag_gain = 0;
+	short int bias_gain = 0;
 
     printf("MAIN: Starting Navigation ... \n");
 
@@ -271,6 +274,16 @@ int main( int argc, char *argv[] )
 			/* Seed the random variable. */
 			srand((unsigned int) time(NULL) );
 			imu_fd = 0;
+		}
+		if( imu_fd > 0 ) {
+			/* Get the system gains. */
+			status = mstrain_read_system_gains( imu_fd, &accel_gain,
+				&mag_gain, &bias_gain );
+			/* Set the magnetometer gain to zero. */
+			mag_gain = 0;
+			/* Write the new system gains. */
+			status = mstrain_write_system_gains( imu_fd, accel_gain,
+				mag_gain, bias_gain );
 		}
     }
 	else {
