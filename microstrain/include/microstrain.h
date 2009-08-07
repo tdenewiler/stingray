@@ -70,7 +70,8 @@
 #define IMU_LENGTH_10  7
 #define IMU_LENGTH_11  5
 #define IMU_LENGTH_12 31
-#define IMU_LENGTH_24  5
+#define IMU_LENGTH_24_CMD  6
+#define IMU_LENGTH_24_RSP  5
 #define IMU_LENGTH_25 11
 #define IMU_LENGTH_27  5
 #define IMU_LENGTH_28  7
@@ -142,6 +143,9 @@ typedef struct _MSTRAIN_DATA {
 	float yaw;                //!< Yaw angle, from Euler angles
 	short eeprom_address;     //!< EEPROM address
 	short eeprom_value;       //!< EEPROM value
+	short int accel_gain;
+	short int mag_gain;
+	short int bias_gain;
 } MSTRAIN_DATA;
 
 #endif /* _MSTRAIN_DATA_ */
@@ -276,6 +280,30 @@ int convert2int( char *buffer );
 //! \param buffer Pointer to first byte.
 //! \return Resulting short integer.
 short convert2short( char *buffer );
+
+//! Get the Euler angles from the IMU.
+//! \param fd A file descriptor for the IMU port.
+//! \param roll A pointer to store the roll value.
+//! \param pitch A pointer to store the pitch value.
+//! \param yaw A pointer to store the yaw value.
+//! \return 1 on success, 0 on failure.
+int mstrain_read_system_gains( int fd,
+                          short int *accel_gain,
+                          short int *mag_gain,
+                          short int *bias_gain
+                        );
+
+//! Get the Euler angles from the IMU.
+//! \param fd A file descriptor for the IMU port.
+//! \param roll A pointer to store the roll value.
+//! \param pitch A pointer to store the pitch value.
+//! \param yaw A pointer to store the yaw value.
+//! \return 1 on success, 0 on failure.
+int mstrain_write_system_gains( int fd,
+                          short int accel_gain,
+                          short int mag_gain,
+                          short int bias_gain
+                        );
 
 
 #endif /* _MICROSTRAIN_H_ */

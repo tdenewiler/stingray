@@ -780,3 +780,108 @@ short convert2short( char *buffer )
 
 	return retval;
 } /* end convert2short() */
+
+
+/******************************************************************************
+ *
+ * Title:       int mstrain_read_system_gains( int fd,
+ *                                    	  float *roll,
+ *                                    	  float *pitch,
+ *                                    	  float *yaw
+ *                                  	 )
+ *
+ * Description: Asks for Euler angles from IMU.
+ *
+ * Input:       fd: A file descriptor for the IMU port.
+ *              roll: A pointer to store the roll value.
+ *              pitch: A pointer to store the pitch value.
+ *              yaw: A pointer to store the yaw value.
+ *
+ * Output:      1 on success, 0 on failure.
+ *
+ *****************************************************************************/
+
+int mstrain_read_system_gains( int fd,
+                          short int *accel_gain,
+                          short int *mag_gain,
+                          short int *bias_gain
+                        )
+{
+	int response_length = (int)IMU_LENGTH_25;
+	int status = 0;
+	char response[response_length];
+	char cmd = (char)IMU_READ_SYSTEM_GAINS;
+
+	/* Send request to and receive data from IMU. */
+	status = send_serial( fd, &cmd, sizeof(cmd) );
+
+	if( status > 0 ) {
+		usleep( MSTRAIN_SERIAL_DELAY );
+		status = recv_serial( fd, response, response_length );
+	}
+
+	if( status != response_length ) {
+		return 0;
+	}
+
+	/* Convert bytes to short ints. */
+	*accel_gain  = convert2short( &response[1] );
+	*mag_gain = convert2short( &response[3] );
+	*bias_gain   = convert2short( &response[5] );
+
+	return 1;
+} /* end mstrain_read_system_gains() */
+
+
+/******************************************************************************
+ *
+ * Title:       int mstrain_read_system_gains( int fd,
+ *                                    	  float *roll,
+ *                                    	  float *pitch,
+ *                                    	  float *yaw
+ *                                  	 )
+ *
+ * Description: Asks for Euler angles from IMU.
+ *
+ * Input:       fd: A file descriptor for the IMU port.
+ *              roll: A pointer to store the roll value.
+ *              pitch: A pointer to store the pitch value.
+ *              yaw: A pointer to store the yaw value.
+ *
+ * Output:      1 on success, 0 on failure.
+ *
+ *****************************************************************************/
+
+int mstrain_write_system_gains( int fd,
+                          short int accel_gain,
+                          short int mag_gain,
+                          short int bias_gain
+                        )
+{
+	int response_length = (int)IMU_LENGTH_24_CMD;
+	int status = 0;
+	char response[response_length];
+	char cmd[7] = {0, 0, 0, 0, 0, 0, 0};
+	
+	cmd[0] = 0x24;
+	cmd[1] = (char)accel_gain;
+	cmd[3] = (char)mag_gain;
+	cmd[5] = (char)bias_gain;
+
+	printf( "accel_gain=%d, mag_gain=%d, bias_gain=%d, cmd_1=%d, cmd_3=%d, cmd_5=%d\n", accel_gain, mag_gain, bias_gain,
+			cmd[1], cmd[3], cmd[5] );
+
+	/* Send request to and receive data from IMU. */
+	status = send_serial( fd, &cmd, sizeof(cmd) );
+
+	if( status > 0 ) {
+		usleep( MSTRAIN_SERIAL_DELAY );
+		status = recv_serial( fd, response, response_length );
+	}
+
+	if( status != response_length ) {
+		return 0;
+	}
+
+	return 1;
+} /* end mstrain_write_system_gains() */
