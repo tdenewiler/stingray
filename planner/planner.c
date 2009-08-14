@@ -369,13 +369,18 @@ int main( int argc, char *argv[] )
 				messages_send( nav_fd, CLIENT_MSGID, &msg );
 				old_dropper = msg.client.data.dropper;
 			}
+			/* Check the kill switch state. */
 			if( !ks_closed ) {
 				if( msg.lj.data.battery1 > 5 ) {
 					ks_closed = TRUE;
 					gettimeofday( &task_start, NULL );
-					//task = TASK_BUOY;
-					//msg.task.data.task = task;
+					if( msg.task.data.course ) {
+						task = TASK_GATE;
+						msg.task.data.task = task;
+						gettimeofday( &subtask_start, NULL );
+					}
 					cf.task_init_yaw = msg.status.data.yaw;
+					cf.target_yaw = cf.task_init_yaw;
 					msg.target.data.yaw = cf.task_init_yaw;
 					printf("MAIN: task = %d     %lf\n", task, cf.task_init_yaw);
 				}

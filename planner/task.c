@@ -162,14 +162,14 @@ int task_buoy( MSG_DATA *msg, CONF_VARS *cf, int dt, int subtask_dt )
 
 			/* TODO: Put in a check here to make sure we don't go too far away
 			 * from buoy depth target from config file. */
-			msg->target.data.depth = msg->status.data.depth +
-				(float)msg->vision.data.front_y * TASK_BUOY_DEPTH_GAIN;
-			if( msg->target.data.depth > cf->depth_buoy + TASK_BUOY_MAX_DEPTH_DELTA ) {
-				msg->target.data.depth = cf->depth_buoy + TASK_BUOY_MAX_DEPTH_DELTA;
-			}
-			else if( msg->target.data.depth < cf->depth_buoy - TASK_BUOY_MAX_DEPTH_DELTA ) {
-				msg->target.data.depth = cf->depth_buoy - TASK_BUOY_MAX_DEPTH_DELTA;
-			}
+			//msg->target.data.depth = msg->status.data.depth +
+				//(float)msg->vision.data.front_y * TASK_BUOY_DEPTH_GAIN;
+			//if( msg->target.data.depth > cf->depth_buoy + TASK_BUOY_MAX_DEPTH_DELTA ) {
+				//msg->target.data.depth = cf->depth_buoy + TASK_BUOY_MAX_DEPTH_DELTA;
+			//}
+			//else if( msg->target.data.depth < cf->depth_buoy - TASK_BUOY_MAX_DEPTH_DELTA ) {
+				//msg->target.data.depth = cf->depth_buoy - TASK_BUOY_MAX_DEPTH_DELTA;
+			//}
 
 			return TASK_CONTINUING;
 		}
@@ -226,6 +226,10 @@ int task_buoy( MSG_DATA *msg, CONF_VARS *cf, int dt, int subtask_dt )
 int task_gate( MSG_DATA *msg, CONF_VARS *cf, int dt, int subtask_dt )
 {
 	if( msg->task.data.course ) {
+		msg->target.data.depth = cf->depth_gate;
+		msg->target.data.fy = -60;
+		msg->target.data.speed = 65;
+
 		/* Check to see if we have detected the buoy. Else don't change yaw or
 		 * depth, just keep old values. */
 		if( msg->vision.data.status == TASK_GATE_DETECTED ||
@@ -237,7 +241,7 @@ int task_gate( MSG_DATA *msg, CONF_VARS *cf, int dt, int subtask_dt )
 
 			if( msg->vision.data.status == TASK_GATE_CLEARED ) {
 				cf->target_yaw = msg->status.data.yaw;
-				printf("TASK_GATE: touched, yaw = %lf\n", cf->target_yaw);
+				printf("TASK_GATE: cleared, yaw = %lf\n", cf->target_yaw);
 			}
 
 			if( dt > TASK_GATE_MAX_TIME ) {
@@ -252,6 +256,7 @@ int task_gate( MSG_DATA *msg, CONF_VARS *cf, int dt, int subtask_dt )
 				}
 				cf->task_init_yaw = cf->target_yaw;
 
+				msg->target.data.depth = cf->depth_buoy;
 				return TASK_SUCCESS;
 			}
 
@@ -271,6 +276,7 @@ int task_gate( MSG_DATA *msg, CONF_VARS *cf, int dt, int subtask_dt )
 					cf->target_yaw = msg->status.data.yaw;
 				}
 				cf->task_init_yaw = cf->target_yaw;
+				msg->target.data.depth = cf->depth_buoy;
 
 				return TASK_FAILURE;
 			}
@@ -340,6 +346,7 @@ int task_pipe( MSG_DATA *msg, CONF_VARS *cf, int dt, int subtask_dt )
 			msg->target.data.yaw = msg->status.data.yaw +
 				msg->vision.data.bearing * TASK_PIPE_YAW_GAIN;
 			cf->task_init_yaw = msg->target.data.yaw;
+			printf( "TASK_PIPE: Detected yaw=%lf\n", cf->task_init_yaw );
 
 			return TASK_SUCCESS;
 		}
@@ -545,7 +552,7 @@ int task_fence( MSG_DATA *msg, CONF_VARS *cf, int dt, int subtask_dt )
 
 			if( msg->vision.data.status == TASK_FENCE_CLEARED ) {
 				cf->task_init_yaw = msg->status.data.yaw;
-				printf("TASK_GATE: touched, yaw = %lf\n", cf->target_yaw);
+				printf("TASK_FENCE: cleared, yaw = %lf\n", cf->target_yaw);
 
 				return TASK_SUCCESS;
 			}

@@ -81,4 +81,6 @@ void nav_exit( );
 int main( int argc, char *argv[] );
 
 
+float calc_yaw_avg( float curr_yaw );
+
 #endif /* _NAV_H_ */

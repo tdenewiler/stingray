@@ -41,12 +41,15 @@
 #include "telemfile.h"
 #endif /* USE_SSA */
 
+#define YAW_HIST_SIZE 30
 
 /* Global file descriptors. Only global so that nav_exit() can close them. */
 int server_fd;
 int pololu_fd;
 int imu_fd;
 int lj_fd;
+float yaw_hist[YAW_HIST_SIZE];
+int yaw_head = 0;
 
 
 #ifdef USE_SSA
@@ -243,6 +246,7 @@ int main( int argc, char *argv[] )
     memset( &pid, 0, sizeof( PID ) );
     memset( &recv_buf, 0, MAX_MSG_SIZE );
 	messages_init( &msg );
+	memset( &yaw_hist, 0, sizeof( yaw_hist ) );
 
     /* Parse command line arguments. */
     parse_default_config( &cf );
@@ -276,14 +280,8 @@ int main( int argc, char *argv[] )
 			imu_fd = 0;
 		}
 		if( imu_fd > 0 ) {
-			/* Get the system gains. */
-			status = mstrain_read_system_gains( imu_fd, &accel_gain,
-				&mag_gain, &bias_gain );
-			/* Set the magnetometer gain to zero. */
-			mag_gain = 0;
-			/* Write the new system gains. */
-			status = mstrain_write_system_gains( imu_fd, accel_gain,
-				mag_gain, bias_gain );
+			/* Zero the mag gains. */
+			//status = mstrain_zero_mag_gain( imu_fd );
 		}
     }
 	else {
@@ -432,6 +430,10 @@ int main( int argc, char *argv[] )
 				&msg.mstrain.data.roll, &msg.mstrain.data.yaw );
 				//&msg.mstrain.data.roll, &msg.mstrain.data.yaw, msg.mstrain.data.accel,
 				//msg.mstrain.data.ang_rate );
+
+			/* Calculate yaw average from history. */
+			//msg.mstrain.data.yaw = calc_yaw_avg( msg.mstrain.data.yaw );
+
 			recv_bytes = mstrain_vectors( imu_fd, 0, msg.mstrain.data.mag,
 				msg.mstrain.data.accel, msg.mstrain.data.ang_rate );
         }
@@ -518,3 +520,30 @@ int main( int argc, char *argv[] )
 
     exit( 0 );
 } /* end main() */
+
+float calc_yaw_avg( float curr_yaw )
+{
+	int i = 0;
+	float yaw_total = 0;
+	float yaw_avg = 0;
+
+	/* Update yaw history. */
+	yaw_hist[yaw_head] = curr_yaw;
+	yaw_head++;
+	if ( yaw_head > YAW_HIST_SIZE )
+	{
+		yaw_head = 0;
+	}
+
+	/* Calculate yaw average. */
+	for ( i = 0; i < YAW_HIST_SIZE; i++ )
+	{
+		yaw_total += yaw_hist[i];
+	}
+
+	yaw_avg = yaw_total / YAW_HIST_SIZE;
+
+	printf( "yaw_avg = %f\n", yaw_avg );
+
+	return yaw_avg;
+}

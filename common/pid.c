@@ -303,7 +303,9 @@ void pid_loop( int pololu_fd,
 		pid->yaw.kd		= msg->gain.data.kd_yaw;
 
 		/* Use different gains for buoy task. */
-		if( msg->target.data.task == TASK_BUOY &&
+		if( (msg->target.data.task == TASK_BUOY ||
+		     msg->target.data.task == TASK_GATE ||
+		     msg->target.data.task == TASK_FENCE) &&
 			msg->target.data.vision_status != TASK_NOT_DETECTED ) {
 			pid->yaw.kp = cf->kp_buoy;
 			pid->yaw.ki = cf->ki_buoy;
