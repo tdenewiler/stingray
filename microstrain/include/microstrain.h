@@ -70,7 +70,7 @@
 #define IMU_LENGTH_10  7
 #define IMU_LENGTH_11  5
 #define IMU_LENGTH_12 31
-#define IMU_LENGTH_24_CMD  6
+#define IMU_LENGTH_24_CMD  7
 #define IMU_LENGTH_24_RSP  5
 #define IMU_LENGTH_25 11
 #define IMU_LENGTH_27  5
@@ -304,6 +304,10 @@ int mstrain_write_system_gains( int fd,
                           short int mag_gain,
                           short int bias_gain
                         );
+
+int mstrain_zero_mag_gain( int fd );
+
+int mstrain_capture_gyro_bias( int fd );
 
 
 #endif /* _MICROSTRAIN_H_ */

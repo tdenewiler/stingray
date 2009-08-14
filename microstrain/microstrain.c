@@ -829,6 +829,9 @@ int mstrain_read_system_gains( int fd,
 	*mag_gain = convert2short( &response[3] );
 	*bias_gain   = convert2short( &response[5] );
 
+	//printf( "response_1=%d, response_3=%d, response_5=%d, accel_gain=%d, mag_gain=%d, bias_gain=%d\n",
+	//	response[1], response[3], response[5], accel_gain, mag_gain, bias_gain );
+
 	return 1;
 } /* end mstrain_read_system_gains() */
 
@@ -862,14 +865,14 @@ int mstrain_write_system_gains( int fd,
 	int status = 0;
 	char response[response_length];
 	char cmd[7] = {0, 0, 0, 0, 0, 0, 0};
-	
+
 	cmd[0] = 0x24;
 	cmd[1] = (char)accel_gain;
 	cmd[3] = (char)mag_gain;
 	cmd[5] = (char)bias_gain;
 
-	printf( "accel_gain=%d, mag_gain=%d, bias_gain=%d, cmd_1=%d, cmd_3=%d, cmd_5=%d\n", accel_gain, mag_gain, bias_gain,
-			cmd[1], cmd[3], cmd[5] );
+	//printf( "accel_gain=%d, mag_gain=%d, bias_gain=%d, cmd_1=%d, cmd_3=%d, cmd_5=%d\n", accel_gain, mag_gain, bias_gain,
+	//		cmd[1], cmd[3], cmd[5] );
 
 	/* Send request to and receive data from IMU. */
 	status = send_serial( fd, &cmd, sizeof(cmd) );
@@ -885,3 +888,110 @@ int mstrain_write_system_gains( int fd,
 
 	return 1;
 } /* end mstrain_write_system_gains() */
+
+/******************************************************************************
+ *
+ * Title:       int mstrain_read_system_gains( int fd,
+ *                                    	  float *roll,
+ *                                    	  float *pitch,
+ *                                    	  float *yaw
+ *                                  	 )
+ *
+ * Description: Asks for Euler angles from IMU.
+ *
+ * Input:       fd: A file descriptor for the IMU port.
+ *              roll: A pointer to store the roll value.
+ *              pitch: A pointer to store the pitch value.
+ *              yaw: A pointer to store the yaw value.
+ *
+ * Output:      1 on success, 0 on failure.
+ *
+ *****************************************************************************/
+
+int mstrain_zero_mag_gain( int fd )
+{
+	int response_length = (int)IMU_LENGTH_25;
+	int status = 0;
+	char response[response_length];
+	char cmd = (char)IMU_READ_SYSTEM_GAINS;
+
+	int write_response_length = (int)IMU_LENGTH_24_RSP;
+	char write_response[write_response_length];
+	char cmd_write[7] = {0, 0, 0, 0, 0, 0, 0};
+
+	/* Send request to and receive data from IMU. */
+	status = send_serial( fd, &cmd, sizeof(cmd) );
+
+	if( status > 0 ) {
+		usleep( MSTRAIN_SERIAL_DELAY );
+		status = recv_serial( fd, response, response_length );
+	}
+
+	if( status != response_length ) {
+		return 0;
+	}
+
+	cmd_write[0] = 0x24;
+	cmd_write[1] = response[1];
+	cmd_write[2] = response[2];
+	cmd_write[3] = 0x0;
+	cmd_write[4] = 0x0;
+	cmd_write[5] = response[5];
+	cmd_write[6] = response[6];
+
+	/* Send command to set data from IMU. */
+	status = send_serial( fd, &cmd_write, sizeof(cmd_write) );
+
+	if( status > 0 ) {
+		usleep( MSTRAIN_SERIAL_DELAY );
+		status = recv_serial( fd, write_response, write_response_length );
+	}
+
+	if( status != write_response_length ) {
+		return 0;
+	}
+
+	return 1;
+} /* end mstrain_zero_mag_gains() */
+
+
+/******************************************************************************
+ *
+ * Title:       int mstrain_capture_gyro_bias( int fd,
+ *                                    	  float *roll,
+ *                                    	  float *pitch,
+ *                                    	  float *yaw
+ *                                  	 )
+ *
+ * Description: Asks for Euler angles from IMU.
+ *
+ * Input:       fd: A file descriptor for the IMU port.
+ *              roll: A pointer to store the roll value.
+ *              pitch: A pointer to store the pitch value.
+ *              yaw: A pointer to store the yaw value.
+ *
+ * Output:      1 on success, 0 on failure.
+ *
+ *****************************************************************************/
+
+int mstrain_capture_gyro_bias( int fd )
+{
+	int response_length = (int)IMU_LENGTH_06;
+	int status = 0;
+	char response[response_length];
+	char cmd = (char)IMU_GYRO_BIAS;
+
+	/* Send request to and receive data from IMU. */
+	status = send_serial( fd, &cmd, sizeof(cmd) );
+
+	if( status > 0 ) {
+		usleep( MSTRAIN_SERIAL_DELAY );
+		status = recv_serial( fd, response, response_length );
+	}
+
+	if( status != response_length ) {
+		return 0;
+	}
+
+	return 1;
+} /* end mstrain_capture_gyro_bias() */

@@ -29,13 +29,16 @@ int main( )
 		return 0;
 	}
 
-	/* !!!!!!!!!!!!!! Only use one of the two following calls. !!!!!!!!!!!!!!
+	/* !!!!!!!!!!!!!! Only use one of the three following calls. !!!!!!!!!!!!!!
 	 * !!!!!!!!!!!!!! Recompile to use the other call.         !!!!!!!!!!!!!! */
 	/* Set the tare for the Microstrain unit. */
-	status = mstrain_set_tare( imu_fd );
+	//status = mstrain_set_tare( imu_fd );
 
 	/* Remove the tare for the Microstrain unit. */
 	//status = mstrain_remove_tare( imu_fd );
+
+	/* Capture the gyro bias. */
+	status = mstrain_capture_gyro_bias( imu_fd );
 
 	/* Close the serial port. */
 	close( imu_fd );

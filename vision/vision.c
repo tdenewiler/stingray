@@ -81,7 +81,7 @@ int vision_find_dot( int *dotx,
 
 	/* Use a median filter image to remove outliers. */
 	cvSmooth( binImg, outImg, CV_MEDIAN, 7, 7, 0. ,0. );
-	cvMorphologyEx( binImg, binImg, wS, NULL, CV_MOP_CLOSE, 1); 
+	cvMorphologyEx( binImg, binImg, wS, NULL, CV_MOP_CLOSE, 1);
 
     /* Find the centroid. */
     center = vision_find_centroid( binImg, 5 );
@@ -143,7 +143,7 @@ int vision_find_pipe( int *pipex,
     IplImage *outImg = NULL;
     IplConvKernel *wS = cvCreateStructuringElementEx( 2, 2,
             (int)floor( ( 2.0 ) / 2 ), (int)floor( ( 2.0 ) / 2 ), CV_SHAPE_RECT );
-	int detect_thresh = 1600;
+	int detect_thresh = 15000;
 	int num_pix = 0;
 
     /* Initialize to impossible values. */
@@ -1541,8 +1541,8 @@ int vision_find_gate( int *dotx,
     IplConvKernel *wS = cvCreateStructuringElementEx( 3, 3,
             (int)floor( ( 3.0 ) / 2 ), (int)floor( ( 3.0 ) / 2 ), CV_SHAPE_RECT );
 	int num_pix = 0;
-	int touch_thresh = 150000;
-    int detect_thresh = 40;
+	int touch_thresh = 50000;
+    int detect_thresh = 1500;
     /* Initialize to impossible values. */
     center.x = -10000;
     center.y = -10000;
@@ -1567,7 +1567,7 @@ int vision_find_gate( int *dotx,
 
 	/* Use a median filter image to remove outliers. */
 	cvSmooth( binImg, outImg, CV_MEDIAN, 11, 11, 0. ,0. );
-	cvMorphologyEx( binImg, binImg, wS, NULL, CV_MOP_CLOSE, 1); 
+	cvMorphologyEx( binImg, binImg, wS, NULL, CV_MOP_CLOSE, 1);
 
     /* Find the centroid. */
     center = vision_find_centroid( binImg, 5 );
