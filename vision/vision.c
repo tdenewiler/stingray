@@ -7,17 +7,6 @@
  *****************************************************************************/
 
 
-#include <stdio.h>
-#include <unistd.h>
-#include <string.h>
-#include <time.h>
-#include <sys/time.h>
-#include <cv.h>
-#include <cxcore.h>
-#include <highgui.h>
-#include <math.h>
-#include <cvcompat.h>
-
 #include "vision.h"
 
 
@@ -46,7 +35,7 @@ int vision_find_dot( int *dotx,
                      int angle,
                      IplImage *srcImg,
                      IplImage *binImg,
-					 HSV *hsv
+					 HSV_HL *hsv
                    )
 {
     CvPoint center;
@@ -135,14 +124,14 @@ int vision_find_pipe( int *pipex,
                       double *bearing,
                       IplImage *srcImg,
                       IplImage *binImg,
-                      HSV *hsv
+                      HSV_HL *hsv
                     )
 {
     CvPoint center;
     IplImage *hsvImg = NULL;
     IplImage *outImg = NULL;
-    IplConvKernel *wS = cvCreateStructuringElementEx( 2, 2,
-            (int)floor( ( 2.0 ) / 2 ), (int)floor( ( 2.0 ) / 2 ), CV_SHAPE_RECT );
+    //IplConvKernel *wS = cvCreateStructuringElementEx( 2, 2,
+    //        (int)floor( ( 2.0 ) / 2 ), (int)floor( ( 2.0 ) / 2 ), CV_SHAPE_RECT );
 	int detect_thresh = 15000;
 	int num_pix = 0;
 
@@ -441,7 +430,7 @@ int vision_find_fence( int *fence_center,
                       int *y_max,
                       IplImage *srcImg,
                       IplImage *binImg,
-					  HSV *hsv
+					  HSV_HL *hsv
                     )
 {
 	/* Declare variables. */
@@ -452,8 +441,8 @@ int vision_find_fence( int *fence_center,
     CvPoint center;
 	IplImage *hsvImg = NULL;
     IplImage *outImg = NULL;
-    IplConvKernel *wS = cvCreateStructuringElementEx( 2, 2,
-            (int)floor( ( 2.0 ) / 2 ), (int)floor( ( 2.0 ) / 2 ), CV_SHAPE_RECT );
+    //IplConvKernel *wS = cvCreateStructuringElementEx( 2, 2,
+    //        (int)floor( ( 2.0 ) / 2 ), (int)floor( ( 2.0 ) / 2 ), CV_SHAPE_RECT );
     CvSize sz = cvSize( srcImg->width & -2, srcImg->height & -2 );
  	int num_pix = 0;
 	int detect_thresh = 1;
@@ -1288,7 +1277,7 @@ void vision_white_balance( IplImage *img )
 	int ii = 0;
 	int jj = 0;
 	uchar *temp_ptr;
-	double scale = 0.65;
+	//double scale = 0.65;
 	double rscale = 255. / 255.;
 	double bscale = 255. / 245.;
 	double gscale = 255. / 255.;
@@ -1532,7 +1521,7 @@ int vision_find_gate( int *dotx,
                       int angle,
                       IplImage *srcImg,
                       IplImage *binImg,
-					  HSV *hsv
+					  HSV_HL *hsv
                    )
 {
     CvPoint center;

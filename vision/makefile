@@ -1,6 +1,7 @@
 LIB			= vision
 INCLUDES	= -Iinclude
 INCLUDES	+= -I/usr/include/opencv
+INCLUDES	+= -I../../src/common/include
 CFLAGS		= -Wall
 CFLAGS		+= -O2
 CFLAGS		+= -g

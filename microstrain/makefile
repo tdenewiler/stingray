@@ -3,6 +3,7 @@ SERIALDIR   = ../serial
 INCLUDE_DIR = include
 INCLUDES    = -I$(INCLUDE_DIR)
 INCLUDES    += -I$(SERIALDIR)/$(INCLUDE_DIR)
+INCLUDES    += -I../../src/common/include
 CFLAGS      = -Wall
 CFLAGS      += -O2
 CFLAGS      += -g

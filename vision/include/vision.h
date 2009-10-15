@@ -6,6 +6,19 @@
 #ifndef _VISION_H_
 #define _VISION_H_
 
+#include <stdio.h>
+#include <unistd.h>
+#include <string.h>
+#include <time.h>
+#include <sys/time.h>
+#include <cv.h>
+#include <cxcore.h>
+#include <highgui.h>
+#include <math.h>
+#include <cvcompat.h>
+
+#include "msgtypes.h"
+
 /******************************
 **
 ** #defines
@@ -70,23 +83,6 @@
 
 /******************************
 **
-** Data types
-**
-******************************/
-
-/*! High and low limits for thresholding an HSV image. */
-typedef struct _HSV {
-	float hL;	//!< Low limit for hue.
-	float hH;	//!< High limit for hue.
-	float sL;	//!< Low limit for saturation.
-	float sH;	//!< High limit for saturation.
-	float vL;	//!< Low limit for value.
-	float vH;	//!< High limit for value.
-} HSV;
-
-
-/******************************
-**
 ** Function prototypes
 **
 ******************************/
@@ -107,7 +103,7 @@ int vision_find_dot( int *dotx,
                      int angle,
                      IplImage *srcImg,
                      IplImage *binImg,
-                     HSV *hsv
+                     HSV_HL *hsv
                    );
 
 //! Finds a pipe object from a camera.
@@ -120,7 +116,7 @@ int vision_find_pipe( int *pipex,
                       double *bearing,
                       IplImage *srcImg,
                       IplImage *binImg,
-                      HSV *hsv
+                      HSV_HL *hsv
                     );
 
 //! Finds the centroid of the pixels in an image.
@@ -138,7 +134,7 @@ int vision_find_fence( int *pipex,
                       int *y_max,
                       IplImage *srcImg,
                       IplImage *binImg,
-					  HSV *hsv
+					  HSV_HL *hsv
                     );
 					
 //! Finds the centroid of the gate using the smae logic of find dot
@@ -152,7 +148,7 @@ int vision_find_gate( int *dotx,
                       int angle,
                       IplImage *srcImg,
                       IplImage *binImg,
-					  HSV *hsv
+					  HSV_HL *hsv
                    );
 
 //! Finds the centroid of the suitcase structure in an image.

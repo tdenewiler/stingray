@@ -10,6 +10,8 @@
 #ifndef _MICROSTRAIN_H_
 #define _MICROSTRAIN_H_
 
+#include "msgtypes.h"
+
 /******************************
  *
  * #defines
@@ -128,7 +130,7 @@
 #define _MSTRAIN_DATA_
 
 /*! Struct to store data from the IMU. */
-typedef struct _MSTRAIN_DATA {
+/*typedef struct _MSTRAIN_DATA {
 	int   serial_number;      //!< Serial number
 	float temp;               //!< Temperature inside the IMU housing
 	float ticks;              //!< Timer tick interval
@@ -146,7 +148,7 @@ typedef struct _MSTRAIN_DATA {
 	short int accel_gain;
 	short int mag_gain;
 	short int bias_gain;
-} MSTRAIN_DATA;
+} MSTRAIN_DATA;*/
 
 #endif /* _MSTRAIN_DATA_ */
 
