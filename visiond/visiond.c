@@ -90,8 +90,11 @@ void visiond_exit( )
     }
 
     cvReleaseImage( &bin_img );
-    closedir( dirp );
-
+    
+    if ( dirp ) {
+    	closedir( dirp );
+	}
+	
     printf("<OK>\n\n");
 } /* end visiond_exit() */
 
@@ -194,8 +197,6 @@ int main( int argc, char *argv[] )
 
 	/* Variables for opening, reading and using directories and files. */
 	struct dirent *dfile = NULL;
-	//const char *dirname = "images/buoy/";
-	const char *dirname = "../../../pics/practice_side_wed_1pm/images/buoy/";
 	int diropen = FALSE;
 	char filename[STRING_SIZE * 2];
 
@@ -258,17 +259,6 @@ int main( int argc, char *argv[] )
     hsv_fence.vL = cf.fence_vL;
     hsv_fence.vH = cf.fence_vH;
 
-	/* Open directory. */
-	if( cf.open_rate ) {
-		if( (dirp = opendir(dirname)) ) {
-			printf("MAIN: Image directory opened OK.\n");
-			diropen = TRUE;
-		}
-		else {
-			printf("MAIN: WARNING!!! Image directory not opened.\n");
-		}
-	}
-
     /* Set up server. */
     if( cf.enable_server ) {
         server_fd = net_server_setup( cf.server_port );
@@ -280,76 +270,91 @@ int main( int argc, char *argv[] )
 		}
     }
 
-    /* Need to have a config about what cameras if any to open. */
-    if( cf.op_mode == 99 ) {
-    	/* Special case for bad camera. */
-    	printf("MAIN: Skipping camera opening because op mode = 99 in "
-			   "configuration file.\n");
-	}
-	else {
-		if( diropen ) {
-			/* Load an image from disk. */
+    /* Decide whether to use source images or cameras. */
+	if ( cf.open_image_rate && strcmp( cf.open_image_dir, "" ) != 0 ) {
+		/* Load an images from disk. */
+		printf( "MAIN: Using source images from directory for vision...\n" );
+		
+		/* Open directory. */
+		if ( (dirp = opendir( cf.open_image_dir ) ) ) {
+			
+			diropen = TRUE;
+			
 			dfile = readdir( dirp );
-			if( dfile == NULL ) {
-				closedir( dirp );
-				dirp = opendir( dirname );
+			if ( dfile == NULL ) {
+				printf( "MAIN: WARNING!!! Image directory not valid.\n" );
 			}
 			else {
-				/* Check that we don't try to open directories. */
-				if( strncmp( dfile->d_name, ".", 1 ) == 0 ) {
+				/* Find the next file by ignoring directories. */
+				while ( dfile != NULL && dfile->d_type == DT_DIR ) {
 					dfile = readdir( dirp );
 				}
-				if( strncmp( dfile->d_name, "..", 2 ) == 0 ) {
-					dfile = readdir( dirp );
+				
+				/* Setup the images. */
+				if( dfile != NULL ) {
+					/* This is a file so use it. */
+					
+					/* Load image here. */
+					strncpy( filename, cf.open_image_dir, STRING_SIZE );
+					strncat( filename, dfile->d_name, STRING_SIZE );
+				
+					img = cvLoadImage( filename );
+					
+					bin_img = cvCreateImage( cvGetSize(img), IPL_DEPTH_8U, 1 );
+					img_eq  = cvCreateImage( cvGetSize(img), IPL_DEPTH_8U, 3 );
+					fence_center = img->width / 2;
+					
+					printf( "MAIN: Image source directory OK.\n" );
 				}
-				/* Load image here and set up other images. */
-				strncpy( filename, dirname, STRING_SIZE );
-				printf("MAIN: Loading dir %s\n", filename);
-				//strncat( filename, dfile->d_name, STRING_SIZE );
-				//strncat( filename, "20090730_135401.54264.jpg", STRING_SIZE );
-				strncat( filename, "20090730_135402.489205.jpg", STRING_SIZE );
-
-				printf("MAIN: Loading file %s\n", filename);
-				img = cvLoadImage( filename );
-				bin_img = cvCreateImage( cvGetSize(img), IPL_DEPTH_8U, 1 );
-				img_eq  = cvCreateImage( cvGetSize(img), IPL_DEPTH_8U, 3 );
-				fence_center = img->width / 2;
-				if( img ) {
-					printf("MAIN: img created OK.\n");
-				}
-				if( bin_img ) {
-					printf("MAIN: bin_img created OK.\n");
+				else {
+					/* No images so exit the module. */
+					printf( "MAIN: WARNING!!! No image files in directory.\n" );
+					exit( 0 );
 				}
 			}
 		}
 		else {
-			/* Open front camera. */
-			f_cam = cvCaptureFromCAM( camera );
-			if( !f_cam ) {
-				cvReleaseCapture( &f_cam );
-				printf("MAIN: WARNING!!! Could not open f_cam.\n");
-			}
-			else {
-				img = cvQueryFrame( f_cam );
-				bin_img = cvCreateImage( cvGetSize(img), IPL_DEPTH_8U, 1 );
-				img_eq  = cvCreateImage( cvGetSize(img), IPL_DEPTH_8U, 3 );
-				fence_center = img->width / 2;
-				printf("MAIN: Front camera opened OK.\n");
-			}
+			/* Directory was not opened so exit the module. */
+			printf( "MAIN: WARNING!!! Image directory '%s' not opened.\n", cf.open_image_dir );
+			exit( 0 );
+		}
+		
+	}
+	else if( cf.op_mode == 99 ) {
+    	/* Special case for bad camera. */
+    	printf( "MAIN: Skipping camera opening because op mode = 99 in "
+		   	"configuration file.\n" );
+	}
+	else {
+		/* Using actual cameras. */
+    	printf( "MAIN: Using actual cameras for vision...\n" );
+		   	
+		/* Open front camera. */
+		f_cam = cvCaptureFromCAM( camera );
+		if( !f_cam ) {
+			cvReleaseCapture( &f_cam );
+			printf( "MAIN: WARNING!!! Could not open f_cam.\n" );
+		}
+		else {
+			img = cvQueryFrame( f_cam );
+			bin_img = cvCreateImage( cvGetSize(img), IPL_DEPTH_8U, 1 );
+			img_eq  = cvCreateImage( cvGetSize(img), IPL_DEPTH_8U, 3 );
+			fence_center = img->width / 2;
+			printf( "MAIN: Front camera opened OK.\n" );
+		}
 
-			/* Open bottom camera. */
-			camera = 1;
-			b_cam = cvCaptureFromCAM( camera );
-			if( !b_cam ) {
-				cvReleaseCapture( &b_cam );
-				printf("MAIN: WARNING!!! Could not open b_cam.\n");
-			}
-			else {
-				img = cvQueryFrame( b_cam );
-				bin_img = cvCreateImage( cvGetSize(img), IPL_DEPTH_8U, 1 );
-				img_eq  = cvCreateImage( cvGetSize(img), IPL_DEPTH_8U, 3 );
-				printf("MAIN: Bottom camera opened OK.\n");
-			}
+		/* Open bottom camera. */
+		camera = 1;
+		b_cam = cvCaptureFromCAM( camera );
+		if( !b_cam ) {
+			cvReleaseCapture( &b_cam );
+			printf( "MAIN: WARNING!!! Could not open b_cam.\n" );
+		}
+		else {
+			img = cvQueryFrame( b_cam );
+			bin_img = cvCreateImage( cvGetSize(img), IPL_DEPTH_8U, 1 );
+			img_eq  = cvCreateImage( cvGetSize(img), IPL_DEPTH_8U, 3 );
+			printf( "MAIN: Bottom camera opened OK.\n" );
 		}
 	}
 
@@ -358,7 +363,8 @@ int main( int argc, char *argv[] )
 		cvNamedWindow( win, CV_WINDOW_AUTOSIZE );
 		cvNamedWindow( binwin, CV_WINDOW_AUTOSIZE );
 	}
-    printf("MAIN: Vision server running now.\n");
+	
+    printf( "MAIN: Vision server running now.\n" );
 
     /* Main loop. */
     int loop_counter = 0;
@@ -369,7 +375,6 @@ int main( int argc, char *argv[] )
 		else {
 			loop_counter++;
 		}
-
 		/* Look for a file. Check for NULL or directory. */
 		if( diropen ) {
 			/* Check timer. */
@@ -378,38 +383,40 @@ int main( int argc, char *argv[] )
 			time2s =  open_start.tv_sec;
 			time2ms = open_start.tv_usec;
 			dt = util_calc_dt( &time1s, &time1ms, &time2s, &time2ms ) / 1000000;
-
-			if( dt > cf.open_rate ) {
-				dfile = readdir( dirp );
-				if( dfile == NULL ) {
-					/* Start over at the beginning of the directory. */
-					closedir( dirp );
-					dirp = opendir( dirname );
+			
+			if( dt > cf.open_image_rate ) {
+				/* Time to pull a new image. */
+				
+				/* Find the next file by ignoring directories. */
+				while ( dfile != NULL && dfile->d_type == DT_DIR ) {
+					dfile = readdir( dirp );
+				}
+				
+				if( dfile != NULL ) {
+					/* This is a file so use it. */
+					
+					/* Load image here. */
+					strncpy( filename, cf.open_image_dir, STRING_SIZE );
+					strncat( filename, dfile->d_name, STRING_SIZE );
+				
+					img = cvLoadImage( filename );
+					
+					/* Get the next file pointer. */
+					dfile = readdir( dirp );
 				}
 				else {
-					if( strncmp( dfile->d_name, ".", 1 ) == 0 ) {
-						dfile = readdir( dirp );
-					}
-					if( strncmp( dfile->d_name, "..", 2 ) == 0 ) {
-						dfile = readdir( dirp );
-					}
-					if( dfile == NULL ) {
-						/* Start over at the beginning of the directory. */
-						closedir( dirp );
-						dirp = opendir( dirname );
-						dfile = readdir( dirp );
-					}
+					/* Finished the directory. */
+					printf( "MAIN: Finished loading from source directory.\n" );
+					exit( 0 );
 				}
+
 				/* Reset the open image timer. */
 				gettimeofday( &open_start, NULL );
 			}
-			/* Load image here. */
-			strncpy( filename, dirname, STRING_SIZE );
-			//strncat( filename, dfile->d_name, STRING_SIZE );
-			strncat( filename, "20090730_135402.489205.jpg", STRING_SIZE );
-
-			img = cvLoadImage( filename );
+			
 		}
+		/* Need a way to force task from file. */
+		task = TASK_BUOY;
 
     	/* Do vision processing based on task */
     	if( task == TASK_NONE ) {
@@ -463,7 +470,7 @@ int main( int argc, char *argv[] )
 			}
 		} /* end TASK_GATE */
 
-        else if( task == TASK_BUOY && (f_cam || diropen) ) {
+        else if( task == TASK_BUOY && (f_cam || (diropen && img != NULL) ) ) {
 			/* Set to not detected to start and reset if we get a hit. */
 			msg.vision.data.status = TASK_NOT_DETECTED;
 
@@ -477,6 +484,7 @@ int main( int argc, char *argv[] )
 			/* Look for the buoy. */
 			status = vision_find_dot( &dotx, &doty, cf.vision_angle, img,
 				bin_img, &hsv_buoy );
+		
 			if( status == 1 || status == 2 ) {
 				/* We have detected the buoy. */
 				//printf("MAIN: Bouy Status = %d\n", status);
@@ -810,6 +818,10 @@ int main( int argc, char *argv[] )
 		/* Show the image in a window. */
 		if( cf.vision_window ) {
 			vision_mode = msg.vision.data.mode;
+		
+			/* Need to have a way to force from file. */
+			vision_mode = VISIOND_FCOLOR;
+		
 			/* OpenCV needs a little pause here. */
 			if( cvWaitKey( 5 ) >= 0 );
 			/* Determine which image to show in which window. */
@@ -901,7 +913,7 @@ int main( int argc, char *argv[] )
 		}
 
 		/* Check to see if we should load an image from disk for simulation. */
-		if( cf.open_rate ) {
+		if( cf.open_image_rate ) {
 		}
 
         /* Check state of save frames and video messages. */

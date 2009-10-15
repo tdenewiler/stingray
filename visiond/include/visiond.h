@@ -80,5 +80,4 @@ void visiond_exit( );
 //! \return Always returns 0.
 int main( int argc, char *argv[] );
 
-
 #endif /* _VISIOND_H_ */
