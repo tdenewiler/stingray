@@ -173,7 +173,9 @@ typedef struct _CONF_VARS {
 	int			dock_time;
 	int			buoy_blind_time;
 	int			save_image_rate;
-	int			open_rate;
+	char		save_image_dir[STRING_SIZE];
+	int			open_image_rate;
+	char		open_image_dir[STRING_SIZE];
 	float		task_init_yaw;
 } CONF_VARS;
 

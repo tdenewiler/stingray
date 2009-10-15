@@ -83,11 +83,19 @@ void parse_line( CONF_VARS *config )
 			if( strncmp( tokens[2], "rate", STRING_SIZE ) == 0 ) {
 				sscanf( tokens[3], "%d", &config->save_image_rate );
 			}
+			else if ( strncmp( tokens[2], "dir", STRING_SIZE ) == 0 ) {
+				strncpy( config->save_image_dir, tokens[3], STRING_SIZE );
+			}
 		}
 	}
 	if( strncmp( tokens[0], "open", STRING_SIZE ) == 0 ) {
-		if( strncmp( tokens[1], "rate", STRING_SIZE ) == 0 ) {
-			sscanf( tokens[2], "%d", &config->open_rate );
+		if ( strncmp( tokens[1], "image", STRING_SIZE ) == 0 ) {
+			if ( strncmp( tokens[2], "rate", STRING_SIZE ) == 0 ) {
+				sscanf( tokens[3], "%d", &config->open_image_rate );
+			}
+			else if ( strncmp( tokens[2], "dir", STRING_SIZE ) == 0 ) {
+				strcpy( config->open_image_dir, tokens[3] );
+			}
 		}
 	}
 	/* end vision parameters */
@@ -933,7 +941,9 @@ void parse_default_config( CONF_VARS *config )
 	config->vision_window = FALSE;
 	config->vision_angle = 0;
 	config->save_image_rate = 0;
-	config->open_rate = 0;
+	strncpy( config->save_image_dir, "", STRING_SIZE );
+	config->open_image_rate = 0;
+	strncpy( config->open_image_dir, "", STRING_SIZE );
 
     /* other */
     config->debug_level = 5;
@@ -1074,7 +1084,9 @@ void parse_print_config( CONF_VARS *config )
 	printf("PARSE_PRINT_CONFIG: dock_time = %d\n", config->dock_time);
 	printf("PARSE_PRINT_CONFIG: buoy_blind_time = %d\n", config->buoy_blind_time);
 	printf("PARSE_PRINT_CONFIG: save_image_rate = %d\n", config->save_image_rate);
-	printf("PARSE_PRINT_CONFIG: open_rate = %d\n", config->open_rate);
+	printf("PARSE_PRINT_CONFIG: save_image_dir = %s\n", config->save_image_dir);
+	printf("PARSE_PRINT_CONFIG: open_image_rate = %d\n", config->open_image_rate);
+	printf("PARSE_PRINT_CONFIG: open_image_dir = %s\n", config->open_image_dir);	
 	printf("PARSE_PRINT_CONFIG: kp_buoy = %lf\n", config->kp_buoy);
 	printf("PARSE_PRINT_CONFIG: ki_buoy = %lf\n", config->ki_buoy);
 	printf("PARSE_PRINT_CONFIG: kd_buoy = %lf\n", config->kd_buoy);
