@@ -6,7 +6,6 @@
  *
  *****************************************************************************/
 
-
 #include <stdio.h>
 #include <stdlib.h>
 #include <signal.h>
@@ -19,7 +18,6 @@
 #include <cxcore.h>
 #include <highgui.h>
 
-#include "visiond.h"
 #include "vision.h"
 #include "network.h"
 #include "parser.h"
@@ -28,6 +26,7 @@
 #include "microstrain.h"
 #include "labjack.h"
 #include "task.h"
+#include "visiond.h"
 
 
 /* Global file descriptors. Only global so that vision_exit() can close them. */
@@ -130,6 +129,8 @@ int main( int argc, char *argv[] )
     char recv_buf[MAX_MSG_SIZE];
     CONF_VARS cf;
     MSG_DATA msg;
+    
+    
     int dotx = -1;
     int doty = -1;
     int xrot = -1;
@@ -153,9 +154,6 @@ int main( int argc, char *argv[] )
     char write_time[80] = {0};
 	int vision_mode = VISIOND_NONE;
 	int task = TASK_NONE;
-	HSV hsv_buoy;
-	HSV hsv_pipe;
-	HSV hsv_fence;
 	int bouyTouchCount = 0;
 	double angleFrontCam = VISIOND_FRONT_CAM_ANGLE_OFFSET * M_PI /  180;
 
@@ -200,6 +198,8 @@ int main( int argc, char *argv[] )
 	int diropen = FALSE;
 	char filename[STRING_SIZE * 2];
 
+
+
 	/* Initialize timers. */
 	gettimeofday( &fps_time, NULL );
 	gettimeofday( &fps_start, NULL );
@@ -239,26 +239,6 @@ int main( int argc, char *argv[] )
     msg.vsetting.data.fence_hsv.vL = cf.fence_vL;
     msg.vsetting.data.fence_hsv.vH = cf.fence_vH;
 
-	/* Initialize HSV structs to configuration values. */
-    hsv_pipe.hL = cf.pipe_hL;
-    hsv_pipe.hH = cf.pipe_hH;
-    hsv_pipe.sL = cf.pipe_sL;
-    hsv_pipe.sH = cf.pipe_sH;
-    hsv_pipe.vL = cf.pipe_vL;
-    hsv_pipe.vH = cf.pipe_vH;
-    hsv_buoy.hL = cf.buoy_hL;
-    hsv_buoy.hH = cf.buoy_hH;
-    hsv_buoy.sL = cf.buoy_sL;
-    hsv_buoy.sH = cf.buoy_sH;
-    hsv_buoy.vL = cf.buoy_vL;
-    hsv_buoy.vH = cf.buoy_vH;
-    hsv_fence.hL = cf.fence_hL;
-    hsv_fence.hH = cf.fence_hH;
-    hsv_fence.sL = cf.fence_sL;
-    hsv_fence.sH = cf.fence_sH;
-    hsv_fence.vL = cf.fence_vL;
-    hsv_fence.vH = cf.fence_vH;
-
     /* Set up server. */
     if( cf.enable_server ) {
         server_fd = net_server_setup( cf.server_port );
@@ -272,53 +252,17 @@ int main( int argc, char *argv[] )
 
     /* Decide whether to use source images or cameras. */
 	if ( cf.open_image_rate && strcmp( cf.open_image_dir, "" ) != 0 ) {
-		/* Load an images from disk. */
-		printf( "MAIN: Using source images from directory for vision...\n" );
 		
-		/* Open directory. */
-		if ( (dirp = opendir( cf.open_image_dir ) ) ) {
-			
-			diropen = TRUE;
-			
-			dfile = readdir( dirp );
-			if ( dfile == NULL ) {
-				printf( "MAIN: WARNING!!! Image directory not valid.\n" );
-			}
-			else {
-				/* Find the next file by ignoring directories. */
-				while ( dfile != NULL && dfile->d_type == DT_DIR ) {
-					dfile = readdir( dirp );
-				}
-				
-				/* Setup the images. */
-				if( dfile != NULL ) {
-					/* This is a file so use it. */
-					
-					/* Load image here. */
-					strncpy( filename, cf.open_image_dir, STRING_SIZE );
-					strncat( filename, dfile->d_name, STRING_SIZE );
-				
-					img = cvLoadImage( filename );
-					
-					bin_img = cvCreateImage( cvGetSize(img), IPL_DEPTH_8U, 1 );
-					img_eq  = cvCreateImage( cvGetSize(img), IPL_DEPTH_8U, 3 );
-					fence_center = img->width / 2;
-					
-					printf( "MAIN: Image source directory OK.\n" );
-				}
-				else {
-					/* No images so exit the module. */
-					printf( "MAIN: WARNING!!! No image files in directory.\n" );
-					exit( 0 );
-				}
-			}
+		if ( ( diropen = open_image_init( cf.open_image_dir, filename ) ) ) {
+    		img = cvLoadImage( filename );
+    		bin_img = cvCreateImage( cvGetSize(img), IPL_DEPTH_8U, 1 );
+			img_eq  = cvCreateImage( cvGetSize(img), IPL_DEPTH_8U, 3 );
+			fence_center = img->width / 2;
+			printf( "MAIN: Load from file as camera OK.\n" );
 		}
 		else {
-			/* Directory was not opened so exit the module. */
-			printf( "MAIN: WARNING!!! Image directory '%s' not opened.\n", cf.open_image_dir );
 			exit( 0 );
 		}
-		
 	}
 	else if( cf.op_mode == 99 ) {
     	/* Special case for bad camera. */
@@ -375,6 +319,9 @@ int main( int argc, char *argv[] )
 		else {
 			loop_counter++;
 		}
+		
+		
+		
 		/* Look for a file. Check for NULL or directory. */
 		if( diropen ) {
 			/* Check timer. */
@@ -386,6 +333,9 @@ int main( int argc, char *argv[] )
 			
 			if( dt > cf.open_image_rate ) {
 				/* Time to pull a new image. */
+				
+				/* Get the next file pointer. */
+				dfile = readdir( dirp );
 				
 				/* Find the next file by ignoring directories. */
 				while ( dfile != NULL && dfile->d_type == DT_DIR ) {
@@ -400,9 +350,6 @@ int main( int argc, char *argv[] )
 					strncat( filename, dfile->d_name, STRING_SIZE );
 				
 					img = cvLoadImage( filename );
-					
-					/* Get the next file pointer. */
-					dfile = readdir( dirp );
 				}
 				else {
 					/* Finished the directory. */
@@ -440,7 +387,7 @@ int main( int argc, char *argv[] )
 
 			/* Look for the gate . */
 			status = vision_find_gate( &dotx, &doty, cf.vision_angle, img,
-				bin_img, &hsv_buoy );
+				bin_img, &msg.vsetting.data.buoy_hsv );
 			if( status == 1 || status == 2 ) {
 				/* We have detected the gate. */
 				//printf("MAIN: Gate Status = %d\n", status);
@@ -483,7 +430,7 @@ int main( int argc, char *argv[] )
 
 			/* Look for the buoy. */
 			status = vision_find_dot( &dotx, &doty, cf.vision_angle, img,
-				bin_img, &hsv_buoy );
+				bin_img, &msg.vsetting.data.buoy_hsv );
 		
 			if( status == 1 || status == 2 ) {
 				/* We have detected the buoy. */
@@ -526,7 +473,7 @@ int main( int argc, char *argv[] )
 
 			/* Look for the pipe. */
 			status = vision_find_pipe( &pipex, &pipey, &bearing, img, bin_img,
-				&hsv_pipe );
+				&msg.vsetting.data.pipe_hsv );
 
 			/* If we get a positive status message, render the box and populate
 			 * the network message. */
@@ -629,7 +576,7 @@ int main( int argc, char *argv[] )
 
 			/* Look for the fence. */
             status = vision_find_fence( &fence_center, &y_max, img,	bin_img,
-				&hsv_fence );
+				&msg.vsetting.data.fence_hsv );
             if( status == 1 ) {
             	/* Set the detection status of vision. */
 				msg.vision.data.status = TASK_FENCE_DETECTED;
@@ -787,24 +734,6 @@ int main( int argc, char *argv[] )
 
 				/* Update local variables using network variables. */
                 task = msg.task.data.task;
-				hsv_pipe.hL = msg.vsetting.data.pipe_hsv.hL;
-				hsv_pipe.hH = msg.vsetting.data.pipe_hsv.hH;
-				hsv_pipe.sL = msg.vsetting.data.pipe_hsv.sL;
-				hsv_pipe.sH = msg.vsetting.data.pipe_hsv.sH;
-				hsv_pipe.vL = msg.vsetting.data.pipe_hsv.vL;
-				hsv_pipe.vH = msg.vsetting.data.pipe_hsv.vH;
-				hsv_buoy.hL = msg.vsetting.data.buoy_hsv.hL;
-				hsv_buoy.hH = msg.vsetting.data.buoy_hsv.hH;
-				hsv_buoy.sL = msg.vsetting.data.buoy_hsv.sL;
-				hsv_buoy.sH = msg.vsetting.data.buoy_hsv.sH;
-				hsv_buoy.vL = msg.vsetting.data.buoy_hsv.vL;
-				hsv_buoy.vH = msg.vsetting.data.buoy_hsv.vH;
-				hsv_fence.hL = msg.vsetting.data.fence_hsv.hL;
-				hsv_fence.hH = msg.vsetting.data.fence_hsv.hH;
-				hsv_fence.sL = msg.vsetting.data.fence_hsv.sL;
-				hsv_fence.sH = msg.vsetting.data.fence_hsv.sH;
-				hsv_fence.vL = msg.vsetting.data.fence_hsv.vL;
-				hsv_fence.vH = msg.vsetting.data.fence_hsv.vH;
 
                 /* Force vision to look for the pipe no matter which pipe
 			     * subtask we are currently searching for. */
@@ -980,3 +909,66 @@ int main( int argc, char *argv[] )
 
     exit( 0 );
 } /* end main() */
+
+
+/******************************************************************************
+ *
+ * Title:       int open_image_init( char *dir, char *filename )
+ *
+ * Description: Tests if we should and can load images from file.
+ *
+ * Input:      	dir: The directory from which to load images.
+ * 				filename: The resulting name of the first file.
+ *
+ * Output:      None.
+ *
+ *****************************************************************************/
+int open_image_init( char *dir, char *filename )
+{
+	struct dirent *dfile = NULL;
+	
+	/* Load an images from disk. */
+	printf( "OPEN_IMAGE_INIT: Using source images from directory for vision...\n" );
+	
+	/* Open directory. */
+	if ( (dirp = opendir( dir ) ) ) {
+		
+		dfile = readdir( dirp );
+		if ( dfile == NULL ) {
+			printf( "OPEN_IMAGE_INIT: WARNING!!! Image directory not valid.\n" );
+			return FALSE;
+		}
+		else {
+			/* Find the next file by ignoring directories. */
+			while ( dfile != NULL && dfile->d_type == DT_DIR ) {
+				dfile = readdir( dirp );
+			}
+			
+			/* Setup the images. */
+			if( dfile != NULL ) {
+				/* This is a file so use it. */
+				
+				/* Load image here. */
+				strncpy( filename, dir, STRING_SIZE );
+				strncat( filename, dfile->d_name, STRING_SIZE );
+			
+				//img = cvLoadImage( filename );
+				
+				printf( "OPEN_IMAGE_INIT: Image source directory OK.\n" );
+				return TRUE;
+			}
+			else {
+				/* No images so exit the module. */
+				printf( "OPEN_IMAGE_INIT: WARNING!!! No image files in directory.\n" );
+				return FALSE;
+			}
+		}
+	}
+	else {
+		/* Directory was not opened so exit the module. */
+		printf( "OPEN_IMAGE_INIT: WARNING!!! Image directory '%s' not opened.\n", dir );
+		return FALSE;
+	}
+	
+	return TRUE;	
+} /* end open_image_init() */

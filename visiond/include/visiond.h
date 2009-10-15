@@ -6,6 +6,7 @@
 #ifndef _VISIOND_H_
 #define _VISIOND_H_
 
+
 /******************************
 **
 ** #defines
@@ -79,5 +80,11 @@ void visiond_exit( );
 //! \param argv Array of command line arguments.
 //! \return Always returns 0.
 int main( int argc, char *argv[] );
+
+//! Main function for the uuv program.
+//! \param argc Number of command line arguments.
+//! \param argv Array of command line arguments.
+//! \return Always returns 0.
+int open_image_init( char *dir, char *filename );
 
 #endif /* _VISIOND_H_ */

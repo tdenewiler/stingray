@@ -12,11 +12,12 @@
 #include <gtk/gtk.h>
 #include <unistd.h>
 
-#include "gui.h"
 #include "buttons.h"
 #include "network.h"
 #include "messages.h"
 #include "parser.h"
+#include "gui.h"
+
 
 
 /* Handlers for timers. */

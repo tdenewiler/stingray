@@ -7,6 +7,7 @@ INCLUDES	+= -I../../libs/parser/include
 INCLUDES	+= -I../../libs/microstrain/include
 INCLUDES	+= -I../../libs/labjack/include
 INCLUDES	+= -I../../libs/pololu/include
+INCLUDES	+= -I../../libs/vision/include
 
 # compiler and flags
 CC        	= g++
