@@ -124,22 +124,11 @@ int main( int argc, char *argv[] )
     sigaction( SIGINT, &sigint_action, NULL );
 
     /* Set up variables and initialize them. */
-    int status = -1;
     int recv_bytes = 0;
     char recv_buf[MAX_MSG_SIZE];
     CONF_VARS cf;
     MSG_DATA msg;
     
-    
-    int dotx = -1;
-    int doty = -1;
-    int xrot = -1;
-    int yrot = -1;
-    int fence_center = -1;
-	int y_max = -1;
-    int ii = 0;
-    int lineWidth = 75;
-    int camera = 0;
     int saving_fvideo = FALSE;
     int saving_bvideo = FALSE;
     IplImage *img = NULL;
@@ -153,30 +142,7 @@ int main( int argc, char *argv[] )
     struct tm ct;
     char write_time[80] = {0};
 	int vision_mode = VISIOND_NONE;
-	int task = TASK_NONE;
-	int bouyTouchCount = 0;
-	double angleFrontCam = VISIOND_FRONT_CAM_ANGLE_OFFSET * M_PI /  180;
 
-	/* Temporary variable to make it easier to switch between using HSV
-	 *  olding or boxes to try and find pipe. HSV = 1, Boxes = 2. */
-	int pipe_type = VISION_PIPE_HSV;
-	int pipex = -10000;
-	int pipey = -10000;
-	double bearing = -10000;
-
-	/* Variables to hold box centroid sequence and vertex sequence. */
-	CvMemStorage *storage1 = 0;
-	storage1 = cvCreateMemStorage(0);
-	CvSeq *boxes = cvCreateSeq( 0, sizeof(CvSeq), sizeof(CvPoint), storage1 );
-	CvSeqReader reader1;
-	CvMemStorage *storage2 = 0;
-	storage2 = cvCreateMemStorage(0);
-	CvSeq *squares = cvCreateSeq( 0, sizeof(CvSeq), sizeof(CvPoint), storage2 );
-	CvSeqReader reader2;
-	CvPoint box_pt;
-	CvPoint pt[4];
-	CvPoint *rect = pt;
-	int count = 4;
 
 	/* Timers. */
 	struct timeval fps_time = {0, 0};
@@ -215,6 +181,9 @@ int main( int argc, char *argv[] )
     memset( &msg, 0, sizeof(MSG_DATA) );
 	messages_init( &msg );
 
+	/* Initialize task to none. */
+	msg.task.data.task = TASK_NONE;
+
     /* Parse command line arguments. */
     parse_default_config( &cf );
     parse_cla( argc, argv, &cf, STINGRAY, (const char *)VISIOND_FILENAME );
@@ -238,6 +207,8 @@ int main( int argc, char *argv[] )
     msg.vsetting.data.fence_hsv.sH = cf.fence_sH;
     msg.vsetting.data.fence_hsv.vL = cf.fence_vL;
     msg.vsetting.data.fence_hsv.vH = cf.fence_vH;
+    
+    msg.vsetting.data.vision_angle = cf.vision_angle;
 
     /* Set up server. */
     if( cf.enable_server ) {
@@ -257,7 +228,6 @@ int main( int argc, char *argv[] )
     		img = cvLoadImage( filename );
     		bin_img = cvCreateImage( cvGetSize(img), IPL_DEPTH_8U, 1 );
 			img_eq  = cvCreateImage( cvGetSize(img), IPL_DEPTH_8U, 3 );
-			fence_center = img->width / 2;
 			printf( "MAIN: Load from file as camera OK.\n" );
 		}
 		else {
@@ -274,7 +244,7 @@ int main( int argc, char *argv[] )
     	printf( "MAIN: Using actual cameras for vision...\n" );
 		   	
 		/* Open front camera. */
-		f_cam = cvCaptureFromCAM( camera );
+		f_cam = cvCaptureFromCAM( 0 );
 		if( !f_cam ) {
 			cvReleaseCapture( &f_cam );
 			printf( "MAIN: WARNING!!! Could not open f_cam.\n" );
@@ -283,13 +253,11 @@ int main( int argc, char *argv[] )
 			img = cvQueryFrame( f_cam );
 			bin_img = cvCreateImage( cvGetSize(img), IPL_DEPTH_8U, 1 );
 			img_eq  = cvCreateImage( cvGetSize(img), IPL_DEPTH_8U, 3 );
-			fence_center = img->width / 2;
 			printf( "MAIN: Front camera opened OK.\n" );
 		}
 
 		/* Open bottom camera. */
-		camera = 1;
-		b_cam = cvCaptureFromCAM( camera );
+		b_cam = cvCaptureFromCAM( 1 );
 		if( !b_cam ) {
 			cvReleaseCapture( &b_cam );
 			printf( "MAIN: WARNING!!! Could not open b_cam.\n" );
@@ -311,20 +279,15 @@ int main( int argc, char *argv[] )
     printf( "MAIN: Vision server running now.\n" );
 
     /* Main loop. */
-    int loop_counter = 0;
     while( 1 ) {
-    	if( loop_counter == 1000 ) {
-    		loop_counter = 0;
-		}
-		else {
-			loop_counter++;
-		}
-		
+    	
 		/* Need a way to force task from file. */
-		task = TASK_BUOY;
+		if ( diropen ) {
+			msg.task.data.task = translate_task( cf.vision_task );
+		}
 
     	/* Do vision processing based on task */
-    	if( task == TASK_NONE ) {
+    	if( msg.task.data.task == TASK_NONE ) {
     		/* Do nothing and give cleared values. */
     		msg.vision.data.front_x = 0;
     		msg.vision.data.front_y = 0;
@@ -347,7 +310,9 @@ int main( int argc, char *argv[] )
 				dfile = readdir( dirp );
 				
 				/* Find the next file by ignoring directories. */
-				while ( dfile != NULL && dfile->d_type == DT_DIR ) {
+				while ( dfile != NULL && strstr( dfile->d_name, ".jpg" ) == NULL ) {
+ 
+					/* Iterate to next file. */
 					dfile = readdir( dirp );
 				}
 				
@@ -369,316 +334,23 @@ int main( int argc, char *argv[] )
 				/* Reset the open image timer. */
 				gettimeofday( &open_start, NULL );
 			}
-			else if ( f_cam && ( task == TASK_GATE || task == TASK_BUOY || task == TASK_FENCE ) ) {
+			else if ( f_cam && ( msg.task.data.task == TASK_GATE || 
+								msg.task.data.task == TASK_BUOY || 
+								msg.task.data.task == TASK_FENCE ) ) {
 				img = cvQueryFrame( f_cam );
 				cvFlip( img, img );
 			}
-			else if ( b_cam && ( task == TASK_PIPE || task == TASK_BOXES || task == TASK_SUITCASE ) ) {
+			else if ( b_cam && ( msg.task.data.task == TASK_PIPE || 
+								msg.task.data.task == TASK_BOXES || 
+								msg.task.data.task == TASK_SUITCASE ) ) {
 				img = cvQueryFrame( b_cam );
 			}
 			
 			/* Only process the image if there is a valid one. */
-			if ( img != NULL ) {	
-				if ( task == TASK_GATE ) {
-					/* Set to not detected to start and reset if we get a hit. */
-					msg.vision.data.status = TASK_NOT_DETECTED;
-
-					/* Look for the gate . */
-					status = vision_find_gate( &dotx, &doty, cf.vision_angle, img,
-						bin_img, &msg.vsetting.data.buoy_hsv );
-					if( status == 1 || status == 2 ) {
-						/* We have detected the gate. */
-						//printf("MAIN: Gate Status = %d\n", status);
-						msg.vision.data.status = TASK_GATE_DETECTED;
-
-						/* The subtractions are opposite of each other on purpose. This
-						 * is so that they match the way the depth sensor and yaw sensor
-						 * work. */
-						msg.vision.data.front_x = dotx - (img->width / 2);
-						msg.vision.data.front_y = (img->height / 2) - doty;
-
-						xrot =  msg.vision.data.front_x * cos( angleFrontCam ) +
-								msg.vision.data.front_y * sin( angleFrontCam );
-						yrot = -msg.vision.data.front_x * sin( angleFrontCam ) +
-								msg.vision.data.front_y * cos( angleFrontCam );
-
-						msg.vision.data.front_x = xrot;
-						msg.vision.data.front_y = yrot;
-
-						/* Draw a circle at the centroid location. */
-						cvCircle( img, cvPoint(dotx, doty),
-							10, cvScalar(0, 255, 0), 5, 8 );
-
-						if( status == 2 ) {
-							msg.vision.data.status = TASK_GATE_CLEARED;
-						}
-					}
-				} /* end TASK_GATE */
-
-				else if ( task == TASK_BUOY ) {
-					/* Set to not detected to start and reset if we get a hit. */
-					msg.vision.data.status = TASK_NOT_DETECTED;
-
-					/* Look for the buoy. */
-					status = vision_find_dot( &dotx, &doty, cf.vision_angle, img,
-						bin_img, &msg.vsetting.data.buoy_hsv );
+			if ( img != NULL ) {
 				
-					if( status == 1 || status == 2 ) {
-						/* We have detected the buoy. */
-						//printf("MAIN: Bouy Status = %d\n", status);
-						msg.vision.data.status = TASK_BUOY_DETECTED;
-
-						/* The subtractions are opposite of each other on purpose. This
-						 * is so that they match the way the depth sensor and yaw sensor
-						 * work. */
-						msg.vision.data.front_x = dotx - (img->width / 2);
-						msg.vision.data.front_y = (img->height / 2) - doty;
-
-						xrot =  msg.vision.data.front_x * cos( angleFrontCam ) +
-								msg.vision.data.front_y * sin( angleFrontCam );
-						yrot = -msg.vision.data.front_x * sin( angleFrontCam ) +
-								msg.vision.data.front_y * cos( angleFrontCam );
-
-						msg.vision.data.front_x = xrot;
-						msg.vision.data.front_y = yrot;
-
-						/* Draw a circle at the centroid location. */
-						cvCircle( img, cvPoint(dotx, doty),
-							10, cvScalar(0, 255, 0), 5, 8 );
-
-						if( status == 2 ) {
-							msg.vision.data.status = TASK_BUOY_TOUCHED;
-						}
-					}
-				} /* end TASK_BUOY */
-
-				else if ( task == TASK_PIPE && pipe_type == VISION_PIPE_HSV ) {
-					/* Set to not detected to start and reset if we get a hit. */
-					msg.vision.data.status = TASK_NOT_DETECTED;
-
-					/* Look for the pipe. */
-					status = vision_find_pipe( &pipex, &pipey, &bearing, img, bin_img,
-						&msg.vsetting.data.pipe_hsv );
-
-					/* If we get a positive status message, render the box and populate
-					 * the network message. */
-					if( status == 1 ) {
-						/* Set the detection status of vision */
-						//printf("MAIN Pipe Status = %d\n", status);
-						msg.vision.data.status = TASK_PIPE_DETECTED;
-
-						msg.vision.data.bearing = bearing;
-						msg.vision.data.bottom_x = pipex - img->width / 2;
-						msg.vision.data.bottom_y = pipey - img->height / 2;
-
-						/* Draw a circle at the centroid location. */
-						cvCircle( img, cvPoint(pipex, pipey),
-							10, cvScalar(255, 0, 0), 5, 8 );
-
-						/* Draw the bearing if it is there. */
-						if( bearing != 0 ) {
-							for( ii = 0; ii < 25; ii++ ) {
-								cvCircle( img,
-									cvPoint(img->width / 2 + ((int)(bearing * ii)),
-									img->width / 2 + ii), 2, cvScalar(255, 255, 0), 2 );
-							}
-						}
-						else {
-							for( ii = 0; ii < 25; ii++ ) {
-								cvCircle( img,
-									cvPoint(img->width / 2 + ((int)(bearing * ii)),
-									img->width / 2 + ii), 2, cvScalar(0, 0, 255), 2 );
-							}
-						}
-					}
-				} /* end TASK_PIPE -- hsv */
-
-				else if ( task == TASK_PIPE && pipe_type == VISION_PIPE_BOX ) {
-					/* Set to not detected to start and reset if we get a hit. */
-					msg.vision.data.status = TASK_NOT_DETECTED;
-
-					/* Look for the pipe. */
-					status = vision_find_boxes( img, boxes, squares, VISION_PIPE,
-						&msg.vision.data.bearing );
-
-					/* If we get a positive status message, render the box
-					 * and populate the network message. */
-					if( status > 0 ) {
-						/* Initialize the centroid sequence reader. */
-						cvStartReadSeq( boxes, &reader1, 0 );
-						/* Read four sequence elements at a time. */
-						for( ii = 0; ii < boxes->total; ii += 2 ) {
-							/* Read centroid x and y coordinates. */
-							CV_READ_SEQ_ELEM( box_pt, reader1 );
-							/* Draw the centroid as a circle. */
-							cvCircle( img, box_pt,
-								10, cvScalar(0, 0, 255), 5, 8 );
-						}
-						/* Initialize the vertex sequence reader. */
-						cvStartReadSeq( squares, &reader2, 0 );
-						for( ii = 0; ii < squares->total; ii += 4 ) {
-							/* Read vertex x and y coordinates. */
-							CV_READ_SEQ_ELEM( pt[0], reader2 );
-							CV_READ_SEQ_ELEM( pt[1], reader2 );
-							CV_READ_SEQ_ELEM( pt[2], reader2 );
-							CV_READ_SEQ_ELEM( pt[3], reader2 );
-							/* Draw the square as a closed polyline. */
-							cvPolyLine( img, &rect, &count, 1, 1, CV_RGB(0, 255, 0),
-								3, CV_AA, 0 );
-						}
-						/* Set target offsets in network message. */
-						if( boxes->total > 0 ) {
-							/* Set the detection status of vision */
-							msg.vision.data.status = TASK_PIPE_DETECTED;
-
-							msg.vision.data.bearing = 0; /* !!! TODO: Fix this value !!! */
-							msg.vision.data.bottom_x = box_pt.x - img->width / 2;
-							msg.vision.data.bottom_y = box_pt.y - img->height / 2;
-						}
-						/* Clear out the sequences so that next time we only draw newly
-						 * found squares and centroids. */
-						cvClearSeq( boxes );
-						cvClearSeq( squares );
-					}
-				} /* end TASK_PIPE -- boxes */
-
-				else if ( task == TASK_FENCE ) {
-					/* Set to not detected to start and reset if we get a hit. */
-					msg.vision.data.status = TASK_NOT_DETECTED;
-
-					/* Look for the fence. */
-					status = vision_find_fence( &fence_center, &y_max, img,	bin_img,
-						&msg.vsetting.data.fence_hsv );
-					if( status == 1 ) {
-						/* Set the detection status of vision. */
-						msg.vision.data.status = TASK_FENCE_DETECTED;
-
-						/* Draw a circle at the centroid. */
-						cvCircle( img, cvPoint(fence_center, y_max),
-							10, cvScalar(0, 0, 255), 5, 8 );
-
-						/* Draw a horizontal line indicating the lowest point of the
-						 * fence. */
-						y_max = vision_get_fence_bottom(bin_img);
-						for( ii = 0; ii < lineWidth; ii++ ) {
-							cvCircle( img, cvPoint(img->width / 2 + ii, y_max),
-								2, cvScalar(100, 255, 20), 2 );
-						}
-						/* Set target offsets in network message. The subtractions are
-						 * opposite of each other on purpose. This is so that they
-						 * match the way the depth sensor and yaw sensor work. */
-						msg.vision.data.front_x = fence_center - img->width / 2;
-						msg.vision.data.front_y = y_max - img->height / 4;
-					}
-				} /* end TASK_FENCE */
-
-				else if ( task == TASK_BOXES ) {
-					/* Set to not detected to start and reset if we get a hit. */
-					msg.vision.data.status = TASK_NOT_DETECTED;
-
-					/* Look for the boxes. */
-					status = vision_find_boxes( img, boxes, squares, VISION_BOX,
-						&msg.vision.data.bearing );
-
-					/* If we get a positive status message, render the box and populate
-					 * the network message. */
-					if( status > 0 ) {
-						/* Initialize the centroid sequence reader. */
-						cvStartReadSeq( boxes, &reader1, 0 );
-						/* Read two sequence elements at a time. */
-						for( ii = 0; ii < boxes->total; ii += 2 ) {
-							/* Read centroid x and y coordinates. */
-							CV_READ_SEQ_ELEM( box_pt, reader1 );
-							/* Draw the centroid as a circle. */
-							cvCircle( img, box_pt,
-								10, cvScalar(0, 0, 255), 5, 8 );
-						}
-						/* Initialize the vertex sequence reader. */
-						cvStartReadSeq( squares, &reader2, 0 );
-						/* Read four sequence elements at a time. */
-						for( ii = 0; ii < squares->total; ii += 4 ) {
-							/* Read vertex x and y coordinates. */
-							CV_READ_SEQ_ELEM( pt[0], reader2 );
-							CV_READ_SEQ_ELEM( pt[1], reader2 );
-							CV_READ_SEQ_ELEM( pt[2], reader2 );
-							CV_READ_SEQ_ELEM( pt[3], reader2 );
-							/* Draw the square as a closed polyline. */
-							cvPolyLine( img, &rect, &count, 1, 1, CV_RGB(0, 255, 0), 3, CV_AA, 0 );
-						}
-						/* Set target offsets in network message. */
-						if( boxes->total > 0 ) {
-							/* Set the detection status of vision */
-							msg.vision.data.status = TASK_BOXES_DETECTED;
-
-							/* Set the message variables to the center of the detected
-							 * box. */
-							msg.vision.data.box1_x = box_pt.x - img->width / 2;
-							msg.vision.data.box1_y = box_pt.y - img->height / 2;
-						}
-						/* Clear out the sequences so that next time we only draw newly
-						 * found squares and centroids. */
-						cvClearSeq( boxes );
-						cvClearSeq( squares );
-					}
-				} /* end TASK_BOXES */
-
-				else if ( task == TASK_SUITCASE ) {
-					/* Set to not detected to start and reset if we get a hit. */
-					msg.vision.data.status = TASK_NOT_DETECTED;
-
-					/* Look for the suitcase. */
-					status = vision_suitcase( img, boxes, squares );
-					if( status > 0 ) {
-
-						/* Initialize the centroid sequence reader. */
-						cvStartReadSeq( boxes, &reader1, 0 );
-						/* Read four sequence elements at a time. */
-						for( ii = 0; ii < boxes->total; ii += 2 ) {
-							/* Read centroid x and y coordinates. */
-							CV_READ_SEQ_ELEM( box_pt, reader1 );
-							/* Draw the centroid as a circle. */
-							cvCircle( img, box_pt,
-								10, cvScalar(0, 0, 255), 5, 8 );
-						}
-						/* Initialize the vertex sequence reader. */
-						cvStartReadSeq( squares, &reader2, 0 );
-						for( ii = 0; ii < squares->total; ii += 4 ) {
-							/* Read vertex x and y coordinates. */
-							CV_READ_SEQ_ELEM( pt[0], reader2 );
-							CV_READ_SEQ_ELEM( pt[1], reader2 );
-							CV_READ_SEQ_ELEM( pt[2], reader2 );
-							CV_READ_SEQ_ELEM( pt[3], reader2 );
-							/* Draw the square as a closed polyline. */
-							cvPolyLine( img, &rect, &count, 1, 1, CV_RGB(0, 255, 0), 3, CV_AA, 0 );
-						}
-						/* Set target offsets in network message. */
-						if( boxes->total > 0 ) {
-							/* Set the detection status of vision */
-							msg.vision.data.status = TASK_SUITCASE_DETECTED;
-
-							msg.vision.data.suitcase_x = box_pt.x - img->width / 2;
-							msg.vision.data.suitcase_y = box_pt.y - img->height / 2;
-						}
-						/* Clear out the sequences so that next time we only draw newly
-						 * found squares and centroids. */
-						cvClearSeq( boxes );
-						cvClearSeq( squares );
-					}
-				} /* end TASK_SUITCASE */
-
-				else {
-					/* Clear the detection status */
-					msg.vision.data.status = TASK_NOT_DETECTED;
-
-					/* Clear the bouy touch count */
-					bouyTouchCount = 0;
-
-					/* No mode or no valid cameras -- Simulate. */
-					if( loop_counter % 100 == 0 ) {
-						msg.vision.data.front_x = loop_counter;
-						msg.vision.data.front_y = loop_counter;
-					}
-				}
+				/* Process the image according to the task. */
+				process_image( img, bin_img, &msg );
 			}
 		}
 		
@@ -689,14 +361,11 @@ int main( int argc, char *argv[] )
                 recv_buf[recv_bytes] = '\0';
                 messages_decode( server_fd, recv_buf, &msg, recv_bytes );
 
-				/* Update local variables using network variables. */
-                task = msg.task.data.task;
-
                 /* Force vision to look for the pipe no matter which pipe
 			     * subtask we are currently searching for. */
-				if( task == TASK_PIPE1 || task == TASK_PIPE2 ||
-					task == TASK_PIPE3 || task == TASK_PIPE4 ) {
-					task = TASK_PIPE;
+				if( msg.task.data.task == TASK_PIPE1 || msg.task.data.task == TASK_PIPE2 ||
+					msg.task.data.task == TASK_PIPE3 || msg.task.data.task == TASK_PIPE4 ) {
+					msg.task.data.task = TASK_PIPE;
 				}
             }
         }
@@ -714,25 +383,25 @@ int main( int argc, char *argv[] )
 			switch( vision_mode ) {
 			case VISIOND_FCOLOR:
 				cvShowImage( win, img );
-				if( task != TASK_NONE ) {
+				if( msg.task.data.task != TASK_NONE ) {
 					cvShowImage( binwin, bin_img );
 				}
 				break;
 			case VISIOND_FBINARY:
 				cvShowImage( win, bin_img );
-				if( task != TASK_NONE ) {
+				if( msg.task.data.task != TASK_NONE ) {
 					cvShowImage( binwin, bin_img );
 				}
 				break;
 			case VISIOND_BCOLOR:
 				cvShowImage( win, img );
-				if( task != TASK_NONE ) {
+				if( msg.task.data.task != TASK_NONE ) {
 					cvShowImage( binwin, bin_img );
 				}
 				break;
 			case VISIOND_BBINARY:
 				cvShowImage( win, bin_img );
-				if( task != TASK_NONE ) {
+				if( msg.task.data.task != TASK_NONE ) {
 					cvShowImage( binwin, bin_img );
 				}
 				break;
@@ -796,10 +465,6 @@ int main( int argc, char *argv[] )
 				}
 				gettimeofday( &save_start, NULL );
 			}
-		}
-
-		/* Check to see if we should load an image from disk for simulation. */
-		if( cf.open_image_rate ) {
 		}
 
         /* Check state of save frames and video messages. */
@@ -897,7 +562,9 @@ int open_image_init( char *dir, char *filename )
 		}
 		else {
 			/* Find the next file by ignoring directories. */
-			while ( dfile != NULL && dfile->d_type == DT_DIR ) {
+			while ( dfile != NULL && strstr( dfile->d_name, ".jpg" ) == NULL ) {
+					
+				/* Iterate to next file. */
 				dfile = readdir( dirp );
 			}
 			
@@ -908,8 +575,6 @@ int open_image_init( char *dir, char *filename )
 				/* Load image here. */
 				strncpy( filename, dir, STRING_SIZE );
 				strncat( filename, dfile->d_name, STRING_SIZE );
-			
-				//img = cvLoadImage( filename );
 				
 				printf( "OPEN_IMAGE_INIT: Image source directory OK.\n" );
 				return TRUE;
@@ -929,3 +594,393 @@ int open_image_init( char *dir, char *filename )
 	
 	return TRUE;	
 } /* end open_image_init() */
+
+
+/******************************************************************************
+ *
+ * Title:       int translate_task( char *task_name )
+ *
+ * Description: Translates the task name to the task ID.
+ *
+ * Input:      	task_name: The name of the task.
+ *
+ * Output:      None.
+ *
+ *****************************************************************************/
+int translate_task( char *task_name )
+{
+	if ( strcmp( task_name, "buoy" ) == 0 ) {
+		return TASK_BUOY;
+	}
+	else if ( strcmp( task_name, "gate" ) == 0 ) {
+		return TASK_GATE;
+	}
+	else if ( strcmp( task_name, "fence" ) == 0 ) {
+		return TASK_FENCE;
+	}
+	else if ( strcmp( task_name, "pipe" ) == 0 ) {
+		return TASK_PIPE;
+	}
+	else if ( strcmp( task_name, "boxes" ) == 0 ) {
+		return TASK_BOXES;
+	}
+	else if ( strcmp( task_name, "suitcase" ) == 0 ) {
+		return TASK_SUITCASE;
+	}
+	
+	return TASK_NONE;
+}
+
+/******************************************************************************
+ *
+ * Title:       int process_imagee( IplImage *img, IplImage *bin_img, 
+ * 									MSG_DATA *msg )
+ *
+ * Description: Processes the given image based on the current task. Fills the
+ * 				given binary image file with the result of processing and
+ * 				draws a circle in the object spot on the given image.
+ *
+ * Input:      	img: The given image to be processed.
+ * 				bin_img: The place to put the resulting binary image.
+ * 				msg: The message structure that holds relevant information
+ * 					including hsv values, vision_angle, and task.
+ *
+ * Output:      Draws cirlce on img if object found and draws bin_img.
+ *
+ *****************************************************************************/
+int process_image( IplImage *img, IplImage *bin_img, MSG_DATA *msg )
+{
+	int status = -1;
+	
+	/* BUOY VARIABLES. */
+	int dotx = -1;
+    int doty = -1;
+	int xrot = -1;
+    int yrot = -1;
+    
+    double angleFrontCam = VISIOND_FRONT_CAM_ANGLE_OFFSET * M_PI /  180;
+    
+    /* PIPE VARIABLES. */
+    /* Temporary variable to make it easier to switch between using HSV
+	 *  olding or boxes to try and find pipe. HSV = 1, Boxes = 2. */
+	int pipe_type = VISION_PIPE_HSV;
+	int pipex = -10000;
+	int pipey = -10000;
+	double bearing = -10000;
+	int ii = 0;
+	
+	/* BOXES VARIABLES. */
+	/* Variables to hold box centroid sequence and vertex sequence. */
+	CvMemStorage *storage1 = 0;
+	storage1 = cvCreateMemStorage(0);
+	CvSeq *boxes = cvCreateSeq( 0, sizeof(CvSeq), sizeof(CvPoint), storage1 );
+	CvSeqReader reader1;
+	CvMemStorage *storage2 = 0;
+	storage2 = cvCreateMemStorage(0);
+	CvSeq *squares = cvCreateSeq( 0, sizeof(CvSeq), sizeof(CvPoint), storage2 );
+	CvSeqReader reader2;
+	CvPoint box_pt;
+	CvPoint pt[4];
+	CvPoint *rect = pt;
+	int count = 4;
+	
+	/* FENCE VARIABLES. */
+    int fence_center = img->width / 2;
+	int y_max = -1;
+	int lineWidth = 75;
+	
+	
+	if ( msg->task.data.task == TASK_GATE ) {
+		/* Set to not detected to start and reset if we get a hit. */
+		msg->vision.data.status = TASK_NOT_DETECTED;
+
+		/* Look for the gate . */
+		status = vision_find_gate( &dotx, &doty, msg->vsetting.data.vision_angle, img,
+			bin_img, &msg->vsetting.data.buoy_hsv );
+		if( status == 1 || status == 2 ) {
+			/* We have detected the gate. */
+			//printf("MAIN: Gate Status = %d\n", status);
+			msg->vision.data.status = TASK_GATE_DETECTED;
+
+			/* The subtractions are opposite of each other on purpose. This
+			 * is so that they match the way the depth sensor and yaw sensor
+			 * work. */
+			msg->vision.data.front_x = dotx - (img->width / 2);
+			msg->vision.data.front_y = (img->height / 2) - doty;
+
+			xrot =  msg->vision.data.front_x * cos( angleFrontCam ) +
+					msg->vision.data.front_y * sin( angleFrontCam );
+			yrot = -msg->vision.data.front_x * sin( angleFrontCam ) +
+					msg->vision.data.front_y * cos( angleFrontCam );
+
+			msg->vision.data.front_x = xrot;
+			msg->vision.data.front_y = yrot;
+
+			/* Draw a circle at the centroid location. */
+			cvCircle( img, cvPoint(dotx, doty),
+				10, cvScalar(0, 255, 0), 5, 8 );
+
+			if( status == 2 ) {
+				msg->vision.data.status = TASK_GATE_CLEARED;
+			}
+		}
+	} /* end TASK_GATE */
+
+	else if ( msg->task.data.task == TASK_BUOY ) {
+		/* Set to not detected to start and reset if we get a hit. */
+		msg->vision.data.status = TASK_NOT_DETECTED;
+
+		/* Look for the buoy. */
+		status = vision_find_dot( &dotx, &doty, msg->vsetting.data.vision_angle, img,
+			bin_img, &msg->vsetting.data.buoy_hsv );
+	
+		if( status == 1 || status == 2 ) {
+			/* We have detected the buoy. */
+			//printf("MAIN: Bouy Status = %d\n", status);
+			msg->vision.data.status = TASK_BUOY_DETECTED;
+
+			/* The subtractions are opposite of each other on purpose. This
+			 * is so that they match the way the depth sensor and yaw sensor
+			 * work. */
+			msg->vision.data.front_x = dotx - (img->width / 2);
+			msg->vision.data.front_y = (img->height / 2) - doty;
+
+			xrot =  msg->vision.data.front_x * cos( angleFrontCam ) +
+					msg->vision.data.front_y * sin( angleFrontCam );
+			yrot = -msg->vision.data.front_x * sin( angleFrontCam ) +
+					msg->vision.data.front_y * cos( angleFrontCam );
+
+			msg->vision.data.front_x = xrot;
+			msg->vision.data.front_y = yrot;
+
+			/* Draw a circle at the centroid location. */
+			cvCircle( img, cvPoint(dotx, doty),
+				10, cvScalar(0, 255, 0), 5, 8 );
+
+			if( status == 2 ) {
+				msg->vision.data.status = TASK_BUOY_TOUCHED;
+			}
+		}
+	} /* end TASK_BUOY */
+
+	else if ( msg->task.data.task == TASK_PIPE && pipe_type == VISION_PIPE_HSV ) {
+		/* Set to not detected to start and reset if we get a hit. */
+		msg->vision.data.status = TASK_NOT_DETECTED;
+
+		/* Look for the pipe. */
+		status = vision_find_pipe( &pipex, &pipey, &bearing, img, bin_img,
+			&msg->vsetting.data.pipe_hsv );
+
+		/* If we get a positive status message, render the box and populate
+		 * the network message. */
+		if( status == 1 ) {
+			/* Set the detection status of vision */
+			//printf("MAIN Pipe Status = %d\n", status);
+			msg->vision.data.status = TASK_PIPE_DETECTED;
+
+			msg->vision.data.bearing = bearing;
+			msg->vision.data.bottom_x = pipex - img->width / 2;
+			msg->vision.data.bottom_y = pipey - img->height / 2;
+
+			/* Draw a circle at the centroid location. */
+			cvCircle( img, cvPoint(pipex, pipey),
+				10, cvScalar(255, 0, 0), 5, 8 );
+
+			/* Draw the bearing if it is there. */
+			if( bearing != 0 ) {
+				for( ii = 0; ii < 25; ii++ ) {
+					cvCircle( img,
+						cvPoint(img->width / 2 + ((int)(bearing * ii)),
+						img->width / 2 + ii), 2, cvScalar(255, 255, 0), 2 );
+				}
+			}
+			else {
+				for( ii = 0; ii < 25; ii++ ) {
+					cvCircle( img,
+						cvPoint(img->width / 2 + ((int)(bearing * ii)),
+						img->width / 2 + ii), 2, cvScalar(0, 0, 255), 2 );
+				}
+			}
+		}
+	} /* end TASK_PIPE -- hsv */
+
+	else if ( msg->task.data.task == TASK_PIPE && pipe_type == VISION_PIPE_BOX ) {
+		/* Set to not detected to start and reset if we get a hit. */
+		msg->vision.data.status = TASK_NOT_DETECTED;
+
+		/* Look for the pipe. */
+		status = vision_find_boxes( img, boxes, squares, VISION_PIPE,
+			&msg->vision.data.bearing );
+
+		/* If we get a positive status message, render the box
+		 * and populate the network message. */
+		if( status > 0 ) {
+			/* Initialize the centroid sequence reader. */
+			cvStartReadSeq( boxes, &reader1, 0 );
+			/* Read four sequence elements at a time. */
+			for( ii = 0; ii < boxes->total; ii += 2 ) {
+				/* Read centroid x and y coordinates. */
+				CV_READ_SEQ_ELEM( box_pt, reader1 );
+				/* Draw the centroid as a circle. */
+				cvCircle( img, box_pt,
+					10, cvScalar(0, 0, 255), 5, 8 );
+			}
+			/* Initialize the vertex sequence reader. */
+			cvStartReadSeq( squares, &reader2, 0 );
+			for( ii = 0; ii < squares->total; ii += 4 ) {
+				/* Read vertex x and y coordinates. */
+				CV_READ_SEQ_ELEM( pt[0], reader2 );
+				CV_READ_SEQ_ELEM( pt[1], reader2 );
+				CV_READ_SEQ_ELEM( pt[2], reader2 );
+				CV_READ_SEQ_ELEM( pt[3], reader2 );
+				/* Draw the square as a closed polyline. */
+				cvPolyLine( img, &rect, &count, 1, 1, CV_RGB(0, 255, 0),
+					3, CV_AA, 0 );
+			}
+			/* Set target offsets in network message. */
+			if( boxes->total > 0 ) {
+				/* Set the detection status of vision */
+				msg->vision.data.status = TASK_PIPE_DETECTED;
+
+				msg->vision.data.bearing = 0; /* !!! TODO: Fix this value !!! */
+				msg->vision.data.bottom_x = box_pt.x - img->width / 2;
+				msg->vision.data.bottom_y = box_pt.y - img->height / 2;
+			}
+			/* Clear out the sequences so that next time we only draw newly
+			 * found squares and centroids. */
+			cvClearSeq( boxes );
+			cvClearSeq( squares );
+		}
+	} /* end TASK_PIPE -- boxes */
+
+	else if ( msg->task.data.task == TASK_FENCE ) {
+		/* Set to not detected to start and reset if we get a hit. */
+		msg->vision.data.status = TASK_NOT_DETECTED;
+
+		/* Look for the fence. */
+		status = vision_find_fence( &fence_center, &y_max, img,	bin_img,
+			&msg->vsetting.data.fence_hsv );
+		if( status == 1 ) {
+			/* Set the detection status of vision. */
+			msg->vision.data.status = TASK_FENCE_DETECTED;
+
+			/* Draw a circle at the centroid. */
+			cvCircle( img, cvPoint(fence_center, y_max),
+				10, cvScalar(0, 0, 255), 5, 8 );
+
+			/* Draw a horizontal line indicating the lowest point of the
+			 * fence. */
+			y_max = vision_get_fence_bottom(bin_img);
+			for( ii = 0; ii < lineWidth; ii++ ) {
+				cvCircle( img, cvPoint(img->width / 2 + ii, y_max),
+					2, cvScalar(100, 255, 20), 2 );
+			}
+			/* Set target offsets in network message. The subtractions are
+			 * opposite of each other on purpose. This is so that they
+			 * match the way the depth sensor and yaw sensor work. */
+			msg->vision.data.front_x = fence_center - img->width / 2;
+			msg->vision.data.front_y = y_max - img->height / 4;
+		}
+	} /* end TASK_FENCE */
+
+	else if ( msg->task.data.task == TASK_BOXES ) {
+		/* Set to not detected to start and reset if we get a hit. */
+		msg->vision.data.status = TASK_NOT_DETECTED;
+
+		/* Look for the boxes. */
+		status = vision_find_boxes( img, boxes, squares, VISION_BOX,
+			&msg->vision.data.bearing );
+
+		/* If we get a positive status message, render the box and populate
+		 * the network message. */
+		if( status > 0 ) {
+			/* Initialize the centroid sequence reader. */
+			cvStartReadSeq( boxes, &reader1, 0 );
+			/* Read two sequence elements at a time. */
+			for( ii = 0; ii < boxes->total; ii += 2 ) {
+				/* Read centroid x and y coordinates. */
+				CV_READ_SEQ_ELEM( box_pt, reader1 );
+				/* Draw the centroid as a circle. */
+				cvCircle( img, box_pt,
+					10, cvScalar(0, 0, 255), 5, 8 );
+			}
+			/* Initialize the vertex sequence reader. */
+			cvStartReadSeq( squares, &reader2, 0 );
+			/* Read four sequence elements at a time. */
+			for( ii = 0; ii < squares->total; ii += 4 ) {
+				/* Read vertex x and y coordinates. */
+				CV_READ_SEQ_ELEM( pt[0], reader2 );
+				CV_READ_SEQ_ELEM( pt[1], reader2 );
+				CV_READ_SEQ_ELEM( pt[2], reader2 );
+				CV_READ_SEQ_ELEM( pt[3], reader2 );
+				/* Draw the square as a closed polyline. */
+				cvPolyLine( img, &rect, &count, 1, 1, CV_RGB(0, 255, 0), 3, CV_AA, 0 );
+			}
+			/* Set target offsets in network message. */
+			if( boxes->total > 0 ) {
+				/* Set the detection status of vision */
+				msg->vision.data.status = TASK_BOXES_DETECTED;
+
+				/* Set the message variables to the center of the detected
+				 * box. */
+				msg->vision.data.box1_x = box_pt.x - img->width / 2;
+				msg->vision.data.box1_y = box_pt.y - img->height / 2;
+			}
+			/* Clear out the sequences so that next time we only draw newly
+			 * found squares and centroids. */
+			cvClearSeq( boxes );
+			cvClearSeq( squares );
+		}
+	} /* end TASK_BOXES */
+
+	else if ( msg->task.data.task == TASK_SUITCASE ) {
+		/* Set to not detected to start and reset if we get a hit. */
+		msg->vision.data.status = TASK_NOT_DETECTED;
+
+		/* Look for the suitcase. */
+		status = vision_suitcase( img, boxes, squares );
+		if( status > 0 ) {
+
+			/* Initialize the centroid sequence reader. */
+			cvStartReadSeq( boxes, &reader1, 0 );
+			/* Read four sequence elements at a time. */
+			for( ii = 0; ii < boxes->total; ii += 2 ) {
+				/* Read centroid x and y coordinates. */
+				CV_READ_SEQ_ELEM( box_pt, reader1 );
+				/* Draw the centroid as a circle. */
+				cvCircle( img, box_pt,
+					10, cvScalar(0, 0, 255), 5, 8 );
+			}
+			/* Initialize the vertex sequence reader. */
+			cvStartReadSeq( squares, &reader2, 0 );
+			for( ii = 0; ii < squares->total; ii += 4 ) {
+				/* Read vertex x and y coordinates. */
+				CV_READ_SEQ_ELEM( pt[0], reader2 );
+				CV_READ_SEQ_ELEM( pt[1], reader2 );
+				CV_READ_SEQ_ELEM( pt[2], reader2 );
+				CV_READ_SEQ_ELEM( pt[3], reader2 );
+				/* Draw the square as a closed polyline. */
+				cvPolyLine( img, &rect, &count, 1, 1, CV_RGB(0, 255, 0), 3, CV_AA, 0 );
+			}
+			/* Set target offsets in network message. */
+			if( boxes->total > 0 ) {
+				/* Set the detection status of vision */
+				msg->vision.data.status = TASK_SUITCASE_DETECTED;
+
+				msg->vision.data.suitcase_x = box_pt.x - img->width / 2;
+				msg->vision.data.suitcase_y = box_pt.y - img->height / 2;
+			}
+			/* Clear out the sequences so that next time we only draw newly
+			 * found squares and centroids. */
+			cvClearSeq( boxes );
+			cvClearSeq( squares );
+		}
+	} /* end TASK_SUITCASE */
+
+	else {
+		/* Clear the detection status */
+		msg->vision.data.status = TASK_NOT_DETECTED;
+
+	}
+	return 0;
+}

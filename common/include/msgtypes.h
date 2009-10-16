@@ -346,6 +346,7 @@ typedef struct _VSETTING {
     int save_fframe;	//!< Save front frame.
     int save_bvideo;	//!< Save bottom video.
     int save_fvideo;	//!< Save front video.
+    int vision_angle;	//!< The vision angle.
 } VSETTING;
 
 typedef struct _VSETTING_MSG {
