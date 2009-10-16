@@ -64,6 +64,7 @@ typedef struct _CONF_VARS {
     short int   vision_port;
     int         vision_window;
     int			vision_angle;
+    char		vision_task[STRING_SIZE];
     char        planner_IP[STRING_SIZE];
     int         enable_planner;
     short int   planner_port;

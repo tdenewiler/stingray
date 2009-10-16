@@ -77,6 +77,9 @@ void parse_line( CONF_VARS *config )
         else if( strncmp( tokens[1], "port", STRING_SIZE ) == 0 ) {
             sscanf( tokens[2], "%hd", &config->vision_port );
         }
+        else if ( strncmp( tokens[1], "task", STRING_SIZE ) == 0 ) {
+        	strncpy( config->vision_task, tokens[2], STRING_SIZE );
+		}
     }
 	if( strncmp( tokens[0], "save", STRING_SIZE ) == 0 ) {
 		if( strncmp( tokens[1], "image", STRING_SIZE ) == 0 ) {
@@ -984,6 +987,7 @@ void parse_print_config( CONF_VARS *config )
     printf("PARSE_PRINT_CONFIG: vision_port = %hd\n", config->vision_port);
     printf("PARSE_PRINT_CONFIG: vision_window = %d\n", config->vision_window);
     printf("PARSE_PRINT_CONFIG: vision_angle = %d\n", config->vision_angle);
+    printf("PARSE_PRINT_CONFIG: vision_task = %d\n", config->vision_task);
     printf("PARSE_PRINT_CONFIG: planner_IP[STRING_SIZE] = %s\n", config->planner_IP);
     printf("PARSE_PRINT_CONFIG: enable_planner = %d\n", config->enable_planner);
     printf("PARSE_PRINT_CONFIG: planner_port = %hd\n", config->planner_port);
