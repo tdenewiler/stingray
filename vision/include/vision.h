@@ -222,7 +222,8 @@ void vision_rgb_sum_filter( IplImage *img , short * rgb_sum );
 
 //! Saves an image to disk.
 //! \param img The image to save to disk.
-void vision_save_frame( IplImage *img );
+//! \param dir The directory in which to save the image.
+void vision_save_frame( IplImage *img, char *dir );
 
 
 #endif /* _VISION_H_ */

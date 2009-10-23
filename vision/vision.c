@@ -1469,29 +1469,32 @@ void vision_rgb_sum_filter( IplImage *img , short * rgb_sum )
 
 /******************************************************************************
  *
- * Title:       void vision_save_frame( IplImage *img )
+ * Title:       void vision_save_frame( IplImage *img, char *dir )
  *
  * Description: Saves an image to disk.
  *
  * Input:       img: The image to save to disk.
+ * 				dir: The directory in which to save the image.
  *
  * Output:      None.
  *
  *****************************************************************************/
 
-void vision_save_frame( IplImage *img )
+void vision_save_frame( IplImage *img, char *dir )
 {
 	/* Declare variables. */
     struct timeval ctime;
     struct tm ct;
-    char write_time[80] = {0};
+    char write_time[128] = {0};
 
 	/* Get a timestamp and use for filename. */
 	gettimeofday( &ctime, NULL );
 	ct = *( localtime ((const time_t*) &ctime.tv_sec) );
-	strftime( write_time, sizeof(write_time), "images/20%y%m%d_%H%M%S", &ct);
+	strcpy( write_time, dir );
+	strftime( write_time + strlen(write_time), sizeof(write_time), "20%y%m%d_%H%M%S", &ct);
 	snprintf( write_time + strlen(write_time),
 			strlen(write_time), ".%.03ld.jpg", ctime.tv_usec );
+			
 	cvSaveImage( write_time, img );
 } /* end vision_save_frame() */
 
@@ -1569,7 +1572,7 @@ int vision_find_gate( int *dotx,
 
 	/* Check to see how many pixels of are detected in the image. */
 	num_pix = cvCountNonZero( binImg );
-	printf("VISION_FIND_DOT: num_pix = %d\n" , num_pix);
+
 	if( num_pix > touch_thresh ) {
 		return 2;
 	}

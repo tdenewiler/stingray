@@ -83,7 +83,19 @@ void parse_line( CONF_VARS *config )
     }
 	if( strncmp( tokens[0], "save", STRING_SIZE ) == 0 ) {
 		if( strncmp( tokens[1], "image", STRING_SIZE ) == 0 ) {
-			if( strncmp( tokens[2], "rate", STRING_SIZE ) == 0 ) {
+			if ( strncmp( tokens[2], "front", STRING_SIZE ) == 0 ) {
+				sscanf( tokens[3], "%d", &config->save_image_front );
+			}
+			else if ( strncmp( tokens[2], "bottom", STRING_SIZE ) == 0 ) {
+				sscanf( tokens[3], "%d", &config->save_image_bottom );
+			}
+			else if ( strncmp( tokens[2], "color", STRING_SIZE ) == 0 ) {
+				sscanf( tokens[3], "%d", &config->save_image_color );
+			}
+			else if ( strncmp( tokens[2], "binary", STRING_SIZE ) == 0 ) {
+				sscanf( tokens[3], "%d", &config->save_image_binary );
+			}
+			else if ( strncmp( tokens[2], "rate", STRING_SIZE ) == 0 ) {
 				sscanf( tokens[3], "%d", &config->save_image_rate );
 			}
 			else if ( strncmp( tokens[2], "dir", STRING_SIZE ) == 0 ) {
@@ -943,6 +955,10 @@ void parse_default_config( CONF_VARS *config )
 	/* vision */
 	config->vision_window = FALSE;
 	config->vision_angle = 0;
+	config->save_image_front = 0;
+	config->save_image_bottom = 0;
+	config->save_image_color = 0;
+	config->save_image_binary = 0;
 	config->save_image_rate = 0;
 	strncpy( config->save_image_dir, "", STRING_SIZE );
 	config->open_image_rate = 0;
@@ -987,7 +1003,7 @@ void parse_print_config( CONF_VARS *config )
     printf("PARSE_PRINT_CONFIG: vision_port = %hd\n", config->vision_port);
     printf("PARSE_PRINT_CONFIG: vision_window = %d\n", config->vision_window);
     printf("PARSE_PRINT_CONFIG: vision_angle = %d\n", config->vision_angle);
-    printf("PARSE_PRINT_CONFIG: vision_task = %d\n", config->vision_task);
+    printf("PARSE_PRINT_CONFIG: vision_task[STRING_SIZE] = %s\n", config->vision_task);
     printf("PARSE_PRINT_CONFIG: planner_IP[STRING_SIZE] = %s\n", config->planner_IP);
     printf("PARSE_PRINT_CONFIG: enable_planner = %d\n", config->enable_planner);
     printf("PARSE_PRINT_CONFIG: planner_port = %hd\n", config->planner_port);
@@ -1087,6 +1103,10 @@ void parse_print_config( CONF_VARS *config )
 	printf("PARSE_PRINT_CONFIG: course_start = %d\n", config->course_start);
 	printf("PARSE_PRINT_CONFIG: dock_time = %d\n", config->dock_time);
 	printf("PARSE_PRINT_CONFIG: buoy_blind_time = %d\n", config->buoy_blind_time);
+	printf("PARSE_PRINT_CONFIG: save_image_front = %d\n", config->save_image_front );
+	printf("PARSE_PRINT_CONFIG: save_image_bottom = %d\n", config->save_image_bottom );
+	printf("PARSE_PRINT_CONFIG: save_image_color = %d\n", config->save_image_color );
+	printf("PARSE_PRINT_CONFIG: save_image_binary = %d\n", config->save_image_binary );
 	printf("PARSE_PRINT_CONFIG: save_image_rate = %d\n", config->save_image_rate);
 	printf("PARSE_PRINT_CONFIG: save_image_dir = %s\n", config->save_image_dir);
 	printf("PARSE_PRINT_CONFIG: open_image_rate = %d\n", config->open_image_rate);

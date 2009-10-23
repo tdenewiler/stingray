@@ -173,6 +173,10 @@ typedef struct _CONF_VARS {
 	int			course_start;
 	int			dock_time;
 	int			buoy_blind_time;
+	int			save_image_front;
+	int			save_image_bottom;
+	int			save_image_color;
+	int			save_image_binary;
 	int			save_image_rate;
 	char		save_image_dir[STRING_SIZE];
 	int			open_image_rate;
