@@ -123,28 +123,34 @@ int main( int argc, char *argv[] )
     sigint_action.sa_flags = 0;
     sigaction( SIGINT, &sigint_action, NULL );
 
-    /* Set up variables and initialize them. */
+    /* Set up state variables and initialize them. */
     int recv_bytes = 0;
     char recv_buf[MAX_MSG_SIZE];
     CONF_VARS cf;
     MSG_DATA msg;
-    
-    int saving_fvideo = FALSE;
-    int saving_bvideo = FALSE;
+ 
+    /* Set up image/window variables and initialize them. */
     IplImage *img = NULL;
-    IplImage *img_eq = NULL;
 	const char *win = "Image";
 	const char *binwin = "Binary";
+	
+	/* Set up video variables and initialize them. */
+	int saving_fvideo = FALSE;
+    int saving_bvideo = FALSE;
     CvVideoWriter *f_writer = 0;
     CvVideoWriter *b_writer = 0;
     int is_color = TRUE;
     struct timeval ctime;
     struct tm ct;
-    char write_time[80] = {0};
-	int vision_mode = VISIOND_NONE;
+    
+    /* Set up file access variables and initialize them. */
+	struct dirent *dfile = NULL;
+	int diropen = FALSE;
+	char filename[STRING_SIZE * 2];
+	char write_time[80] = {0};
+    char curr_save_dir[STRING_SIZE];
 
-
-	/* Timers. */
+	/* Set up timer variables and intialize them. */
 	struct timeval fps_time = {0, 0};
 	struct timeval fps_start = {0, 0};
 	struct timeval save_time = {0, 0};
@@ -159,20 +165,16 @@ int main( int argc, char *argv[] )
 	int nframes = 0;
     double fps = 0.0;
 
-	/* Variables for opening, reading and using directories and files. */
-	struct dirent *dfile = NULL;
-	int diropen = FALSE;
-	char filename[STRING_SIZE * 2];
-
-
-
-	/* Initialize timers. */
+	/* Actually initialize timers. */
 	gettimeofday( &fps_time, NULL );
 	gettimeofday( &fps_start, NULL );
 	gettimeofday( &save_time, NULL );
 	gettimeofday( &save_start, NULL );
 	gettimeofday( &open_time, NULL );
 	gettimeofday( &open_start, NULL );
+
+
+
 
     printf( "MAIN: Starting Vision daemon ...\n" );
 
@@ -227,7 +229,6 @@ int main( int argc, char *argv[] )
 		if ( ( diropen = open_image_init( cf.open_image_dir, filename ) ) ) {
     		img = cvLoadImage( filename );
     		bin_img = cvCreateImage( cvGetSize(img), IPL_DEPTH_8U, 1 );
-			img_eq  = cvCreateImage( cvGetSize(img), IPL_DEPTH_8U, 3 );
 			printf( "MAIN: Load from file as camera OK.\n" );
 		}
 		else {
@@ -252,7 +253,6 @@ int main( int argc, char *argv[] )
 		else {
 			img = cvQueryFrame( f_cam );
 			bin_img = cvCreateImage( cvGetSize(img), IPL_DEPTH_8U, 1 );
-			img_eq  = cvCreateImage( cvGetSize(img), IPL_DEPTH_8U, 3 );
 			printf( "MAIN: Front camera opened OK.\n" );
 		}
 
@@ -265,7 +265,6 @@ int main( int argc, char *argv[] )
 		else {
 			img = cvQueryFrame( b_cam );
 			bin_img = cvCreateImage( cvGetSize(img), IPL_DEPTH_8U, 1 );
-			img_eq  = cvCreateImage( cvGetSize(img), IPL_DEPTH_8U, 3 );
 			printf( "MAIN: Bottom camera opened OK.\n" );
 		}
 	}
@@ -276,15 +275,54 @@ int main( int argc, char *argv[] )
 		cvNamedWindow( binwin, CV_WINDOW_AUTOSIZE );
 	}
 	
+	/* Show the image in a window. */
+	if( cf.vision_window ) {
+				
+		/* OpenCV needs a little pause here. */
+		if( cvWaitKey( 500 ) >= 0 );
+		
+		/* Actually show the image. */
+		if ( img )
+		{
+			cvShowImage( win, img );
+		}
+		if( bin_img )
+		{
+			cvShowImage( binwin, bin_img );
+		}
+
+		/* OpenCV needs a little pause here. */
+		if( cvWaitKey( 500 ) >= 0 );
+	}
+	
     printf( "MAIN: Vision server running now.\n" );
 
     /* Main loop. */
     while( 1 ) {
     	
+    	/* Get network data. */
+        if( (cf.enable_server) && (server_fd > 0) ) {
+            recv_bytes = net_server( server_fd, recv_buf, &msg, MODE_VISION );
+            if( recv_bytes > 0 ) {
+                recv_buf[recv_bytes] = '\0';
+                messages_decode( server_fd, recv_buf, &msg, recv_bytes );
+
+                /* Force vision to look for the pipe no matter which pipe
+			     * subtask we are currently searching for. */
+				if( msg.task.data.task == TASK_PIPE1 || msg.task.data.task == TASK_PIPE2 ||
+					msg.task.data.task == TASK_PIPE3 || msg.task.data.task == TASK_PIPE4 ) {
+					msg.task.data.task = TASK_PIPE;
+				}
+            }
+        }
+    	
 		/* Need a way to force task from file. */
 		if ( diropen ) {
 			msg.task.data.task = translate_task( cf.vision_task );
 		}
+		
+		/* Reset "THE" image to be null. This way we know if there is a new image or not. */
+		img = NULL;
 
     	/* Do vision processing based on task */
     	if( msg.task.data.task == TASK_NONE ) {
@@ -293,8 +331,7 @@ int main( int argc, char *argv[] )
     		msg.vision.data.front_y = 0;
     		msg.vision.data.bottom_x = 0;
     		msg.vision.data.bottom_y = 0.0;
-		} /* end TASK_NONE */
-		
+		}
 		else {
 			/* Get the open image timer. */
 			time1s =  open_time.tv_sec;
@@ -311,7 +348,6 @@ int main( int argc, char *argv[] )
 				
 				/* Find the next file by ignoring directories. */
 				while ( dfile != NULL && strstr( dfile->d_name, ".jpg" ) == NULL ) {
- 
 					/* Iterate to next file. */
 					dfile = readdir( dirp );
 				}
@@ -345,188 +381,158 @@ int main( int argc, char *argv[] )
 								msg.task.data.task == TASK_SUITCASE ) ) {
 				img = cvQueryFrame( b_cam );
 			}
+		}
+		
+		/* Only handle the image if there is a valid one. */
+		if ( img != NULL ) {
 			
-			/* Only process the image if there is a valid one. */
-			if ( img != NULL ) {
+			/* Process the image according to the task. */
+			process_image( img, bin_img, &msg );
+			
+			/* Show the image in a window. */
+			if( cf.vision_window ) {
+			
+				/* OpenCV needs a little pause here. */
+				if( cvWaitKey( 5 ) >= 0 );
 				
-				/* Process the image according to the task. */
-				process_image( img, bin_img, &msg );
-			}
-		}
-		
-        /* Get network data. */
-        if( (cf.enable_server) && (server_fd > 0) ) {
-            recv_bytes = net_server( server_fd, recv_buf, &msg, MODE_VISION );
-            if( recv_bytes > 0 ) {
-                recv_buf[recv_bytes] = '\0';
-                messages_decode( server_fd, recv_buf, &msg, recv_bytes );
-
-                /* Force vision to look for the pipe no matter which pipe
-			     * subtask we are currently searching for. */
-				if( msg.task.data.task == TASK_PIPE1 || msg.task.data.task == TASK_PIPE2 ||
-					msg.task.data.task == TASK_PIPE3 || msg.task.data.task == TASK_PIPE4 ) {
-					msg.task.data.task = TASK_PIPE;
-				}
-            }
-        }
-
-		/* Show the image in a window. */
-		if( cf.vision_window ) {
-			vision_mode = msg.vision.data.mode;
-		
-			/* Need to have a way to force from file. */
-			vision_mode = VISIOND_FCOLOR;
-		
-			/* OpenCV needs a little pause here. */
-			if( cvWaitKey( 5 ) >= 0 );
-			/* Determine which image to show in which window. */
-			switch( vision_mode ) {
-			case VISIOND_FCOLOR:
-				cvShowImage( win, img );
-				if( msg.task.data.task != TASK_NONE ) {
-					cvShowImage( binwin, bin_img );
-				}
-				break;
-			case VISIOND_FBINARY:
-				cvShowImage( win, bin_img );
-				if( msg.task.data.task != TASK_NONE ) {
-					cvShowImage( binwin, bin_img );
-				}
-				break;
-			case VISIOND_BCOLOR:
-				cvShowImage( win, img );
-				if( msg.task.data.task != TASK_NONE ) {
-					cvShowImage( binwin, bin_img );
-				}
-				break;
-			case VISIOND_BBINARY:
-				cvShowImage( win, bin_img );
-				if( msg.task.data.task != TASK_NONE ) {
-					cvShowImage( binwin, bin_img );
-				}
-				break;
-			case VISIOND_NONE:
-				break;
-			}
-			/* Just show color video without any processing of it. */
-			if( msg.task.data.task == TASK_NONE ) {
-				switch( vision_mode ) {
-				case VISIOND_FCOLOR:
-					if( !diropen ) {
-						img = cvQueryFrame( f_cam );
-					}
+				/* Actually show the image. */
+				if ( img )
+				{
 					cvShowImage( win, img );
-					break;
-				case VISIOND_BCOLOR:
-					if( !diropen ) {
-						img = cvQueryFrame( b_cam );
-					}
-					cvShowImage( win, img );
-					break;
+				}
+				if( bin_img )
+				{
+					cvShowImage( binwin, bin_img );
 				}
 			}
-		}
-
-		/* Calculate frames per second. */
-		nframes++;
-		time1s =  fps_time.tv_sec;
-		time1ms = fps_time.tv_usec;
-		time2s =  fps_start.tv_sec;
-		time2ms = fps_start.tv_usec;
-		dt = util_calc_dt( &time1s, &time1ms, &time2s, &time2ms );
-
-		if( dt > 1000000 ) {
-			fps = (double)nframes * (1000000 / dt);
-			gettimeofday( &fps_start, NULL );
-			nframes = 0;
-			msg.vision.data.fps = fps;
-			//printf("MAIN: fps = %lf\n", fps);
-		}
-
-		/* Save an image from both the front and bottom cameras using timer. */
-		if( cf.save_image_rate == 0 ) {
-			/* Do nothing. */
-		}
-		else if( !diropen ) {
-			/* Check save frame timer. */
-			time1s =  save_time.tv_sec;
-			time1ms = save_time.tv_usec;
-			time2s =  save_start.tv_sec;
-			time2ms = save_start.tv_usec;
+			
+			/* Calculate frames per second. */
+			nframes++;
+			time1s =  fps_time.tv_sec;
+			time1ms = fps_time.tv_usec;
+			time2s =  fps_start.tv_sec;
+			time2ms = fps_start.tv_usec;
 			dt = util_calc_dt( &time1s, &time1ms, &time2s, &time2ms );
-			if( dt > 1000000 / cf.save_image_rate ) {
-				if( f_cam ) {
-					img = cvQueryFrame( f_cam );
-					vision_save_frame( img );
+
+			if( dt > 1000000 ) {
+				fps = (double)nframes * (1000000 / dt);
+				gettimeofday( &fps_start, NULL );
+				nframes = 0;
+				msg.vision.data.fps = fps;
+			}
+		
+			/* !!! TODO !!! Make sure save image directory is formatted correctly. */
+			/* !!! TODO !!! Make sure the hardcoded sub directories exist. Create if not. */
+			
+
+			if ( diropen ) {
+				/* The processed images need to be saved before the live feeds. */
+				if ( cf.save_image_color ) {
+					/* Save the resulting processed image. */
+					strncpy( curr_save_dir, cf.save_image_dir, STRING_SIZE );
+					vision_save_frame( img, strncat( curr_save_dir, "color/", 6 ) );
 				}
-				if( b_cam ) {
-					img = cvQueryFrame( b_cam );
-					vision_save_frame( img );
+				if ( cf.save_image_binary ) {
+					/* Save the resulting binary image. */
+					strncpy( curr_save_dir, cf.save_image_dir, STRING_SIZE );
+					vision_save_frame( bin_img, strncat( curr_save_dir, "binary/", 7 ) );
 				}
-				gettimeofday( &save_start, NULL );
+			}
+
+			/* If image was loaded from file, release it. Don't need to release if
+		 	* image is captured from camera. */
+			if( diropen ) {
+				cvReleaseImage( &img );
 			}
 		}
+		
+		/* Save the front and/or bottom images. (CONFIG) */
+		time1s =  save_time.tv_sec;
+		time1ms = save_time.tv_usec;
+		time2s =  save_start.tv_sec;
+		time2ms = save_start.tv_usec;
+		dt = util_calc_dt( &time1s, &time1ms, &time2s, &time2ms ) / 1000000;	
+		if ( !diropen && dt > cf.save_image_rate ) {
+			if ( cf.save_image_front && f_cam ) {
+				/* Save an image from the front camera. */
+				img = cvQueryFrame( f_cam );
+				strncpy( curr_save_dir, cf.save_image_dir, STRING_SIZE );
+				vision_save_frame( img, strncat( curr_save_dir, "front/", 6 ) );
+			}
+			
+			if ( cf.save_image_bottom && b_cam ) {
+				/* Save an image from the bottom camera. */
+				img = cvQueryFrame( b_cam );
+				strncpy( curr_save_dir, cf.save_image_dir, STRING_SIZE );
+				vision_save_frame( img, strncat( curr_save_dir, "bottom/", 7 ) );
+			}
+			
+			gettimeofday( &save_start, NULL );
+		}
+		
 
-        /* Check state of save frames and video messages. */
-        if( msg.vsetting.data.save_fframe && f_cam ) {
-            /* Save image to disk. */
-			vision_save_frame( img );
+		/* Save the front or bottom image. (GUI) */
+		if( msg.vsetting.data.save_fframe && f_cam ) {
+			/* Save image to disk. */
+			img = cvQueryFrame( f_cam );
+			strncpy( curr_save_dir, cf.save_image_dir, STRING_SIZE );
+			vision_save_frame( img, strncat( curr_save_dir, "front/", 6 ) );
 			msg.vsetting.data.save_fframe = FALSE;
-        }
-        if( msg.vsetting.data.save_bframe && b_cam ) {
-            /* Save image to disk. */
-			vision_save_frame( img );
+		}
+		if( msg.vsetting.data.save_bframe && b_cam ) {
+			/* Save image to disk. */
+			img = cvQueryFrame( b_cam );
+			strncpy( curr_save_dir, cf.save_image_dir, STRING_SIZE );
+			vision_save_frame( img, strncat( curr_save_dir, "bottom/", 7 ) );
 			msg.vsetting.data.save_bframe = FALSE;
-        }
-        if( msg.vsetting.data.save_fvideo && !saving_fvideo && f_cam ) {
-            /* Get a timestamp and use for filename. */
-            gettimeofday( &ctime, NULL );
-            ct = *( localtime ((const time_t*) &ctime.tv_sec) );
-            strftime( write_time, sizeof(write_time), "stream/f20%y%m%d_%H%M%S", &ct);
-            snprintf( write_time + strlen(write_time),
-            		strlen(write_time), ".%03ld.avi", ctime.tv_usec );
-            fps = cvGetCaptureProperty( f_cam, CV_CAP_PROP_FPS );
-            f_writer = cvCreateVideoWriter( write_time, CV_FOURCC('M', 'J', 'P', 'G'),
-                fps, cvGetSize( img ), is_color );
-            saving_fvideo = TRUE;
-        }
-        else if( !msg.vsetting.data.save_fvideo && saving_fvideo ) {
-            cvReleaseVideoWriter( &f_writer );
-            saving_fvideo = FALSE;
-        }
+		}
+		
+		/* Save the front or bottom video. (GUI) */
+		if( msg.vsetting.data.save_fvideo && !saving_fvideo && f_cam ) {
+			/* Get a timestamp and use for filename. */
+			gettimeofday( &ctime, NULL );
+			img = cvQueryFrame( f_cam );
+			ct = *( localtime ((const time_t*) &ctime.tv_sec) );
+			strftime( write_time, sizeof(write_time), "stream/f20%y%m%d_%H%M%S", &ct);
+			snprintf( write_time + strlen(write_time),
+					strlen(write_time), ".%03ld.avi", ctime.tv_usec );
+			fps = cvGetCaptureProperty( f_cam, CV_CAP_PROP_FPS );
+			f_writer = cvCreateVideoWriter( write_time, CV_FOURCC('M', 'J', 'P', 'G'),
+				fps, cvGetSize( img ), is_color );
+			saving_fvideo = TRUE;
+		}
+		else if( !msg.vsetting.data.save_fvideo && saving_fvideo ) {
+			cvReleaseVideoWriter( &f_writer );
+			saving_fvideo = FALSE;
+		}
 		else if( msg.vsetting.data.save_fvideo && saving_fvideo ) {
 			cvWriteFrame( f_writer, img );
+		}	
+		if( msg.vsetting.data.save_bvideo && !saving_bvideo && b_cam ) {
+			/* Get a timestamp and use for filename. */
+			gettimeofday( &ctime, NULL );
+			img = cvQueryFrame( b_cam );
+			ct = *( localtime ((const time_t*) &ctime.tv_sec) );
+			strftime( write_time, sizeof(write_time), "stream/b20%y%m%d_%H%M%S", &ct);
+			snprintf( write_time + strlen(write_time),
+					strlen(write_time), ".%03ld.avi", ctime.tv_usec );
+			fps = cvGetCaptureProperty( b_cam, CV_CAP_PROP_FPS );
+			b_writer = cvCreateVideoWriter( write_time, CV_FOURCC('M', 'J', 'P', 'G'),
+				fps, cvGetSize( img ), is_color );
+			saving_bvideo = TRUE;
 		}
-        if( msg.vsetting.data.save_bvideo && !saving_bvideo && b_cam ) {
-            /* Get a timestamp and use for filename. */
-            gettimeofday( &ctime, NULL );
-            ct = *( localtime ((const time_t*) &ctime.tv_sec) );
-            strftime( write_time, sizeof(write_time), "stream/b20%y%m%d_%H%M%S", &ct);
-            snprintf( write_time + strlen(write_time),
-            		strlen(write_time), ".%03ld.avi", ctime.tv_usec );
-            fps = cvGetCaptureProperty( b_cam, CV_CAP_PROP_FPS );
-            b_writer = cvCreateVideoWriter( write_time, CV_FOURCC('M', 'J', 'P', 'G'),
-                fps, cvGetSize( img ), is_color );
-            saving_bvideo = TRUE;
-        }
-        else if( !msg.vsetting.data.save_bvideo && saving_bvideo ) {
-            cvReleaseVideoWriter( &b_writer );
-            saving_bvideo = FALSE;
-        }
+		else if( !msg.vsetting.data.save_bvideo && saving_bvideo ) {
+			cvReleaseVideoWriter( &b_writer );
+			saving_bvideo = FALSE;
+		}
 		else if( msg.vsetting.data.save_bvideo && saving_bvideo ) {
 			cvWriteFrame( b_writer, img );
 		}
-
+		
 		/* Update timers. */
 		gettimeofday( &fps_time, NULL );
 		gettimeofday( &save_time, NULL );
 		gettimeofday( &open_time, NULL );
-
-		/* If image was loaded from file, release it. Don't need to release if
-		 * image is captured from camera. */
-		if( diropen ) {
-			cvReleaseImage( &img );
-		}
     }
 
     exit( 0 );

@@ -17,7 +17,6 @@
 #include "parser.h"
 #include "network.h"
 #include "task.h"
-#include "visiond.h"
 
 
 /* Operation mode buttons. */
@@ -1094,7 +1093,7 @@ void events_images( GtkWidget *widget,
                     gpointer data
                   )
 {
-    /* Check the state of the buttons and send message. */
+    /* Check the state of the buttons and send message.
     if( gtk_toggle_button_get_active( (GtkToggleButton *)button_image_fcolor ) ) {
         msg.vision.data.mode = VISIOND_FCOLOR;
         if( vision_fd > 0 ) {
@@ -1125,6 +1124,7 @@ void events_images( GtkWidget *widget,
             messages_send( vision_fd, VISION_MSGID, &msg );
         }
     }
+    */
 } /* end events_images() */
 
 
