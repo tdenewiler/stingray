@@ -114,11 +114,17 @@ int visiond_open_image_init( char *dir, char *filename );
 int visiond_translate_task( char *task_name );
 
 //! Processes the given image based on the current task.
-//! \param img: The given image to be processed.
-//! \param bin_img: The place to put the resulting binary image.
-//! \param msg: The message structure that holds relevant information
+//! \param img The given image to be processed.
+//! \param bin_img The place to put the resulting binary image.
+//! \param msg The message structure that holds relevant information
 //! \return The task ID.
 int visiond_process_image( IplImage *img, IplImage *bin_img, MSG_DATA *msg );
+
+//! Initializes the msg variables using config file variables.
+//! \param msg The message variables.
+//! \param cf The configuration file variables.
+//! \return TRUE.
+int visiond_msg_cf_init( MSG_DATA *msg, CONF_VARS *cf );
 
 
 #endif /* _VISIOND_H_ */

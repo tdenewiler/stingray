@@ -157,27 +157,8 @@ int main( int argc, char *argv[] )
     parse_cla( argc, argv, &cf, STINGRAY, (const char *)VISIOND_FILENAME );
 
     /* Initialize HSV message data to configuration values. */
-    msg.vsetting.data.pipe_hsv.hL = cf.pipe_hL;
-    msg.vsetting.data.pipe_hsv.hH = cf.pipe_hH;
-    msg.vsetting.data.pipe_hsv.sL = cf.pipe_sL;
-    msg.vsetting.data.pipe_hsv.sH = cf.pipe_sH;
-    msg.vsetting.data.pipe_hsv.vL = cf.pipe_vL;
-    msg.vsetting.data.pipe_hsv.vH = cf.pipe_vH;
-    msg.vsetting.data.buoy_hsv.hL = cf.buoy_hL;
-    msg.vsetting.data.buoy_hsv.hH = cf.buoy_hH;
-    msg.vsetting.data.buoy_hsv.sL = cf.buoy_sL;
-    msg.vsetting.data.buoy_hsv.sH = cf.buoy_sH;
-    msg.vsetting.data.buoy_hsv.vL = cf.buoy_vL;
-    msg.vsetting.data.buoy_hsv.vH = cf.buoy_vH;
-    msg.vsetting.data.fence_hsv.hL = cf.fence_hL;
-    msg.vsetting.data.fence_hsv.hH = cf.fence_hH;
-    msg.vsetting.data.fence_hsv.sL = cf.fence_sL;
-    msg.vsetting.data.fence_hsv.sH = cf.fence_sH;
-    msg.vsetting.data.fence_hsv.vL = cf.fence_vL;
-    msg.vsetting.data.fence_hsv.vH = cf.fence_vH;
-    
-    msg.vsetting.data.vision_angle = cf.vision_angle;
-
+	visiond_msg_cf_init( &msg, &cf );
+	
     /* Set up server. */
     if( cf.enable_server ) {
         server_fd = net_server_setup( cf.server_port );
@@ -931,3 +912,37 @@ int visiond_process_image( IplImage *img, IplImage *bin_img, MSG_DATA *msg )
 	}
 	return 0;
 } /* end visiond_process_image() */
+
+
+/******************************************************************************
+ *
+ * Title:       int visiond_msg_cf_init( MSG_DATA *msg, CONF_VARS *cf )
+ *
+ * Description: Initializes the msg variables using config file variables.
+ *
+ *****************************************************************************/
+
+int visiond_msg_cf_init( MSG_DATA *msg, CONF_VARS *cf )
+{
+    msg->vsetting.data.pipe_hsv.hL  = cf->pipe_hL;
+    msg->vsetting.data.pipe_hsv.hH  = cf->pipe_hH;
+    msg->vsetting.data.pipe_hsv.sL  = cf->pipe_sL;
+    msg->vsetting.data.pipe_hsv.sH  = cf->pipe_sH;
+    msg->vsetting.data.pipe_hsv.vL  = cf->pipe_vL;
+    msg->vsetting.data.pipe_hsv.vH  = cf->pipe_vH;
+    msg->vsetting.data.buoy_hsv.hL  = cf->buoy_hL;
+    msg->vsetting.data.buoy_hsv.hH  = cf->buoy_hH;
+    msg->vsetting.data.buoy_hsv.sL  = cf->buoy_sL;
+    msg->vsetting.data.buoy_hsv.sH  = cf->buoy_sH;
+    msg->vsetting.data.buoy_hsv.vL  = cf->buoy_vL;
+    msg->vsetting.data.buoy_hsv.vH  = cf->buoy_vH;
+    msg->vsetting.data.fence_hsv.hL = cf->fence_hL;
+    msg->vsetting.data.fence_hsv.hH = cf->fence_hH;
+    msg->vsetting.data.fence_hsv.sL = cf->fence_sL;
+    msg->vsetting.data.fence_hsv.sH = cf->fence_sH;
+    msg->vsetting.data.fence_hsv.vL = cf->fence_vL;
+    msg->vsetting.data.fence_hsv.vH = cf->fence_vH;
+    msg->vsetting.data.vision_angle = cf->vision_angle;
+	
+	return TRUE;
+}
