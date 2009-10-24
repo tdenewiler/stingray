@@ -6,6 +6,18 @@
 #ifndef _CLIENT_H_
 #define _CLIENT_H_
 
+#include <stdio.h>
+#include <unistd.h>
+#include <string.h>
+#include <sys/select.h>
+#include <signal.h>
+#include <gtk/gtk.h>
+
+#include "gui.h"
+#include "network.h"
+#include "util.h"
+#include "messages.h"
+#include "parser.h"
 
 /******************************
 **

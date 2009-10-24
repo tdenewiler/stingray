@@ -6,6 +6,15 @@
 #ifndef _GUI_H_
 #define _GUI_H_
 
+#include <sys/timeb.h>
+#include <string.h>
+#include <gtk/gtk.h>
+#include <unistd.h>
+
+#include "buttons.h"
+#include "network.h"
+#include "messages.h"
+#include "parser.h"
 
 /******************************
 **

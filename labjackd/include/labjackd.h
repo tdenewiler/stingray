@@ -6,6 +6,21 @@
 #ifndef _LABJACKD_H_
 #define _LABJACKD_H_
 
+#include <stdio.h>
+#include <stdlib.h>
+#include <signal.h>
+#include <unistd.h>
+#include <string.h>
+#include <math.h>
+#include <time.h>
+#include <sys/time.h>
+
+#include "network.h"
+#include "labjack.h"
+#include "util.h"
+#include "messages.h"
+#include "parser.h"
+
 /******************************
 **
 ** #defines

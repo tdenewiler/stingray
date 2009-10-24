@@ -8,12 +8,17 @@ INCLUDES	+= -I../../libs/microstrain/include
 INCLUDES	+= -I../../libs/labjack/include
 INCLUDES	+= -I../../libs/pololu/include
 INCLUDES	+= -I../../libs/vision/include
+INCLUDES	+= -I../../libs/serial/include
+INCLUDES	+= -I../../libs/kalman/include
+INCLUDES	+= -I../../libs/timing/include
+INCLUDES	+= -I/usr/include/opencv
 
 # compiler and flags
 CC        	= g++
 CFLAGS    	= -Wall
 CFLAGS    	+= -O2
 CFLAGS    	+= -g
+LINK		= -lcv
 
 # Gtk+ flags
 LLIBS = `pkg-config --libs gtk+-2.0`
@@ -26,6 +31,7 @@ PARSEDIR	= ../../libs/parser/lib
 PARSELIB	= parser.a
 LIBS		= $(PARSEDIR)/$(PARSELIB)
 LIBS		+= $(STDLIBS)
+LIBS		+= $(LINK)
 
 # executables to build
 EXE 		= gui

@@ -9,6 +9,9 @@
 #include "microstrain.h"
 #include "labjack.h"
 #include "msgtypes.h"
+#include "network.h"
+#include "pololu.h"
+#include "pid.h"
 
 
 /******************************

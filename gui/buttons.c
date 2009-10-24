@@ -6,16 +6,7 @@
  *
  *****************************************************************************/
 
-
-#include <sys/timeb.h>
-#include <gtk/gtk.h>
-
 #include "buttons.h"
-#include "events.h"
-#include "messages.h"
-#include "pololu.h"
-#include "parser.h"
-
 
 /* Handle for status output widget. */
 GtkWidget *label_status;

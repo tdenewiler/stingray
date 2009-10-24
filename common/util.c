@@ -13,8 +13,6 @@
 #include <stdlib.h>
 
 #include "util.h"
-#include "pololu.h"
-#include "labjack.h"
 
 
 /******************************************************************************

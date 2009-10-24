@@ -1,10 +1,15 @@
 # include directories
 INCLUDES  	= -Iinclude
 INCLUDES	+= -I../common/include
+INCLUDES	+= -I../planner/include
 INCLUDES	+= -I../../libs/microstrain/include
 INCLUDES	+= -I../../libs/pololu/include
 INCLUDES	+= -I../../libs/labjack/include
 INCLUDES	+= -I../../libs/parser/include
+INCLUDES	+= -I../../libs/serial/include
+INCLUDES	+= -I../../libs/kalman/include
+INCLUDES	+= -I../../libs/timing/include
+INCLUDES	+= -I/usr/include/opencv
 
 # compiler and flags
 CC        	= g++

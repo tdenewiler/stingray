@@ -22,7 +22,6 @@
 #include <fcntl.h>
 
 #include "network.h"
-#include "messages.h"
 
 
 static int fdmax;

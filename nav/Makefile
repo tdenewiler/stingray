@@ -10,6 +10,8 @@ INCLUDES    += -I../../libs/timing/include
 INCLUDES    += -I../../libs/ssa/src
 INCLUDES    += -I../labjackd/include
 INCLUDES    += -I../planner/include/
+INCLUDES	+= -I../../libs/kalman/include
+INCLUDES	+= -I/usr/include/opencv
 
 # compiler and flags
 CC          = g++

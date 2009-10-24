@@ -6,6 +6,14 @@
 #ifndef _BUTTONS_H_
 #define _BUTTONS_H_
 
+#include <sys/timeb.h>
+#include <gtk/gtk.h>
+
+#include "events.h"
+#include "messages.h"
+#include "pololu.h"
+#include "parser.h"
+
 /******************************
 **
 ** #defines

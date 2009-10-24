@@ -6,6 +6,16 @@
 #ifndef _EVENTS_H_
 #define _EVENTS_H_
 
+#include <sys/timeb.h>
+#include <gtk/gtk.h>
+
+#include "buttons.h"
+#include "messages.h"
+#include "pololu.h"
+#include "parser.h"
+#include "network.h"
+#include "task.h"
+
 /******************************
 **
 ** #defines

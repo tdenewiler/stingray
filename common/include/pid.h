@@ -9,6 +9,10 @@
 #include "messages.h"
 #include "parser.h"
 #include "labjack.h"
+#include "microstrain.h"
+#include "pololu.h"
+#include "util.h"
+#include "task.h"
 
 
 /******************************

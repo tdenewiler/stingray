@@ -6,18 +6,7 @@
  *
  *****************************************************************************/
 
-
-#include <sys/timeb.h>
-#include <gtk/gtk.h>
-
 #include "events.h"
-#include "buttons.h"
-#include "messages.h"
-#include "pololu.h"
-#include "parser.h"
-#include "network.h"
-#include "task.h"
-
 
 /* Operation mode buttons. */
 extern GtkWidget *button_hold_yaw;

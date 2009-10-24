@@ -13,12 +13,6 @@
 #include <math.h>
 
 #include "pid.h"
-#include "microstrain.h"
-#include "parser.h"
-#include "labjack.h"
-#include "pololu.h"
-#include "util.h"
-#include "task.h"
 
 
 /******************************************************************************

@@ -7,21 +7,7 @@
  *****************************************************************************/
 
 
-#include <stdio.h>
-#include <stdlib.h>
-#include <signal.h>
-#include <unistd.h>
-#include <string.h>
-#include <math.h>
-#include <time.h>
-#include <sys/time.h>
-
 #include "labjackd.h"
-#include "network.h"
-#include "labjack.h"
-#include "util.h"
-#include "messages.h"
-#include "parser.h"
 
 
 /* Global file descriptors. Only global so that labjackd_exit() can close them. */

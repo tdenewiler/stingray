@@ -12,11 +12,7 @@
 #include <unistd.h>
 #include <string.h>
 
-#include "network.h"
-#include "pololu.h"
 #include "messages.h"
-#include "labjack.h"
-#include "pid.h"
 
 
 /******************************************************************************
