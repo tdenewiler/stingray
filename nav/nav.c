@@ -27,6 +27,7 @@
 #include "messages.h"
 #include "pid.h"
 #include "labjackd.h"
+#include "timing.h"
 
 #ifdef USE_SSA
 #include <sys/timeb.h>
@@ -216,24 +217,11 @@ int main( int argc, char *argv[] )
     CONF_VARS cf;
     MSG_DATA msg;
     PID pid;
-    struct timeval pitch_time = {0, 0};
-    struct timeval roll_time = {0, 0};
-    struct timeval yaw_time = {0, 0};
-    struct timeval depth_time = {0, 0};
-	struct timeval pololu_time = {0, 0};
-    struct timeval pitch_start = {0, 0};
-    struct timeval roll_start = {0, 0};
-    struct timeval yaw_start = {0, 0};
-    struct timeval depth_start = {0, 0};
-	struct timeval pololu_start = {0, 0};
-    int time1s = 0;
-    int time1ms = 0;
-    int time2s = 0;
-    int time2ms = 0;
-    int dt = 0;
-	short int accel_gain = 0;
-	short int mag_gain = 0;
-	short int bias_gain = 0;
+    TIMING timer_pitch;
+    TIMING timer_roll;
+    TIMING timer_yaw;
+    TIMING timer_depth;
+	TIMING timer_pololu;
 
     printf("MAIN: Starting Navigation ... \n");
 
@@ -315,16 +303,11 @@ int main( int argc, char *argv[] )
 	}
 
     /* Initialize timers. */
-    gettimeofday( &pitch_time, NULL );
-    gettimeofday( &pitch_start, NULL );
-    gettimeofday( &roll_time, NULL );
-    gettimeofday( &roll_start, NULL );
-    gettimeofday( &yaw_time, NULL );
-    gettimeofday( &yaw_start, NULL );
-    gettimeofday( &depth_time, NULL );
-    gettimeofday( &depth_start, NULL );
-    gettimeofday( &pololu_time, NULL );
-    gettimeofday( &pololu_start, NULL );
+    timing_set_timer(&timer_pitch);
+    timing_set_timer(&timer_roll);
+    timing_set_timer(&timer_yaw);
+    timing_set_timer(&timer_depth);
+    timing_set_timer(&timer_pololu);
 
 	printf("MAIN: Nav running now.\n");
 
@@ -345,15 +328,10 @@ int main( int argc, char *argv[] )
 						pololuInitializeChannels( pololu_fd );
 						pololu_starting = TRUE;
 						/* Start the timer. */
-						gettimeofday( &pololu_start, NULL );
+						timing_set_timer(&timer_pololu);
 					}
 					/* Check that 7 seconds have elapsed since initializing Pololu. */
-		            time1s =    pololu_time.tv_sec;
-					time1ms =   pololu_time.tv_usec;
-					time2s =    pololu_start.tv_sec;
-					time2ms =   pololu_start.tv_usec;
-					dt = util_calc_dt( &time1s, &time1ms, &time2s, &time2ms );
-					if( dt > POLOLU_INIT_TIME ) {
+					if(timing_check_elapsed(&timer_pololu, (float)POLOLU_INIT_TIME)) {
 						pololu_initialized = TRUE;
 						pololu_starting = FALSE;
 						pid.pitch.ierr = 0;
@@ -398,41 +376,10 @@ int main( int argc, char *argv[] )
             }
         }
 
-        /* Send dropper servo command. Check that Pololu is initialized. */
-        //if( (pololu_fd > 0) && (pololu_initialized) ) {
-            //status = pololuSetPosition7Bit( pololu_fd, POLOLU_DROPPER_SERVO, msg.client.data.dropper );
-            //printf("MAIN: dropper = %d\n", msg.client.data.dropper);
-        //}
-
-        /* Check for assisted teleop commands. */
-        //if( msg.target.data.mode == MANUAL ) {
-            //msg.target.data.pitch   += msg.teleop.data.pitch;
-            //msg.target.data.roll    += msg.teleop.data.roll;
-            //msg.target.data.yaw     += msg.teleop.data.yaw;
-            //msg.target.data.depth   += msg.teleop.data.depth;
-            //msg.target.data.fx      += msg.teleop.data.fx;
-            //msg.target.data.fy      += msg.teleop.data.fy;
-            //msg.target.data.speed   += msg.teleop.data.speed;
-
-            ///* Reset the target change values back to zero. */
-            //msg.teleop.data.pitch = 0;
-            //msg.teleop.data.roll = 0;
-            //msg.teleop.data.yaw = 0;
-            //msg.teleop.data.depth = 0;
-            //msg.teleop.data.fx = 0;
-            //msg.teleop.data.fy = 0;
-            //msg.teleop.data.speed = 0;
-        //}
-
-         /* Get Microstrain data. */
+        /* Get Microstrain data. */
         if( (cf.enable_imu) && (imu_fd > 0) ) {
             recv_bytes = mstrain_euler_angles( imu_fd, &msg.mstrain.data.pitch,
 				&msg.mstrain.data.roll, &msg.mstrain.data.yaw );
-				//&msg.mstrain.data.roll, &msg.mstrain.data.yaw, msg.mstrain.data.accel,
-				//msg.mstrain.data.ang_rate );
-
-			/* Calculate yaw average from history. */
-			//msg.mstrain.data.yaw = calc_yaw_avg( msg.mstrain.data.yaw );
 
 			recv_bytes = mstrain_vectors( imu_fd, 0, msg.mstrain.data.mag,
 				msg.mstrain.data.accel, msg.mstrain.data.ang_rate );
@@ -453,97 +400,39 @@ int main( int argc, char *argv[] )
         /* Perform PID loops. */
         if( msg.stop.data.state == FALSE ) {
             /* Pitch. */
-            time1s =    pitch_time.tv_sec;
-            time1ms =   pitch_time.tv_usec;
-            time2s =    pitch_start.tv_sec;
-            time2ms =   pitch_start.tv_usec;
-            dt = util_calc_dt( &time1s, &time1ms, &time2s, &time2ms );
-            if( dt > pid.pitch.period ) {
-                pid_loop( pololu_fd, &pid, &cf, &msg, dt, PID_PITCH, pololu_initialized );
-                msg.status.data.pitch_period = dt;
-                gettimeofday( &pitch_start, NULL );
+			if(timing_check_elapsed(&timer_pitch, cf.period_pitch)) {
+                pid_loop( pololu_fd, &pid, &cf, &msg, cf.period_pitch, PID_PITCH, pololu_initialized );
+				timing_set_timer(&timer_pitch);
             }
 
             /* Roll. */
-            time1s =    roll_time.tv_sec;
-            time1ms =   roll_time.tv_usec;
-            time2s =    roll_start.tv_sec;
-            time2ms =   roll_start.tv_usec;
-            dt = util_calc_dt( &time1s, &time1ms, &time2s, &time2ms );
-            if( dt > pid.roll.period ) {
-                pid_loop( pololu_fd, &pid, &cf, &msg, dt, PID_ROLL, pololu_initialized );
-                msg.status.data.roll_period = dt;
-                gettimeofday( &roll_start, NULL );
+			if(timing_check_elapsed(&timer_roll, cf.period_roll)) {
+                pid_loop( pololu_fd, &pid, &cf, &msg, cf.period_roll, PID_ROLL, pololu_initialized );
+				timing_set_timer(&timer_roll);
             }
 
             /* Yaw. */
-            time1s =    yaw_time.tv_sec;
-            time1ms =   yaw_time.tv_usec;
-            time2s =    yaw_start.tv_sec;
-            time2ms =   yaw_start.tv_usec;
-            dt = util_calc_dt( &time1s, &time1ms, &time2s, &time2ms );
-            if( dt > pid.yaw.period ) {
-                pid_loop( pololu_fd, &pid, &cf, &msg, dt, PID_YAW, pololu_initialized );
-				msg.status.data.yaw_period = dt;
-				gettimeofday( &yaw_start, NULL );
+			if(timing_check_elapsed(&timer_yaw, cf.period_yaw)) {
+                pid_loop( pololu_fd, &pid, &cf, &msg, cf.period_yaw, PID_YAW, pololu_initialized );
+				timing_set_timer(&timer_yaw);
             }
 
             /* Depth. */
-            time1s =    depth_time.tv_sec;
-            time1ms =   depth_time.tv_usec;
-            time2s =    depth_start.tv_sec;
-            time2ms =   depth_start.tv_usec;
-            dt = util_calc_dt( &time1s, &time1ms, &time2s, &time2ms );
-            if( dt > pid.depth.period ) {
-                pid_loop( pololu_fd, &pid, &cf, &msg, dt, PID_DEPTH, pololu_initialized );
-                msg.status.data.depth_period = dt;
-                gettimeofday( &depth_start, NULL );
+			if(timing_check_elapsed(&timer_depth, cf.period_depth)) {
+                pid_loop( pololu_fd, &pid, &cf, &msg, cf.period_depth, PID_DEPTH, pololu_initialized );
+				timing_set_timer(&timer_depth);
             }
         }
 
         /* Update status message. */
-        messages_update( &msg );
+        messages_update(&msg);
 
         /* Update and send the SSA data. */
         #ifdef USE_SSA
         ssa_update_telemetry( &msg );
         usleep( SSA_SLEEP );
         #endif /* USE_SSA */
-
-        /* Update timers. */
-        gettimeofday( &pitch_time, NULL );
-        gettimeofday( &roll_time, NULL );
-        gettimeofday( &yaw_time, NULL );
-        gettimeofday( &depth_time, NULL );
-        gettimeofday( &pololu_time, NULL );
     }
 
     exit( 0 );
 } /* end main() */
-
-float calc_yaw_avg( float curr_yaw )
-{
-	int i = 0;
-	float yaw_total = 0;
-	float yaw_avg = 0;
-
-	/* Update yaw history. */
-	yaw_hist[yaw_head] = curr_yaw;
-	yaw_head++;
-	if ( yaw_head > YAW_HIST_SIZE )
-	{
-		yaw_head = 0;
-	}
-
-	/* Calculate yaw average. */
-	for ( i = 0; i < YAW_HIST_SIZE; i++ )
-	{
-		yaw_total += yaw_hist[i];
-	}
-
-	yaw_avg = yaw_total / YAW_HIST_SIZE;
-
-	printf( "yaw_avg = %f\n", yaw_avg );
-
-	return yaw_avg;
-}
