@@ -28,7 +28,8 @@ GTKFLAGS = `pkg-config --cflags gtk+-2.0`
 PARSEDIR	= ../../libs/parser/lib
 
 # libraries
-PARSELIB	= parser.a
+LIBPREFIX	= lib
+PARSELIB	= $(LIBPREFIX)parser.a
 LIBS		= $(PARSEDIR)/$(PARSELIB)
 LIBS		+= $(STDLIBS)
 LIBS		+= $(LINK)

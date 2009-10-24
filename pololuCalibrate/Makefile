@@ -15,9 +15,10 @@ SERDIR      = ../../libs/serial/lib
 LJDIR		= ../../libs/labjack/lib
 
 # libraries
-POLLIB		= pololu.a
-SERLIB      = serial.a
-LJLIB		= labjack.a
+LIBPREFIX	= lib
+POLLIB		= $(LIBPREFIX)pololu.a
+SERLIB      = $(LIBPREFIX)serial.a
+LJLIB		= $(LIBPREFIX)labjack.a
 LIBS		= $(POLDIR)/$(POLLIB)
 LIBS		+= $(SERDIR)/$(SERLIB)
 LIBS		+= $(LJDIR)/$(LJLIB)

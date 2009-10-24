@@ -28,13 +28,13 @@ TIMINGDIR	= ../../libs/timing/lib
 
 # libraries
 LIBPREFIX	= lib
-PARSELIB	= parser.a
-SERLIB		= serial.a
-MSLIB		= microstrain.a
-LJLIB		= labjack.a
-POLLIB		= pololu.a
-KALLIB		= kalman.a
-TIMINGLIB	= timing.a
+PARSELIB	= $(LIBPREFIX)parser.a
+SERLIB		= $(LIBPREFIX)serial.a
+MSLIB		= $(LIBPREFIX)microstrain.a
+LJLIB		= $(LIBPREFIX)labjack.a
+POLLIB		= $(LIBPREFIX)pololu.a
+KALLIB		= $(LIBPREFIX)kalman.a
+TIMINGLIB	= $(LIBPREFIX)timing.a
 STDLIBS		= -lm
 LIBS		= $(PARSEDIR)/$(PARSELIB)
 LIBS		+= $(MSDIR)/$(MSLIB)
@@ -42,7 +42,7 @@ LIBS		+= $(LJDIR)/$(LJLIB)
 LIBS		+= $(POLDIR)/$(POLLIB)
 LIBS		+= $(SERDIR)/$(SERLIB)
 LIBS		+= $(KALDIR)/$(KALLIB)
-LIBS		+= $(TIMINGDIR)/$(LIBPREFIX)$(TIMINGLIB)
+LIBS		+= $(TIMINGDIR)/$(TIMINGLIB)
 LIBS		+= $(LINK)
 LIBS		+= $(STDLIBS)
 

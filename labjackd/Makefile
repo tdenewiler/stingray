@@ -22,8 +22,9 @@ LJDIR		= ../../libs/labjack/lib
 PARSEDIR	= ../../libs/parser/lib
 
 # libraries
-LJLIB		= labjack.a
-PARSELIB	= parser.a
+LIBPREFIX	= lib
+LJLIB		= $(LIBPREFIX)labjack.a
+PARSELIB	= $(LIBPREFIX)parser.a
 LIBS		= $(LJDIR)/$(LJLIB)
 LIBS		+= $(PARSEDIR)/$(PARSELIB)
 

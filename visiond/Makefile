@@ -8,6 +8,8 @@ INCLUDES	+= -I../../libs/labjack/include
 INCLUDES	+= -I../../libs/pololu/include
 INCLUDES	+= -I../../libs/vision/include
 INCLUDES	+= -I../../libs/timing/include
+INCLUDES	+= -I../../libs/serial/include
+INCLUDES	+= -I../../libs/kalman/include
 INCLUDES	+= -I/usr/include/opencv
 
 # compiler and flags
@@ -27,12 +29,12 @@ TIMINGDIR	= ../../libs/timing/lib
 
 # libraries
 LIBPREFIX	= lib
-PARSELIB	= parser.a
-VISIONLIB	= vision.a
-TIMINGLIB	= timing.a
+PARSELIB	= $(LIBPREFIX)parser.a
+VISIONLIB	= $(LIBPREFIX)vision.a
+TIMINGLIB	= $(LIBPREFIX)timing.a
 STDLIBS		= -lm
 LIBS		= $(PARSEDIR)/$(PARSELIB)
-LIBS		+= $(TIMINGDIR)/$(LIBPREFIX)$(TIMINGLIB)
+LIBS		+= $(TIMINGDIR)/$(TIMINGLIB)
 LIBS		+= $(VISIONDIR)/$(VISIONLIB)
 LIBS		+= $(LINK)
 LIBS		+= $(STDLIBS)

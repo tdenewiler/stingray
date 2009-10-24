@@ -31,12 +31,12 @@ SSADIR      = ../../libs/ssa/lib
 
 # libraries
 LIBPREFIX	= lib
-PARSELIB    = parser.a
-SERLIB      = serial.a
-MSLIB       = microstrain.a
-LJLIB       = labjack.a
-POLLIB      = pololu.a
-TIMINGLIB   = timing.a
+PARSELIB    = $(LIBPREFIX)parser.a
+SERLIB      = $(LIBPREFIX)serial.a
+MSLIB       = $(LIBPREFIX)microstrain.a
+LJLIB       = $(LIBPREFIX)labjack.a
+POLLIB      = $(LIBPREFIX)pololu.a
+TIMINGLIB   = $(LIBPREFIX)timing.a
 SSALIB      = ssa.a
 STDLIBS     = -lm
 STDLIBS		+= -lgnome-2
@@ -45,7 +45,7 @@ LIBS		+= $(MSDIR)/$(MSLIB)
 LIBS		+= $(LJDIR)/$(LJLIB)
 LIBS		+= $(POLDIR)/$(POLLIB)
 LIBS		+= $(SERDIR)/$(SERLIB)
-LIBS		+= $(TIMINGDIR)/$(LIBPREFIX)$(TIMINGLIB)
+LIBS		+= $(TIMINGDIR)/$(TIMINGLIB)
 LIBS		+= $(STDLIBS)
 
 # executables to build

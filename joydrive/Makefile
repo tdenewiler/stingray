@@ -23,8 +23,9 @@ PARSEDIR	= ../../libs/parser/lib
 JOYDIR		= ../../libs/joy/lib
 
 # libraries
-PARSELIB	= parser.a
-JOYLIB		= joy.a
+LIBPREFIX	= lib
+PARSELIB	= $(LIBPREFIX)parser.a
+JOYLIB		= $(LIBPREFIX)joy.a
 LIBS		= $(PARSEDIR)/$(PARSELIB)
 LIBS		+= $(JOYDIR)/$(JOYLIB)
 
