@@ -62,3 +62,46 @@ int timing_set_timer(TIMING *timer)
 
 	return TIMING_SUCCESS;
 } /* end timing_set_timer() */
+
+
+/*------------------------------------------------------------------------------
+ * int timing_get_elapsed()
+ * Get the time elapsed for a given timer. Return the elapsed time in another
+ * TIMING element.
+ *----------------------------------------------------------------------------*/
+
+int timing_get_elapsed(TIMING *timer, TIMING *elapsed)
+{
+	/// Declare variables.
+	struct timeval t = {0, 0};
+
+	/// Get the current system time.
+	gettimeofday(&t, NULL);
+
+	/// Check to see which fraction of a second is larger.
+	if(t.tv_usec > timer->us) {
+		elapsed->s  = timer->s - t.tv_sec;
+		elapsed->us = 1000000 + timer->us - t.tv_usec;
+		/// This should never happen. If it does then there is a problem with the system time.
+		if(elapsed->s < 0)
+			return TIMING_ERROR;
+	}
+	else {
+		elapsed->s  = timer->s - t.tv_sec;
+		elapsed->us = timer->us - t.tv_usec;
+	}
+
+	return TIMING_SUCCESS;
+} /* end timing_check_elapsed() */
+
+
+/*------------------------------------------------------------------------------
+ * int timing_s2us()
+ * Convert a TIMING struct to the time in microseconds.
+ *----------------------------------------------------------------------------*/
+
+int timing_s2us(TIMING *timer)
+{
+	/// Convert from seconds.microseconds to microseconds.
+	return (timer->s * 1000000 ) + timer->us;
+} /* end timing_check_elapsed() */

@@ -56,5 +56,16 @@ int timing_check_elapsed(TIMING *timer, float period);
 //! \return 1 on success, 0 on failure.
 int timing_set_timer(TIMING *timer);
 
+//! Computes elapsed time for a given timer.
+//! \param timer A timer value to check.
+//! \param elapsed The amount of time elapsed for timer.
+//! \return 1 on success, 0 on failure.
+int timing_get_elapsed(TIMING *timer, TIMING *elapsed);
+
+//! Convert from a timing element to microseconds.
+//! \param timer A timer value to convert.
+//! \return The time in microseconds.
+int timing_s2us(TIMING *timer);
+
 
 #endif /* _TIMING_H_ */
