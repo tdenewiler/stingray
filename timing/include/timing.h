@@ -32,7 +32,7 @@
 #ifndef _TIMING_
 #define _TIMING_
 /*! Timer struct. */
-typedef struct _HEADER {
+typedef struct _TIMING {
 	int us;	//!< Time in microseconds
     int s;	//!< Time in seconds
 } TIMING;

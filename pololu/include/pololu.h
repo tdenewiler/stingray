@@ -76,9 +76,9 @@
 #define POLOLU_MOVE_STOP			0
 //@}
 
-/** @name The time (ms) it takes for the Pololu to initialize. */
+/** @name The time (in seconds) it takes for the Pololu to initialize. */
 //@{
-#define POLOLU_INIT_TIME	7000000
+#define POLOLU_INIT_TIME	7
 //@}
 
 /** @name The number of bytes expected to be sent for vertical and Voith commands. */

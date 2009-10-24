@@ -393,31 +393,31 @@ void parse_line( CONF_VARS *config )
 
     else if( strncmp( tokens[0], "period", STRING_SIZE ) == 0 ) {
         if( strncmp( tokens[1], "pitch", STRING_SIZE ) == 0 ) {
-            sscanf( tokens[2], "%d", &config->period_pitch );
+            sscanf( tokens[2], "%f", &config->period_pitch );
         }
         else if( strncmp( tokens[1], "roll", STRING_SIZE ) == 0 ) {
-            sscanf( tokens[2], "%d", &config->period_roll );
+            sscanf( tokens[2], "%f", &config->period_roll );
         }
         else if( strncmp( tokens[1], "yaw", STRING_SIZE ) == 0 ) {
-            sscanf( tokens[2], "%d", &config->period_yaw );
+            sscanf( tokens[2], "%f", &config->period_yaw );
         }
         else if( strncmp( tokens[1], "depth", STRING_SIZE ) == 0 ) {
-            sscanf( tokens[2], "%d", &config->period_depth );
+            sscanf( tokens[2], "%f", &config->period_depth );
         }
         else if( strncmp( tokens[1], "ax", STRING_SIZE ) == 0 ) {
-            sscanf( tokens[2], "%d", &config->period_ax );
+            sscanf( tokens[2], "%f", &config->period_ax );
         }
         else if( strncmp( tokens[1], "ay", STRING_SIZE ) == 0 ) {
-            sscanf( tokens[2], "%d", &config->period_ay );
+            sscanf( tokens[2], "%f", &config->period_ay );
         }
         else if( strncmp( tokens[1], "az", STRING_SIZE ) == 0 ) {
-            sscanf( tokens[2], "%d", &config->period_az );
+            sscanf( tokens[2], "%f", &config->period_az );
         }
         else if( strncmp( tokens[1], "vision", STRING_SIZE ) == 0 ) {
-            sscanf( tokens[2], "%d", &config->period_vision );
+            sscanf( tokens[2], "%f", &config->period_vision );
         }
         else if( strncmp( tokens[1], "planner", STRING_SIZE ) == 0 ) {
-            sscanf( tokens[2], "%d", &config->period_planner );
+            sscanf( tokens[2], "%f", &config->period_planner );
         }
     }
     /* end PID parameters */
@@ -1038,14 +1038,14 @@ void parse_print_config( CONF_VARS *config )
     printf("PARSE_PRINT_CONFIG: target_fx = %f\n", config->target_fx);
     printf("PARSE_PRINT_CONFIG: target_fy = %f\n", config->target_fy);
     printf("PARSE_PRINT_CONFIG: target_speed = %f\n", config->target_speed);
-    printf("PARSE_PRINT_CONFIG: period_pitch = %d\n", config->period_pitch);
-    printf("PARSE_PRINT_CONFIG: period_roll = %d\n", config->period_roll);
-    printf("PARSE_PRINT_CONFIG: period_yaw = %d\n", config->period_yaw);
-    printf("PARSE_PRINT_CONFIG: period_depth = %d\n", config->period_depth);
-    printf("PARSE_PRINT_CONFIG: period_ax = %d\n", config->period_ax);
-    printf("PARSE_PRINT_CONFIG: period_ay = %d\n", config->period_ay);
-    printf("PARSE_PRINT_CONFIG: period_az = %d\n", config->period_az);
-    printf("PARSE_PRINT_CONFIG: period_vision = %d\n", config->period_vision);
+    printf("PARSE_PRINT_CONFIG: period_pitch = %f\n", config->period_pitch);
+    printf("PARSE_PRINT_CONFIG: period_roll = %f\n", config->period_roll);
+    printf("PARSE_PRINT_CONFIG: period_yaw = %f\n", config->period_yaw);
+    printf("PARSE_PRINT_CONFIG: period_depth = %f\n", config->period_depth);
+    printf("PARSE_PRINT_CONFIG: period_ax = %f\n", config->period_ax);
+    printf("PARSE_PRINT_CONFIG: period_ay = %f\n", config->period_ay);
+    printf("PARSE_PRINT_CONFIG: period_az = %f\n", config->period_az);
+    printf("PARSE_PRINT_CONFIG: period_vision = %f\n", config->period_vision);
     printf("PARSE_PRINT_CONFIG: period_planner = %d\n", config->period_planner);
     printf("PARSE_PRINT_CONFIG: enable_pololu = %d\n", config->enable_pololu);
     printf("PARSE_PRINT_CONFIG: pololu_baud = %d\n", config->pololu_baud);
@@ -1110,7 +1110,7 @@ void parse_print_config( CONF_VARS *config )
 	printf("PARSE_PRINT_CONFIG: save_image_rate = %d\n", config->save_image_rate);
 	printf("PARSE_PRINT_CONFIG: save_image_dir = %s\n", config->save_image_dir);
 	printf("PARSE_PRINT_CONFIG: open_image_rate = %d\n", config->open_image_rate);
-	printf("PARSE_PRINT_CONFIG: open_image_dir = %s\n", config->open_image_dir);	
+	printf("PARSE_PRINT_CONFIG: open_image_dir = %s\n", config->open_image_dir);
 	printf("PARSE_PRINT_CONFIG: kp_buoy = %lf\n", config->kp_buoy);
 	printf("PARSE_PRINT_CONFIG: ki_buoy = %lf\n", config->ki_buoy);
 	printf("PARSE_PRINT_CONFIG: kd_buoy = %lf\n", config->kd_buoy);
