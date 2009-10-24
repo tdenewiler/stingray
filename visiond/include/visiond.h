@@ -6,6 +6,27 @@
 #ifndef _VISIOND_H_
 #define _VISIOND_H_
 
+#include <stdio.h>
+#include <stdlib.h>
+#include <signal.h>
+#include <unistd.h>
+#include <string.h>
+#include <time.h>
+#include <sys/time.h>
+#include <dirent.h>
+#include <cv.h>
+#include <cxcore.h>
+#include <highgui.h>
+
+#include "vision.h"
+#include "messages.h"
+#include "network.h"
+#include "parser.h"
+#include "util.h"
+#include "microstrain.h"
+#include "labjack.h"
+#include "task.h"
+#include "timing.h"
 
 /******************************
 **
