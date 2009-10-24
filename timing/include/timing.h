@@ -49,7 +49,7 @@ typedef struct _TIMING {
 //! \param timer A timer value to check.
 //! \param period The amount of time to check against, in seconds.
 //! \return 1 on success, 0 on failure.
-int timing_check_elapsed(TIMING *timer, float period);
+int timing_check_period(TIMING *timer, float period);
 
 //! Sets a timer to the current system time.
 //! \param timer A timer to set.
@@ -60,7 +60,7 @@ int timing_set_timer(TIMING *timer);
 //! \param timer A timer value to check.
 //! \param elapsed The amount of time elapsed for timer.
 //! \return 1 on success, 0 on failure.
-int timing_get_elapsed(TIMING *timer, TIMING *elapsed);
+int timing_get_dt(TIMING *timer, TIMING *elapsed);
 
 //! Convert from a timing element to microseconds.
 //! \param timer A timer value to convert.

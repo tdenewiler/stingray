@@ -96,7 +96,7 @@ void parse_line( CONF_VARS *config )
 				sscanf( tokens[3], "%d", &config->save_image_binary );
 			}
 			else if ( strncmp( tokens[2], "rate", STRING_SIZE ) == 0 ) {
-				sscanf( tokens[3], "%d", &config->save_image_rate );
+				sscanf( tokens[3], "%f", &config->save_image_rate );
 			}
 			else if ( strncmp( tokens[2], "dir", STRING_SIZE ) == 0 ) {
 				strncpy( config->save_image_dir, tokens[3], STRING_SIZE );
@@ -106,7 +106,7 @@ void parse_line( CONF_VARS *config )
 	if( strncmp( tokens[0], "open", STRING_SIZE ) == 0 ) {
 		if ( strncmp( tokens[1], "image", STRING_SIZE ) == 0 ) {
 			if ( strncmp( tokens[2], "rate", STRING_SIZE ) == 0 ) {
-				sscanf( tokens[3], "%d", &config->open_image_rate );
+				sscanf( tokens[3], "%f", &config->open_image_rate );
 			}
 			else if ( strncmp( tokens[2], "dir", STRING_SIZE ) == 0 ) {
 				strcpy( config->open_image_dir, tokens[3] );
@@ -1107,9 +1107,9 @@ void parse_print_config( CONF_VARS *config )
 	printf("PARSE_PRINT_CONFIG: save_image_bottom = %d\n", config->save_image_bottom );
 	printf("PARSE_PRINT_CONFIG: save_image_color = %d\n", config->save_image_color );
 	printf("PARSE_PRINT_CONFIG: save_image_binary = %d\n", config->save_image_binary );
-	printf("PARSE_PRINT_CONFIG: save_image_rate = %d\n", config->save_image_rate);
+	printf("PARSE_PRINT_CONFIG: save_image_rate = %f\n", config->save_image_rate);
 	printf("PARSE_PRINT_CONFIG: save_image_dir = %s\n", config->save_image_dir);
-	printf("PARSE_PRINT_CONFIG: open_image_rate = %d\n", config->open_image_rate);
+	printf("PARSE_PRINT_CONFIG: open_image_rate = %f\n", config->open_image_rate);
 	printf("PARSE_PRINT_CONFIG: open_image_dir = %s\n", config->open_image_dir);
 	printf("PARSE_PRINT_CONFIG: kp_buoy = %lf\n", config->kp_buoy);
 	printf("PARSE_PRINT_CONFIG: ki_buoy = %lf\n", config->ki_buoy);

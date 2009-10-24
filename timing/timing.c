@@ -16,11 +16,11 @@
 
 
 /*------------------------------------------------------------------------------
- * int timing_check_elapsed()
+ * int timing_check_period()
  * Check if a period has elapsed for a timer.
  *----------------------------------------------------------------------------*/
 
-int timing_check_elapsed(TIMING *timer, float period)
+int timing_check_period(TIMING *timer, float period)
 {
 	/// Declare variables.
 	struct timeval t = {0, 0};
@@ -40,7 +40,7 @@ int timing_check_elapsed(TIMING *timer, float period)
 	}
 
 	return TIMING_ERROR;
-} /* end timing_check_elapsed() */
+} /* end timing_check_period() */
 
 
 /*------------------------------------------------------------------------------
@@ -65,12 +65,12 @@ int timing_set_timer(TIMING *timer)
 
 
 /*------------------------------------------------------------------------------
- * int timing_get_elapsed()
+ * int timing_get_dt()
  * Get the time elapsed for a given timer. Return the elapsed time in another
  * TIMING element.
  *----------------------------------------------------------------------------*/
 
-int timing_get_elapsed(TIMING *timer, TIMING *elapsed)
+int timing_get_dt(TIMING *timer, TIMING *elapsed)
 {
 	/// Declare variables.
 	struct timeval t = {0, 0};
@@ -92,7 +92,7 @@ int timing_get_elapsed(TIMING *timer, TIMING *elapsed)
 	}
 
 	return TIMING_SUCCESS;
-} /* end timing_check_elapsed() */
+} /* end timing_get_dt() */
 
 
 /*------------------------------------------------------------------------------
@@ -104,4 +104,4 @@ int timing_s2us(TIMING *timer)
 {
 	/// Convert from seconds.microseconds to microseconds.
 	return (timer->s * 1000000 ) + timer->us;
-} /* end timing_check_elapsed() */
+} /* end timing_s2us() */

@@ -177,9 +177,9 @@ typedef struct _CONF_VARS {
 	int			save_image_bottom;
 	int			save_image_color;
 	int			save_image_binary;
-	int			save_image_rate;
+	float		save_image_rate;
 	char		save_image_dir[STRING_SIZE];
-	int			open_image_rate;
+	float		open_image_rate;
 	char		open_image_dir[STRING_SIZE];
 	float		task_init_yaw;
 } CONF_VARS;
