@@ -1,12 +1,12 @@
-LIB		= timing
+LIB			= timing
 LIBPREFIX	= lib
 INCLUDES	= -Iinclude
 CFLAGS		= -Wall
 CFLAGS		+= -O2
 CFLAGS		+= -g
 CFLAGS		+= -fPIC
-CC		= g++
-AR		= ar
+CC			= g++
+AR			= ar
 ARFLAGS		= rs
 SOFLAGS		= -shared
 LIBSO		= $(LIBPREFIX)$(LIB).so

@@ -1,4 +1,5 @@
 LIB         = ssa
+LIBPREFIX	= lib
 SRCDIR		= ./src
 GNOMEINC	= -I/usr/include/libgnome-2.0
 GNOMEINC	+= -I/usr/include/glib-2.0
@@ -20,6 +21,7 @@ CFLAGS      += $(NETWORK)
 CFLAGS      += $(COMPONENTS)
 CFLAGS      += -O2
 #CFLAGS      += -g
+CFLAGS		+= -fPIC
 CC          = gcc $(CFLAGS) $(INCLUDES)
 CPP         = g++ $(CFLAGS) $(INCLUDES)
 AR          = ar

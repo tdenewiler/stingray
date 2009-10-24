@@ -1,23 +1,30 @@
 LIB			= vision
+LIBPREFIX	= lib
 INCLUDES	= -Iinclude
 INCLUDES	+= -I/usr/include/opencv
 INCLUDES	+= -I../../src/common/include
 CFLAGS		= -Wall
 CFLAGS		+= -O2
 CFLAGS		+= -g
+CFLAGS		+= -fPIC
 CC			= g++
 AR			= ar
 ARFLAGS		= rs
-LIBS		= $(LIB).a
+SOFLAGS		= -shared
+LIBSO		= $(LIBPREFIX)$(LIB).so
+LIBA		= $(LIBPREFIX)$(LIB).a
 LIBDIR		= lib
 SRCDIR		= .
 
 LIBOBJ = $(SRCDIR)/$(LIB).o
 
-all: $(LIBS)
+all: $(LIBSO) $(LIBA)
 
-$(LIBS): $(LIBOBJ)
-	$(AR) $(ARFLAGS) $(LINK) $(LIBDIR)/$@ $(LIBOBJ)
+$(LIBSO): $(LIBOBJ)
+	$(CC) $(SOFLAGS) $(CFLAGS) $(INCLUDES) $(DEFINES) -o $(LIBDIR)/$@ $(LIBOBJ)
+
+$(LIBA): $(LIBOBJ)
+	$(AR) $(ARFLAGS) $(LIBDIR)/$@ $(LIBOBJ)
 
 %.o: %.cpp
 	$(CC) $(CFLAGS) $(INCLUDES) $(LINK) $(DEFINES) -c $<
@@ -26,4 +33,4 @@ $(LIBS): $(LIBOBJ)
 	$(CC) $(CFLAGS) $(INCLUDES) $(LINK) $(DEFINES) -c $<
 
 clean:
-	rm -f *.o $(LIBDIR)/*.a
+	rm -f *.o $(LIBDIR)/*.a $(LIBDIR)/*.so
