@@ -160,17 +160,6 @@ int task_buoy( MSG_DATA *msg, CONF_VARS *cf, int dt, int subtask_dt )
 			msg->target.data.yaw = msg->status.data.yaw +
 				(float)msg->vision.data.front_x * TASK_BUOY_YAW_GAIN;
 
-			/* TODO: Put in a check here to make sure we don't go too far away
-			 * from buoy depth target from config file. */
-			//msg->target.data.depth = msg->status.data.depth +
-				//(float)msg->vision.data.front_y * TASK_BUOY_DEPTH_GAIN;
-			//if( msg->target.data.depth > cf->depth_buoy + TASK_BUOY_MAX_DEPTH_DELTA ) {
-				//msg->target.data.depth = cf->depth_buoy + TASK_BUOY_MAX_DEPTH_DELTA;
-			//}
-			//else if( msg->target.data.depth < cf->depth_buoy - TASK_BUOY_MAX_DEPTH_DELTA ) {
-				//msg->target.data.depth = cf->depth_buoy - TASK_BUOY_MAX_DEPTH_DELTA;
-			//}
-
 			return TASK_CONTINUING;
 		}
 		/* CHRIS: Keep yaw if we don't see buoy. */

@@ -6,30 +6,7 @@
  *
  *****************************************************************************/
 
-
-#include <stdio.h>
-#include <stdlib.h>
-#include <signal.h>
-#include <unistd.h>
-#include <string.h>
-#include <math.h>
-#include <time.h>
-#include <sys/time.h>
-#include <cv.h>
-
 #include "planner.h"
-#include "microstrain.h"
-#include "network.h"
-#include "parser.h"
-#include "labjack.h"
-#include "pololu.h"
-#include "kalman.h"
-#include "util.h"
-#include "serial.h"
-#include "messages.h"
-#include "pid.h"
-#include "task.h"
-
 
 /* Global file descriptors. Only global so that planner_exit() can close them. */
 int server_fd;
@@ -143,33 +120,21 @@ int main( int argc, char *argv[] )
 	int old_task = 0;
 	int old_dropper = 0;
 	int old_subtask = 0;
-	CvPoint3D32f loc;
 	int task = TASK_NONE;
 	int subtask = SUBTASK_CONTINUING;
 	int status = TASK_CONTINUING;
 	int ks_closed = FALSE;
 	int buoy_touched = FALSE;
 	int buoy_success = FALSE;
+	CvPoint3D32f loc;
 
-	struct timeval vision_time = {0, 0};
-	struct timeval vision_start = {0, 0};
-	struct timeval plan_time = {0, 0};
-	struct timeval plan_start = {0, 0};
-	struct timeval task_time = {0, 0};
-	struct timeval task_start = {0, 0};
-	struct timeval log_time = {0, 0};
-	struct timeval log_start = {0, 0};
-	struct timeval kalman_time = {0, 0};
-	struct timeval kalman_start = {0,0};
-	struct timeval subtask_time = {0, 0};
-	struct timeval subtask_start = {0, 0};
-	int time1s = 0;
-	int time1ms = 0;
-	int time2s = 0;
-	int time2ms = 0;
-	int task_dt = 0;
-	int subtask_dt = 0;
-	int dt = 0;
+	/// Declare timers.
+	TIMING timer_vision;
+	TIMING timer_plan;
+	TIMING timer_task;
+	TIMING timer_log;
+	TIMING timer_kalman;
+	TIMING timer_subtask;
 
 	/* Declare timestamp variables. */
 	struct timeval ctime;
@@ -288,18 +253,12 @@ int main( int argc, char *argv[] )
 	}
 
 	/* Initialize timers. */
-	gettimeofday( &vision_time, NULL );
-	gettimeofday( &vision_start, NULL );
-	gettimeofday( &plan_time, NULL );
-	gettimeofday( &plan_start, NULL );
-	gettimeofday( &task_time, NULL );
-	gettimeofday( &task_start, NULL );
-	gettimeofday( &subtask_time, NULL );
-	gettimeofday( &subtask_start, NULL );
-	gettimeofday( &log_time, NULL );
-	gettimeofday( &log_start, NULL );
-	gettimeofday( &kalman_time, NULL );
-	gettimeofday( &kalman_start, NULL );
+	timing_set_timer(&timer_vision);
+	timing_set_timer(&timer_plan);
+	timing_set_timer(&timer_task);
+	timing_set_timer(&timer_subtask);
+	timing_set_timer(&timer_log);
+	timing_set_timer(&timer_kalman);
 
 	printf("MAIN: Planner running now.\n");
 	printf( "\n" );
@@ -317,18 +276,12 @@ int main( int argc, char *argv[] )
 
 		/* Get vision data. */
 		if( (cf.enable_vision) && (vision_fd > 0) ) {
-			time1s =    vision_time.tv_sec;
-			time1ms =   vision_time.tv_usec;
-			time2s =    vision_start.tv_sec;
-			time2ms =   vision_start.tv_usec;
-			dt = util_calc_dt( &time1s, &time1ms, &time2s, &time2ms );
-
-			if( dt > cf.period_vision ) {
+			if(timing_check_elapsed(&timer_vision, cf.period_vision)) {
 				recv_bytes = net_client( vision_fd, vision_buf, &msg, MODE_OPEN );
 				vision_buf[recv_bytes] = '\0';
 				if( recv_bytes > 0 ) {
-					messages_decode( vision_fd, vision_buf, &msg, recv_bytes );
-                    gettimeofday( &vision_start, NULL );
+					messages_decode(vision_fd, vision_buf, &msg, recv_bytes);
+                    timing_set_timer(&timer_vision);
 					msg.status.data.fps = msg.vision.data.fps;
 				}
 			}
@@ -343,15 +296,15 @@ int main( int argc, char *argv[] )
 			}
 			old_task = msg.task.data.task;
 			/* Reset the task and subtask start timers. */
-			gettimeofday( &task_start, NULL );
-			gettimeofday( &subtask_start, NULL );
+			timing_set_timer(&timer_task);
+			timing_set_timer(&timer_subtask);
 		}
 		else if( old_subtask != msg.task.data.subtask ) {
 			if( (cf.enable_vision) && (vision_fd > 0) ) {
 				messages_send( vision_fd, TASK_MSGID, &msg );
 			}
 			old_subtask = msg.task.data.subtask;
-			gettimeofday( &subtask_start, NULL );
+			timing_set_timer(&timer_subtask);
 		}
 
         /* Get nav data. */
@@ -373,11 +326,11 @@ int main( int argc, char *argv[] )
 			if( !ks_closed ) {
 				if( msg.lj.data.battery1 > 5 ) {
 					ks_closed = TRUE;
-					gettimeofday( &task_start, NULL );
+					timing_set_timer(&timer_task);
 					if( msg.task.data.course ) {
 						task = TASK_GATE;
 						msg.task.data.task = task;
-						gettimeofday( &subtask_start, NULL );
+						timing_set_timer(&timer_subtask);
 					}
 					cf.task_init_yaw = msg.status.data.yaw;
 					cf.target_yaw = cf.task_init_yaw;
@@ -399,22 +352,16 @@ int main( int argc, char *argv[] )
 
 		/* Update Kalman filter. */
 		if( bKF ) {
-			time1s =    kalman_time.tv_sec;
-			time1ms =   kalman_time.tv_usec;
-			time2s =    kalman_start.tv_sec;
-			time2ms =   kalman_start.tv_usec;
-			dt = util_calc_dt( &time1s, &time1ms, &time2s, &time2ms );
-
 			/* If it has been long enough, update the filter. */
-			if( dt > 0.1 * 1000000 ) {
+			if(timing_check_elapsed(&timer_kalman, 0.1)) {
 				STAT cs = msg.status.data;
 				float ang[] = { cs.pitch, cs.roll, cs.yaw };
 				float real_accel[] = { cs.accel[0], cs.accel[1], cs.accel[2] - 9.86326398 };
 
 				/* Update the Kalman filter. */
-				kalman_update( ((float)dt)/1000000, msg.lj.data.pressure, ang,
+				kalman_update( ((float)timing_s2us(&timer_kalman))/1000000, msg.lj.data.pressure, ang,
 						real_accel, cs.ang_rate );
-				gettimeofday( &kalman_start, NULL );
+				timing_set_timer(&timer_kalman);
 			}
 
 			/* Get current location estimation. */
@@ -433,12 +380,6 @@ int main( int argc, char *argv[] )
 
         /* Log if flag is set. */
         if( cf.enable_log && f_log ) {
-        	time1s =    log_time.tv_sec;
-			time1ms =   log_time.tv_usec;
-			time2s =    log_start.tv_sec;
-			time2ms =   log_start.tv_usec;
-			dt = util_calc_dt( &time1s, &time1ms, &time2s, &time2ms );
-
 			/* Get a timestamp and use for log. */
             gettimeofday( &ctime, NULL );
             ct = *( localtime ((const time_t*) &ctime.tv_sec) );
@@ -447,7 +388,7 @@ int main( int argc, char *argv[] )
             		strlen(write_time), ".%06ld", ctime.tv_usec );
 
 			/* Log enable_log times every second. */
-			if( dt > (cf.enable_log * 100000) ) {
+			if(timing_check_elapsed(&timer_log, cf.enable_log)) {
 				STAT cs = msg.status.data;
 				TARGET target = msg.target.data;
 				fprintf( f_log, "%s, %.06f,%.06f,%.06f,%.06f,%.06f,%.06f,%.06f,"
@@ -458,26 +399,16 @@ int main( int argc, char *argv[] )
 					cs.ang_rate[0], cs.ang_rate[1], cs.ang_rate[2], cs.fx, cs.fy,
 					target.pitch, target.roll, target.yaw, target.depth,
 					target.fx, target.fy );
-				gettimeofday( &log_start, NULL );
+				timing_set_timer(&timer_log);
 			}
 		}
 
-		/* Update the task dt. dt value is in seconds */
-		time1s =    task_time.tv_sec;
-		time1ms =   task_time.tv_usec;
-		time2s =    task_start.tv_sec;
-		time2ms =   task_start.tv_usec;
-		task_dt = util_calc_dt( &time1s, &time1ms, &time2s, &time2ms ) / 1000000;
-
-		/* Update the subtask dt. dt value is in seconds */
-		time1s =    subtask_time.tv_sec;
-		time1ms =   subtask_time.tv_usec;
-		time2s =    subtask_start.tv_sec;
-		time2ms =   subtask_start.tv_usec;
-		subtask_dt = util_calc_dt( &time1s, &time1ms, &time2s, &time2ms ) / 1000000;
+		/* Update the task and subtask elapsed times. */
+		timing_get_elapsed(&timer_task, &timer_task);
+		timing_get_elapsed(&timer_subtask, &timer_subtask);
 
 		/* Run the current task. */
-		status = task_run( &msg, &cf, task_dt, subtask_dt );
+		status = task_run( &msg, &cf, timer_task.s, timer_subtask.s );
 		if( msg.task.data.course ) {
 			/* Set the subtask in the network message. */
 			msg.task.data.subtask = subtask;
@@ -486,7 +417,7 @@ int main( int argc, char *argv[] )
 					if( !buoy_touched ) {
 						buoy_touched = TRUE;
 					}
-					else if( buoy_touched && subtask_dt < TASK_BUOY_WAIT_TIME ) {
+					else if( buoy_touched && timer_subtask.s < TASK_BUOY_WAIT_TIME ) {
 						/* Do nothing here. */
 					}
 					else {
@@ -495,13 +426,13 @@ int main( int argc, char *argv[] )
 						printf("MAIN: task = %d\n", task);
 						msg.task.data.subtask = SUBTASK_SEARCH_DEPTH;
 						/* Re-initialize the task and subtask timers. */
-						gettimeofday( &task_start, NULL );
-						gettimeofday( &subtask_start, NULL );
+						timing_set_timer(&timer_task);
+						timing_set_timer(&timer_subtask);
 					}
 				}
 				else if( task == TASK_BUOY && status == TASK_SUCCESS ) {
 					buoy_success = TRUE;
-					gettimeofday( &subtask_start, NULL );
+					timing_set_timer(&timer_subtask);
 				}
 				else {
 					/* Move on to the next task. Initialize the subtask. */
@@ -510,12 +441,12 @@ int main( int argc, char *argv[] )
 					printf("MAIN: task = %d\n", task);
 					msg.task.data.subtask = SUBTASK_SEARCH_DEPTH;
 					/* Re-initialize the task and subtask timers. */
-					gettimeofday( &task_start, NULL );
-					gettimeofday( &subtask_start, NULL );
+					timing_set_timer(&timer_task);
+					timing_set_timer(&timer_subtask);
 				}
 			}
 			else if( task == TASK_BUOY && buoy_success ) {
-				if( subtask_dt < TASK_BUOY_WAIT_TIME ) {
+				if( timer_subtask.s < TASK_BUOY_WAIT_TIME ) {
 					/* Do nothing here. */
 				}
 				else {
@@ -524,8 +455,8 @@ int main( int argc, char *argv[] )
 					printf("MAIN: task = %d\n", task);
 					msg.task.data.subtask = SUBTASK_SEARCH_DEPTH;
 					/* Re-initialize the task and subtask timers. */
-					gettimeofday( &task_start, NULL );
-					gettimeofday( &subtask_start, NULL );
+					timing_set_timer(&timer_task);
+					timing_set_timer(&timer_subtask);
 				}
 			}
 		}
@@ -533,18 +464,10 @@ int main( int argc, char *argv[] )
 			/* If we are not in course mode and get a status of something other
 			 * than task continue, reset the timers. */
 			if( status == TASK_SUCCESS || status == TASK_FAILURE ) {
-				gettimeofday( &task_start, NULL );
-				gettimeofday( &subtask_start, NULL );
+				timing_set_timer(&timer_task);
+				timing_set_timer(&timer_subtask);
 			}
 		}
-
-		/* Update timers. */
-		gettimeofday( &vision_time, NULL );
-		gettimeofday( &plan_time, NULL );
-		gettimeofday( &task_time, NULL );
-		gettimeofday( &subtask_time, NULL );
-		gettimeofday( &log_time, NULL );
-		gettimeofday( &kalman_time, NULL );
 	}
 
 	exit( 0 );

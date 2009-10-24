@@ -7,6 +7,7 @@ INCLUDES	+= -I../../libs/microstrain/include
 INCLUDES	+= -I../../libs/labjack/include
 INCLUDES	+= -I../../libs/pololu/include
 INCLUDES	+= -I../../libs/kalman/include
+INCLUDES	+= -I../../libs/timing/include
 INCLUDES	+= -I/usr/include/opencv
 
 # compiler and flags
@@ -23,14 +24,17 @@ MSDIR		= ../../libs/microstrain/lib
 LJDIR		= ../../libs/labjack/lib
 POLDIR		= ../../libs/pololu/lib
 KALDIR		= ../../libs/kalman/lib
+TIMINGDIR	= ../../libs/timing/lib
 
 # libraries
+LIBPREFIX	= lib
 PARSELIB	= parser.a
 SERLIB		= serial.a
 MSLIB		= microstrain.a
 LJLIB		= labjack.a
 POLLIB		= pololu.a
 KALLIB		= kalman.a
+TIMINGLIB	= timing.a
 STDLIBS		= -lm
 LIBS		= $(PARSEDIR)/$(PARSELIB)
 LIBS		+= $(MSDIR)/$(MSLIB)
@@ -38,6 +42,7 @@ LIBS		+= $(LJDIR)/$(LJLIB)
 LIBS		+= $(POLDIR)/$(POLLIB)
 LIBS		+= $(SERDIR)/$(SERLIB)
 LIBS		+= $(KALDIR)/$(KALLIB)
+LIBS		+= $(TIMINGDIR)/$(LIBPREFIX)$(TIMINGLIB)
 LIBS		+= $(LINK)
 LIBS		+= $(STDLIBS)
 

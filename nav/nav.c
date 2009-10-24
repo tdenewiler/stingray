@@ -6,51 +6,13 @@
  *
  *****************************************************************************/
 
-
-#include <stdio.h>
-#include <stdlib.h>
-#include <signal.h>
-#include <unistd.h>
-#include <string.h>
-#include <math.h>
-#include <time.h>
-#include <sys/time.h>
-
 #include "nav.h"
-#include "microstrain.h"
-#include "network.h"
-#include "parser.h"
-#include "labjack.h"
-#include "pololu.h"
-#include "util.h"
-#include "serial.h"
-#include "messages.h"
-#include "pid.h"
-#include "labjackd.h"
-#include "timing.h"
-
-#ifdef USE_SSA
-#include <sys/timeb.h>
-#include "waypoints.h"
-#define NEED_TYPENAMES
-#include "platform_types.h"
-#undef NEED_TYPENAMES
-#define NEED_MODENAMES
-#include "platform_modes.h"
-#undef NEED_MODENAMES
-#include "status.h"
-#include "telemfile.h"
-#endif /* USE_SSA */
-
-#define YAW_HIST_SIZE 30
 
 /* Global file descriptors. Only global so that nav_exit() can close them. */
 int server_fd;
 int pololu_fd;
 int imu_fd;
 int lj_fd;
-float yaw_hist[YAW_HIST_SIZE];
-int yaw_head = 0;
 
 
 #ifdef USE_SSA
@@ -235,7 +197,6 @@ int main( int argc, char *argv[] )
     memset( &pid, 0, sizeof( PID ) );
     memset( &recv_buf, 0, MAX_MSG_SIZE );
 	messages_init( &msg );
-	memset( &yaw_hist, 0, sizeof( yaw_hist ) );
 
     /* Parse command line arguments. */
     parse_default_config( &cf );

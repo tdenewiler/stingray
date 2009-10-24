@@ -6,6 +6,37 @@
 #ifndef _NAV_H_
 #define _NAV_H_
 
+#include <stdio.h>
+#include <stdlib.h>
+#include <signal.h>
+#include <string.h>
+
+#include "microstrain.h"
+#include "network.h"
+#include "parser.h"
+#include "labjack.h"
+#include "pololu.h"
+#include "util.h"
+#include "serial.h"
+#include "messages.h"
+#include "pid.h"
+#include "labjackd.h"
+#include "timing.h"
+
+#ifdef USE_SSA
+#include <sys/timeb.h>
+#include "waypoints.h"
+#define NEED_TYPENAMES
+#include "platform_types.h"
+#undef NEED_TYPENAMES
+#define NEED_MODENAMES
+#include "platform_modes.h"
+#undef NEED_MODENAMES
+#include "status.h"
+#include "telemfile.h"
+#endif /* USE_SSA */
+
+
 /******************************
 **
 ** #defines

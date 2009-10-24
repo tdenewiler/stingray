@@ -6,6 +6,28 @@
 #ifndef _PLANNER_H_
 #define _PLANNER_H_
 
+#include <stdio.h>
+#include <stdlib.h>
+#include <signal.h>
+#include <string.h>
+#include <time.h>
+#include <sys/time.h>
+#include <cv.h>
+
+#include "microstrain.h"
+#include "network.h"
+#include "parser.h"
+#include "labjack.h"
+#include "pololu.h"
+#include "kalman.h"
+#include "util.h"
+#include "serial.h"
+#include "messages.h"
+#include "pid.h"
+#include "task.h"
+#include "timing.h"
+
+
 /******************************
 **
 ** #defines
