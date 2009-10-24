@@ -3,7 +3,6 @@
 //Example U3 helper functions.  Function descriptions are in the u3.h file.
 
 #include "u3.h"
-#include <stdlib.h>
 
 
 void normalChecksum( uint8 *b, int n )

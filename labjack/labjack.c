@@ -5,8 +5,6 @@
  * auth: chris boynton <bboynton@ucsd.edu>
  *****************************************************************************/
 
-#include <unistd.h>
-#include <termios.h>
 #include "labjack.h"
 #include "u3.h"
 

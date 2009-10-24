@@ -11,6 +11,8 @@
 #define _MICROSTRAIN_H_
 
 #include "msgtypes.h"
+#include "serial.h"
+
 
 /******************************
  *

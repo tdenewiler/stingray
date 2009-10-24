@@ -6,6 +6,9 @@
 #ifndef _LABJACK_H_
 #define _LABJACK_H_
 
+#include <unistd.h>
+#include <termios.h>
+
 #ifndef LABJACK_VALS
 #define LABJACK_VALS
 #define BATTERY_1 0

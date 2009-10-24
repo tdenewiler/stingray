@@ -6,6 +6,12 @@
 #ifndef KALMAN_FILTER_H
 #define KALMAN_FILTER_H
 
+#include <unistd.h>
+#include <cv.h>
+#include <cvaux.h>
+#include <cxcore.h>
+#include <highgui.h>
+
 /******************************
 **
 ** #defines

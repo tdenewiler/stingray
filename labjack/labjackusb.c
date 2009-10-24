@@ -10,13 +10,6 @@
 //
 
 #include "labjackusb.h"
-#include <unistd.h>
-#include <stdlib.h>
-#include <stdio.h>
-#include <sys/types.h>
-#include <sys/stat.h>
-#include <fcntl.h>
-#include <errno.h>
 
 
 const char *ue9DeviceFileName = "/dev/usb/labjackue9_";

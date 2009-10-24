@@ -12,12 +12,6 @@
  *
  *****************************************************************************/
 
-#include <unistd.h>
-#include <cv.h>
-#include <cvaux.h>
-#include <cxcore.h>
-#include <highgui.h>
-
 #include "kalman.h"
 
 /* Helper variables. */

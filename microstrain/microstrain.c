@@ -16,7 +16,6 @@
 #include <string.h>
 
 #include "microstrain.h"
-#include "serial.h"
 
 
 /******************************************************************************

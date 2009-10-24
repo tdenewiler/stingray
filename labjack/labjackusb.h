@@ -27,6 +27,14 @@
 #ifndef _LABJACKUSB_H_
 #define _LABJACKUSB_H_
 
+#include <unistd.h>
+#include <stdlib.h>
+#include <stdio.h>
+#include <sys/types.h>
+#include <sys/stat.h>
+#include <fcntl.h>
+#include <errno.h>
+
 #define LJUSB_LINUX_LIBRARY_VERSION 1.10
 
 typedef void * HANDLE;
