@@ -293,7 +293,7 @@ int main( int argc, char *argv[] )
 						timing_set_timer(&timer_pololu);
 					}
 					/* Check that 7 seconds have elapsed since initializing Pololu. */
-					if(timing_check_elapsed(&timer_pololu, (float)POLOLU_INIT_TIME)) {
+					if(timing_check_period(&timer_pololu, (float)POLOLU_INIT_TIME)) {
 						pololu_initialized = TRUE;
 						pololu_starting = FALSE;
 						pid.pitch.ierr = 0;
@@ -362,28 +362,28 @@ int main( int argc, char *argv[] )
         /* Perform PID loops. */
         if( msg.stop.data.state == FALSE ) {
             /* Pitch. */
-			if(timing_check_elapsed(&timer_pitch, cf.period_pitch)) {
+			if(timing_check_period(&timer_pitch, cf.period_pitch)) {
 				dt = timing_s2us(&timer_pitch);
                 pid_loop( pololu_fd, &pid, &cf, &msg, dt, PID_PITCH, pololu_initialized );
 				timing_set_timer(&timer_pitch);
             }
 
             /* Roll. */
-			if(timing_check_elapsed(&timer_roll, cf.period_roll)) {
+			if(timing_check_period(&timer_roll, cf.period_roll)) {
 				dt = timing_s2us(&timer_pitch);
                 pid_loop( pololu_fd, &pid, &cf, &msg, dt, PID_ROLL, pololu_initialized );
 				timing_set_timer(&timer_roll);
             }
 
             /* Yaw. */
-			if(timing_check_elapsed(&timer_yaw, cf.period_yaw)) {
+			if(timing_check_period(&timer_yaw, cf.period_yaw)) {
 				dt = timing_s2us(&timer_pitch);
                 pid_loop( pololu_fd, &pid, &cf, &msg, dt, PID_YAW, pololu_initialized );
 				timing_set_timer(&timer_yaw);
             }
 
             /* Depth. */
-			if(timing_check_elapsed(&timer_depth, cf.period_depth)) {
+			if(timing_check_period(&timer_depth, cf.period_depth)) {
 				dt = timing_s2us(&timer_pitch);
                 pid_loop( pololu_fd, &pid, &cf, &msg, dt, PID_DEPTH, pololu_initialized );
 				timing_set_timer(&timer_depth);

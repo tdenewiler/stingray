@@ -276,7 +276,7 @@ int main( int argc, char *argv[] )
 
 		/* Get vision data. */
 		if( (cf.enable_vision) && (vision_fd > 0) ) {
-			if(timing_check_elapsed(&timer_vision, cf.period_vision)) {
+			if(timing_check_period(&timer_vision, cf.period_vision)) {
 				recv_bytes = net_client( vision_fd, vision_buf, &msg, MODE_OPEN );
 				vision_buf[recv_bytes] = '\0';
 				if( recv_bytes > 0 ) {
@@ -353,7 +353,7 @@ int main( int argc, char *argv[] )
 		/* Update Kalman filter. */
 		if( bKF ) {
 			/* If it has been long enough, update the filter. */
-			if(timing_check_elapsed(&timer_kalman, 0.1)) {
+			if(timing_check_period(&timer_kalman, 0.1)) {
 				STAT cs = msg.status.data;
 				float ang[] = { cs.pitch, cs.roll, cs.yaw };
 				float real_accel[] = { cs.accel[0], cs.accel[1], cs.accel[2] - 9.86326398 };
@@ -388,7 +388,7 @@ int main( int argc, char *argv[] )
             		strlen(write_time), ".%06ld", ctime.tv_usec );
 
 			/* Log enable_log times every second. */
-			if(timing_check_elapsed(&timer_log, cf.enable_log)) {
+			if(timing_check_period(&timer_log, cf.enable_log)) {
 				STAT cs = msg.status.data;
 				TARGET target = msg.target.data;
 				fprintf( f_log, "%s, %.06f,%.06f,%.06f,%.06f,%.06f,%.06f,%.06f,"
@@ -404,8 +404,8 @@ int main( int argc, char *argv[] )
 		}
 
 		/* Update the task and subtask elapsed times. */
-		timing_get_elapsed(&timer_task, &timer_task);
-		timing_get_elapsed(&timer_subtask, &timer_subtask);
+		timing_get_dt(&timer_task, &timer_task);
+		timing_get_dt(&timer_subtask, &timer_subtask);
 
 		/* Run the current task. */
 		status = task_run( &msg, &cf, timer_task.s, timer_subtask.s );

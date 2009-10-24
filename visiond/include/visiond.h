@@ -85,19 +85,19 @@ int main( int argc, char *argv[] );
 //! \param dir The directory to load images from.
 //! \param filename Resulting first file name.
 //! \return Returns TRUE if successful and FALSE if failure.
-int open_image_init( char *dir, char *filename );
+int visiond_open_image_init( char *dir, char *filename );
 
 //! Translates the task name to the task ID.
 //! \param task_name The name of the task to be translated.
 //! \return The task ID.
-int translate_task( char *task_name );
+int visiond_translate_task( char *task_name );
 
 //! Processes the given image based on the current task.
 //! \param img: The given image to be processed.
 //! \param bin_img: The place to put the resulting binary image.
 //! \param msg: The message structure that holds relevant information
 //! \return The task ID.
-int process_image( IplImage *img, IplImage *bin_img, MSG_DATA *msg );
+int visiond_process_image( IplImage *img, IplImage *bin_img, MSG_DATA *msg );
 
 
 #endif /* _VISIOND_H_ */

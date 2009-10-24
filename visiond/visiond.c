@@ -18,18 +18,19 @@
 #include <cxcore.h>
 #include <highgui.h>
 
+#include "messages.h"
+#include "visiond.h"
 #include "vision.h"
 #include "network.h"
 #include "parser.h"
 #include "util.h"
-#include "messages.h"
 #include "microstrain.h"
 #include "labjack.h"
 #include "task.h"
-#include "visiond.h"
+#include "timing.h"
 
 
-/* Global file descriptors. Only global so that vision_exit() can close them. */
+/* Global file descriptors. Only global so that visiond_exit() can close them. */
 int server_fd;
 CvCapture *f_cam;
 CvCapture *b_cam;
@@ -151,30 +152,17 @@ int main( int argc, char *argv[] )
     char curr_save_dir[STRING_SIZE];
 
 	/* Set up timer variables and intialize them. */
-	struct timeval fps_time = {0, 0};
-	struct timeval fps_start = {0, 0};
-	struct timeval save_time = {0, 0};
-	struct timeval save_start = {0, 0};
-	struct timeval open_time = {0, 0};
-	struct timeval open_start = {0, 0};
-	int time1s = 0;
-	int time1ms = 0;
-	int time2s = 0;
-	int time2ms = 0;
+	TIMING timer_fps;
+	TIMING timer_save;
+	TIMING timer_open;
 	int dt = 0;
 	int nframes = 0;
     double fps = 0.0;
 
 	/* Actually initialize timers. */
-	gettimeofday( &fps_time, NULL );
-	gettimeofday( &fps_start, NULL );
-	gettimeofday( &save_time, NULL );
-	gettimeofday( &save_start, NULL );
-	gettimeofday( &open_time, NULL );
-	gettimeofday( &open_start, NULL );
-
-
-
+	timing_set_timer(&timer_fps);
+	timing_set_timer(&timer_save);
+	timing_set_timer(&timer_open);
 
     printf( "MAIN: Starting Vision daemon ...\n" );
 
@@ -226,7 +214,7 @@ int main( int argc, char *argv[] )
     /* Decide whether to use source images or cameras. */
 	if ( cf.open_image_rate && strcmp( cf.open_image_dir, "" ) != 0 ) {
 		
-		if ( ( diropen = open_image_init( cf.open_image_dir, filename ) ) ) {
+		if ( ( diropen = visiond_open_image_init( cf.open_image_dir, filename ) ) ) {
     		img = cvLoadImage( filename );
     		bin_img = cvCreateImage( cvGetSize(img), IPL_DEPTH_8U, 1 );
 			printf( "MAIN: Load from file as camera OK.\n" );
@@ -318,7 +306,7 @@ int main( int argc, char *argv[] )
     	
 		/* Need a way to force task from file. */
 		if ( diropen ) {
-			msg.task.data.task = translate_task( cf.vision_task );
+			msg.task.data.task = visiond_translate_task( cf.vision_task );
 		}
 		
 		/* Reset "THE" image to be null. This way we know if there is a new image or not. */
@@ -333,16 +321,8 @@ int main( int argc, char *argv[] )
     		msg.vision.data.bottom_y = 0.0;
 		}
 		else {
-			/* Get the open image timer. */
-			time1s =  open_time.tv_sec;
-			time1ms = open_time.tv_usec;
-			time2s =  open_start.tv_sec;
-			time2ms = open_start.tv_usec;
-			dt = util_calc_dt( &time1s, &time1ms, &time2s, &time2ms ) / 1000000;
-			
-			if( diropen && dt > cf.open_image_rate ) {
-				/* Time to pull a new image. */
-				
+			/* Check if time to pull a new image. */
+			if( diropen && timing_check_period(&timer_open, cf.open_image_rate)) {
 				/* Get the next file pointer. */
 				dfile = readdir( dirp );
 				
@@ -368,7 +348,7 @@ int main( int argc, char *argv[] )
 				}
 
 				/* Reset the open image timer. */
-				gettimeofday( &open_start, NULL );
+				timing_set_timer(&timer_open);
 			}
 			else if ( f_cam && ( msg.task.data.task == TASK_GATE || 
 								msg.task.data.task == TASK_BUOY || 
@@ -387,7 +367,7 @@ int main( int argc, char *argv[] )
 		if ( img != NULL ) {
 			
 			/* Process the image according to the task. */
-			process_image( img, bin_img, &msg );
+			visiond_process_image( img, bin_img, &msg );
 			
 			/* Show the image in a window. */
 			if( cf.vision_window ) {
@@ -408,15 +388,11 @@ int main( int argc, char *argv[] )
 			
 			/* Calculate frames per second. */
 			nframes++;
-			time1s =  fps_time.tv_sec;
-			time1ms = fps_time.tv_usec;
-			time2s =  fps_start.tv_sec;
-			time2ms = fps_start.tv_usec;
-			dt = util_calc_dt( &time1s, &time1ms, &time2s, &time2ms );
-
-			if( dt > 1000000 ) {
+			if( timing_check_period(&timer_fps, 1.) ) {
+				timing_get_dt(&timer_fps, &timer_fps);
+				dt = timing_s2us(&timer_fps);
 				fps = (double)nframes * (1000000 / dt);
-				gettimeofday( &fps_start, NULL );
+				timing_set_timer(&timer_fps);
 				nframes = 0;
 				msg.vision.data.fps = fps;
 			}
@@ -447,12 +423,7 @@ int main( int argc, char *argv[] )
 		}
 		
 		/* Save the front and/or bottom images. (CONFIG) */
-		time1s =  save_time.tv_sec;
-		time1ms = save_time.tv_usec;
-		time2s =  save_start.tv_sec;
-		time2ms = save_start.tv_usec;
-		dt = util_calc_dt( &time1s, &time1ms, &time2s, &time2ms ) / 1000000;	
-		if ( !diropen && dt > cf.save_image_rate ) {
+		if ( !diropen && timing_check_period(&timer_save, cf.save_image_rate) ) {
 			if ( cf.save_image_front && f_cam ) {
 				/* Save an image from the front camera. */
 				img = cvQueryFrame( f_cam );
@@ -467,7 +438,7 @@ int main( int argc, char *argv[] )
 				vision_save_frame( img, strncat( curr_save_dir, "bottom/", 7 ) );
 			}
 			
-			gettimeofday( &save_start, NULL );
+			timing_set_timer(&timer_save);
 		}
 		
 
@@ -528,11 +499,7 @@ int main( int argc, char *argv[] )
 		else if( msg.vsetting.data.save_bvideo && saving_bvideo ) {
 			cvWriteFrame( b_writer, img );
 		}
-		
-		/* Update timers. */
-		gettimeofday( &fps_time, NULL );
-		gettimeofday( &save_time, NULL );
-		gettimeofday( &open_time, NULL );
+	
     }
 
     exit( 0 );
@@ -541,29 +508,25 @@ int main( int argc, char *argv[] )
 
 /******************************************************************************
  *
- * Title:       int open_image_init( char *dir, char *filename )
+ * Title:       int visiond_visiond_open_image_init( char *dir, char *filename )
  *
  * Description: Tests if we should and can load images from file.
  *
- * Input:      	dir: The directory from which to load images.
- * 				filename: The resulting name of the first file.
- *
- * Output:      None.
- *
  *****************************************************************************/
-int open_image_init( char *dir, char *filename )
+
+int visiond_open_image_init( char *dir, char *filename )
 {
 	struct dirent *dfile = NULL;
 	
 	/* Load an images from disk. */
-	printf( "OPEN_IMAGE_INIT: Using source images from directory for vision...\n" );
+	printf( "visiond_open_image_init: Using source images from directory for vision...\n" );
 	
 	/* Open directory. */
 	if ( (dirp = opendir( dir ) ) ) {
 		
 		dfile = readdir( dirp );
 		if ( dfile == NULL ) {
-			printf( "OPEN_IMAGE_INIT: WARNING!!! Image directory not valid.\n" );
+			printf( "visiond_open_image_init: WARNING!!! Image directory not valid.\n" );
 			return FALSE;
 		}
 		else {
@@ -582,29 +545,29 @@ int open_image_init( char *dir, char *filename )
 				strncpy( filename, dir, STRING_SIZE );
 				strncat( filename, dfile->d_name, STRING_SIZE );
 				
-				printf( "OPEN_IMAGE_INIT: Image source directory OK.\n" );
+				printf( "visiond_open_image_init: Image source directory OK.\n" );
 				return TRUE;
 			}
 			else {
 				/* No images so exit the module. */
-				printf( "OPEN_IMAGE_INIT: WARNING!!! No image files in directory.\n" );
+				printf( "visiond_open_image_init: WARNING!!! No image files in directory.\n" );
 				return FALSE;
 			}
 		}
 	}
 	else {
 		/* Directory was not opened so exit the module. */
-		printf( "OPEN_IMAGE_INIT: WARNING!!! Image directory '%s' not opened.\n", dir );
+		printf( "visiond_open_image_init: WARNING!!! Image directory '%s' not opened.\n", dir );
 		return FALSE;
 	}
 	
 	return TRUE;	
-} /* end open_image_init() */
+} /* end visiond_visiond_open_image_init() */
 
 
 /******************************************************************************
  *
- * Title:       int translate_task( char *task_name )
+ * Title:       int visiond_translate_task( char *task_name )
  *
  * Description: Translates the task name to the task ID.
  *
@@ -613,7 +576,7 @@ int open_image_init( char *dir, char *filename )
  * Output:      None.
  *
  *****************************************************************************/
-int translate_task( char *task_name )
+int visiond_translate_task( char *task_name )
 {
 	if ( strcmp( task_name, "buoy" ) == 0 ) {
 		return TASK_BUOY;
@@ -639,7 +602,7 @@ int translate_task( char *task_name )
 
 /******************************************************************************
  *
- * Title:       int process_imagee( IplImage *img, IplImage *bin_img, 
+ * Title:       int visiond_process_image( IplImage *img, IplImage *bin_img, 
  * 									MSG_DATA *msg )
  *
  * Description: Processes the given image based on the current task. Fills the
@@ -654,7 +617,7 @@ int translate_task( char *task_name )
  * Output:      Draws cirlce on img if object found and draws bin_img.
  *
  *****************************************************************************/
-int process_image( IplImage *img, IplImage *bin_img, MSG_DATA *msg )
+int visiond_process_image( IplImage *img, IplImage *bin_img, MSG_DATA *msg )
 {
 	int status = -1;
 	
@@ -989,4 +952,4 @@ int process_image( IplImage *img, IplImage *bin_img, MSG_DATA *msg )
 
 	}
 	return 0;
-}
+} /* end visiond_process_image() */

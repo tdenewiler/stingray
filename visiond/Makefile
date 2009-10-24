@@ -7,6 +7,7 @@ INCLUDES	+= -I../../libs/microstrain/include
 INCLUDES	+= -I../../libs/labjack/include
 INCLUDES	+= -I../../libs/pololu/include
 INCLUDES	+= -I../../libs/vision/include
+INCLUDES	+= -I../../libs/timing/include
 INCLUDES	+= -I/usr/include/opencv
 
 # compiler and flags
@@ -22,12 +23,16 @@ LINK		+= -lhighgui
 # library directories
 PARSEDIR	= ../../libs/parser/lib
 VISIONDIR	= ../../libs/vision/lib
+TIMINGDIR	= ../../libs/timing/lib
 
 # libraries
+LIBPREFIX	= lib
 PARSELIB	= parser.a
 VISIONLIB	= vision.a
+TIMINGLIB	= timing.a
 STDLIBS		= -lm
 LIBS		= $(PARSEDIR)/$(PARSELIB)
+LIBS		+= $(TIMINGDIR)/$(LIBPREFIX)$(TIMINGLIB)
 LIBS		+= $(VISIONDIR)/$(VISIONLIB)
 LIBS		+= $(LINK)
 LIBS		+= $(STDLIBS)
