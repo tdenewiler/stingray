@@ -181,7 +181,7 @@ void parse_line( CONF_VARS *config )
             sscanf( tokens[2], "%d", &config->enable_imu );
         }
         else if( strncmp( tokens[1], "logs", STRING_SIZE ) == 0 ) {
-            sscanf( tokens[2], "%d", &config->enable_log );
+            sscanf( tokens[2], "%f", &config->enable_log );
         }
         else if( strncmp( tokens[1], "gui", STRING_SIZE ) == 0 ) {
             sscanf( tokens[2], "%d", &config->enable_gui );
@@ -967,7 +967,7 @@ void parse_default_config( CONF_VARS *config )
     /* other */
     config->debug_level = 5;
     config->op_mode = 1;
-    config->enable_log = FALSE;
+    config->enable_log = 0;
 	config->dock_time = 0;
 	config->buoy_blind_time = 0;
 } /* end parse_default_config() */
@@ -1046,7 +1046,7 @@ void parse_print_config( CONF_VARS *config )
     printf("PARSE_PRINT_CONFIG: period_ay = %f\n", config->period_ay);
     printf("PARSE_PRINT_CONFIG: period_az = %f\n", config->period_az);
     printf("PARSE_PRINT_CONFIG: period_vision = %f\n", config->period_vision);
-    printf("PARSE_PRINT_CONFIG: period_planner = %d\n", config->period_planner);
+    printf("PARSE_PRINT_CONFIG: period_planner = %f\n", config->period_planner);
     printf("PARSE_PRINT_CONFIG: enable_pololu = %d\n", config->enable_pololu);
     printf("PARSE_PRINT_CONFIG: pololu_baud = %d\n", config->pololu_baud);
     printf("PARSE_PRINT_CONFIG: pololu_port[STRING_SIZE] = %s\n", config->pololu_port);
@@ -1085,7 +1085,7 @@ void parse_print_config( CONF_VARS *config )
     printf("PARSE_PRINT_CONFIG: relay_baud = %d\n", config->relay_baud);
     printf("PARSE_PRINT_CONFIG: debug_level = %d\n", config->debug_level);
     printf("PARSE_PRINT_CONFIG: op_mode = %d\n", config->op_mode);
-    printf("PARSE_PRINT_CONFIG: enable_log = %d\n", config->enable_log);
+    printf("PARSE_PRINT_CONFIG: enable_log = %f\n", config->enable_log);
 	printf("PARSE_PRINT_CONFIG: depth_gate = %f\n", config->depth_gate);
 	printf("PARSE_PRINT_CONFIG: depth_pipe = %f\n", config->depth_pipe);
 	printf("PARSE_PRINT_CONFIG: depth_buoy = %f\n", config->depth_buoy);

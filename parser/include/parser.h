@@ -155,7 +155,7 @@ typedef struct _CONF_VARS {
     int         relay_baud;
     int         debug_level;
     int         op_mode;
-    int         enable_log;
+    float       enable_log;
 	float		depth_gate;
 	float		depth_pipe;
 	float		depth_buoy;
