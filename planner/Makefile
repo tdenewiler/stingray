@@ -15,6 +15,7 @@ CC        	= g++
 CFLAGS    	= -Wall
 CFLAGS    	+= -O2
 CFLAGS    	+= -g
+CFLAGS		+= -Wno-write-strings
 LINK		= -lcv
 
 # library directories

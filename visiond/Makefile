@@ -17,6 +17,7 @@ CC        	= g++
 CFLAGS    	= -Wall
 CFLAGS    	+= -O2
 CFLAGS    	+= -g
+CFLAGS		+= -Wno-write-strings
 LINK		= -L/usr/X11R6/lib
 LINK		+= -lcv
 LINK		+= -lX11

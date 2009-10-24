@@ -17,6 +17,7 @@ CC        	= g++
 CFLAGS    	= -Wall
 CFLAGS    	+= -O2
 CFLAGS    	+= -g
+CFLAGS		+= -Wno-write-strings
 
 # library directories
 PARSEDIR	= ../../libs/parser/lib
