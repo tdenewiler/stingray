@@ -3,8 +3,13 @@
  *  \brief Parses configuration files for initialization values.
  */
 
-#ifndef _PARSER_H_
-#define _PARSER_H_
+#ifndef PARSER_H
+#define PARSER_H
+
+#include <stdio.h>
+#include <string.h>
+#include <ctype.h>
+#include <unistd.h>
 
 /******************************
 **
@@ -229,5 +234,4 @@ void parse_default_config( CONF_VARS *config );
 void parse_print_config( CONF_VARS *config );
 
 
-#endif /* _PARSER_H_ */
-
+#endif /* PARSER_H */

@@ -7,6 +7,20 @@
 #ifndef _JOY_H_
 #define _JOY_H_
 
+#include <sys/ioctl.h>
+#include <sys/time.h>
+#include <sys/types.h>
+#include <stdlib.h>
+#include <fcntl.h>
+#include <unistd.h>
+#include <stdio.h>
+#include <errno.h>
+#include <string.h>
+#include <stdlib.h>
+#include <stdint.h>
+#include <linux/input.h>
+#include <linux/joystick.h>
+
 /*
  * The Logitech Dual Action has 6 Axes:
  *

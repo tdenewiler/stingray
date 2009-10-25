@@ -1,36 +1,21 @@
-/******************************************************************************
+/*------------------------------------------------------------------------------
  *
  *  Title:        parser.c
  *
  *  Description:  Parses configuration files to initialize configuration values.
  *
- *****************************************************************************/
-
-
-#include <stdio.h>
-#include <string.h>
-#include <ctype.h>
-#include <unistd.h>
+ *----------------------------------------------------------------------------*/
 
 #include "parser.h"
 
-
 static char tokens[MAX_TOKENS][STRING_SIZE];
 
+/*------------------------------------------------------------------------------
+ * void parse_line()
+ * Parses a line for configuration values.
+ *----------------------------------------------------------------------------*/
 
-/******************************************************************************
- *
- * Title:       void parse_line( CONF_VARS *config )
- *
- * Description: Parses a line for configuration values.
- *
- * Input:       config: An array of configuration variables.
- *
- * Output:      None.
- *
- *****************************************************************************/
-
-void parse_line( CONF_VARS *config )
+void parse_line(CONF_VARS *config)
 {
     int ii;
     int ip_octal[4];
@@ -39,8 +24,8 @@ void parse_line( CONF_VARS *config )
         memset( &( ip_octal[ii] ), -1, sizeof( ip_octal[ii] ) );
     }
 
-    /* Check here to find out which variables to fill in. */
-    /* Nav parameters */
+    /// Check here to find out which variables to fill in.
+    /// Nav parameters
     if( strncmp( tokens[0], "nav", STRING_SIZE ) == 0 ) {
         if( strncmp( tokens[1], "ip", STRING_SIZE ) == 0 ) {
             sscanf( tokens[2], "%d.%d.%d.%d"
@@ -54,16 +39,16 @@ void parse_line( CONF_VARS *config )
         else if( strncmp( tokens[1], "port", STRING_SIZE ) == 0 ) {
             sscanf( tokens[2], "%hd", &config->nav_port );
         }
-    } /* end nav parameters */
+    } /// end nav parameters
 
-	/* Server parameters */
+	/// Server parameters
     if( strncmp( tokens[0], "server", STRING_SIZE ) == 0 ) {
         if( strncmp( tokens[1], "port", STRING_SIZE ) == 0 ) {
             sscanf( tokens[2], "%hd", &config->server_port );
         }
-    } /* end server parameters */
+    } /// end server parameters
 
-    /* Vision parameters */
+    /// Vision parameters
     if( strncmp( tokens[0], "vision", STRING_SIZE ) == 0 ) {
         if( strncmp( tokens[1], "ip", STRING_SIZE ) == 0 ) {
             sscanf( tokens[2], "%d.%d.%d.%d"
@@ -113,9 +98,9 @@ void parse_line( CONF_VARS *config )
 			}
 		}
 	}
-	/* end vision parameters */
+	/// end vision parameters
 
-    /* Planner parameters */
+    /// Planner parameters
     if( strncmp( tokens[0], "planner", STRING_SIZE ) == 0 ) {
         if( strncmp( tokens[1], "ip", STRING_SIZE ) == 0 ) {
             sscanf( tokens[2], "%d.%d.%d.%d"
@@ -129,9 +114,9 @@ void parse_line( CONF_VARS *config )
         else if( strncmp( tokens[1], "port", STRING_SIZE ) == 0 ) {
             sscanf( tokens[2], "%hd", &config->planner_port );
         }
-    } /* end planner parameters */
+    } /// end planner parameters
 
-    /* GUI parameters */
+    /// GUI parameters
     if( strncmp( tokens[0], "window", STRING_SIZE ) == 0 ) {
         if( strncmp( tokens[1], "height", STRING_SIZE ) == 0 ) {
             sscanf( tokens[2], "%d", &config->window_height );
@@ -140,9 +125,9 @@ void parse_line( CONF_VARS *config )
             sscanf( tokens[2], "%d", &config->window_width );
         }
     }
-    /* end GUI parameters */
+    /// end GUI parameters
 
-    /* net parameters */
+    /// net parameters
     if( strncmp( tokens[0], "api", STRING_SIZE ) == 0 ) {
         if( strncmp( tokens[1], "clients", STRING_SIZE ) == 0 ) {
             sscanf( tokens[2], "%d", &config->max_api_clients );
@@ -173,9 +158,9 @@ void parse_line( CONF_VARS *config )
             sscanf( tokens[2], "%d", &config->vision_angle );
         }
     }
-    /* end net parameters */
+    /// end net parameters
 
-    /* enable parameters */
+    /// enable parameters
     else if( strncmp( tokens[0], "enable", STRING_SIZE ) == 0 ) {
         if( strncmp( tokens[1], "imu", STRING_SIZE ) == 0 ) {
             sscanf( tokens[2], "%d", &config->enable_imu );
@@ -211,9 +196,9 @@ void parse_line( CONF_VARS *config )
             sscanf( tokens[2], "%d", &config->enable_nav );
         }
     }
-    /* end enable parameters */
+    /// end enable parameters
 
-    /* imu parameters */
+    /// imu parameters
     else if( strncmp( tokens[0], "imu", STRING_SIZE ) == 0 ) {
         if( strncmp( tokens[1], "baud", STRING_SIZE ) == 0 ) {
             sscanf( tokens[2], "%d", &config->imu_baud );
@@ -225,9 +210,9 @@ void parse_line( CONF_VARS *config )
             sscanf( tokens[2], "%d", &config->imu_stab );
         }
     }
-    /* end imu parameters */
+    /// end imu parameters
 
-    /* pololu parameters */
+    /// pololu parameters
     else if( strncmp( tokens[0], "pololu", STRING_SIZE ) == 0 ) {
         if( strncmp( tokens[1], "baud", STRING_SIZE ) == 0 ) {
             sscanf( tokens[2], "%d", &config->pololu_baud );
@@ -236,17 +221,17 @@ void parse_line( CONF_VARS *config )
             strncpy( config->pololu_port, tokens[2], STRING_SIZE );
         }
     }
-    /* end pololu parameters */
+    /// end pololu parameters
 
-    /* operating mode parameters */
+    /// operating mode parameters
     else if( strncmp( tokens[0], "op", STRING_SIZE ) == 0 ) {
         if( strncmp( tokens[1], "mode", STRING_SIZE ) == 0 ) {
             sscanf( tokens[2], "%d", &config->op_mode );
         }
     }
-    /* end operating mode parameters */
+    /// end operating mode parameters
 
-    /* labjackd parameters */
+    /// labjackd parameters
     else if( strncmp( tokens[0], "labjackd", STRING_SIZE ) == 0 ) {
         if( strncmp( tokens[1], "ip", STRING_SIZE ) == 0 ) {
             sscanf( tokens[2], "%d.%d.%d.%d"
@@ -261,9 +246,9 @@ void parse_line( CONF_VARS *config )
             sscanf( tokens[2], "%hd", &config->labjackd_port );
         }
     }
-    /* end labjackd parameters */
+    /// end labjackd parameters
 
-    /* GPS parameters */
+    /// GPS parameters
     else if( strncmp( tokens[0], "gps", STRING_SIZE ) == 0 ) {
         if( strncmp( tokens[1], "baud", STRING_SIZE ) == 0 ) {
             sscanf( tokens[2], "%d", &config->gps_baud );
@@ -272,9 +257,9 @@ void parse_line( CONF_VARS *config )
             strncpy( config->gps_port, tokens[2], STRING_SIZE );
         }
     }
-    /* end GPS parameters */
+    /// end GPS parameters
 
-    /* USB relay board */
+    /// USB relay board
     else if( strncmp( tokens[0], "relay", STRING_SIZE ) == 0 ) {
         if( strncmp( tokens[1], "port", STRING_SIZE ) == 0 ) {
             strncpy( config->relay_port, tokens[2], STRING_SIZE );
@@ -283,17 +268,17 @@ void parse_line( CONF_VARS *config )
             sscanf( tokens[2], "%d", &config->relay_baud );
         }
     }
-    /* end USB relay board */
+    /// end USB relay board
 
-    /* Set the debug level. */
+    /// Set the debug level
     else if( strncmp( tokens[0], "debug", STRING_SIZE ) == 0 ) {
         if( strncmp( tokens[1], "level", STRING_SIZE ) == 0 ) {
             sscanf( tokens[2], "%d", &config->debug_level );
         }
     }
-    /* end debug level */
+    /// end debug level
 
-    /* PID parameters. */
+    /// PID parameters
     else if( strncmp( tokens[0], "kp", STRING_SIZE ) == 0 ) {
         if( strncmp( tokens[1], "yaw", STRING_SIZE ) == 0 ) {
             sscanf( tokens[2], "%lf", &config->kp_yaw );
@@ -420,9 +405,9 @@ void parse_line( CONF_VARS *config )
             sscanf( tokens[2], "%f", &config->period_planner );
         }
     }
-    /* end PID parameters */
+    /// end PID parameters
 
-    /* target values */
+    /// target values
     else if( strncmp( tokens[0], "target", STRING_SIZE ) == 0 ) {
         if( strncmp( tokens[1], "pitch", STRING_SIZE ) == 0 ) {
             sscanf( tokens[2], "%f", &config->target_pitch );
@@ -455,9 +440,9 @@ void parse_line( CONF_VARS *config )
             sscanf( tokens[2], "%f", &config->target_speed );
         }
     }
-    /* end target values */
+    /// end target values
 
-    /* Vision HSV values */
+    /// Vision HSV values
     else if( strncmp( tokens[0], "pipe", STRING_SIZE ) == 0 ) {
         if( strncmp( tokens[1], "hL", STRING_SIZE ) == 0 ) {
             sscanf( tokens[2], "%f", &config->pipe_hL );
@@ -546,9 +531,9 @@ void parse_line( CONF_VARS *config )
             sscanf( tokens[2], "%f", &config->gate_vH );
         }
     }
-    /* end vision HSV values */
+    /// end vision HSV values
 
-	/* depth values */
+	/// depth values
 	else if( strncmp( tokens[0], "depth", STRING_SIZE ) == 0 ) {
 		if( strncmp( tokens[1], "gate", STRING_SIZE ) == 0 ) {
 			sscanf( tokens[2], "%f", &config->depth_gate );
@@ -580,9 +565,9 @@ void parse_line( CONF_VARS *config )
 			sscanf( tokens[2], "%f", &config->depth_surface );
 		}
 	}
-	/* end depth values */
+	/// end depth values
 
-	/* heading values */
+	/// heading values
 	else if( strncmp( tokens[0], "heading", STRING_SIZE ) == 0 ) {
 		if( strncmp( tokens[1], "buoy", STRING_SIZE ) == 0 ) {
 			sscanf( tokens[2], "%f", &config->heading_buoy );
@@ -591,9 +576,9 @@ void parse_line( CONF_VARS *config )
 			sscanf( tokens[2], "%f", &config->heading_gate );
 		}
 	}
-	/* end heading values */
+	/// end heading values
 
-	/* task start values */
+	/// task start values
 	else if( strncmp( tokens[0], "start", STRING_SIZE ) == 0 ) {
 		if( strncmp( tokens[1], "task", STRING_SIZE ) == 0 ) {
 			sscanf( tokens[2], "%d", &config->task_start );
@@ -617,30 +602,18 @@ void parse_line( CONF_VARS *config )
 			}
 		}
 	}
-	/* end task start values */
+	/// end task start values
 } /* end parse_line() */
 
 
-/******************************************************************************
- *
- * Title:       void parse_config( const char *filename,
- *                                 CONF_VARS *config
- *                                )
- *
- * Description: Parses a configuration file for variable data such as IP
- *              addresses.
- *
- * Input:       filename: File to open for configuration values.
- *              config: An array of initialization variables.
- *
- * Output:      None.
- *
- *****************************************************************************/
+/*------------------------------------------------------------------------------
+ * void parse_config()
+ * Parses a configuration file for variable data such as IP addresses.
+ *----------------------------------------------------------------------------*/
 
-void parse_config( const char *filename,
-                   CONF_VARS *config
-                 )
+void parse_config(const char *filename, CONF_VARS *config)
 {
+	/// Declare variables.
     char token_buf[STRING_SIZE] = "\0";
     int  filling_in_token       = FALSE;
     int  line_number            = 0;
@@ -653,7 +626,7 @@ void parse_config( const char *filename,
 
     cfg_fd = fopen( filename, "r" );
     if( cfg_fd == NULL ) {
-        //printf( "PARSE_CONFIG: Error opening config file %s\n", filename );
+        printf("PARSE_CONFIG: WARNING!!! Error opening config file %s\n", filename);
         return;
     }
 
@@ -663,7 +636,7 @@ void parse_config( const char *filename,
     memset( &( token_buf ), 0, sizeof( token_buf ) );
 
     if( fgets( token_buf, STRING_SIZE, cfg_fd ) == NULL ) {
-        /* Do nothing. */
+        /// Do nothing.
     }
 
     while( feof( cfg_fd ) == 0 ) {
@@ -675,8 +648,8 @@ void parse_config( const char *filename,
                 }
                 else if( token_buf[ii] == '#' ) {
                     comment = TRUE;
-                    /* Prevent whitespace betweeen last token and comment from
-                     * increasing token count. */
+                    /// Prevent whitespace betweeen last token and comment from
+                    /// increasing token count. */
                     if( last_value_space == TRUE ) {
                         token_number--;
                         last_value_space = FALSE;
@@ -686,7 +659,7 @@ void parse_config( const char *filename,
                     break;
                 }
                 else if( isspace( token_buf[ii] ) ) {
-                    /* Do nothing. Still looking on current line. */
+                    /// Do nothing. Still looking on current line.
                 }
                 else {
                     filling_in_token = TRUE;
@@ -728,7 +701,7 @@ void parse_config( const char *filename,
         }
         memset( &( token_buf ), 0, sizeof( token_buf ) );
         if( fgets( token_buf, STRING_SIZE, cfg_fd ) == NULL ) {
-            /* Do nothing. */
+            /// Do nothing.
         }
     }
 
@@ -736,40 +709,18 @@ void parse_config( const char *filename,
 } /* end parse_config() */
 
 
-/******************************************************************************
- *
- * Title:       int parse_cla( int argc,
- *                             char *argv[],
- *                             CONF_VARS *config,
- *                             int app
- *                             const char *filename
- *                            )
- *
- * Description: Parses command line arguments and sets appropriate variables.
- *
- * Input:       argc: Number of command lin arguments.
- *              argv: Array of command line arguments.
- *              config: An array of initialization variables.
- *              app: Indicates which application is calling this function.
- *              filename: Configuration file to use.
- *
- * Output:      0 on success.
- *              -1 when help is invoked.
- *
- *****************************************************************************/
+/*------------------------------------------------------------------------------
+ * int parse_cla()
+ * Parses command line arguments and sets appropriate variables.
+ *----------------------------------------------------------------------------*/
 
-int parse_cla( int argc,
-               char *argv[],
-               CONF_VARS *config,
-               int app,
-               const char *filename
-             )
+int parse_cla(int argc, char *argv[], CONF_VARS *config, int app, const char *filename)
 {
-    /* Get command line arguments and parse configuration file. */
+    /// Get command line arguments and parse configuration file.
     char *cvalue = NULL;
     int cmd;
 
-    /* Parse the configuration file passed in on command line. */
+    /// Parse the configuration file passed in on command line.
     opterr = 0;
 
     while( ( cmd = getopt( argc, argv, "c:h" ) ) != -1 ) {
@@ -797,54 +748,46 @@ int parse_cla( int argc,
     else {
         parse_config( filename, config );
     }
-    /* End of get command line arguments and parse configuration file. */
 
     return 0;
 } /* end parse_cla() */
 
 
-/******************************************************************************
- *
- * Title:       void parse_default_config( CONF_VARS *config )
- *
- * Description: Sets default values for the initialization variables. This
- *              function should be followed by a call to parse_cla() in order to
- *              fill in the variables with values set in a configuration file.
- *
- * Input:       config: An array of initialization variables.
- *
- * Output:      None.
- *
- *****************************************************************************/
+/*------------------------------------------------------------------------------
+ * void parse_default_config()
+ * Sets default values for the initialization variables. This function should be
+ * followed by a call to parse_cla() in order to fill in the variables with
+ * values set in a configuration file.
+ *----------------------------------------------------------------------------*/
 
 void parse_default_config( CONF_VARS *config )
 {
-    /* labjack */
+    /// labjack
     config->enable_labjack = TRUE;
 
-    /* imu */
+    /// imu
     config->enable_imu = TRUE;
     config->imu_baud = 38400;
     config->imu_stab = TRUE;
     strncpy( config->imu_port, "/dev/ttyUSB5", STRING_SIZE );
 
-    /* net */
+    /// net
     config->enable_server = TRUE;
 	config->server_port = 0;
     config->net_mode = 1;
 
-	/* nav */
+	/// nav
 	config->enable_nav = FALSE;
     config->nav_port = 2000;
     strncpy( config->nav_IP, "127.0.0.1", STRING_SIZE );
     config->max_api_clients = 5;
 
-	/* planner */
+	/// planner
 	config->enable_planner = FALSE;
 	config->planner_port = 2002;
 	strncpy( config->planner_IP, "127.0.0.1", STRING_SIZE );
 
-    /* pid */
+    /// pid
     config->kp_yaw = 1;
     config->ki_yaw = 0;
     config->kd_yaw = 0;
@@ -873,7 +816,7 @@ void parse_default_config( CONF_VARS *config )
     config->kp_depth_forward = 0;
     config->kp_place_holder = 0;
 
-    /* target values */
+    /// target values
     config->target_pitch = 0.0;
     config->target_roll = 0.0;
     config->target_yaw = 0.0;
@@ -886,7 +829,7 @@ void parse_default_config( CONF_VARS *config )
     config->target_speed = 0.0;
     config->task_init_yaw = 0.0;
 
-	/* hsv values */
+	/// hsv values
     config->pipe_hL = 0.0;
     config->pipe_hH = 0.0;
     config->pipe_sL = 0.0;
@@ -912,7 +855,7 @@ void parse_default_config( CONF_VARS *config )
     config->gate_vL = 0.0;
     config->gate_vH = 0.0;
 
-	/* depths */
+	/// depths
 	config->depth_boxes = 0.600;
 	config->depth_buoy = 0.600;
 	config->depth_fence = 0.600;
@@ -923,36 +866,36 @@ void parse_default_config( CONF_VARS *config )
 	config->depth_surface = 0.600;
 	config->fence_min = 0.600;
 
-	/* headings */
+	/// headings
 	config->heading_buoy = 0.0;
 	config->heading_gate = 0.0;
 
-	/* task starts */
+	/// task starts
 	config->task_start = 1;
 	config->subtask_start = 2;
 	config->course_start = 0;
 
-    /* servos */
+    /// pololu
     config->enable_pololu = TRUE;
     config->pololu_baud = 9600;
     strncpy( config->pololu_port, "/dev/ttyUSB4", STRING_SIZE );
 
-    /* gui */
+    /// gui
     config->enable_gui = FALSE;
     config->window_height = 768;
     config->window_width = 1024;
 
-    /* gps */
+    /// gps
     config->enable_gps = FALSE;
     strncpy( config->gps_port, "/dev/ttyUSB6", STRING_SIZE );
     config->gps_baud = 9600;
 
-    /* relay */
+    /// relay
     config->enable_relay = FALSE;
     strncpy( config->relay_port, "/dev/ttyUSB7", STRING_SIZE );
     config->relay_baud = 9600;
 
-	/* vision */
+	/// vision
 	config->vision_window = FALSE;
 	config->vision_angle = 0;
 	config->save_image_front = 0;
@@ -964,7 +907,7 @@ void parse_default_config( CONF_VARS *config )
 	config->open_image_rate = 0;
 	strncpy( config->open_image_dir, "", STRING_SIZE );
 
-    /* other */
+    /// other
     config->debug_level = 5;
     config->op_mode = 1;
     config->enable_log = 0;
@@ -973,19 +916,12 @@ void parse_default_config( CONF_VARS *config )
 } /* end parse_default_config() */
 
 
-/******************************************************************************
- *
- * Title:       void parse_print_config( CONF_VARS *config )
- *
- * Description: Prints out the values of all the configuration file variables.
- *
- * Input:       config: An array of initialization variables.
- *
- * Output:      None.
- *
+/*------------------------------------------------------------------------------
+ * void parse_print_config()
+ * Prints out the values of all the configuration file variables.
  *****************************************************************************/
 
-void parse_print_config( CONF_VARS *config )
+void parse_print_config(CONF_VARS *config)
 {
     printf("PARSE_PRINT_CONFIG: enable_labjack = %d\n", config->enable_labjack);
     printf("PARSE_PRINT_CONFIG: enable_imu = %d\n", config->enable_imu);

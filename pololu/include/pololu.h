@@ -6,8 +6,8 @@
  *			for using the Stingray's propulsion systems are included.
  */
 
-#ifndef _POLOLU_H_
-#define _POLOLU_H_
+#ifndef POLOLU_H
+#define POLOLU_H
 
 #include <stdio.h>
 #include <math.h>
@@ -234,4 +234,4 @@ int pololuControlVertical( int fd,
                    );
 
 
-#endif /* _POLOLU_H_ */
+#endif /* POLOLU_H */

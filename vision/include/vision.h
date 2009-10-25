@@ -3,8 +3,8 @@
  *  \brief General vision processing functions.
  */
 
-#ifndef _VISION_H_
-#define _VISION_H_
+#ifndef VISION_H
+#define VISION_H
 
 #include <stdio.h>
 #include <unistd.h>
@@ -226,4 +226,4 @@ void vision_rgb_sum_filter( IplImage *img , short * rgb_sum );
 void vision_save_frame( IplImage *img, char *dir );
 
 
-#endif /* _VISION_H_ */
+#endif /* VISION_H */

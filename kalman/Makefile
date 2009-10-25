@@ -7,6 +7,7 @@ CFLAGS		= -Wall
 CFLAGS		+= -O2
 CFLAGS		+= -g
 CFLAGS		+= -fPIC
+CFLAGS		+= -Wno-write-strings
 CC			= g++
 AR			= ar
 ARFLAGS		= rs

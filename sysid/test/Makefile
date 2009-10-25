@@ -8,6 +8,7 @@ SYSIDDIR	= ../lib
 # Includes.
 INCLUDES	= -Iinclude
 INCLUDES	+= -I../include
+INCLUDES	+= -I../../../src/common/include
 
 # Compiler and flags.
 CFLAGS      = -Wall

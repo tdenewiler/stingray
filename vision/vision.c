@@ -1,42 +1,19 @@
-/******************************************************************************
+/*------------------------------------------------------------------------------
  *
  *  Title:        vision.c
  *
  *  Description:  General vision processing functions.
  *
- *****************************************************************************/
-
+ *----------------------------------------------------------------------------*/
 
 #include "vision.h"
 
+/*------------------------------------------------------------------------------
+ * int vision_find_dot()
+ * Finds a circular object from a camera.
+ *----------------------------------------------------------------------------*/
 
-/******************************************************************************
- *
- * Title:       int vision_find_dot(    int *dotx,
- *                                      int *doty,
- *                                      int amt,
- *                                      IplImage *srcImg,
- *                                      IplImage *outImg
- *                                  )
- *
- * Description: Finds a circular object from a camera.
- *
- * Input:       dotx: Pointer to variable for x position of dot.
- *              doty: Pointer to variable for y position of dot.
- *              amt: The amount of erosion/dilation to perform.
- *              cap: A pointer to an open camera.
- *
- * Output:      status: 1 on success, 0 on failure.
- *
- *****************************************************************************/
-
-int vision_find_dot( int *dotx,
-                     int *doty,
-                     int angle,
-                     IplImage *srcImg,
-                     IplImage *binImg,
-					 HSV_HL *hsv
-                   )
+int vision_find_dot(int *dotx, int *doty, int angle, IplImage *srcImg, IplImage *binImg, HSV_HL *hsv)
 {
     CvPoint center;
     IplImage *hsvImg = NULL;
@@ -46,42 +23,43 @@ int vision_find_dot( int *dotx,
 	int num_pix = 0;
 	int touch_thresh = 150000;
     int detect_thresh = 40;
-    /* Initialize to impossible values. */
+
+    /// Initialize to impossible values.
     center.x = -10000;
     center.y = -10000;
 
-	/* Create intermediate images for scratch space. */
+	/// Create intermediate images for scratch space.
     hsvImg = cvCreateImage( cvGetSize(srcImg), IPL_DEPTH_8U, 3 );
     outImg = cvCreateImage( cvGetSize(srcImg), IPL_DEPTH_8U, 1 );
 
-	/* Enhance the red channel of the source image. */
+	/// Enhance the red channel of the source image.
 	//vision_white_balance( srcImg );
 
-    /* Segment the flipped image into a binary image. */
+    /// Segment the flipped image into a binary image.
     cvCvtColor( srcImg, hsvImg, CV_RGB2HSV );
 
-	/* Equalize the histograms of each channel. */
+	/// Equalize the histograms of each channel.
 	//vision_hist_eq( hsvImg, VISION_CHANNEL3 );
 		//VISION_CHANNEL1 + VISION_CHANNEL2 + VISION_CHANNEL3 );
 
-	/* Threshold all three channels using our own values. */
+	/// Threshold all three channels using our own values.
     cvInRangeS( hsvImg, cvScalar(hsv->hL, hsv->sL, hsv->vL),
 		cvScalar(hsv->hH, hsv->sH, hsv->vH), binImg );
 
-	/* Use a median filter image to remove outliers. */
+	/// Use a median filter image to remove outliers.
 	cvSmooth( binImg, outImg, CV_MEDIAN, 7, 7, 0. ,0. );
 	cvMorphologyEx( binImg, binImg, wS, NULL, CV_MOP_CLOSE, 1);
 
-    /* Find the centroid. */
+    /// Find the centroid.
     center = vision_find_centroid( binImg, 5 );
     *dotx = center.x;
     *doty = center.y;
 
-    /* Clear variables to free memory. */
+    /// Clear variables to free memory.
     cvReleaseImage( &hsvImg );
     cvReleaseImage( &outImg );
 
-	/* Check to see how many pixels of are detected in the image. */
+	/// Check to see how many pixels of are detected in the image.
 	num_pix = cvCountNonZero( binImg );
 	//printf("VISION_FIND_DOT: num_pix = %d\n" , num_pix);
 	if( num_pix > touch_thresh ) {
@@ -90,7 +68,7 @@ int vision_find_dot( int *dotx,
     if( num_pix < detect_thresh) {
 		return 0;
 	}
-	/* Check that the values of dotx & doty are not negative */
+	/// Check that the values of dotx & doty are not negative.
 	if( dotx < 0 || doty < 0 ) {
 		return 0;
 	}
@@ -99,33 +77,12 @@ int vision_find_dot( int *dotx,
 } /* end vision_find_dot() */
 
 
-/******************************************************************************
- *
- * Title:       int vision_find_pipe(   int *pipex,
- * 									    int *pipey,
- *                                      float *bearing,
- *                                      IplImage *srcImg,
- *                                      IplImage *outImg
- *                                   )
- *
- * Description: Finds a pipe object from a camera.
- *
- * Input:       pipex: Pointer to variable for x position of pipe.
- * 				pipey: Pointer to variable for y position of pipe.
- *              bearing: Pointer to variable for bearing of pipe.
- *              cap: A pointer to an open camera.
- *
- * Output:      status: 1 on success, 0 on failure.
- *
- *****************************************************************************/
+/*------------------------------------------------------------------------------
+ * int vision_find_pipe()
+ * Finds a pipe object from a camera.
+ *----------------------------------------------------------------------------*/
 
-int vision_find_pipe( int *pipex,
-					  int *pipey,
-                      double *bearing,
-                      IplImage *srcImg,
-                      IplImage *binImg,
-                      HSV_HL *hsv
-                    )
+int vision_find_pipe(int *pipex, int *pipey, double *bearing, IplImage *srcImg, IplImage *binImg, HSV_HL *hsv)
 {
     CvPoint center;
     IplImage *hsvImg = NULL;
@@ -135,48 +92,48 @@ int vision_find_pipe( int *pipex,
 	int detect_thresh = 15000;
 	int num_pix = 0;
 
-    /* Initialize to impossible values. */
+    /// Initialize to impossible values.
     center.x = -10000;
     center.y = -10000;
 
-	/* Create intermediate images for scratch space. */
+	/// Create intermediate images for scratch space.
     hsvImg = cvCreateImage( cvGetSize(srcImg), IPL_DEPTH_8U, 3 );
     outImg = cvCreateImage( cvGetSize(srcImg), IPL_DEPTH_8U, 1 );
 
-	/* Enhance the red channel of the source image. */
+	/// Enhance the red channel of the source image.
 	//vision_white_balance( srcImg );
 
-    /* Flip the source image. */
+    /// Flip the source image.
     cvFlip( srcImg, srcImg );
 
-    /* Segment the flipped image into a binary image. */
+    /// Segment the flipped image into a binary image.
     cvCvtColor( srcImg, hsvImg, CV_RGB2HSV );
 
-	/* Equalize the histograms of each channel. */
+	/// Equalize the histograms of each channel.
 	//vision_hist_eq( hsvImg,
 	//	VISION_CHANNEL1 + VISION_CHANNEL2 + VISION_CHANNEL3 );
 
-	/* Threshold all three channels using our own values. */
+	/// Threshold all three channels using our own values.
     cvInRangeS( hsvImg, cvScalar(hsv->hL, hsv->sL, hsv->vL),
 		cvScalar(hsv->hH, hsv->sH, hsv->vH), binImg );
 
-	/* Median filter image to remove outliers */
+	/// Use a median filter to remove outliers.
 	cvSmooth( binImg, outImg, CV_MEDIAN, 5, 5, 0. ,0. );
 	//cvDilate( outImg, binImg, 0, 2 );
 	//cvErode( outImg, binImg, 0, 4 );
 	//cvDilate( outImg, binImg, 0, 2 );
 
-    /* Process the image to get the bearing and centroid. */
+    /// Process the image to get the bearing and centroid.
     *bearing = vision_get_bearing( outImg );
     center = vision_find_centroid( outImg, 0 );
     *pipex = center.x;
     *pipey = center.y;
 
-    /* Clear variables to free memory. */
+    /// Clear variables to free memory.
     cvReleaseImage( &hsvImg );
     cvReleaseImage( &outImg );
 
-	/* Check to see how many pixels are detected in the image. */
+	/// Check to see how many pixels are detected in the image.
 	num_pix = cvCountNonZero( binImg );
 	//printf("VISION_FIND_PIPE: num_pix = %d\n" , num_pix);
 	if( num_pix < detect_thresh ) {
@@ -187,19 +144,12 @@ int vision_find_pipe( int *pipex,
 } /* end vision_find_pipe() */
 
 
-/******************************************************************************
- *
- * Title:       float vision_get_bearing( IplImage *inputBinImg )
- *
- * Description: Fits edges of pipe to a line and calculates its angle.
- *
- * Input:       inputBinImage: The binary image to find the bearing of.
- *
- * Output:      bearing: The angle of the pipe in radians.
- *
- *****************************************************************************/
+/*------------------------------------------------------------------------------
+ * float vision_get_bearing()
+ * Fits edges of pipe to a line and calculates its angle.
+ *----------------------------------------------------------------------------*/
 
-double vision_get_bearing( IplImage *inputBinImg )
+double vision_get_bearing(IplImage *inputBinImg)
 {
     CvScalar Right_STD;
     CvScalar Left_STD;
@@ -218,19 +168,18 @@ double vision_get_bearing( IplImage *inputBinImg )
     CvMat *RError;
     CvPoint2D32f point;
 
-    /* Slope (m) and b for left, right and combined estimate. */
+    /// Slope (m) and b for left, right and combined estimate.
     double mL = 0.0;
     double mR = 0.0;
     double m = 0.0;
 
-    /* Edge vectors, first element = x, second = y. */
+    /// Edge vectors, first element = x, second = y.
     int leftEdge[imHeight][2];
     int rightEdge[imHeight][2];
-
     int i = 0;
     int j = 0;
 
-    /* Initialize edge arrays, mset may be better. */
+    /// Initialize edge arrays, mset may be better.
     for( i = 0; i < imHeight; i++ ) {
         leftEdge[i][0] = 0;
         leftEdge[i][1] = 0;
@@ -238,22 +187,21 @@ double vision_get_bearing( IplImage *inputBinImg )
         rightEdge[i][1] = 0;
     }
     for( i = 0; i < imHeight - 10; i++ ) {
-        /* Scan through each line of image and look for first non zero pixel
-         * then get the (i,j) pixel value. */
+        /// Scan through each line of image and look for first non zero pixel
+        /// then get the (i,j) pixel value.
         while( (cvGet2D(inputBinImg, i, j).val[0] < 1) && (j<imWidth - 1) ) {
             j++;
         }
-        /* If we exit before getting to end of row, edge exists. */
+        /// If we exit before getting to end of row, edge exists.
         if( (j < imWidth - 1) && (j > 0) ) {
             leftEdge[leftEdgeCount][0] = i; //FLIP i, j, here worksish
             leftEdge[leftEdgeCount][1] = j;
             leftEdgeCount++;
-            /* Continue scanning to find right edge. */
+            /// Continue scanning to find right edge.
             while( (cvGet2D(inputBinImg, i, j).val[0] > 0) && (j < imWidth - 1) ) {
                 j++;
             }
-            if( j < imWidth - 2 ) { /* Scan didn't get to end of image so
-            						  * right edge exists. */
+            if( j < imWidth - 2 ) { /// Scan didn't get to end of image so right edge exists.
                 rightEdge[rightEdgeCount][0] = i;
                 rightEdge[rightEdgeCount][1] = j;
                 rightEdgeCount++;
@@ -266,7 +214,7 @@ double vision_get_bearing( IplImage *inputBinImg )
         return 0.0;
     }
 
-    /* Begin fitline. */
+    /// Begin fitline.
     float *left_line = new float[4];
     float *right_line = new float[4];
 
@@ -282,11 +230,11 @@ double vision_get_bearing( IplImage *inputBinImg )
         mL = atan2( left_line[1], left_line[0] );
         LError = cvCreateMat( 1, leftEdgeCount - 1, CV_32SC1 );
         for( k = 0; k < leftEdgeCount - 1; k++ ) {
-            /* Save errors in vector LError. */
+            /// Save errors in vector LError.
             cvSetReal2D( LError, 0, k, (double)(leftEdge[k][2])
                 - (double)(( left_line[1] / left_line[0] ) * (leftEdge[k][0] - left_line[1]) + left_line[3]) );
         }
-        /* Calculate standard deviation of error. */
+        /// Calculate standard deviation of error.
         cvAvgSdv( LError, NULL, &Left_STD, NULL );
         cvClearSeq( point_seq );
     }
@@ -307,7 +255,7 @@ double vision_get_bearing( IplImage *inputBinImg )
         cvClearSeq( point_seq );
     }
 
-    /* If estimate is really poor, do not update bearing. */
+    /// If estimate is really poor, do not update bearing.
     if( (Right_STD.val[0] > maxSTD) && (Left_STD.val[0] > maxSTD) ) {
 		delete left_line;
 		delete right_line;
@@ -315,15 +263,15 @@ double vision_get_bearing( IplImage *inputBinImg )
         return 0.0;
     }
 
-    /* Only a left edge, ignore right. */
+    /// Only a left edge, ignore right.
     if( rightEdgeCount <= edgeThreshold ) {
         m = mL;
     }
-    /* Only a right edge, ignore left. */
+    /// Only a right edge, ignore left.
     else if( leftEdgeCount <= edgeThreshold ) {
         m = mR;
     }
-    /* Both edges exist, scale each estimate by variances. */
+    /// Both edges exist, scale each estimate by variances.
     else {
         m = (Right_STD.val[0] * mL + Left_STD.val[0] * mR) /
         	(Right_STD.val[0] + Left_STD.val[0]);
@@ -337,39 +285,31 @@ double vision_get_bearing( IplImage *inputBinImg )
 } /* end vision_get_bearing() */
 
 
-/******************************************************************************
- *
- * Title:       CvPoint vision_find_centroid( IplImage *binImage, int thresh )
- *
- * Description: Finds the centroid of the pixels in the image.
- *
- * Input:       binImage: The binary image to find the centroid of.
- *              thresh: The amount of pixels required for centroid to be valid.
- *
- * Output:      centroid: The x and y coordinates of the centroid.
- *
- *****************************************************************************/
+/*------------------------------------------------------------------------------
+ * CvPoint vision_find_centroid()
+ * Finds the centroid of the pixels in the image.
+ *----------------------------------------------------------------------------*/
 
-CvPoint vision_find_centroid( IplImage *binImage, int thresh )
+CvPoint vision_find_centroid(IplImage *binImage, int thresh)
 {
-    /* Return value. */
+    /// Return value.
     CvPoint centroid;
 
-    /* Get image width and height. */
+    /// Get image width and height.
     int width = binImage->width;
     int height = binImage->height;
 
-    /* Totals. */
+    /// Totals.
     unsigned int rowTotal = 0;
     unsigned int colTotal = 0;
     int count = 0;
 
-    /* Counters. */
+    /// Counters.
     unsigned int ii = 0;
     unsigned int jj = 0;
     bool detected = FALSE;
 
-    /* Find centroid. */
+    /// Find centroid.
     for( ii = ( binImage->roi == NULL ? 0 : ( unsigned int )binImage->roi->xOffset );
             ii < ( binImage->roi == NULL ? ( unsigned int )width : ( unsigned int )( binImage->roi->xOffset + binImage->roi->width ) );
             ii++ ) {
@@ -390,16 +330,16 @@ CvPoint vision_find_centroid( IplImage *binImage, int thresh )
         }
     }
 
-    /* Check if an object is detected. */
+    /// Check if an object is detected.
     if( count > thresh )
         detected = true;
 
-    /* If the centroid was detected convert it */
+    /// If the centroid was detected convert it.
     if( detected ) {
         centroid.x = (int)colTotal / count;
         centroid.y = (int)rowTotal / count;
     }
-    else { /* Send back negatives if we do not have a positive detection */
+    else { ///* Send back negatives if we do not have a positive detection.
         centroid.x = -1;
         centroid.y = -1;
     }
@@ -408,32 +348,14 @@ CvPoint vision_find_centroid( IplImage *binImage, int thresh )
 } /* end vision_find_centroid() */
 
 
-/******************************************************************************
- *
- * Title:       int vision_find_fence(   int *pipex,
- *                                      float *bearing,
- *                                      IplImage *srcImg,
- *                                      IplImage *outImg
- *                                   )
- *
- * Description: Finds a pipe object from a camera.
- *
- * Input:       pipex: Pointer to variable for x position of pipe.
- *              bearing: Pointer to variable for bearing of pipe.
- *              cap: A pointer to an open camera.
- *
- * Output:      status: 1 on success, 0 on failure.
- *
- *****************************************************************************/
+/*------------------------------------------------------------------------------
+ * int vision_find_fence()
+ * Finds a pipe object from a camera.
+ *----------------------------------------------------------------------------*/
 
-int vision_find_fence( int *fence_center,
-                      int *y_max,
-                      IplImage *srcImg,
-                      IplImage *binImg,
-					  HSV_HL *hsv
-                    )
+int vision_find_fence(int *fence_center, int *y_max, IplImage *srcImg, IplImage *binImg, HSV_HL *hsv)
 {
-	/* Declare variables. */
+	/// Declare variables.
 	//int sum_x = 0;
     //int ii = 0;
     //int jj = 0;
@@ -447,62 +369,62 @@ int vision_find_fence( int *fence_center,
  	int num_pix = 0;
 	int detect_thresh = 1;
 
-	/* Initialize center to impossible value. */
+	/// Initialize center to impossible value.
 	center.x = -1000;
 	center.y = -1000;
 
-	/* Create intermediate images for scratch space. */
+	/// Create intermediate images for scratch space.
     hsvImg = cvCreateImage( cvGetSize(srcImg), IPL_DEPTH_8U, 3 );
     outImg = cvCreateImage( cvGetSize(srcImg), IPL_DEPTH_8U, 1 );
 
-	/* Enhance the red channel of the source image. */
+	/// Enhance the red channel of the source image.
 	//vision_white_balance( srcImg );
 
-    /* Segment the flipped image into a binary image. */
+    /// Segment the flipped image into a binary image.
     cvCvtColor( srcImg, hsvImg, CV_RGB2HSV );
 
-	/* Equalize the histograms of each channel. */
+	/// Equalize the histograms of each channel.
 	//vision_hist_eq( hsvImg,
 	//	VISION_CHANNEL1 + VISION_CHANNEL2 + VISION_CHANNEL3 );
 
-	/* Threshold all three channels using our own values. */
+	/// Threshold all three channels using our own values.
     cvInRangeS( hsvImg, cvScalar(hsv->hL, hsv->sL, hsv->vL),
 		cvScalar(hsv->hH, hsv->sH, hsv->vH), binImg );
 
-	/* Median filter image to remove outliers */
+	/// Median filter image to remove outliers.
 	cvSmooth( binImg, outImg, CV_MEDIAN, 5, 11, 0. ,0. );
 	//cvErode( outImg, binImg, wS );
 
-	/* Check to see how many pixels are detected in the image. */
+	/// Check to see how many pixels are detected in the image.
 	num_pix = cvCountNonZero( binImg );
 	//printf("VISION_FIND_FENCE: num_pix = %d\n" , num_pix);
 
-	/* Find the centroid. */
+	/// Find the centroid.
     center = vision_find_centroid( binImg, 5 );
     *fence_center = floor(center.x);
     *y_max = floor(center.y);
 
-    ///* Compute Centroid. */
-    //for( ii = 0; ii < binImg->height; ii++ ) {
-        //for( jj = 0; jj < binImg->width; jj++ ) {
-        	//if( cvGet2D(binImg, ii, jj).val[0] != 0 ) {
-        		//sum_x += jj;
-        		//kk++;
-			//}
-		//}
-	//}
-	/* Make sure we don't divide by 0 here. */
-//	if( kk == 0 ) {
-//		kk = 1;
-//	}
-//    *fence_center = floor(sum_x / kk);
+    /// Compute centroid.
+    /*for( ii = 0; ii < binImg->height; ii++ ) {
+        for( jj = 0; jj < binImg->width; jj++ ) {
+        	if( cvGet2D(binImg, ii, jj).val[0] != 0 ) {
+        		sum_x += jj;
+        		kk++;
+			}
+		}
+	}
+	/// Make sure we don't divide by 0 here.
+	if( kk == 0 ) {
+		kk = 1;
+	}
+    *fence_center = floor(sum_x / kk);*/
 
-    /* Clear variables to free memory. */
+    /// Clear variables to free memory.
     cvReleaseImage( &hsvImg );
     cvReleaseImage( &outImg );
 
 	if( num_pix > detect_thresh ) {
-		/* We have found enough pixels to qualify as detecting the fence. */
+		/// We have found enough pixels to qualify as detecting the fence.
 		return 1;
 	}
 
@@ -510,19 +432,12 @@ int vision_find_fence( int *fence_center,
 } /* end vision_find_fence() */
 
 
-/******************************************************************************
- *
- * Title:       float vision_get_fence_bottom( IplImage *inputBinImg )
- *
- * Description: Fits edges of pipe to a line and calculates its angle.
- *
- * Input:       inputBinImage: The binary image to find the bearing of.
- *
- * Output:      bearing: The angle of the pipe in radians.
- *
- *****************************************************************************/
+/*------------------------------------------------------------------------------
+ * float vision_get_fence_bottom()
+ * Fits edges of pipe to a line and calculates its angle.
+ *----------------------------------------------------------------------------*/
 
-int vision_get_fence_bottom( IplImage *inputBinImg)
+int vision_get_fence_bottom(IplImage *inputBinImg)
 {
     int y_max = 0;
     int imHeight = inputBinImg->height;
@@ -530,31 +445,31 @@ int vision_get_fence_bottom( IplImage *inputBinImg)
     int minPipeWidth = 2;
     int edgeThreshold = 2;
 
-    /* Edge vectors, first element = x, second = y. */
+    /// Edge vectors, first element = x, second = y.
     int leftEdge[imHeight];
     int rightEdge[imHeight];
-    int i = 0; /* rows */
-    int j = 0; /* columns */
+    int i = 0; /// rows
+    int j = 0; /// columns
     int k = 0;
-    /* Initialize edge arrays, memset may be better. */
+    /// Initialize edge arrays, memset may be better.
     memset( &leftEdge, 0, sizeof(leftEdge) );
     memset( &rightEdge, 0, sizeof(rightEdge) );
     for( i = 0; i < imHeight - 1; i++ ) {
-        /* Scan through each line of image and look for first non zero pixel
-         * then get the (i,j) pixel value. */
+        /// Scan through each line of image and look for first non zero pixel
+        /// then get the (i,j) pixel value. */
         while( (cvGet2D(inputBinImg, i, j).val[0] < 1) && (j < imWidth - 2) ) {
             j++;
         }
-        /* If we exit before getting to end of row, edge exists. */
+        /// If we exit before getting to end of row, edge exists.
         if( (j < imWidth) && (j > minPipeWidth) ) {
             leftEdge[k] = j;
-            /* Countinue scanning to find bottom edge. */
+            /// Countinue scanning to find bottom edge.
             while( (cvGet2D(inputBinImg, i, j).val[0] > 0) &&
 				(j < imWidth - 2) ) {
                 j++;
             }
             if( j < imWidth - 2) {
-            	/* Scan didn't get to end of image, bottom edge exists. */
+            	/// Scan didn't get to end of image, bottom edge exists.
                 rightEdge[k] = j;
             }
             if( rightEdge[k] - leftEdge[k] > minPipeWidth ) {
@@ -565,58 +480,44 @@ int vision_get_fence_bottom( IplImage *inputBinImg)
         j = 0;
     }
 
-    /* We found a fence. */
+    /// We found a fence.
     if( y_max > edgeThreshold ) {
 		return y_max;
     }
 	return -1;
 } /* end vision_get_fence_bottom() */
 
-/******************************************************************************
- *
- * Title:       int vision_find_boxes(  IplImage *srcImg,
- * 										CvSeq *boxes
- *                                    )
- *
- * Description: Finds rectangles in an image from a camera.
- *
- * Input:       cap: A pointer to an open camera.
- *				srcImg: Memory location to store a captured image.
- *
- * Output:      status: 1 on success, 0 on failure.
- *
- *****************************************************************************/
 
-int vision_find_boxes( IplImage *srcImg,
-					   CvSeq *result,
-					   CvSeq *squares,
-					   int task,
-					   float *angle )
+/*------------------------------------------------------------------------------
+ * int vision_find_boxes()
+ * Finds rectangles in an image from a camera.
+ *----------------------------------------------------------------------------*/
+
+int vision_find_boxes(IplImage *srcImg, CvSeq *result, CvSeq *squares, int task, float *angle)
 {
-	/* Declare variables. */
+	/// Declare variables.
 	IplImage *img = NULL;
 	CvMemStorage *storage = 0;
 	int status = -1;
 
-	/* Initialize variables. */
+	/// Initialize variables.
 	storage = cvCreateMemStorage( 0 );
 
-	/* Clone the source image so that we have an image we can write over. The
-	 * source image needs to be kept clean so that we can display it later. */
+	/// Clone the source image so that we have an image we can write over. The
+	/// source image needs to be kept clean so that we can display it later.
 	img = cvCloneImage( srcImg );
 
-	/* Smooth the image with a Gaussian filter. Add the channels to smooth to
-	 * the second argument. */
+	/// Smooth the image with a Gaussian filter. Add the channels to smooth to the second argument.
 	vision_smooth( img, VISION_CHANNEL3 );
 
-	/* Equalize the histograms of each channel. */
+	/// Equalize the histograms of each channel.
 	vision_hist_eq( img,
 		VISION_CHANNEL1 + VISION_CHANNEL2 + VISION_CHANNEL3 );
 
-	/* Look for boxes in the image. */
+	/// Look for boxes in the image.
 	status = vision_find_squares( img, storage, result, squares, task, angle );
 
-    /* Clear memory storage and reset free space position. */
+    /// Clear memory storage and reset free space position.
     cvReleaseImage( &img );
     cvClearMemStorage( storage );
     cvReleaseMemStorage( &storage );
@@ -625,27 +526,14 @@ int vision_find_boxes( IplImage *srcImg,
 } /* end vision_find_boxes() */
 
 
-/******************************************************************************
- *
- * Title:       double vision_angle(  CvPoint *pt1,
- * 									  CvPoint *pt2,
- * 									  CvPoint *pt0
- *                                  )
- *
- * Description: Finds the cosine of the angle between two vectors.
- *
- * Input:       pt1: First point.
- *				pt2: Second point.
- * 				pt0: Point used to find angle from.
- *
- * Output:      The angle between the points.
- *
- *****************************************************************************/
+/*------------------------------------------------------------------------------
+ * double vision_angle()
+ * Finds the cosine of the angle between two vectors.
+ *----------------------------------------------------------------------------*/
 
-double vision_angle( CvPoint* pt1, CvPoint* pt2, CvPoint* pt0, IplImage *img,
-					 int task, float *angle )
+double vision_angle(CvPoint* pt1, CvPoint* pt2, CvPoint* pt0, IplImage *img, int task, float *angle)
 {
-	/* Calculate length between points. */
+	/// Calculate length between points.
     double dx1 = pt1->x - pt0->x;
     double dy1 = pt1->y - pt0->y;
     double dx2 = pt2->x - pt0->x;
@@ -658,17 +546,16 @@ double vision_angle( CvPoint* pt1, CvPoint* pt2, CvPoint* pt0, IplImage *img,
 	double arinv = 0;
 	int ar_passed = FALSE;
 
-	/* The find box code detects a box at the image boundary. To remove this we
-	 * are going to exclude boxes that are within a small band around the edge
-	 * of the image. */
+	/// The find box code detects a box at the image boundary. To remove this we
+	/// are going to exclude boxes that are within a small band around the edge of the image.
 	if( (dx > borderx) || (dy > bordery) ) {
 		return 100000.;
 	}
 
-	/* Check that the lengths of the found box are within the bounds of the
-	 * aspect ratios for the individual targets. They can be off by a certain
-	 * percentage set by VISION_AR_THRESH to accomodate looking at the objects
-	 * from an angle. */
+	/// Check that the lengths of the found box are within the bounds of the
+	/// aspect ratios for the individual targets. They can be off by a certain
+	/// percentage set by VISION_AR_THRESH to accomodate looking at the objects
+	/// from an angle. */
 	if( dy == 0 ) {
 		ar = 0.;
 	}
@@ -683,31 +570,31 @@ double vision_angle( CvPoint* pt1, CvPoint* pt2, CvPoint* pt0, IplImage *img,
 	}
 	switch( task ) {
 	case VISION_SUITCASE:
-		/* Check the aspect ratio. */
+		/// Check the aspect ratio.
 		if( ar > VISION_AR_SUITCASE * (1 - VISION_AR_THRESH) &&
 			ar < VISION_AR_SUITCASE * (1 + VISION_AR_THRESH) ) {
-			/* Found a valid box. */
+			/// Found a valid box.
 			ar_passed = TRUE;
 		}
-		/* Check to see if we are looking at the box rotated by 90 degrees. */
+		/// Check to see if we are looking at the box rotated by 90 degrees.
 		if( !ar_passed ) {
 			if( arinv < VISION_AR_SUITCASE * (1 - VISION_AR_THRESH) ||
 				arinv > VISION_AR_SUITCASE * (1 + VISION_AR_THRESH) ) {
 				return 100000.;
 			}
 		}
-		/* Else we have found a box with a valid aspect ratio. */
+		/// Else we have found a box with a valid aspect ratio.
 		else {
 			break;
 		}
 	case VISION_PIPE:
-		/* Check the aspect ratio. */
+		/// Check the aspect ratio.
 		if( ar > VISION_AR_PIPE * (1 - VISION_AR_THRESH) &&
 			ar < VISION_AR_PIPE * (1 + VISION_AR_THRESH) ) {
-			/* Found a valid box. */
+			/// Found a valid box.
 			ar_passed = TRUE;
 
-			/* Find the angle of the pipe so that we follow the longer edge. */
+			/// Find the angle of the pipe so that we follow the longer edge.
 			if( dy1 > dy2 ) {
 				*angle = atan2( dy1, dx2 ) * 180 / M_PI;
 			}
@@ -716,13 +603,13 @@ double vision_angle( CvPoint* pt1, CvPoint* pt2, CvPoint* pt0, IplImage *img,
 			}
 			//printf("VISION_ANGLE: %f\n", *angle);
 		}
-		/* Check to see if we are looking at the box rotated by 90 degrees. */
+		/// Check to see if we are looking at the box rotated by 90 degrees.
 		if( !ar_passed ) {
 			if( arinv < VISION_AR_PIPE * (1 - VISION_AR_THRESH) ||
 				arinv > VISION_AR_PIPE * (1 + VISION_AR_THRESH) ) {
 				return 100000.;
 			}
-			/* Find the angle of the pipe so that we follow the longer edge. */
+			/// Find the angle of the pipe so that we follow the longer edge.
 			if( dy1 > dy2 ) {
 				*angle = atan2( dy1, dx2 ) * 180 / M_PI;
 			}
@@ -731,18 +618,18 @@ double vision_angle( CvPoint* pt1, CvPoint* pt2, CvPoint* pt0, IplImage *img,
 			}
 			//printf("VISION_ANGLE: %f\n", *angle);
 		}
-		/* Else we have found a box with a valid aspect ratio. */
+		/// Else we have found a box with a valid aspect ratio.
 		else {
 			break;
 		}
 	case VISION_BOX:
-		/* Check the aspect ratio. */
+		/// Check the aspect ratio.
 		if( ar > VISION_AR_BOX * (1 - VISION_AR_THRESH) &&
 			ar < VISION_AR_BOX * (1 + VISION_AR_THRESH) ) {
-			/* Found a valid box. */
+			/// Found a valid box.
 			ar_passed = TRUE;
 
-			/* Find the angle of the pipe so that we follow the longer edge. */
+			/// Find the angle of the pipe so that we follow the longer edge.
 			if( dy1 > dy2 ) {
 				*angle = atan2( dy1, dx2 );
 			}
@@ -751,13 +638,13 @@ double vision_angle( CvPoint* pt1, CvPoint* pt2, CvPoint* pt0, IplImage *img,
 			}
 			//printf("VISION_ANGLE: %f\n", *angle);
 		}
-		/* Check to see if we are looking at the box rotated by 90 degrees. */
+		/// Check to see if we are looking at the box rotated by 90 degrees.
 		if( !ar_passed ) {
 			if( arinv < VISION_AR_BOX * (1 - VISION_AR_THRESH) ||
 				arinv > VISION_AR_BOX * (1 + VISION_AR_THRESH) ) {
 				return 100000.;
 			}
-			/* Find the angle of the pipe so that we follow the longer edge. */
+			/// Find the angle of the pipe so that we follow the longer edge.
 			if( dy1 > dy2 ) {
 				*angle = atan2( dy1, dx2 );
 			}
@@ -766,40 +653,26 @@ double vision_angle( CvPoint* pt1, CvPoint* pt2, CvPoint* pt0, IplImage *img,
 			}
 			//printf("VISION_ANGLE: %f\n", *angle);
 		}
-		/* Else we have found a box with a valid aspect ratio. */
+		/// Else we have found a box with a valid aspect ratio.
 		else {
 			break;
 		}
 	}
 
-	/* Return the cosine between the two points. */
+	/// Return the cosine between the two points.
     return( dx1*dx2 + dy1*dy2) / sqrt((dx1*dx1 + dy1*dy1)*(dx2*dx2 + dy2*dy2) + 1e-10 );
 } /* end vision_angle() */
 
 
-/******************************************************************************
- *
- * Title:       int vision_find_squares(  IplImage *img,
- * 										   CvMemStorage *storage,
- * 										   CvSeq *box_centers,
- * 										   CvSeq *squares
- *                                       )
- *
- * Description: Finds all the rectangles in an image.
- *
- * Input:       img: The image to search for rectangle shapes.
- *				storage: Memory location to store square locations.
- * 				box_centers: A sequence to store the box center locations in.
- *
- * Output:      The number of rectangles found in the image.
- *
- *****************************************************************************/
+/*------------------------------------------------------------------------------
+ * int vision_find_squares()
+ * Finds all the rectangles in an image.
+ *----------------------------------------------------------------------------*/
 
-int vision_find_squares( IplImage *img, CvMemStorage *storage,
-						 CvSeq *box_centers, CvSeq *squares,
-						 int task, float *angle )
+int vision_find_squares(IplImage *img, CvMemStorage *storage, CvSeq *box_centers,
+	CvSeq *squares, int task, float *angle)
 {
-	/* Declare variables. */
+	/// Declare variables.
     CvSeq* contours;
     CvMoments moments;
 	CvPoint box_centroid;
@@ -814,57 +687,56 @@ int vision_find_squares( IplImage *img, CvMemStorage *storage,
 	int thresh = 50;
 	int status = 0;
 
-    /* Select the maximum ROI in the image with the width and height divisible by 2. */
+    /// Select the maximum ROI in the image with the width and height divisible by 2.
     cvSetImageROI( timg, cvRect( 0, 0, sz.width, sz.height ));
 
-    /* Down-scale and upscale the image to filter out the noise. */
+    /// Down-scale and upscale the image to filter out the noise.
     cvPyrDown( timg, pyr, 7 );
     cvPyrUp( pyr, timg, 7 );
 
-	/* Create a grayscale image. */
+	/// Create a grayscale image.
     tgray = cvCreateImage( sz, 8, 1 );
 
-    /* Find squares in every color plane of the image. */
+    /// Find squares in every color plane of the image.
     for( c = 0; c < 3; c++ ) {
-        /* Extract the c-th color plane. */
+        /// Extract the c-th color plane.
         cvSetImageCOI( timg, c + 1 );
         cvCopy( timg, tgray, 0 );
 
-        /* Try several threshold levels. */
+        /// Try several threshold levels.
         for( l = 0; l < N; l++ ) {
             /* !!! HACK !!!: Use Canny instead of zero threshold level. Canny
 			 * helps to catch squares with gradient shading. */
             if( l == 0 ) {
-                /* Apply Canny and use the upper threshold and set the lower to
-				 * 0 (which forces edges merging). */
+                /// Apply Canny and use the upper threshold and set the lower to
+				/// 0 (which forces edges merging). */
                 cvCanny( tgray, gray, 0, thresh, 5 );
-                /* Dilate Canny output to remove potential holes between edge
-				 * segments. */
+                /// Dilate Canny output to remove potential holes between edge segments.
                 cvDilate( gray, gray, 0, 1 );
             }
             else {
-                /* Apply threshold if l != 0. */
+                /// Apply threshold if l != 0.
                 cvThreshold( tgray, gray, (l + 1) * 255 / N, 255, CV_THRESH_BINARY );
             }
 
-            /* Find contours and store them all as a list. */
+            /// Find contours and store them all as a list.
             cvFindContours( gray, storage, &contours, sizeof(CvContour),
                 CV_RETR_LIST, CV_CHAIN_APPROX_SIMPLE, cvPoint(0,0) );
 
-            /* Test each contour to see if it is a rectangle. */
+            /// Test each contour to see if it is a rectangle.
             while( contours ) {
-                /* Approximate contour with accuracy proportional to the contour perimeter. */
+                /// Approximate contour with accuracy proportional to the contour perimeter.
                 result = cvApproxPoly( contours, sizeof(CvContour), storage,
                     CV_POLY_APPROX_DP, cvContourPerimeter(contours)*0.02, 0 );
-                /* Square contours should have 4 vertices after approximation
-                 * relatively large area (to filter out noisy contours) and be convex.
-                 * Note: absolute value of an area is used because area may be
-				 * positive or negative in accordance with the contour orientation. */
+                /// Square contours should have 4 vertices after approximation
+                /// relatively large area (to filter out noisy contours) and be convex.
+                /// Note: absolute value of an area is used because area may be
+				/// positive or negative in accordance with the contour orientation. */
                 if( result->total == 4 && fabs(cvContourArea(result, CV_WHOLE_SEQ)) > 1000 &&
                     cvCheckContourConvexity(result) ) {
                     s = 0;
                     for( i = 0; i < 5; i++ ) {
-                        /* Find the minimum angle between joint edges (max of cos). */
+                        /// Find the minimum angle between joint edges (max of cos).
                         if( i >= 2 ) {
                             t = fabs(vision_angle(
 								(CvPoint*)cvGetSeqElem( result, i ),
@@ -875,8 +747,8 @@ int vision_find_squares( IplImage *img, CvMemStorage *storage,
                         }
                     }
 
-                    /* If cosines of all angles are small (all angles are ~90 degree)
-					 * then write rectangle vertices to resultant sequence. */
+                    /// If cosines of all angles are small (all angles are ~90 degree)
+					/// then write rectangle vertices to resultant sequence. */
                     if( s < VISION_MIN_ANGLE ) {
                         for( i = 0; i < 4; i++ ) {
                          	cvContourMoments( result, &moments );
@@ -888,13 +760,13 @@ int vision_find_squares( IplImage *img, CvMemStorage *storage,
                         }
 					}
 				}
-				/* Look at the next contour to see if it is a rectangle. */
+				/// Look at the next contour to see if it is a rectangle.
 				contours = contours->h_next;
             }
         }
     }
 
-    /* Release all temporary images to free up memory. */
+    /// Release all temporary images to free up memory.
     cvReleaseImage( &gray );
     cvReleaseImage( &pyr );
     cvReleaseImage( &tgray );
@@ -904,41 +776,28 @@ int vision_find_squares( IplImage *img, CvMemStorage *storage,
 } /* end vision_find_squares() */
 
 
-/******************************************************************************
- *
- * Title:       int vision_suitcase(  IplImage *srcImg,
- * 									  CvSeq *result,
- * 									  CvSeq *squares
- *                                  )
- *
- * Description: Finds the centroid of the suitcase structure in an image.
- *
- * Input:       cap: A pointer to an open camera.
- *				srcImg: Memory location to store a captured image.
- *
- * Output:      status: 1 on success, 0 on failure.
- *
- *****************************************************************************/
+/*------------------------------------------------------------------------------
+ * int vision_suitcase()
+ * Finds the centroid of the suitcase structure in an image.
+ *----------------------------------------------------------------------------*/
 
-int vision_suitcase( IplImage *srcImg,
-					 CvSeq *result,
-					 CvSeq *squares )
+int vision_suitcase(IplImage *srcImg, CvSeq *result, CvSeq *squares )
 {
-	/* Declare variables. */
+	/// Declare variables.
 	IplImage *img = NULL;
 	CvMemStorage *storage = 0;
 	int status = -1;
 	float angle = 0;
 
-	/* Initialize variables. */
+	/// Initialize variables.
 	storage = cvCreateMemStorage( 0 );
 
-	/* Clone the source image so that we have an image we can write over. The
-	 * source image needs to be kept clean so that we can display it later. */
+	/// Clone the source image so that we have an image we can write over. The
+	/// source image needs to be kept clean so that we can display it later.
 	img = cvCloneImage( srcImg );
     status = vision_find_squares( img, storage, result, squares, VISION_SUITCASE, &angle );
 
-    /* Clear memory storage and reset free space position. */
+    /// Clear memory storage and reset free space position.
     cvReleaseImage( &img );
     cvReleaseMemStorage( &storage );
 
@@ -946,42 +805,30 @@ int vision_suitcase( IplImage *srcImg,
 } /* end vision_suitcase() */
 
 
-/******************************************************************************
- *
- * Title:       int vision_find_circle(  IplImage *srcImg,
- * 										 CvSeq *circles
- *                                     )
- *
- * Description: Finds a circle in an image.
- *
- * Input:       cap: A pointer to an open camera.
- *				srcImg: Memory location to store a captured image.
- * 				circles: A sequence to store detected circle data in.
- *
- * Output:      status: 1 on success, 0 on failure.
- *
- *****************************************************************************/
+/*------------------------------------------------------------------------------
+ * int vision_find_circle()
+ * Finds a circle in an image.
+ *----------------------------------------------------------------------------*/
 
-int vision_find_circle( IplImage *srcImg,
-						CvSeq *circles )
+int vision_find_circle(IplImage *srcImg, CvSeq *circles )
 {
-	/* Declare variables. */
+	/// Declare variables.
 	IplImage *gray = NULL;
 	CvMemStorage *storage = 0;
 
-	/* Initialize variables. */
+	/// Initialize variables.
 	storage = cvCreateMemStorage( 0 );
 
-	/* Convert captured image to grayscale. */
+	/// Convert captured image to grayscale.
     gray = cvCreateImage( cvGetSize(srcImg), 8, 1 );
 	cvCvtColor( srcImg, gray, CV_BGR2GRAY );
 	cvSmooth( gray, gray, CV_GAUSSIAN, 9, 9 );
 
-	/* Look for circles. */
+	/// Look for circles.
 	circles = cvHoughCircles( gray, storage, CV_HOUGH_GRADIENT, 2,
 		gray->height / 4, 200, 100 );
 
-    /* Clear memory storage and reset free space position. */
+    /// Clear memory storage and reset free space position.
     cvReleaseImage( &gray );
     cvReleaseMemStorage( &storage );
 
@@ -989,49 +836,30 @@ int vision_find_circle( IplImage *srcImg,
 } /* end vision_find_circle() */
 
 
-/******************************************************************************
- *
- * Title:       int vision_window_filter(  IplImage *img,
- * 										   IplImage *bin_img,
- * 										   CvPoint *center,
- * 										   int sizex,
- * 										   int sizey
- *                                      )
- *
- * Description: Finds the centroid in a binary image using the sum of a window.
- *
- * Input:       img: The binary image to search over.
- *				center: A pointer to fill in the centroid values.
- * 				sizex: The window size in x direction.
- * 				sizey: The window size in y direction.
- *
- * Output:      status: 1 on success, 0 on failure.
- *
- *****************************************************************************/
+/*------------------------------------------------------------------------------
+ * int vision_window_filter()
+ * Finds the centroid in a binary image using the sum of a window.
+ *----------------------------------------------------------------------------*/
 
-int vision_window_filter( IplImage *img,
-						IplImage *bin_img,
-					    CvPoint *center,
-						int sizex,
-						int sizey )
+int vision_window_filter(IplImage *img, IplImage *bin_img, CvPoint *center, int sizex, int sizey )
 {
-	/* Declare variables. */
+	/// Declare variables.
 	int rows = 0;
 	int cols = 0;
 	double val = 0.;
 	IplImage *timg = NULL;
 	double retval = 0.;
 
-	/* Create temporary image. */
+	/// Create temporary image.
     timg = cvCreateImage( cvGetSize(img), IPL_DEPTH_8U, 1 );
 
-	/* Look for the maximum value in the filtered image. */
+	/// Look for the maximum value in the filtered image.
 	for( cols = 0; cols < img->height - (sizey + 1); cols++ ) {
 		for( rows = 0; rows < img->width - (sizex + 1); rows++ ) {
-			/* Search through the window to find the sum of the pixels. */
+			/// Search through the window to find the sum of the pixels.
 			val = cvGet2D( timg, cols, rows ).val[0];
 			if( val > retval ) {
-				/* We have found a new max correlation. */
+				/// We have found a new max correlation.
 				retval = val;
 				center->x = rows;
 				center->y = cols;
@@ -1039,7 +867,7 @@ int vision_window_filter( IplImage *img,
 		}
 	}
 
-	/* Release elements to free memory. */
+	/// Release elements to free memory.
 	cvReleaseImage( &timg );
 
 	if( retval > 0. ) {
@@ -1051,24 +879,14 @@ int vision_window_filter( IplImage *img,
 } /* end vision_window_filter() */
 
 
-/******************************************************************************
- *
- * Title:       void vision_smooth(  IplImage *img, int mode )
- *
- * Description: Performs Gaussian smoothing on an image.
- *
- * Input:       img: The image to smooth.
- *              mode: Sort of a mask to figure out which channels to operate
- * 				on. Set channel 1 = 1, channel 2 = 2, channel 3 = 4. Then add
- * 				the channels that are to be operated on.
- *
- * Output:      None.
- *
- *****************************************************************************/
+/*------------------------------------------------------------------------------
+ * void vision_smooth()
+ * Performs Gaussian smoothing on an image.
+ *----------------------------------------------------------------------------*/
 
-void vision_smooth( IplImage *img, int mode )
+void vision_smooth(IplImage *img, int mode)
 {
-	/* Declare variables. */
+	/// Declare variables.
     IplImage *clone = NULL;
     IplImage *tgray1 = NULL;
     IplImage *tgray2 = NULL;
@@ -1076,15 +894,15 @@ void vision_smooth( IplImage *img, int mode )
     CvSize sz = cvSize( img->width & -2, img->height & -2 );
     int smooth_size = 9;
 
-	/* Clone the original image. */
+	/// Clone the original image.
 	clone = cvCloneImage( img );
 
-	/* Create three separate grayscale images, one for each channel. */
+	/// Create three separate grayscale images, one for each channel.
     tgray1 = cvCreateImage( sz, 8, 1 );
 	tgray2 = cvCreateImage( sz, 8, 1 );
 	tgray3 = cvCreateImage( sz, 8, 1 );
 
-    /* Filter each plane with a Gaussian and merge back to original image.  */
+    /// Filter each plane with a Gaussian and merge back to original image.
     cvSetImageCOI( clone, 1 );
     cvCopy( clone, tgray1, 0 );
 	if( mode == 1 || mode == 3 || mode == 5 || mode == 7 ) {
@@ -1105,31 +923,22 @@ void vision_smooth( IplImage *img, int mode )
 
 	cvMerge( tgray1, tgray2, tgray3, NULL, img );
 
-    /* Clear variables to free memory. */
+    /// Clear variables to free memory.
     cvReleaseImage( &clone );
     cvReleaseImage( &tgray1 );
     cvReleaseImage( &tgray2 );
     cvReleaseImage( &tgray3 );
 } /* end vision_smooth() */
 
-/******************************************************************************
- *
- * Title:       void vision_hist_eq(  IplImage *img, int mode )
- *
- * Description: Performs histogram equalization on an image.
- *
- * Input:       img: The image to equalize histogram of.
- *              mode: Sort of a mask to figure out which channels to operate
- * 				on. Set channel 1 = 1, channel 2 = 2, channel 3 = 4. Then add
- * 				the channels that are to be operated on.
- *
- * Output:      None.
- *
- *****************************************************************************/
 
-void vision_hist_eq( IplImage *img, int mode )
+/*------------------------------------------------------------------------------
+ * void vision_hist_eq()
+ * Performs histogram equalization on an image.
+ *----------------------------------------------------------------------------*/
+
+void vision_hist_eq(IplImage *img, int mode)
 {
-	/* Declare variables. */
+	/// Declare variables.
     IplImage *clone = NULL;
     IplImage *tgray1 = NULL;
     IplImage *tgray2 = NULL;
@@ -1139,10 +948,10 @@ void vision_hist_eq( IplImage *img, int mode )
     IplImage *tgray3eq = NULL;
     CvSize sz = cvSize( img->width & -2, img->height & -2 );
 
-	/* Clone the original image. */
+	/// Clone the original image.
 	clone = cvCloneImage( img );
 
-	/* Create three separate grayscale images, one for each channel. */
+	/// Create three separate grayscale images, one for each channel.
     tgray1 = cvCreateImage( sz, 8, 1 );
 	tgray2 = cvCreateImage( sz, 8, 1 );
 	tgray3 = cvCreateImage( sz, 8, 1 );
@@ -1150,8 +959,8 @@ void vision_hist_eq( IplImage *img, int mode )
 	tgray2eq = cvCreateImage( sz, 8, 1 );
 	tgray3eq = cvCreateImage( sz, 8, 1 );
 
-    /* Find squares in every color plane of the image. Filter each plane with a
-	 * Gaussian and then merge back to original image.  */
+    /// Find squares in every color plane of the image. Filter each plane with a
+	/// Gaussian and then merge back to original image.
     cvSetImageCOI( clone, 1 );
     cvCopy( clone, tgray1, 0 );
 
@@ -1161,7 +970,7 @@ void vision_hist_eq( IplImage *img, int mode )
 	cvSetImageCOI( clone, 3 );
     cvCopy( clone, tgray3, 0 );
 
-	/* Equalize the histograms of each channel. */
+	/// Equalize the histograms of each channel.
 	if( mode == 1 || mode == 3 || mode == 5 || mode == 7 ) {
 		cvEqualizeHist( tgray1, tgray1eq );
 	}
@@ -1174,7 +983,7 @@ void vision_hist_eq( IplImage *img, int mode )
 
 	cvMerge( tgray1eq, tgray2eq, tgray3eq, NULL, img );
 
-    /* Clear variables to free memory. */
+    /// Clear variables to free memory.
     cvReleaseImage( &clone );
     cvReleaseImage( &tgray1 );
     cvReleaseImage( &tgray2 );
@@ -1185,21 +994,14 @@ void vision_hist_eq( IplImage *img, int mode )
 } /* end vision_hist_eq() */
 
 
-/******************************************************************************
- *
- * Title:       void vision_saturate(  IplImage *img )
- *
- * Description: Saturates channels of an image.
- *
- * Input:       img: The image to saturate.
- *
- * Output:      None.
- *
- *****************************************************************************/
+/*------------------------------------------------------------------------------
+ * void vision_saturate()
+ * Saturates channels of an image.
+ *----------------------------------------------------------------------------*/
 
-void vision_saturate( IplImage *img )
+void vision_saturate(IplImage *img)
 {
-	/* Declare variables. */
+	/// Declare variables.
     IplImage *clone = NULL;
     IplImage *tgray1 = NULL;
     IplImage *tgray2 = NULL;
@@ -1210,19 +1012,18 @@ void vision_saturate( IplImage *img )
 	double power = 0.99;
 	CvScalar val;
 
-	/* Clone the original image. */
+	/// Clone the original image.
 	clone = cvCloneImage( img );
 
-	/* Create three separate grayscale images, one for each channel. */
+	/// Create three separate grayscale images, one for each channel.
     tgray1 = cvCreateImage( sz, 8, 1 );
 	tgray2 = cvCreateImage( sz, 8, 1 );
 	tgray3 = cvCreateImage( sz, 8, 1 );
 
-	/* Split the three channel image into three grayscale images using set
-	 * channel of interest. */
+	/// Split the three channel image into three grayscale images using set channel of interest.
     cvSetImageCOI( clone, 1 );
 	cvCopy( clone, tgray1, 0 );
-	/* Go through the image and set the value of each pixel to zero. */
+	/// Go through the image and set the value of each pixel to zero.
 	for( ii = 0; ii < img->height; ii++ ) {
 		for( jj = 0; jj < img->width; jj++ ) {
 			val = cvGet2D( img, ii, jj );
@@ -1239,7 +1040,7 @@ void vision_saturate( IplImage *img )
 
 	cvSetImageCOI( clone, 3 );
 	cvCopy( clone, tgray3, 0 );
-	/* Go through the image and raise the value of the pixel to a power. */
+	/// Go through the image and raise the value of the pixel to a power.
 	for( ii = 0; ii < img->height; ii++ ) {
 		for( jj = 0; jj < img->width; jj++ ) {
 			val = cvGet2D( img, ii, jj );
@@ -1248,10 +1049,10 @@ void vision_saturate( IplImage *img )
 		}
     }
 
-	/* Merge the grayscale images back to a three channel image. */
+	/// Merge the grayscale images back to a three channel image.
 	cvMerge( tgray1, tgray2, tgray3, NULL, img );
 
-    /* Clear variables to free memory. */
+    /// Clear variables to free memory.
     cvReleaseImage( &clone );
     cvReleaseImage( &tgray1 );
     cvReleaseImage( &tgray2 );
@@ -1259,21 +1060,14 @@ void vision_saturate( IplImage *img )
 } /* end vision_saturate() */
 
 
-/******************************************************************************
- *
- * Title:       void vision_white_balance(  IplImage *img )
- *
- * Description: Balance the color of an image.
- *
- * Input:       img: The image to balance.
- *
- * Output:      None.
- *
- *****************************************************************************/
+/*------------------------------------------------------------------------------
+ * void vision_white_balance()
+ * Balance the color of an image.
+ *----------------------------------------------------------------------------*/
 
-void vision_white_balance( IplImage *img )
+void vision_white_balance(IplImage *img)
 {
-	/* Declare variables. */
+	/// Declare variables.
 	int ii = 0;
 	int jj = 0;
 	uchar *temp_ptr;
@@ -1282,7 +1076,7 @@ void vision_white_balance( IplImage *img )
 	double bscale = 255. / 245.;
 	double gscale = 255. / 255.;
 
-	/* For each channel in the original image modify the RGB values. */
+	/// For each channel in the original image modify the RGB values.
 	for( ii = 0; ii < img->height; ii++ ) {
 		for( jj = 0; jj < img->width; jj++ ) {
 			temp_ptr = &((uchar *)(img->imageData + img->widthStep * ii))[jj * 3];
@@ -1294,39 +1088,20 @@ void vision_white_balance( IplImage *img )
 } /* end vision_white_balance() */
 
 
-/******************************************************************************
- *
- * Title:       void vision_threshold(  IplImage *img,
- * 										IplImage *bin_img,
- * 										CvPoint *center,
- * 										int sizex,
- * 										int sizey
- *                                    )
- *
- * Description: Thresholds an image.
- *
- * Input:       img: The binary image to search over.
- *				center: A pointer to fill in the centroid values.
- * 				sizex: The window size in x direction.
- * 				sizey: The window size in y direction.
- *
- * Output:      None.
- *
- *****************************************************************************/
+/*------------------------------------------------------------------------------
+ * void vision_threshold()
+ * Thresholds an image.
+ *----------------------------------------------------------------------------*/
 
-void vision_threshold( IplImage *img,
-					   IplImage *bin_img,
-					   int type,
-					   int size,
-					   double thresh )
+void vision_threshold(IplImage *img, IplImage *bin_img, int type, int size, double thresh)
 {
-	/* Declare variables. */
+	/// Declare variables.
 	int ii = 0;
 	int jj = 0;
 	double maxval = 255.;
 	CvMat *kernel = NULL;
 
-	/* Create a matrix to replace my ASCII art. */
+	/// Create a matrix to replace my ASCII art of 1's and 0's. Might be able to find in old revision.
 	kernel = cvCreateMat( size, size, CV_32FC1 );
 	for( ii = 0; ii < size; ii++ ) {
 		for( jj = 0; jj < size; jj++ ) {
@@ -1338,11 +1113,11 @@ void vision_threshold( IplImage *img,
 							}
 		}
 	}
-    /* Filter the image using convolution. */
+    /// Filter the image using convolution.
     cvFilter2D( img, bin_img, kernel, cvPoint(floor(size/2),floor(size/2)) );
 	img = cvCloneImage(bin_img);
 
-	/* Threshold the image based on type of threshold -- normal else adaptive. */
+	/// Threshold the image based on type of threshold -- normal else adaptive.
 	if( type == VISION_BINARY ) {
 		cvThreshold( img, bin_img, thresh, maxval, CV_THRESH_BINARY );
 	}
@@ -1353,40 +1128,28 @@ void vision_threshold( IplImage *img,
 } /* end vision_threshold() */
 
 
-/******************************************************************************
- *
- * Title:       void vision_rgb_ratio_filter( IplImage *img ,
- * 									   		  double * rgb_thresh )
- *
- * Description: Turns any pixel black that doesn't match the input
- * 				RGB thresholds
- *
- * Input:       img: The binary image to perform filter upon.
- *				rgb_thresh: rgb thresholds for filtering. Format -
- * 					{ rmin , rmax , gmin , gmax , bmin , bmax }
- *
- * Output:      None.
- *
- *****************************************************************************/
+/*------------------------------------------------------------------------------
+ * void vision_rgb_ratio_filter()
+ * Turns any pixel black that doesn't match the input RGB thresholds.
+ *----------------------------------------------------------------------------*/
 
-void vision_rgb_ratio_filter( IplImage *img , double * rgb_thresh )
+void vision_rgb_ratio_filter(IplImage *img , double * rgb_thresh)
 {
-	/* Declare variables. */
+	/// Declare variables.
 	int ii = 0;
 	int jj = 0;
 	enum rgb_index { b , g , r };
-
-	uchar *pixel;
+	unsigned char *pixel;
 	double rg = 0.0;
 	double rb = 0.0;
 	double gb = 0.0;
 
-	/* For each channel in the original image modify the RGB values. */
+	/// For each channel in the original image modify the RGB values.
 	for( ii = 0; ii < img->height; ii++ ) {
 		for( jj = 0; jj < img->width; jj++ ) {
 			pixel = &((uchar *)(img->imageData + img->widthStep * ii))[jj * 3];
 
-			/* Compute ratios. Check for div/0. */
+			/// Compute ratios. Check for div/0.
 			if( pixel[g] != 0 ) {
 				rg = (double)pixel[r] / pixel[g];
 			}
@@ -1402,7 +1165,7 @@ void vision_rgb_ratio_filter( IplImage *img , double * rgb_thresh )
 				gb = 0;
 			}
 
-			/* If the pixel is outside the threshold, turn it to black. */
+			/// If the pixel is outside the threshold, turn it to black.
 			if( !( rg >= rgb_thresh[0] && rg <= rgb_thresh[1] &&
 				   rb >= rgb_thresh[2] && rb <= rgb_thresh[3] &&
 				   gb >= rgb_thresh[4] && gb <= rgb_thresh[5] ) ) {
@@ -1412,8 +1175,8 @@ void vision_rgb_ratio_filter( IplImage *img , double * rgb_thresh )
 				pixel[r] = 0;
 			}
 			else {
-				/* If the product of the ratios is too small when the sum
-				 * is below a certain threshold, throw away pixel. */
+				/// If the product of the ratios is too small when the sum
+				/// is below a certain threshold, throw away pixel. */
 				if( (rg*rb*gb) < rgb_thresh[6] &&
 					 (pixel[r]+pixel[g]+pixel[b]) <= rgb_thresh[7] ) {
 				  	pixel[b] =
@@ -1426,37 +1189,27 @@ void vision_rgb_ratio_filter( IplImage *img , double * rgb_thresh )
 } /* end vision_rgb_ratio_filter() */
 
 
-/******************************************************************************
- *
- * Title:       void vision_rgb_sum_filter( IplImage *img ,
- * 											double * rgb_sum )
- *
- * Description: Turns any pixel black that doesn't match the input
- * 				RGB thresholds
- *
- * Input:       img: The binary image to perform filter upon.
- *				rgb_sum: rgb sum limits. Format - { sum_min , sum_max }
- *
- * Output:      None.
- *
- *****************************************************************************/
+/*------------------------------------------------------------------------------
+ * void vision_rgb_sum_filter()
+ * Turns any pixel black that doesn't match the input RGB thresholds.
+ *----------------------------------------------------------------------------*/
 
-void vision_rgb_sum_filter( IplImage *img , short * rgb_sum )
+void vision_rgb_sum_filter(IplImage *img , short * rgb_sum)
 {
-	/* Declare variables. */
+	/// Declare variables.
 	int ii = 0;
 	int jj = 0;
 	enum rgb_index { b , g , r };
-	uchar *pixel;
+	unsigned char *pixel;
 	short sum;
 
-	/* For each channel in the original image modify the RGB values. */
+	/// For each channel in the original image modify the RGB values.
 	for( ii = 0; ii < img->height; ii++ ) {
 		for( jj = 0; jj < img->width; jj++ ) {
 			pixel = &((uchar *)(img->imageData + img->widthStep * ii))[jj * 3];
 			sum = pixel[r] + pixel[g] + pixel[b];
 
-			/* If the pixel is outside the threshold, turn it to black. */
+			/// If the pixel is outside the threshold, turn it to black.
 			if( sum < rgb_sum[0] || sum > rgb_sum[1] ) {
 				pixel[b] = 0;
 				pixel[g] = 0;
@@ -1467,27 +1220,19 @@ void vision_rgb_sum_filter( IplImage *img , short * rgb_sum )
 } /* end vision_rgb_ratio_filter() */
 
 
-/******************************************************************************
- *
- * Title:       void vision_save_frame( IplImage *img, char *dir )
- *
- * Description: Saves an image to disk.
- *
- * Input:       img: The image to save to disk.
- * 				dir: The directory in which to save the image.
- *
- * Output:      None.
- *
- *****************************************************************************/
+/*------------------------------------------------------------------------------
+ * void vision_save_frame()
+ * Saves an image to disk.
+ *----------------------------------------------------------------------------*/
 
-void vision_save_frame( IplImage *img, char *dir )
+void vision_save_frame(IplImage *img, char *dir)
 {
-	/* Declare variables. */
+	/// Declare variables.
     struct timeval ctime;
     struct tm ct;
     char write_time[128] = {0};
 
-	/* Get a timestamp and use for filename. */
+	/// Get a timestamp and use for filename.
 	gettimeofday( &ctime, NULL );
 	ct = *( localtime ((const time_t*) &ctime.tv_sec) );
 	strcpy( write_time, dir );
@@ -1499,33 +1244,12 @@ void vision_save_frame( IplImage *img, char *dir )
 } /* end vision_save_frame() */
 
 
-/******************************************************************************
- *
- * Title:       int vision_find_gate(    int *dotx,
- *                                       int *doty,
- *                                       int amt,
- *                                       IplImage *srcImg,
- *                                       IplImage *outImg
- *                                   )
- *
- * Description: Finds a circular object from a camera.
- *
- * Input:       dotx: Pointer to variable for x position of dot.
- *              doty: Pointer to variable for y position of dot.
- *              amt: The amount of erosion/dilation to perform.
- *              cap: A pointer to an open camera.
- *
- * Output:      status: 1 on success, 0 on failure.
- *
- *****************************************************************************/
+/*------------------------------------------------------------------------------
+ * int vision_find_gate()
+ * Finds a circular object from a camera.
+ *----------------------------------------------------------------------------*/
 
-int vision_find_gate( int *dotx,
-                      int *doty,
-                      int angle,
-                      IplImage *srcImg,
-                      IplImage *binImg,
-					  HSV_HL *hsv
-                   )
+int vision_find_gate(int *dotx, int *doty, int angle, IplImage *srcImg, IplImage *binImg, HSV_HL *hsv)
 {
     CvPoint center;
     IplImage *hsvImg = NULL;
@@ -1535,42 +1259,42 @@ int vision_find_gate( int *dotx,
 	int num_pix = 0;
 	int touch_thresh = 50000;
     int detect_thresh = 1500;
-    /* Initialize to impossible values. */
+    /// Initialize to impossible values.
     center.x = -10000;
     center.y = -10000;
 
-	/* Create intermediate images for scratch space. */
+	/// Create intermediate images for scratch space.
     hsvImg = cvCreateImage( cvGetSize(srcImg), IPL_DEPTH_8U, 3 );
     outImg = cvCreateImage( cvGetSize(srcImg), IPL_DEPTH_8U, 1 );
 
-	/* Enhance the red channel of the source image. */
+	/// Enhance the red channel of the source image.
 	//vision_white_balance( srcImg );
 
-    /* Segment the flipped image into a binary image. */
+    /// Segment the flipped image into a binary image.
     cvCvtColor( srcImg, hsvImg, CV_RGB2HSV );
 
-	/* Equalize the histograms of each channel. */
+	/// Equalize the histograms of each channel.
 	//vision_hist_eq( hsvImg, VISION_CHANNEL3 );
 		//VISION_CHANNEL1 + VISION_CHANNEL2 + VISION_CHANNEL3 );
 
-	/* Threshold all three channels using our own values. */
+	/// Threshold all three channels using our own values.
     cvInRangeS( hsvImg, cvScalar(hsv->hL, hsv->sL, hsv->vL),
 		cvScalar(hsv->hH, hsv->sH, hsv->vH), binImg );
 
-	/* Use a median filter image to remove outliers. */
+	/// Use a median filter image to remove outliers.
 	cvSmooth( binImg, outImg, CV_MEDIAN, 11, 11, 0. ,0. );
 	cvMorphologyEx( binImg, binImg, wS, NULL, CV_MOP_CLOSE, 1);
 
-    /* Find the centroid. */
+    /// Find the centroid.
     center = vision_find_centroid( binImg, 5 );
     *dotx = center.x;
     *doty = center.y;
 
-    /* Clear variables to free memory. */
+    /// Clear variables to free memory.
     cvReleaseImage( &hsvImg );
     cvReleaseImage( &outImg );
 
-	/* Check to see how many pixels of are detected in the image. */
+	/// Check to see how many pixels of are detected in the image.
 	num_pix = cvCountNonZero( binImg );
 
 	if( num_pix > touch_thresh ) {
@@ -1579,7 +1303,7 @@ int vision_find_gate( int *dotx,
     if( num_pix < detect_thresh) {
 		return 0;
 	}
-	/* Check that the values of dotx & doty are not negative */
+	/// Check that the values of dotx & doty are not negative.
 	if( dotx < 0 || doty < 0 ) {
 		return 0;
 	}

@@ -1,6 +1,7 @@
 LIB			= sysid
 LIBPREFIX	= lib
 INCLUDES	= -Iinclude
+INCLUDES	+= -I../../src/common/include
 CFLAGS		= -Wall
 CFLAGS		+= -O2
 CFLAGS		+= -g

@@ -1,4 +1,4 @@
-/******************************************************************************
+/*------------------------------------------------------------------------------
  *
  *  Title:        kalman.c
  *
@@ -10,7 +10,7 @@
  *
  *  NOTE: All matrices are row vectors which means (m X n) is columns by rows.
  *
- *****************************************************************************/
+ *----------------------------------------------------------------------------*/
 
 #include "kalman.h"
 
@@ -26,20 +26,14 @@ CvMat			*u_k;			// Current Controls
 CvMat			*z_k;			// Current measurements
 
 
-/******************************************************************************
- *
- * Title:       init_kalman()
- *
- * Description: Sets up all variables for a Kalman filter for position estimation.
- *
- * Input:       None.
- *
- * Output:      Instance of kalman class.
- *
- *****************************************************************************/
+/*------------------------------------------------------------------------------
+ * init_kalman()
+ * Sets up all variables for a Kalman filter for position estimation.
+ *----------------------------------------------------------------------------*/
+
 int init_kalman()
 {
-	/* Initialize helper variables. */
+	/// Initialize helper variables.
 	int n = 9;					// x, y, z, v_x, v_y, v_z, a_x, a_y, a_z
 	int m = 3;					// accel[x,y,z]
 	int c = 0;					//
@@ -47,21 +41,21 @@ int init_kalman()
 	printCount = 100 + 1;
 	cvRandInit( &rng, 0, 1, -1, CV_RAND_UNI );	// random number generator
 
-	/* Initialize the actual Kalman filter. */
+	/// Initialize the actual Kalman filter.
 	kf = cvCreateKalman( n, m, c );
 
-	//////////////////////////////
-	// Prepare variables for state equation: x_k = F * x_k-1 + B * u_k + w_k
-	//////////////////////////////
+	///
+	/// Prepare variables for state equation: x_k = F * x_k-1 + B * u_k + w_k
+	///
 
-	/* Initialize the state - x_k. */
-	/* It contains x, y, z, v_x, v_y, v_z, a_x, a_y, a_z (n X 1). */
+	/// Initialize the state - x_k.
+	/// It contains x, y, z, v_x, v_y, v_z, a_x, a_y, a_z (n X 1).
 	x_k = cvCreateMat( n, 1, CV_32FC1 );
 	cvRandSetRange( &rng, 0, 1, 0 );
 	rng.disttype = CV_RAND_NORMAL;
 	cvRand( &rng, x_k );
 
-	/* Initialize transition matrix - F - to relate how states interact (n X n). */
+	/// Initialize transition matrix - F - to relate how states interact (n X n).
 	float dt = 0.0; // no time has passed at start up
 	float v = dt;
 	float a = .5 * dt * dt;
@@ -78,22 +72,21 @@ int init_kalman()
 	};
 	memcpy( kf->transition_matrix->data.fl, F, sizeof(F) );
 
-	/* Initialize the controls (c X 1). */
+	/// Initialize the controls (c X 1).
 	// u_k =
 
-	/* Initialize control matrix - B - to relate controls to state (n X c). */
+	/// Initialize control matrix - B - to relate controls to state (n X c).
 	// const float B[] = {
 
-	//////////////////////////////
-	// Prepare variables for measurement equation: z_k = H_k * x_k + v_k
-	//////////////////////////////
+	///
+	/// Prepare variables for measurement equation: z_k = H_k * x_k + v_k
+	///
 
-	/* Initialize measurements (accel[x,y,z]). */
+	/// Initialize measurements (accel[x,y,z]).
 	z_k = cvCreateMat( m, 1, CV_32FC1 );
 	cvZero(z_k);
 
-	/* Initialize internal parameter - H - for relating state
-	 * to measurement (m X n). */
+	/// Initialize internal parameter - H - for relating state to measurement (m X n).
 	const float H[] = {
 		0, 0, 0, 0,  0,  0,  1,  0,  0,
 		0, 0, 0, 0,  0,  0,  0,  1,  0,
@@ -103,21 +96,21 @@ int init_kalman()
 	memcpy( kf->measurement_matrix->data.fl, H, sizeof(H) );
 
 
-	//////////////////////////////
-	// Prepare covariance matrices
-	//////////////////////////////
+	///
+	/// Prepare covariance matrices
+	///
 
-	/* Initialize covariance internal parameters. */
+	/// Initialize covariance internal parameters.
 	cvSetIdentity( kf->process_noise_cov, cvRealScalar(1e-5) );		// (Q)
 	cvSetIdentity( kf->measurement_noise_cov, cvRealScalar(1e-1) );	// (R)
 	cvSetIdentity( kf->error_cov_post, cvRealScalar(1));			// (P_k)
 
 
-	//////////////////////////////
-	// Set initial internal state
-	//////////////////////////////
+	///
+	/// Set initial internal state
+	///
 
-	/* Set initial state to be at point (0,0,0) with no movement. */
+	/// Set initial state to be at point (0,0,0) with no movement.
 	kf->state_post->data.fl[0] = (float)0;	// x
 	kf->state_post->data.fl[1] = (float)0;	// y
 	kf->state_post->data.fl[2] = (float)0;	// z
@@ -128,55 +121,37 @@ int init_kalman()
 	kf->state_post->data.fl[7] = (float)0; 	// a_y
 	kf->state_post->data.fl[8] = (float)0; 	// a_z
 
-	/* Initialization successful. */
+	/// Initialization successful.
 	return 1;
-}
+} /* end init_kalman() */
 
 
-/******************************************************************************
- *
- * Title:       close_kalman()
- *
- * Description: Cleans up variables.
- *
- * Input:       None.
- *
- * Output:      None.
- *
- *****************************************************************************/
+/*------------------------------------------------------------------------------
+ * close_kalman()
+ * Cleans up variables.
+ *----------------------------------------------------------------------------*/
+
 void close_kalman()
 {
-	/* Destroy state, controls, process noise, measurements,
-	 * and measurement noise matricies. */
+	/// Destroy state, controls, process noise, measurements, and measurement noise matricies.
 	cvReleaseMat( &x_k );
 	cvReleaseMat( &u_k );
 	cvReleaseMat( &z_k );
 
-	/* Destroy the actual Kalman filter. */
+	/// Destroy the actual Kalman filter.
 	cvReleaseKalman( &kf );
-}
+} /* end close_kalman() */
 
 
-/******************************************************************************
- *
- * Title:       kalman_update( float dt, float depth, float ang[3],
- * 								float accel[3], float ang_rate[3] )
- *
- * Description: Prints out some data to show things are working.
- *
- * Input:       dt: Time in seconds since last update.
- * 				depth: Depth in meters from the surface.
- * 				ang: Angles of rotation about each axis.
- * 				accel: Acceleration along each axis.
- * 				ang_rate: Rate of rotation about each axis.
- *
- * Output:      None.
- *
- *****************************************************************************/
+/*------------------------------------------------------------------------------
+ * kalman_update()
+ * Prints out some data to show things are working.
+ *----------------------------------------------------------------------------*/
+
 void kalman_update( float dt, float depth, float ang[3],
 					float accel[3], float ang_rate[3] )
 {
-	/* Print data if flags allow. */
+	/// Print data if flags allow.
 	if ( bPrint > 0 && bPrint > printCount ) {
 		printf( "\nInput: dt=%f accel=[%f,%f,%f]\n",
 			dt, accel[0], accel[1], accel[2] );
@@ -190,10 +165,10 @@ void kalman_update( float dt, float depth, float ang[3],
 		kalman_print_state( 1 );
 	}
 
-	/* Predict the state. */
+	/// Predict the state.
 	cvKalmanPredict( kf, 0 );
 
-	/* Print data if flags allow. */
+	/// Print data if flags allow.
 	if ( bPrint > 0 && bPrint > printCount ) {
 		printf( "Predict " );
 		kalman_print_state( 0 );
@@ -201,15 +176,15 @@ void kalman_update( float dt, float depth, float ang[3],
 		kalman_print_state( 1 );
 	}
 
-	/* Set the measurement data. */
+	/// Set the measurement data.
 	z_k->data.fl[0] = accel[0];
 	z_k->data.fl[1] = accel[1];
 	z_k->data.fl[2] = accel[2];
 
-	/* Correct the state. */
+	/// Correct the state.
 	cvKalmanCorrect( kf, z_k );
 
-	/* Print data if flags allow. */
+	/// Print data if flags allow.
 	if ( bPrint > 0 && bPrint > printCount ) {
 		printf( "Correct " );
 		kalman_print_state( 0 );
@@ -220,9 +195,8 @@ void kalman_update( float dt, float depth, float ang[3],
 		z_k->data.fl[0], z_k->data.fl[1], z_k->data.fl[2] );
 	}
 
-	/* Fix transition matrix - F - to relate how states interact (n X n).
-	 * Based on x_t = x_t-1 + v_x_t-1*dt + .5*a_x_t*dt*dt and
-	 * v_x_t = v_x_t-1 + a_x_t*dt. */
+	/// Fix transition matrix - F - to relate how states interact (n X n).
+	/// Based on x_t = x_t-1 + v_x_t-1*dt + .5*a_x_t*dt*dt and v_x_t = v_x_t-1 + a_x_t*dt.
 	float v = dt;
 	float a = .5 * dt * dt;
 	const float F[] = {
@@ -238,63 +212,51 @@ void kalman_update( float dt, float depth, float ang[3],
 	};
 	memcpy( kf->transition_matrix->data.fl, F, sizeof(F) );
 
-	/* Print data if flags allow. */
+	/// Print data if flags allow.
 	if ( bPrint > 0 && bPrint > printCount ) {
 		kalman_print_transition_matrix();
 	}
 
-	/* Update the print flags. */
+	/// Update the print flags.
 	if ( bPrint > printCount ) {
 		bPrint = 1;
 	} else if ( bPrint > 0 ) {
 		bPrint++;
 	}
-}
+} /* end kalman_update() */
 
 
-/******************************************************************************
- *
- * Title:       kalman_print_test()
- *
- * Description: Prints out some data to show things are working.
- *
- * Input:       None.
- *
- * Output:      None.
- *
- *****************************************************************************/
+/*------------------------------------------------------------------------------
+ * kalman_print_test()
+ * Prints out some data to show things are working.
+ *----------------------------------------------------------------------------*/
+
 void kalman_print_test()
 {
 	printf( "-------------- KALMAN START UP -------------\n" );
 
-	/* Print the transition matrix F. */
+	/// Print the transition matrix F.
 	kalman_print_transition_matrix();
 
 	printf( "\n" );
 
-	/* Print the PRE state data. */
+	/// Print the PRE state data.
 	kalman_print_state( 0 );
 
 	printf( "\n" );
 
-	/* Print the POST state data. */
+	/// Print the POST state data.
 	kalman_print_state( 1 );
 
 	printf( "--------------------------------------------\n" );
-}
+} /* end kalman_print_test() */
 
 
-/******************************************************************************
- *
- * Title:       kalman_print_transition_matrix()
- *
- * Description: Prints out the internal transition matrix (F).
- *
- * Input:       None.
- *
- * Output:      None.
- *
- *****************************************************************************/
+/*------------------------------------------------------------------------------
+ * kalman_print_transition_matrix()
+ * Prints out the internal transition matrix (F).
+ *----------------------------------------------------------------------------*/
+
 void kalman_print_transition_matrix()
 {
 	int n = kf->DP;
@@ -308,25 +270,19 @@ void kalman_print_transition_matrix()
 		}
 	}
 	printf( "]\n" );
-}
+} /* end kalman_print_transition_matrix() */
 
 
-/******************************************************************************
- *
- * Title:       kalman_print_state()
- *
- * Description: Prints out the internal state (PRE/POST).
- *
- * Input:       p: Specifies which version PRE=0 and POST=1.
- *
- * Output:      None.
- *
- *****************************************************************************/
+/*------------------------------------------------------------------------------
+ * kalman_print_state()
+ * Prints out the internal state (PRE/POST).
+ *----------------------------------------------------------------------------*/
+
 void kalman_print_state( int p )
 {
 	int n = kf->DP;
 	if ( p == 0 ) {
-		/* Print the PRE state data. */
+		/// Print the PRE state data.
 		printf( "PRE  state = [ " );
 		for ( int i = 0; i < n; i++ ) {
 			printf( "%f", kf->state_pre->data.fl[i] );
@@ -336,7 +292,7 @@ void kalman_print_state( int p )
 		}
 		printf( " ]\n" );
 	} else if ( p == 1 ) {
-		/* Print the POST state data. */
+		/// Print the POST state data.
 		printf( "POST state = [ " );
 		for ( int i = 0; i < n; i++ ) {
 			printf( "%f", kf->state_post->data.fl[i] );
@@ -346,24 +302,18 @@ void kalman_print_state( int p )
 		}
 		printf( " ]\n" );
 	}
-}
+} /* end kalman_print_state() */
 
 
-/******************************************************************************
- *
- * Title:       kalman_get_location( CvPoint3D32f &loc )
- *
- * Description: Gets the current location estimation.
- *
- * Input:       loc: Structure to put the point into.
- *
- * Output:      None.
- *
- *****************************************************************************/
+/*------------------------------------------------------------------------------
+ * kalman_get_location( CvPoint3D32f &loc )
+ * Gets the current location estimation.
+ *----------------------------------------------------------------------------*/
+
 void kalman_get_location( CvPoint3D32f &loc )
 {
-	/* Set the current internal state to this point. */
+	/// Set the current internal state to this point.
 	loc.x = kf->state_post->data.fl[0];	// x
 	loc.y = kf->state_post->data.fl[1];	// y
 	loc.z = kf->state_post->data.fl[2];	// z
-}
+} /* end kalman_get_location() */

@@ -7,8 +7,13 @@
  *         for more details.
  */
 
-#ifndef _MICROSTRAIN_H_
-#define _MICROSTRAIN_H_
+#ifndef MICROSTRAIN_H
+#define MICROSTRAIN_H
+
+#include <stdio.h>
+#include <math.h>
+#include <unistd.h>
+#include <string.h>
 
 #include "msgtypes.h"
 #include "serial.h"
@@ -309,9 +314,15 @@ int mstrain_write_system_gains( int fd,
                           short int bias_gain
                         );
 
+//! Zeroes out the manetometer gains.
+//! \param fd A file descriptor for the IMU port.
+//! \return 1 on success, 0 on failure.
 int mstrain_zero_mag_gain( int fd );
 
+//! Captures the gyro bias.
+//! \param fd A file descriptor for the IMU port.
+//! \return 1 on success, 0 on failure.
 int mstrain_capture_gyro_bias( int fd );
 
 
-#endif /* _MICROSTRAIN_H_ */
+#endif /* MICROSTRAIN_H */

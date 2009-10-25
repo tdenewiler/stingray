@@ -3,8 +3,15 @@
  *  \brief Handles setting up serial connections and serial I/O.
  */
 
-#ifndef _SERIAL_H_
-#define _SERIAL_H_
+#ifndef SERIAL_H
+#define SERIAL_H
+
+#include <stdio.h>
+#include <unistd.h>
+#include <fcntl.h>
+#include <termios.h>
+#include <sys/ioctl.h>
+#include <string.h>
 
 /******************************
  *
@@ -86,4 +93,4 @@ int recv_serial( int fd, void *response, int length );
 int serial_bytes_available( int fd );
 
 
-#endif /* _SERIAL_H_ */
+#endif /* SERIAL_H */
