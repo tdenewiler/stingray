@@ -1,9 +1,9 @@
 # Executable.
-EXE         = test_timing
+EXE         = test_sysid
 
 # Directories.
 SRCDIR		= .
-TIMINGDIR	= ../lib
+SYSIDDIR	= ../lib
 
 # Includes.
 INCLUDES	= -Iinclude
@@ -18,7 +18,7 @@ CC          = g++
 # Standard libraries to include.
 #STDLIBS     = -lm
 LIBS		= $(STDLIBS)
-LIBS		+= $(TIMINGDIR)/libtiming.a
+LIBS		+= $(SYSIDDIR)/libsysid.a
 
 # Glib flags for type definitions.
 #LLIBS = `pkg-config --libs glib-2.0`

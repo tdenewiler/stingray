@@ -4,16 +4,7 @@
  *
  *****************************************************************************/
 
-
-#include <stdio.h>
-#include <math.h>
-#include <stdlib.h>
-#include <termios.h>
-#include <unistd.h>
-#include <string.h>
-
 #include "timing.h"
-
 
 /*------------------------------------------------------------------------------
  * int timing_check_period()

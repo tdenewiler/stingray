@@ -4,9 +4,9 @@
  * 		   time has passed.
  */
 
+#include <stdio.h>
 #include <time.h>
 #include <sys/time.h>
-
 
 #ifndef _TIMING_H_
 #define _TIMING_H_
@@ -20,7 +20,7 @@
 #ifndef TIMING_RETURN_VALS
 #define TIMING_SUCCESS			1
 #define TIMING_ERROR			0
-#endif /* PTU_RETURN_VALS */
+#endif /* RETURN_VALS */
 
 
 /******************************
