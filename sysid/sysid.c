@@ -123,3 +123,19 @@ int sysid_log_init(FILE *fd)
 
 	return 1;
 } /* end sysid_log_init() */
+
+
+/*------------------------------------------------------------------------------
+ * int sysid_check_ss()
+ * Checks to see if a state variable has reached some percentage of its target
+ * value which we consider to be steady-state.
+ *----------------------------------------------------------------------------*/
+
+int sysid_check_ss(float state, float target, float range, float tol)
+{
+	/// Check difference against tolerance. Note that tol is a percentage so / 100.
+	if (fabsf(state - target) < (range * tol / 100.) )
+		return 1;
+
+	return 0;
+} /* end sysid_log_init() */

@@ -68,5 +68,14 @@ int sysid_log(MSG_DATA *msg, FILE *fd);
 //! \return 1 on success, 0 on failure.
 int sysid_log_init(FILE *fd);
 
+//! Checks to see if a state variable has reached some percentage of its target
+//! value which we consider to be steady-state.
+//! \param state The state variable to check.
+//! \param target The target value that the state variable is trying to achieve.
+//! \param range The range that the target values can take for the state variable.
+//! \param tol The percentage that is considered close enough to the target value.
+//! \return 1 on true, 0 on false.
+int sysid_check_ss(float state, float target, float range, float tol);
+
 
 #endif /* SYSID_H */
