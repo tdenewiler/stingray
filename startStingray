@@ -1,0 +1,11 @@
+#!/bin/bash
+
+cd src/visiond; xterm -e ./visiond &
+sleep 1;
+cd ../labjackd; xterm -geometry -0+0 -e ./labjackd &
+sleep 1;
+cd ../nav/; xterm -geometry +0-0 -e ./nav &
+sleep 1;
+#cd ../planner/; xterm -geometry 135-0-0 -e ./planner &
+cd ../planner/; xterm -geometry -0-0 -e ./planner &
+

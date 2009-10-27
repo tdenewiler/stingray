@@ -1,0 +1,6 @@
+In order for labjackd to actually shutdown the computer the binary has to have
+root privileges. To do this you have to give the user that is running the binary
+temporary root privileges. Every time you rebuild labjackd you have to run
+these two commands:
+    sudo chown root labjackd
+    sudo chmod 4755 labjackd
