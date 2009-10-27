@@ -1,0 +1,18 @@
+In order to get the Labjack library installed correctly on your machine make
+sure that the scripts in the driver/ directory are executable:
+
+chmod +x install_driver.sh run_driver.sh
+
+And then run these commands in the driver/ directory:
+
+make
+./install_driver.sh
+./run_driver.sh
+
+This should get the Labjack driver installed correctly. Then you need to run
+make in this directory to build the labjack library. After that you can link
+against the labjack library and build your own code with the ability to use
+the functions in that library.
+
+To email this library using gmail the scripts have to be non-executable is the
+reason for the first commands.

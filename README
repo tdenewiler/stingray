@@ -1,0 +1,46 @@
+To compile all the libraries and the executables run "make" in this directory.
+
+To clean all the libraries and the executables run "make clean" in this
+directory.
+
+To have the Labjack library build correctly go see the README file in
+libs/labjack/.
+
+To build the code the following packages are required:
+	g++
+	libgtk2.0-0
+	libgtk2.0-common
+	libgtk2.0-dev
+	libgtk2.0-0-dbg
+	libgnome2-0
+	libgnome2-common
+	libgnome2-dev
+	libcv1
+	libhighgui1
+	libcvaux1
+	libcv-dev
+	libcvaux-dev
+	libhighgui-dev
+
+And the following packages are recommended:
+	libgtk2.0-doc
+	libgnome2-doc
+	opencv-doc
+
+To install packages you must have apt set up correctly. There is an example
+sources.list file that contains the repositories where packages can be
+downloaded from in this directory. This sources.list file uses repositories for
+the Ubuntu Intrepid (8.10) release. To change it for a different release
+replace all instances of "intrepid" to your release (for example, hardy). To
+make a backup of your current sources and use these instead open a terminal and
+run these commands from the current directory:
+	sudo cp /etc/apt/sources.list /etc/apt/sources.list.bak
+	sudo cp sources.list /etc/apt/sources.list
+
+To retrieve a list of all available packages and upgrade your system to use the
+most current versions use the command:
+	sudo apt-get update
+	sudo apt-get upgrade
+
+To install packages use the command:
+	sudo apt-get install <package1> <package2> ... <packageN>

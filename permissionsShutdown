@@ -1,0 +1,5 @@
+#!/bin/bash
+
+cd src/labjackd;
+sudo chown root labjackd;
+sudo chmod 7755 labjackd
