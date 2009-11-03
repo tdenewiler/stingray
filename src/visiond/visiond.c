@@ -96,7 +96,7 @@ void visiond_exit( )
 
 int main( int argc, char *argv[] )
 {
-    /* Setup exit function. It is called when SIGINT (ctrl-c) is invoked. */
+    /// Setup exit function. It is called when SIGINT (ctrl-c) is invoked.
     void( *exit_ptr )( void );
     exit_ptr = visiond_exit;
     atexit( exit_ptr );
@@ -106,19 +106,19 @@ int main( int argc, char *argv[] )
     sigint_action.sa_flags = 0;
     sigaction( SIGINT, &sigint_action, NULL );
 
-    /* Set up state variables and initialize them. */
+    /// Set up state variables and initialize them.
     int recv_bytes = 0;
     char recv_buf[MAX_MSG_SIZE];
     CONF_VARS cf;
     MSG_DATA msg;
 
-    /* Set up image/window variables and initialize them. */
+    /// Set up image/window variables and initialize them.
     IplImage *img = NULL;
 	const char *win = "Image";
 	const char *binwin = "Binary";
 	save_img = NULL;
 
-	/* Set up video variables and initialize them. */
+	/// Set up video variables and initialize them.
 	int saving_fvideo = FALSE;
     int saving_bvideo = FALSE;
     CvVideoWriter *f_writer = 0;
@@ -127,7 +127,7 @@ int main( int argc, char *argv[] )
     struct timeval ctime;
     struct tm ct;
 
-    /* Set up file access variables and initialize them. */
+    /// Set up file access variables and initialize them.
 	struct dirent *dfile = NULL;
 	int diropen = FALSE;
 	char filename[STRING_SIZE * 2];
@@ -136,7 +136,7 @@ int main( int argc, char *argv[] )
     int vision_classified = 0;
     int vision_considered = 0;
 
-	/* Set up timer variables and intialize them. */
+	/// Set up timer variables and intialize them.
 	TIMING timer_fps;
 	TIMING timer_save;
 	TIMING timer_open;
@@ -144,29 +144,29 @@ int main( int argc, char *argv[] )
 	int nframes = 0;
     double fps = 0.0;
 
-	/* Actually initialize timers. */
+	/// Actually initialize timers.
 	timing_set_timer(&timer_fps);
 	timing_set_timer(&timer_save);
 	timing_set_timer(&timer_open);
 
     printf( "MAIN: Starting Vision daemon ...\n" );
 
-    /* Initialize variables. */
+    /// Initialize variables.
     server_fd = -1;
     memset( &msg, 0, sizeof(MSG_DATA) );
 	messages_init( &msg );
 
-	/* Initialize task to none. */
+	/// Initialize task to none.
 	msg.task.data.task = TASK_NONE;
 
-    /* Parse command line arguments. */
+    /// Parse command line arguments.
     parse_default_config( &cf );
     parse_cla( argc, argv, &cf, STINGRAY, (const char *)VISIOND_FILENAME );
 
-    /* Initialize HSV message data to configuration values. */
+    /// Initialize HSV message data to configuration values.
 	visiond_msg_cf_init( &msg, &cf );
 
-    /* Set up server. */
+    /// Set up server.
     if( cf.enable_server ) {
         server_fd = net_server_setup( cf.server_port );
 		if( server_fd > 0 ) {
@@ -176,8 +176,49 @@ int main( int argc, char *argv[] )
 			printf("MAIN: WARNING!!! Server setup failed.\n");
 		}
     }
+    
+    /// Make sure open image directory is formatted correctly.
+	if ( cf.open_image_dir[strlen( cf.open_image_dir ) - 1] != '/' ) {
+		cf.open_image_dir[strlen( cf.open_image_dir )] = '/';
+	}
+	
+	/// Make sure save image directory is formatted correctly.
+	if ( cf.save_image_dir[strlen( cf.save_image_dir ) - 1] != '/' ) {
+		cf.save_image_dir[strlen( cf.save_image_dir )] = '/';
+	}
+	
+	/// Make sure the hardcoded save sub directories exist. Create if not.
+	strncpy( curr_save_dir, cf.save_image_dir, STRING_SIZE );
+	if ( !opendir ( strncat( curr_save_dir, "post/", 5 ) ) ) {
+		if ( mkdir( curr_save_dir, S_IRWXU ) == -1 ) {
+			printf( "MAIN: WARNING!!! Cannot setup save post image directory.\n" );
+			
+			/// Turn off saving post processed image.
+			cf.save_image_post = 0;
+		}
+	}
+	
+	strncpy( curr_save_dir, cf.save_image_dir, STRING_SIZE );
+	if ( !opendir ( strncat( curr_save_dir, "front/", 6 ) ) ) {
+		if ( mkdir( curr_save_dir, S_IRWXU ) == -1 ) {
+			printf( "MAIN: WARNING!!! Cannot setup front image directory.\n" );
+			
+			/// Turn off saving post processed image.
+			cf.save_image_front = 0;
+		}
+	}
+	
+	strncpy( curr_save_dir, cf.save_image_dir, STRING_SIZE );
+	if ( !opendir ( strncat( curr_save_dir, "bottom/", 7 ) ) ) {
+		if ( mkdir( curr_save_dir, S_IRWXU ) == -1 ) {
+			printf( "MAIN: WARNING!!! Cannot setup bottom image directory.\n" );
+			
+			/// Turn off saving post processed image.
+			cf.save_image_bottom = 0;
+		}
+	}
 
-    /* Decide whether to use source images or cameras. */
+    /// Decide whether to use source images or cameras.
 	if ( cf.open_image_rate && strcmp( cf.open_image_dir, "" ) != 0 ) {
 
 		if ( ( diropen = visiond_open_image_init( cf.open_image_dir, filename ) ) ) {
@@ -191,15 +232,15 @@ int main( int argc, char *argv[] )
 		}
 	}
 	else if( cf.op_mode == 99 ) {
-    	/* Special case for bad camera. */
+    	/// Special case for bad camera.
     	printf( "MAIN: Skipping camera opening because op mode = 99 in "
 		   	"configuration file.\n" );
 	}
 	else {
-		/* Using actual cameras. */
+		/// Using actual cameras.
     	printf( "MAIN: Using actual cameras for vision...\n" );
 
-		/* Open front camera. */
+		/// Open front camera.
 		f_cam = cvCaptureFromCAM( 0 );
 		if( !f_cam ) {
 			cvReleaseCapture( &f_cam );
@@ -211,7 +252,7 @@ int main( int argc, char *argv[] )
 			printf( "MAIN: Front camera opened OK.\n" );
 		}
 
-		/* Open bottom camera. */
+		/// Open bottom camera.
 		b_cam = cvCaptureFromCAM( 1 );
 		if( !b_cam ) {
 			cvReleaseCapture( &b_cam );
@@ -224,19 +265,19 @@ int main( int argc, char *argv[] )
 		}
 	}
 
-    /* Create windows to display video if set in configuration file. */
+    /// Create windows to display video if set in configuration file.
 	if( cf.vision_window ) {
 		cvNamedWindow( win, CV_WINDOW_AUTOSIZE );
 		cvNamedWindow( binwin, CV_WINDOW_AUTOSIZE );
 	}
 
-	/* Show the image in a window. */
+	/// Show the image in a window.
 	if( cf.vision_window ) {
 
-		/* OpenCV needs a little pause here. */
+		/// OpenCV needs a little pause here.
 		if( cvWaitKey( 500 ) >= 0 );
 
-		/* Actually show the image. */
+		/// Actually show the image.
 		if ( img )
 		{
 			cvShowImage( win, img );
@@ -246,24 +287,29 @@ int main( int argc, char *argv[] )
 			cvShowImage( binwin, bin_img );
 		}
 
-		/* OpenCV needs a little pause here. */
+		/// OpenCV needs a little pause here.
 		if( cvWaitKey( 500 ) >= 0 );
+	}
+	
+	/// Need a way to force task from file.
+	if ( diropen ) {
+		msg.task.data.task = visiond_translate_task( cf.vision_task );
 	}
 
     printf( "MAIN: Vision server running now.\n" );
 
-    /* Main loop. */
+    /// Main loop.
     while( 1 ) {
 
-    	/* Get network data. */
+    	/// Get network data.
         if( (cf.enable_server) && (server_fd > 0) ) {
             recv_bytes = net_server( server_fd, recv_buf, &msg, MODE_VISION );
             if( recv_bytes > 0 ) {
                 recv_buf[recv_bytes] = '\0';
                 messages_decode( server_fd, recv_buf, &msg, recv_bytes );
 
-                /* Force vision to look for the pipe no matter which pipe
-			     * subtask we are currently searching for. */
+                /// Force vision to look for the pipe no matter which pipe
+			    /// subtask we are currently searching for.
 				if( msg.task.data.task == TASK_PIPE1 || msg.task.data.task == TASK_PIPE2 ||
 					msg.task.data.task == TASK_PIPE3 || msg.task.data.task == TASK_PIPE4 ) {
 					msg.task.data.task = TASK_PIPE;
@@ -271,45 +317,39 @@ int main( int argc, char *argv[] )
             }
         }
 
-		/* Need a way to force task from file. */
-		if ( diropen ) {
-			msg.task.data.task = visiond_translate_task( cf.vision_task );
-		}
-
-		/* Reset "THE" image to be null. This way we know if there is a new image or not. */
+		/// Reset "THE" image to be null. This way we know if there is a new image or not.
 		img = NULL;
 
-    	/* Do vision processing based on task */
+    	/// Do vision processing based on task.
     	if( msg.task.data.task == TASK_NONE ) {
-    		/* Do nothing and give cleared values. */
+    		/// Do nothing and give cleared values.
     		msg.vision.data.front_x = 0;
     		msg.vision.data.front_y = 0;
     		msg.vision.data.bottom_x = 0;
     		msg.vision.data.bottom_y = 0.0;
 		}
 		else {
-			/* Check if time to pull a new image. */
+			/// Check if time to pull a new image.
 			if( diropen && timing_check_period(&timer_open, cf.open_image_rate)) {
-				/* Get the next file pointer. */
+				/// Get the next file pointer.
 				dfile = readdir( dirp );
 
-				/* Find the next file by ignoring directories. */
+				/// Find the next file by ignoring directories.
 				while ( dfile != NULL && strstr( dfile->d_name, ".jpg" ) == NULL ) {
-					/* Iterate to next file. */
+					/// Iterate to next file.
 					dfile = readdir( dirp );
 				}
 
 				if( dfile != NULL ) {
-					/* This is a file so use it. */
+					/// This is a file so use it.
 
-					/* Load image here. */
+					/// Load image here.
 					strncpy( filename, cf.open_image_dir, STRING_SIZE );
 					strncat( filename, dfile->d_name, STRING_SIZE );
-
 					img = cvLoadImage( filename );
 				}
 				else {
-					/* Finished the directory. */
+					/// Finished the directory.
 					printf( "MAIN: Finished loading from source directory.\n\n" );
 					printf( "VISION RESULTS:\n" );
 					printf( "  %d/%d ---> %f%%\n", vision_classified, vision_considered,
@@ -317,7 +357,7 @@ int main( int argc, char *argv[] )
 					exit( 0 );
 				}
 
-				/* Reset the open image timer. */
+				/// Reset the open image timer.
 				timing_set_timer(&timer_open);
 			}
 			else if ( f_cam && ( msg.task.data.task == TASK_GATE ||
@@ -333,22 +373,22 @@ int main( int argc, char *argv[] )
 			}
 		}
 
-		/* Only handle the image if there is a valid one. */
+		/// Only handle the image if there is a valid one.
 		if ( img != NULL ) {
 
-			/* Process the image according to the task. */
+			/// Process the image according to the task.
 			if ( visiond_process_image( img, bin_img, &msg ) ) {
 				vision_classified++;
 			}
 			vision_considered++;
 
-			/* Show the image in a window. */
+			/// Show the image in a window.
 			if( cf.vision_window ) {
 
-				/* OpenCV needs a little pause here. */
+				/// OpenCV needs a little pause here.
 				if( cvWaitKey( 5 ) >= 0 );
 
-				/* Actually show the image. */
+				/// Actually show the image.
 				if ( img )
 				{
 					cvShowImage( win, img );
@@ -359,7 +399,7 @@ int main( int argc, char *argv[] )
 				}
 			}
 
-			/* Calculate frames per second. */
+			/// Calculate frames per second.
 			nframes++;
 			if( timing_check_period(&timer_fps, 1.) ) {
 				timing_get_dt(&timer_fps, &timer_fps);
@@ -370,11 +410,8 @@ int main( int argc, char *argv[] )
 				msg.vision.data.fps = fps;
 			}
 
-			/* !!! TODO !!! Make sure save image directory is formatted correctly. */
-			/* !!! TODO !!! Make sure the hardcoded sub directories exist. Create if not. */
-
 			if ( diropen ) {
-				/* The processed images need to be saved before the live feeds. */
+				/// The processed images need to be saved before the live feeds.
 				if ( cf.save_image_post ) {
 					vision_concat_images( img, bin_img, save_img );
 					strncpy( curr_save_dir, cf.save_image_dir, STRING_SIZE );
@@ -382,24 +419,24 @@ int main( int argc, char *argv[] )
 				}
 			}
 
-			/* If image was loaded from file, release it. Don't need to release if
-		 	* image is captured from camera. */
+			/// If image was loaded from file, release it. Don't need to release if
+		 	/// image is captured from camera.
 			if( diropen ) {
 				cvReleaseImage( &img );
 			}
 		}
 
-		/* Save the front and/or bottom images. (CONFIG) */
+		/// Save the front and/or bottom images. (CONFIG)
 		if ( !diropen && timing_check_period(&timer_save, cf.save_image_rate) ) {
 			if ( cf.save_image_front && f_cam ) {
-				/* Save an image from the front camera. */
+				/// Save an image from the front camera.
 				img = cvQueryFrame( f_cam );
 				strncpy( curr_save_dir, cf.save_image_dir, STRING_SIZE );
 				vision_save_frame( img, strncat( curr_save_dir, "front/", 6 ) );
 			}
 
 			if ( cf.save_image_bottom && b_cam ) {
-				/* Save an image from the bottom camera. */
+				/// Save an image from the bottom camera.
 				img = cvQueryFrame( b_cam );
 				strncpy( curr_save_dir, cf.save_image_dir, STRING_SIZE );
 				vision_save_frame( img, strncat( curr_save_dir, "bottom/", 7 ) );
@@ -409,25 +446,25 @@ int main( int argc, char *argv[] )
 		}
 
 
-		/* Save the front or bottom image. (GUI) */
+		/// Save the front or bottom image. (GUI)
 		if( msg.vsetting.data.save_fframe && f_cam ) {
-			/* Save image to disk. */
+			/// Save image to disk.
 			img = cvQueryFrame( f_cam );
 			strncpy( curr_save_dir, cf.save_image_dir, STRING_SIZE );
 			vision_save_frame( img, strncat( curr_save_dir, "front/", 6 ) );
 			msg.vsetting.data.save_fframe = FALSE;
 		}
 		if( msg.vsetting.data.save_bframe && b_cam ) {
-			/* Save image to disk. */
+			/// Save image to disk.
 			img = cvQueryFrame( b_cam );
 			strncpy( curr_save_dir, cf.save_image_dir, STRING_SIZE );
 			vision_save_frame( img, strncat( curr_save_dir, "bottom/", 7 ) );
 			msg.vsetting.data.save_bframe = FALSE;
 		}
 
-		/* Save the front or bottom video. (GUI) */
+		/// Save the front or bottom video. (GUI)
 		if( msg.vsetting.data.save_fvideo && !saving_fvideo && f_cam ) {
-			/* Get a timestamp and use for filename. */
+			/// Get a timestamp and use for filename.
 			gettimeofday( &ctime, NULL );
 			img = cvQueryFrame( f_cam );
 			ct = *( localtime ((const time_t*) &ctime.tv_sec) );
@@ -447,7 +484,7 @@ int main( int argc, char *argv[] )
 			cvWriteFrame( f_writer, img );
 		}
 		if( msg.vsetting.data.save_bvideo && !saving_bvideo && b_cam ) {
-			/* Get a timestamp and use for filename. */
+			/// Get a timestamp and use for filename.
 			gettimeofday( &ctime, NULL );
 			img = cvQueryFrame( b_cam );
 			ct = *( localtime ((const time_t*) &ctime.tv_sec) );
@@ -470,7 +507,7 @@ int main( int argc, char *argv[] )
     }
 
     exit( 0 );
-} /* end main() */
+} /// end main()
 
 
 /******************************************************************************
@@ -486,7 +523,7 @@ int visiond_open_image_init( char *dir, char *filename )
 	struct dirent *dfile = NULL;
 
 	/* Load an images from disk. */
-	printf( "visiond_open_image_init: Using source images from directory for vision...\n" );
+	//printf( "visiond_open_image_init: Using source images from directory for vision...\n" );
 
 	/* Open directory. */
 	if ( (dirp = opendir( dir ) ) ) {
@@ -512,8 +549,18 @@ int visiond_open_image_init( char *dir, char *filename )
 				strncpy( filename, dir, STRING_SIZE );
 				strncat( filename, dfile->d_name, STRING_SIZE );
 
-				printf( "visiond_open_image_init: Image source directory OK.\n" );
-				return TRUE;
+				/// Close and Open the directory so we start from the beginning.
+				closedir( dirp );
+				if ( (dirp = opendir( dir ) ) ) {
+					/// Reopen OK.
+					//printf( "visiond_open_image_init: Image source directory OK.\n" );
+					return TRUE;
+				}
+				else {
+					/// Reopen failed.
+					printf( "visiond_open_image_init: WARNING!!! Source directory reopen failed.\n" );
+					return FALSE;
+				}
 			}
 			else {
 				/* No images so exit the module. */
