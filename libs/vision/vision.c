@@ -1221,30 +1221,6 @@ void vision_rgb_sum_filter(IplImage *img , short * rgb_sum)
 
 
 /*------------------------------------------------------------------------------
- * void vision_save_frame()
- * Saves an image to disk.
- *----------------------------------------------------------------------------*/
-
-void vision_save_frame(IplImage *img, char *dir)
-{
-	/// Declare variables.
-    struct timeval ctime;
-    struct tm ct;
-    char write_time[128] = {0};
-
-	/// Get a timestamp and use for filename.
-	gettimeofday( &ctime, NULL );
-	ct = *( localtime ((const time_t*) &ctime.tv_sec) );
-	strcpy( write_time, dir );
-	strftime( write_time + strlen(write_time), sizeof(write_time), "20%y%m%d_%H%M%S", &ct);
-	snprintf( write_time + strlen(write_time),
-			strlen(write_time), ".%.03ld.jpg", ctime.tv_usec );
-			
-	cvSaveImage( write_time, img );
-} /* end vision_save_frame() */
-
-
-/*------------------------------------------------------------------------------
  * int vision_find_gate()
  * Finds a circular object from a camera.
  *----------------------------------------------------------------------------*/
@@ -1310,3 +1286,67 @@ int vision_find_gate(int *dotx, int *doty, int angle, IplImage *srcImg, IplImage
 
     return 1;
 } /* end vision_find_gate() */
+
+
+/*------------------------------------------------------------------------------
+ * void vision_concat_frames()
+ * Makes two images into one side by side.
+ *----------------------------------------------------------------------------*/
+void vision_concat_images(IplImage *img1, IplImage *img2, IplImage *new_img)
+{
+	/// Declare variables.
+	uchar *data1 = ( uchar* )img1->imageData;
+	uchar *data2 = ( uchar* )img2->imageData;
+	uchar *new_data = ( uchar* )new_img->imageData;
+	int i,j,r,g,b;
+	
+	/// Loop through the first image to fill the left part of the new image.
+	for ( i = 0; i < img1->height; i++ ) {
+		for ( j = 0; j < img1->width; j++ ) {
+			r = data1[i * img1->widthStep + j * img1->nChannels + 0];
+			g = data1[i * img1->widthStep + j * img1->nChannels + 1];
+        	b = data1[i * img1->widthStep + j * img1->nChannels + 2];
+        	
+        	new_data[i * new_img->widthStep + j * new_img->nChannels + 0] = r;
+        	new_data[i * new_img->widthStep + j * new_img->nChannels + 1] = g;
+        	new_data[i * new_img->widthStep + j * new_img->nChannels + 2] = b;
+		}
+	}
+	
+	/// Loop through the second image to fill the left part of the new image.
+	for ( i = 0; i < img2->height; i++ ) {
+		for ( j = 0; j < img2->width; j++ ) {
+			r = data2[i * img2->widthStep + j * img2->nChannels + 0];
+			g = data2[i * img2->widthStep + j * img2->nChannels + 1];
+        	b = data2[i * img2->widthStep + j * img2->nChannels + 2];
+        	
+        	new_data[i * new_img->widthStep + (j+img1->width) * new_img->nChannels + 0] = r;
+        	new_data[i * new_img->widthStep + (j+img1->width) * new_img->nChannels + 1] = g;
+        	new_data[i * new_img->widthStep + (j+img1->width) * new_img->nChannels + 2] = b;
+		}
+	}
+	
+} /* end vision_concat_images() */
+
+/*------------------------------------------------------------------------------
+ * void vision_save_frame()
+ * Saves an image to disk.
+ *----------------------------------------------------------------------------*/
+
+void vision_save_frame(IplImage *img, char *dir)
+{
+	/// Declare variables.
+    struct timeval ctime;
+    struct tm ct;
+    char write_time[128] = {0};
+
+	/// Get a timestamp and use for filename.
+	gettimeofday( &ctime, NULL );
+	ct = *( localtime ((const time_t*) &ctime.tv_sec) );
+	strcpy( write_time, dir );
+	strftime( write_time + strlen(write_time), sizeof(write_time), "20%y%m%d_%H%M%S", &ct);
+	snprintf( write_time + strlen(write_time),
+			strlen(write_time), ".%.03ld.jpg", ctime.tv_usec );
+			
+	cvSaveImage( write_time, img );
+} /* end vision_save_frame() */

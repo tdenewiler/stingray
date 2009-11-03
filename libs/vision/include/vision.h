@@ -220,6 +220,11 @@ void vision_rgb_ratio_filter( IplImage *img , double * rgb_thresh );
 //! Thresholds an image with rgb sums.
 void vision_rgb_sum_filter( IplImage *img , short * rgb_sum );
 
+//! Concatenates two image images
+//! \param img1 The first image to concatenate
+//! \param img2 The second image to concatenate
+void vision_concat_images(IplImage *img1, IplImage *img2, IplImage *new_img);
+
 //! Saves an image to disk.
 //! \param img The image to save to disk.
 //! \param dir The directory in which to save the image.

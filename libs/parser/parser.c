@@ -74,11 +74,8 @@ void parse_line(CONF_VARS *config)
 			else if ( strncmp( tokens[2], "bottom", STRING_SIZE ) == 0 ) {
 				sscanf( tokens[3], "%d", &config->save_image_bottom );
 			}
-			else if ( strncmp( tokens[2], "color", STRING_SIZE ) == 0 ) {
-				sscanf( tokens[3], "%d", &config->save_image_color );
-			}
-			else if ( strncmp( tokens[2], "binary", STRING_SIZE ) == 0 ) {
-				sscanf( tokens[3], "%d", &config->save_image_binary );
+			else if ( strncmp( tokens[2], "post", STRING_SIZE ) == 0 ) {
+				sscanf( tokens[3], "%d", &config->save_image_post );
 			}
 			else if ( strncmp( tokens[2], "rate", STRING_SIZE ) == 0 ) {
 				sscanf( tokens[3], "%f", &config->save_image_rate );
@@ -900,8 +897,7 @@ void parse_default_config( CONF_VARS *config )
 	config->vision_angle = 0;
 	config->save_image_front = 0;
 	config->save_image_bottom = 0;
-	config->save_image_color = 0;
-	config->save_image_binary = 0;
+	config->save_image_post = 0;
 	config->save_image_rate = 0;
 	strncpy( config->save_image_dir, "", STRING_SIZE );
 	config->open_image_rate = 0;
@@ -1041,8 +1037,7 @@ void parse_print_config(CONF_VARS *config)
 	printf("PARSE_PRINT_CONFIG: buoy_blind_time = %d\n", config->buoy_blind_time);
 	printf("PARSE_PRINT_CONFIG: save_image_front = %d\n", config->save_image_front );
 	printf("PARSE_PRINT_CONFIG: save_image_bottom = %d\n", config->save_image_bottom );
-	printf("PARSE_PRINT_CONFIG: save_image_color = %d\n", config->save_image_color );
-	printf("PARSE_PRINT_CONFIG: save_image_binary = %d\n", config->save_image_binary );
+	printf("PARSE_PRINT_CONFIG: save_image_post = %d\n", config->save_image_post );
 	printf("PARSE_PRINT_CONFIG: save_image_rate = %f\n", config->save_image_rate);
 	printf("PARSE_PRINT_CONFIG: save_image_dir = %s\n", config->save_image_dir);
 	printf("PARSE_PRINT_CONFIG: open_image_rate = %f\n", config->open_image_rate);

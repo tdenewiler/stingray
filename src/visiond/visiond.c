@@ -13,6 +13,7 @@ int server_fd;
 CvCapture *f_cam;
 CvCapture *b_cam;
 IplImage *bin_img;
+IplImage *save_img;
 DIR *dirp;
 
 
@@ -68,6 +69,9 @@ void visiond_exit( )
     }
 
     cvReleaseImage( &bin_img );
+    if ( save_img ) {
+    	cvReleaseImage( &save_img );
+	}
 
     if ( dirp ) {
     	closedir( dirp );
@@ -112,6 +116,7 @@ int main( int argc, char *argv[] )
     IplImage *img = NULL;
 	const char *win = "Image";
 	const char *binwin = "Binary";
+	save_img = NULL;
 
 	/* Set up video variables and initialize them. */
 	int saving_fvideo = FALSE;
@@ -128,6 +133,8 @@ int main( int argc, char *argv[] )
 	char filename[STRING_SIZE * 2];
 	char write_time[80] = {0};
     char curr_save_dir[STRING_SIZE];
+    int vision_classified = 0;
+    int vision_considered = 0;
 
 	/* Set up timer variables and intialize them. */
 	TIMING timer_fps;
@@ -176,6 +183,7 @@ int main( int argc, char *argv[] )
 		if ( ( diropen = visiond_open_image_init( cf.open_image_dir, filename ) ) ) {
     		img = cvLoadImage( filename );
     		bin_img = cvCreateImage( cvGetSize(img), IPL_DEPTH_8U, 1 );
+    		save_img = cvCreateImage( cvSize( img->width * 2, img->height ), IPL_DEPTH_8U, img->nChannels );
 			printf( "MAIN: Load from file as camera OK.\n" );
 		}
 		else {
@@ -302,7 +310,10 @@ int main( int argc, char *argv[] )
 				}
 				else {
 					/* Finished the directory. */
-					printf( "MAIN: Finished loading from source directory.\n" );
+					printf( "MAIN: Finished loading from source directory.\n\n" );
+					printf( "VISION RESULTS:\n" );
+					printf( "  %d/%d ---> %f%%\n", vision_classified, vision_considered,
+								((double)vision_classified/vision_considered) * 100 );
 					exit( 0 );
 				}
 
@@ -326,7 +337,10 @@ int main( int argc, char *argv[] )
 		if ( img != NULL ) {
 
 			/* Process the image according to the task. */
-			visiond_process_image( img, bin_img, &msg );
+			if ( visiond_process_image( img, bin_img, &msg ) ) {
+				vision_classified++;
+			}
+			vision_considered++;
 
 			/* Show the image in a window. */
 			if( cf.vision_window ) {
@@ -359,18 +373,12 @@ int main( int argc, char *argv[] )
 			/* !!! TODO !!! Make sure save image directory is formatted correctly. */
 			/* !!! TODO !!! Make sure the hardcoded sub directories exist. Create if not. */
 
-
 			if ( diropen ) {
 				/* The processed images need to be saved before the live feeds. */
-				if ( cf.save_image_color ) {
-					/* Save the resulting processed image. */
+				if ( cf.save_image_post ) {
+					vision_concat_images( img, bin_img, save_img );
 					strncpy( curr_save_dir, cf.save_image_dir, STRING_SIZE );
-					vision_save_frame( img, strncat( curr_save_dir, "color/", 6 ) );
-				}
-				if ( cf.save_image_binary ) {
-					/* Save the resulting binary image. */
-					strncpy( curr_save_dir, cf.save_image_dir, STRING_SIZE );
-					vision_save_frame( bin_img, strncat( curr_save_dir, "binary/", 7 ) );
+					vision_save_frame( save_img, strncat( curr_save_dir, "post/", 5 ) );
 				}
 			}
 
@@ -910,6 +918,13 @@ int visiond_process_image( IplImage *img, IplImage *bin_img, MSG_DATA *msg )
 		msg->vision.data.status = TASK_NOT_DETECTED;
 
 	}
+	
+	if ( msg->vision.data.status == TASK_GATE_DETECTED || msg->vision.data.status == TASK_BUOY_DETECTED ||
+			msg->vision.data.status == TASK_PIPE_DETECTED || msg->vision.data.status == TASK_FENCE_DETECTED ||
+			msg->vision.data.status == TASK_BOXES_DETECTED || msg->vision.data.status == TASK_SUITCASE_DETECTED ) {
+		return 1;
+	}
+	
 	return 0;
 } /* end visiond_process_image() */
 
