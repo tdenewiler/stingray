@@ -6,12 +6,13 @@
 #ifndef _MESSAGES_H_
 #define _MESSAGES_H_
 
-#include "microstrain.h"
-#include "labjack.h"
-#include "msgtypes.h"
+#include <stdio.h>
+#include <arpa/inet.h>
+#include <unistd.h>
+#include <string.h>
+
 #include "network.h"
-#include "pololu.h"
-#include "pid.h"
+#include "msgtypes.h"
 
 
 /******************************

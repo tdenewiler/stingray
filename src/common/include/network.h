@@ -7,7 +7,21 @@
 #ifndef _NETWORK_H_
 #define _NETWORK_H_
 
+#include <stdio.h>
+#include <unistd.h>
+#include <errno.h>
+#include <string.h>
+#include <sys/types.h>
+#include <sys/socket.h>
+#include <sys/ioctl.h>
+#include <signal.h>
+#include <sys/wait.h>
+#include <arpa/inet.h>
+#include <netdb.h>
+#include <fcntl.h>
+
 #include "messages.h"
+#include "msgtypes.h"
 
 /******************************
 **
@@ -23,9 +37,9 @@
 #define MAX_MSG_SIZE 65536
 #endif /* MAX_MSG_SIZE */
 
-#ifndef MAX_CLIENTS
-#define MAX_CLIENTS 10
-#endif /* MAX_CLIENTS */
+#ifndef NET_MAX_CLIENTS
+#define NET_MAX_CLIENTS 10
+#endif /* NET_MAX_CLIENTS */
 
 #ifndef NET_MODES
 #define NET_MODES
