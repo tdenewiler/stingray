@@ -84,6 +84,11 @@ void parse_line(CONF_VARS *config)
 				strncpy( config->save_image_dir, tokens[3], STRING_SIZE );
 			}
 		}
+		if( strncmp( tokens[1], "log", STRING_SIZE ) == 0 ) {
+			if ( strncmp( tokens[2], "post", STRING_SIZE ) == 0 ) {
+				sscanf( tokens[3], "%d", &config->save_log_post );
+			}
+		}
 	}
 	if( strncmp( tokens[0], "open", STRING_SIZE ) == 0 ) {
 		if ( strncmp( tokens[1], "image", STRING_SIZE ) == 0 ) {
@@ -899,6 +904,7 @@ void parse_default_config( CONF_VARS *config )
 	config->save_image_bottom = 0;
 	config->save_image_post = 0;
 	config->save_image_rate = 0;
+	config->save_log_post = 0;
 	strncpy( config->save_image_dir, "", STRING_SIZE );
 	config->open_image_rate = 0;
 	strncpy( config->open_image_dir, "", STRING_SIZE );
@@ -1040,6 +1046,7 @@ void parse_print_config(CONF_VARS *config)
 	printf("PARSE_PRINT_CONFIG: save_image_post = %d\n", config->save_image_post );
 	printf("PARSE_PRINT_CONFIG: save_image_rate = %f\n", config->save_image_rate);
 	printf("PARSE_PRINT_CONFIG: save_image_dir = %s\n", config->save_image_dir);
+	printf("PARSE_PRINT_CONFIG: save_log_post= %d\n", config->save_log_post);
 	printf("PARSE_PRINT_CONFIG: open_image_rate = %f\n", config->open_image_rate);
 	printf("PARSE_PRINT_CONFIG: open_image_dir = %s\n", config->open_image_dir);
 	printf("PARSE_PRINT_CONFIG: kp_buoy = %lf\n", config->kp_buoy);

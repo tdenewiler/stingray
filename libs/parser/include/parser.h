@@ -183,6 +183,7 @@ typedef struct _CONF_VARS {
 	int			save_image_post;
 	float		save_image_rate;
 	char		save_image_dir[STRING_SIZE];
+	int			save_log_post;
 	float		open_image_rate;
 	char		open_image_dir[STRING_SIZE];
 	float		task_init_yaw;

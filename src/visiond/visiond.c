@@ -15,7 +15,7 @@ CvCapture *b_cam;
 IplImage *bin_img;
 IplImage *save_img;
 DIR *dirp;
-
+FILE *log_file;
 
 /******************************************************************************
  *
@@ -77,6 +77,10 @@ void visiond_exit( )
     if ( dirp ) {
     	closedir( dirp );
 	}
+	
+	if ( log_file ) {
+		fclose( log_file );
+	}
 
     printf("<OK>\n\n");
 } /// end visiond_exit()
@@ -132,6 +136,7 @@ int main( int argc, char *argv[] )
 	struct dirent *dfile = NULL;
 	int diropen = FALSE;
 	char filename[STRING_SIZE * 2];
+	log_file = NULL;
 	char write_time[80] = {0};
     char curr_save_dir[STRING_SIZE];
     int vision_classified = 0;
@@ -296,6 +301,18 @@ int main( int argc, char *argv[] )
 	if ( diropen ) {
 		msg.task.data.task = visiond_translate_task( cf.vision_task );
 	}
+	
+	/// Open the post log file
+	if ( cf.save_log_post ) {
+		strncpy( filename, cf.save_image_dir, STRING_SIZE );
+		strncat( filename, "post/", 5 );
+		strncat( filename, "center_points.txt", STRING_SIZE );
+		if ( !( log_file = fopen( filename, "w" ) ) ) {
+			/// Don't do post log
+			printf( "MAIN: WARNING!!! Cannot setup log post processing file.\n" );
+			cf.save_log_post = 0;
+		}
+	}
 
     printf( "MAIN: Vision server running now.\n" );
 
@@ -376,12 +393,22 @@ int main( int argc, char *argv[] )
 
 		/// Only handle the image if there is a valid one.
 		if ( img != NULL ) {
+			
+			if ( cf.save_log_post ) {
+				/// Write the filename
+				fprintf( log_file, "%s,", dfile->d_name );
+			}
 
 			/// Process the image according to the task.
 			if ( visiond_process_image( img, bin_img, &msg ) ) {
 				vision_classified++;
 			}
 			vision_considered++;
+			
+			if ( cf.save_log_post ) {
+				/// Write the filename
+				fprintf( log_file, "\n" );
+			}
 
 			/// Show the image in a window.
 			if( cf.vision_window ) {
@@ -738,9 +765,18 @@ int visiond_process_image( IplImage *img, IplImage *bin_img, MSG_DATA *msg )
 			/// Draw a circle at the centroid location.
 			cvCircle( img, cvPoint(dotx, doty),
 				10, cvScalar(0, 255, 0), 5, 8 );
+				
+			if ( log_file ) {
+				fprintf( log_file, "%d,%d", dotx, doty );
+			}
 
 			if( status == 2 ) {
 				msg->vision.data.status = TASK_BUOY_TOUCHED;
+			}
+		}
+		else {
+			if ( log_file ) {
+				fprintf( log_file, "X,Y" );
 			}
 		}
 	} /// end TASK_BUOY
