@@ -75,7 +75,6 @@ static void ssa_update_telemetry(
 
     return;
 } /* end ssa_update_telemetry() */
-
 #endif /* USE_SSA */
 
 

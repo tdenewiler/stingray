@@ -51,7 +51,7 @@ int sysid_get_step_seq(float *step_seq, float min, float max, int size)
  * Generates a sequence of step inputs.
  *----------------------------------------------------------------------------*/
 
-int sysid_get_prb_seq(float *step_seq, float min, float max, int size)
+int sysid_get_prb_seq(float *prb_seq, float min, float max, int size)
 {
 	/// Declare variables.
 	int numinputs = 0;
@@ -66,9 +66,9 @@ int sysid_get_prb_seq(float *step_seq, float min, float max, int size)
 	if (size > 0) {
 		/// Add random values to the array.
 		for (int ii = 0; ii < size; ii++) {
-			*step_seq = min + (rand() / (float)RAND_MAX) * range;
+			*prb_seq = min + (rand() / (float)RAND_MAX) * range;
 			numinputs++;
-			*step_seq++;
+			*prb_seq++;
 		}
 	}
 

@@ -62,6 +62,11 @@ int timing_set_timer(TIMING *timer);
 //! \return 1 on success, 0 on failure.
 int timing_get_dt(TIMING *timer, TIMING *elapsed);
 
+//! Get the time elapsed for a given timer in seconds.
+//! \param timer A timer value to check.
+//! \return The time elapsed in seconds as a float.
+float timing_get_dts(TIMING *timer);
+
 //! Convert from a timing element to microseconds.
 //! \param timer A timer value to convert.
 //! \return The time in microseconds.

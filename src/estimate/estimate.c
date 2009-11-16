@@ -135,8 +135,12 @@ int main( int argc, char *argv[] )
 	timing_set_timer(&timer_input);
 
 	/// Get input sequences for each axis.
+	float prb_seq_pitch[cf.input_size];
+	memset(&prb_seq_pitch, 0, cf.input_size);
+	sysid_get_prb_seq(prb_seq_pitch, -50., 50., cf.input_size);
+	int pitch_seq_num = 0;
 
-	printf("MAIN: Planner running now.\n");
+	printf("MAIN: Estimate running now.\n");
 	printf( "\n" );
 
 	/// Main loop.
@@ -172,6 +176,14 @@ int main( int argc, char *argv[] )
 		}
 
 		/// Send new input if input timer has elapsed.
+		if (timing_check_period(&timer_input, cf.period_input)) {
+			printf("MAIN: Hit input timer at %fs using target %f\n", timing_get_dts(&timer_input), prb_seq_pitch[pitch_seq_num]);
+			timing_set_timer(&timer_input);
+			pitch_seq_num++;
+			if (pitch_seq_num == cf.input_size) {
+				pitch_seq_num = 0;
+			}
+		}
 	}
 
 	exit( 0 );

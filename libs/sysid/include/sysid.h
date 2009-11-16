@@ -50,12 +50,12 @@
 int sysid_get_step_seq(float *step_seq, float min, float max, int size);
 
 //! Generates a sequence of pseudo random binary inputs.
-//! \param step_seq Array to fill with input values.
+//! \param prb_seq Array to fill with input values.
 //! \param min The minimum value for the step sequence to go to.
 //! \param max The maximum value for the step sequence to go to.
 //! \param size The number of inputs to create.
 //! \return 1 on success, 0 on failure.
-int sysid_get_prb_seq(float *step_seq, float min, float max, int size);
+int sysid_get_prb_seq(float *prb_seq, float min, float max, int size);
 
 //! Logs data.
 //! \param msg Message variable with target and status information.
