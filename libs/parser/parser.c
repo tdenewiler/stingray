@@ -238,6 +238,9 @@ void parse_line(CONF_VARS *config)
         if( strncmp( tokens[1], "size", STRING_SIZE ) == 0 ) {
             sscanf( tokens[2], "%d", &config->input_size );
         }
+        else if( strncmp( tokens[1], "type", STRING_SIZE ) == 0 ) {
+            sscanf( tokens[2], "%d", &config->input_type );
+        }
     }
     /// end estimation parameters
 
@@ -803,6 +806,7 @@ void parse_default_config( CONF_VARS *config )
 	/// estimate
 	config->period_input = 10.;
 	config->input_size = 10;
+	config->input_type = 1;
 
     /// pid
     config->kp_yaw = 1;
@@ -1072,5 +1076,6 @@ void parse_print_config(CONF_VARS *config)
 	printf("PARSE_PRINT_CONFIG: ki_buoy = %lf\n", config->ki_buoy_depth);
 	printf("PARSE_PRINT_CONFIG: kd_buoy = %lf\n", config->kd_buoy_depth);
 	printf("PARSE_PRINT_CONFIG: task_init_yaw = %f\n", config->task_init_yaw);
-	printf("PARSE_PRINT_CONFIG: task_init_yaw = %d\n", config->input_size);
+	printf("PARSE_PRINT_CONFIG: input_size = %d\n", config->input_size);
+	printf("PARSE_PRINT_CONFIG: input_type = %d\n", config->input_type);
 } /* end parse_default_config() */

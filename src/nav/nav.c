@@ -225,7 +225,7 @@ int main( int argc, char *argv[] )
 		else {
 			printf("MAIN: SIMULATION MODE!!! IMU data is simulated.\n");
 			/* Seed the random variable. */
-			srand((unsigned int) time(NULL) );
+			srand( (unsigned int)time(NULL) );
 			imu_fd = 0;
 		}
 		if( imu_fd > 0 ) {
@@ -236,7 +236,7 @@ int main( int argc, char *argv[] )
 	else {
 		printf("MAIN: SIMULATION MODE!!! IMU data is simulated.\n");
 		/* Seed the random variable. */
-		srand((unsigned int) time(NULL) );
+		srand( (unsigned int)time(NULL) );
 	}
 
     /* Set up the Pololu servo controller. */

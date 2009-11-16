@@ -53,6 +53,11 @@
 #define MAX_PORT_LEN 8
 #endif /* MAX_PORT_LEN */
 
+#ifndef ESTIMATE_TYPES
+#define INPUT_STEP	1
+#define INPUT_PRB	2
+#endif /* ESTIMATE_TYPES */
+
 
 /******************************
  *

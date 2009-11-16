@@ -29,7 +29,7 @@ void estimate_sigint( int signal )
 
 void estimate_exit( )
 {
-	printf("ESTIMATE_EXIT: Shutting down planner program ... ");
+	printf("ESTIMATE_EXIT: Shutting down estimate program ... ");
 	/// Sleep to let things shut down properly.
 	usleep( 200000 );
 
@@ -86,7 +86,6 @@ int main( int argc, char *argv[] )
 
 	/// Initialize variables.
 	nav_fd = -1;
-
 	memset( &msg, 0, sizeof(MSG_DATA) );
 	messages_init( &msg );
 
@@ -135,10 +134,48 @@ int main( int argc, char *argv[] )
 	timing_set_timer(&timer_input);
 
 	/// Get input sequences for each axis.
-	float prb_seq_pitch[cf.input_size];
-	memset(&prb_seq_pitch, 0, cf.input_size);
-	sysid_get_prb_seq(prb_seq_pitch, -50., 50., cf.input_size);
-	int pitch_seq_num = 0;
+	float seq_pitch[cf.input_size];
+	memset(&seq_pitch, 0, cf.input_size);
+	if (cf.input_type == INPUT_PRB) {
+		sysid_get_prb_seq(seq_pitch, -50., 50., cf.input_size);
+	}
+	else {
+		sysid_get_step_seq(seq_pitch, -50., 50., cf.input_size);
+	}
+	usleep(10000);
+
+	float seq_roll[cf.input_size];
+	memset(&seq_roll, 0, cf.input_size);
+	if (cf.input_type == INPUT_PRB) {
+		sysid_get_prb_seq(seq_roll, -50., 50., cf.input_size);
+	}
+	else {
+		sysid_get_step_seq(seq_roll, -50., 50., cf.input_size);
+	}
+	usleep(10000);
+
+	float seq_yaw[cf.input_size];
+	memset(&seq_yaw, 0, cf.input_size);
+	if (cf.input_type == INPUT_PRB) {
+		sysid_get_prb_seq(seq_yaw, -50., 50., cf.input_size);
+	}
+	else {
+		sysid_get_step_seq(seq_yaw, -50., 50., cf.input_size);
+	}
+	usleep(10000);
+
+	float seq_depth[cf.input_size];
+	memset(&seq_depth, 0, cf.input_size);
+	if (cf.input_type == INPUT_PRB) {
+		sysid_get_prb_seq(seq_depth, 1., 3.5, cf.input_size);
+	}
+	else {
+		sysid_get_step_seq(seq_depth, 1., 3.5, cf.input_size);
+	}
+	usleep(10000);
+
+	int seq_num = 0;
+	int seq = 1;
 
 	printf("MAIN: Estimate running now.\n");
 	printf( "\n" );
@@ -176,15 +213,62 @@ int main( int argc, char *argv[] )
 		}
 
 		/// Send new input if input timer has elapsed.
+		// Might still need to wait for input period after setting axis to cf value so two things aren't happening at once.
 		if (timing_check_period(&timer_input, cf.period_input)) {
-			printf("MAIN: Hit input timer at %fs using target %f\n", timing_get_dts(&timer_input), prb_seq_pitch[pitch_seq_num]);
+			switch (seq) {
+			case 1:
+			printf("MAIN: Hit input timer at %fs using pitch target %f\n", timing_get_dts(&timer_input), seq_pitch[seq_num]);
+			msg.target.data.pitch = seq_pitch[seq_num];
 			timing_set_timer(&timer_input);
-			pitch_seq_num++;
-			if (pitch_seq_num == cf.input_size) {
-				pitch_seq_num = 0;
+			seq_num++;
+			if (seq_num == cf.input_size) {
+				msg.target.data.pitch = cf.target_pitch;
+				seq_num = 0;
+				seq++;
+			}
+			break;
+
+			case 2:
+			printf("MAIN: Hit input timer at %fs using roll target %f\n", timing_get_dts(&timer_input), seq_roll[seq_num]);
+			msg.target.data.roll = seq_roll[seq_num];
+			timing_set_timer(&timer_input);
+			seq_num++;
+			if (seq_num == cf.input_size) {
+				msg.target.data.roll = cf.target_roll;
+				seq_num = 0;
+				seq++;
+			}
+			break;
+
+			case 3:
+			printf("MAIN: Hit input timer at %fs using yaw target %f\n", timing_get_dts(&timer_input), seq_yaw[seq_num]);
+			msg.target.data.yaw = seq_yaw[seq_num];
+			timing_set_timer(&timer_input);
+			seq_num++;
+			if (seq_num == cf.input_size) {
+				msg.target.data.yaw = cf.target_yaw;
+				seq_num = 0;
+				seq++;
+			}
+			break;
+
+			case 4:
+			printf("MAIN: Hit input timer at %fs using depth target %f\n", timing_get_dts(&timer_input), seq_depth[seq_num]);
+			msg.target.data.depth = seq_depth[seq_num];
+			timing_set_timer(&timer_input);
+			seq_num++;
+			if (seq_num == cf.input_size) {
+				msg.target.data.depth = cf.target_depth;
+				seq_num = 0;
+				seq++;
+			}
+			break;
+
+			default:
+			exit(0);
 			}
 		}
 	}
 
-	exit( 0 );
+	exit(0);
 } /* end main() */

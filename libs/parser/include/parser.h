@@ -189,6 +189,7 @@ typedef struct _CONF_VARS {
 	char		open_image_dir[STRING_SIZE];
 	float		task_init_yaw;
 	int			input_size;
+	int			input_type;
 } CONF_VARS;
 
 #endif /* _CONF_VARS_ */
