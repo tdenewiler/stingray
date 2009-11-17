@@ -16,9 +16,9 @@ FILE *f_log;
  * Called when SIGINT (ctrl-c) is invoked.
  *----------------------------------------------------------------------------*/
 
-void estimate_sigint( int signal )
+void estimate_sigint(int signal)
 {
-	exit( 0 );
+	exit(0);
 } /* end estimate_sigint() */
 
 
@@ -28,11 +28,11 @@ void estimate_sigint( int signal )
  * is called when SIGINT (ctrl-c) is invoked.
  *----------------------------------------------------------------------------*/
 
-void estimate_exit( )
+void estimate_exit()
 {
 	printf("ESTIMATE_EXIT: Shutting down estimate program ... ");
 	/// Sleep to let things shut down properly.
-	usleep( 200000 );
+	usleep(200000);
 
 	/// Close the open file descriptors.
 	if (nav_fd > 0) {
@@ -86,6 +86,7 @@ int main( int argc, char *argv[] )
 
 	/// Declare timers.
 	TIMING timer_input;
+	TIMING timer_log;
 
 	printf("MAIN: Starting Estimate ... \n");
 
@@ -148,6 +149,7 @@ int main( int argc, char *argv[] )
 
 	/// Initialize timers.
 	timing_set_timer(&timer_input);
+	timing_set_timer(&timer_log);
 
 	/// Get input sequences for each axis.
 	float seq_pitch[cf.input_size];
@@ -196,7 +198,9 @@ int main( int argc, char *argv[] )
 	printf("MAIN: Estimate running now.\n");
 	printf( "\n" );
 
+	///
 	/// Main loop.
+	///
 	while (1) {
         /// Get nav data.
 		if (nav_fd > 0) {
@@ -234,8 +238,9 @@ int main( int argc, char *argv[] )
         }
 
         /// Log if flag is set.
-        if (cf.enable_log && f_log) {
+		if (timing_check_period(&timer_log, cf.period_log) && f_log) {
 			sysid_log(&msg, f_log);
+			timing_set_timer(&timer_log);
 		}
 
 		/// Send new input if input timer has elapsed.

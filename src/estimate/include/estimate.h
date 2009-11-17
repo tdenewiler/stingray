@@ -56,6 +56,7 @@
 #ifndef ESTIMATE_TYPES
 #define INPUT_STEP	1
 #define INPUT_PRB	2
+#define INPUT_RAMP	3
 #endif /* ESTIMATE_TYPES */
 
 

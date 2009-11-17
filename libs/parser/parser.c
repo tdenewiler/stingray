@@ -420,6 +420,9 @@ void parse_line(CONF_VARS *config)
         else if( strncmp( tokens[1], "input", STRING_SIZE ) == 0 ) {
             sscanf( tokens[2], "%f", &config->period_input );
         }
+        else if( strncmp( tokens[1], "log", STRING_SIZE ) == 0 ) {
+            sscanf( tokens[2], "%f", &config->period_log );
+        }
     }
     /// end PID parameters
 
@@ -1004,7 +1007,8 @@ void parse_print_config(CONF_VARS *config)
     printf("PARSE_PRINT_CONFIG: period_az = %f\n", config->period_az);
     printf("PARSE_PRINT_CONFIG: period_vision = %f\n", config->period_vision);
     printf("PARSE_PRINT_CONFIG: period_planner = %f\n", config->period_planner);
-    printf("PARSE_PRINT_CONFIG: period_planner = %f\n", config->period_input);
+    printf("PARSE_PRINT_CONFIG: period_input = %f\n", config->period_input);
+    printf("PARSE_PRINT_CONFIG: period_log = %f\n", config->period_log);
     printf("PARSE_PRINT_CONFIG: enable_pololu = %d\n", config->enable_pololu);
     printf("PARSE_PRINT_CONFIG: pololu_baud = %d\n", config->pololu_baud);
     printf("PARSE_PRINT_CONFIG: pololu_port[STRING_SIZE] = %s\n", config->pololu_port);

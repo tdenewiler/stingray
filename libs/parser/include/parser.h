@@ -123,6 +123,7 @@ typedef struct _CONF_VARS {
     float       period_vision;
     float       period_planner;
 	float		period_input;
+	float		period_log;
     int         enable_pololu;
     int         pololu_baud;
     char        pololu_port[STRING_SIZE];

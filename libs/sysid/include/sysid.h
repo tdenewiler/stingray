@@ -60,8 +60,7 @@ int sysid_get_prb_seq(float *prb_seq, float min, float max, int size);
 //! Logs data.
 //! \param msg Message variable with target and status information.
 //! \param fd File descriptor for the log file.
-//! \return 1 on success, 0 on failure.
-int sysid_log(MSG_DATA *msg, FILE *fd);
+void sysid_log(MSG_DATA *msg, FILE *fd);
 
 //! Initializes the data log with a header as the first line.
 //! \param fd File descriptor for the log file.

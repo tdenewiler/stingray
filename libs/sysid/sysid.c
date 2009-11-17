@@ -77,11 +77,11 @@ int sysid_get_prb_seq(float *prb_seq, float min, float max, int size)
 
 
 /*------------------------------------------------------------------------------
- * int sysid_log()
+ * void sysid_log()
  * Logs data.
  *----------------------------------------------------------------------------*/
 
-int sysid_log(MSG_DATA *msg, FILE *fd)
+void sysid_log(MSG_DATA *msg, FILE *fd)
 {
 	/// Declare variables.
     struct timeval ctime;
@@ -105,8 +105,6 @@ int sysid_log(MSG_DATA *msg, FILE *fd)
 		msg->mstrain.data.mag[2], msg->target.data.fx, msg->target.data.fy,
 		msg->target.data.speed, msg->target.data.pitch, msg->target.data.roll,
 		msg->target.data.yaw, msg->target.data.depth);
-
-	return 1;
 } /* end sysid_log() */
 
 
