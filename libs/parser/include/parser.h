@@ -124,6 +124,7 @@ typedef struct _CONF_VARS {
     float       period_planner;
 	float		period_input;
 	float		period_log;
+	float		period_axis;
     int         enable_pololu;
     int         pololu_baud;
     char        pololu_port[STRING_SIZE];
@@ -191,6 +192,7 @@ typedef struct _CONF_VARS {
 	float		task_init_yaw;
 	int			input_size;
 	int			input_type;
+	float		input_prob;
 } CONF_VARS;
 
 #endif /* _CONF_VARS_ */

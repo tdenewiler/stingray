@@ -87,6 +87,7 @@ int main( int argc, char *argv[] )
 	/// Declare timers.
 	TIMING timer_input;
 	TIMING timer_log;
+	TIMING timer_axis;
 
 	printf("MAIN: Starting Estimate ... \n");
 
@@ -150,6 +151,7 @@ int main( int argc, char *argv[] )
 	/// Initialize timers.
 	timing_set_timer(&timer_input);
 	timing_set_timer(&timer_log);
+	timing_set_timer(&timer_axis);
 
 	/// Get input sequences for each axis.
 	float seq_pitch[cf.input_size];
@@ -246,57 +248,63 @@ int main( int argc, char *argv[] )
 		/// Send new input if input timer has elapsed.
 		// Might still need to wait for input period after setting axis to cf value so two things aren't happening at once.
 		if (timing_check_period(&timer_input, cf.period_input)) {
-			switch (seq) {
-			case 1:
-			printf("MAIN: Hit input timer at %fs using pitch target %f\n", timing_get_dts(&timer_input), seq_pitch[seq_num]);
-			msg.target.data.pitch = seq_pitch[seq_num];
-			timing_set_timer(&timer_input);
-			seq_num++;
-			if (seq_num == cf.input_size) {
-				msg.target.data.pitch = cf.target_pitch;
-				seq_num = 0;
-				seq++;
-			}
-			break;
+			if ((cf.input_type == INPUT_STEP) || (cf.input_type == INPUT_PRB)) {
+				switch (seq) {
+				case 1:
+				printf("MAIN: Hit input timer at %fs using pitch target %f\n", timing_get_dts(&timer_input), seq_pitch[seq_num]);
+				msg.target.data.pitch = seq_pitch[seq_num];
+				timing_set_timer(&timer_input);
+				seq_num++;
+				if (seq_num == cf.input_size) {
+					msg.target.data.pitch = cf.target_pitch;
+					seq_num = 0;
+					seq++;
+				}
+				break;
 
-			case 2:
-			printf("MAIN: Hit input timer at %fs using roll target %f\n", timing_get_dts(&timer_input), seq_roll[seq_num]);
-			msg.target.data.roll = seq_roll[seq_num];
-			timing_set_timer(&timer_input);
-			seq_num++;
-			if (seq_num == cf.input_size) {
-				msg.target.data.roll = cf.target_roll;
-				seq_num = 0;
-				seq++;
-			}
-			break;
+				case 2:
+				printf("MAIN: Hit input timer at %fs using roll target %f\n", timing_get_dts(&timer_input), seq_roll[seq_num]);
+				msg.target.data.roll = seq_roll[seq_num];
+				timing_set_timer(&timer_input);
+				seq_num++;
+				if (seq_num == cf.input_size) {
+					msg.target.data.roll = cf.target_roll;
+					seq_num = 0;
+					seq++;
+				}
+				break;
 
-			case 3:
-			printf("MAIN: Hit input timer at %fs using yaw target %f\n", timing_get_dts(&timer_input), seq_yaw[seq_num]);
-			msg.target.data.yaw = seq_yaw[seq_num];
-			timing_set_timer(&timer_input);
-			seq_num++;
-			if (seq_num == cf.input_size) {
-				msg.target.data.yaw = cf.target_yaw;
-				seq_num = 0;
-				seq++;
-			}
-			break;
+				case 3:
+				printf("MAIN: Hit input timer at %fs using yaw target %f\n", timing_get_dts(&timer_input), seq_yaw[seq_num]);
+				msg.target.data.yaw = seq_yaw[seq_num];
+				timing_set_timer(&timer_input);
+				seq_num++;
+				if (seq_num == cf.input_size) {
+					msg.target.data.yaw = cf.target_yaw;
+					seq_num = 0;
+					seq++;
+				}
+				break;
 
-			case 4:
-			printf("MAIN: Hit input timer at %fs using depth target %f\n", timing_get_dts(&timer_input), seq_depth[seq_num]);
-			msg.target.data.depth = seq_depth[seq_num];
-			timing_set_timer(&timer_input);
-			seq_num++;
-			if (seq_num == cf.input_size) {
-				msg.target.data.depth = cf.target_depth;
-				seq_num = 0;
-				seq++;
-			}
-			break;
+				case 4:
+				printf("MAIN: Hit input timer at %fs using depth target %f\n", timing_get_dts(&timer_input), seq_depth[seq_num]);
+				msg.target.data.depth = seq_depth[seq_num];
+				timing_set_timer(&timer_input);
+				seq_num++;
+				if (seq_num == cf.input_size) {
+					msg.target.data.depth = cf.target_depth;
+					seq_num = 0;
+					seq++;
+				}
+				break;
 
-			default:
-			exit(0);
+				default:
+				exit(0);
+				}
+			}
+			/// Use ramp input where switching is done using a probability.
+			else {
+				// Fill this in. May want to re-write all this logic.
 			}
 		}
 	}

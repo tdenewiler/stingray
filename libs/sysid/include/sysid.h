@@ -22,8 +22,16 @@
  *
  *****************************/
 
+#ifndef TRUE
+#define TRUE 1
+#endif /* TRUE */
+
+#ifndef FALSE
+#define FALSE 0
+#endif /* FALSE */
+
 #ifndef SYSID_RETURN_VALS
-#define SYSID_SUCCESS			1
+#define SYSID_SUCCESS		1
 #define SYSID_ERROR			0
 #endif /* RETURN_VALS */
 
@@ -76,5 +84,10 @@ int sysid_log_init(FILE *fd);
 //! \return 1 on true, 0 on false.
 int sysid_check_ss(float state, float target, float range, float tol);
 
+//! Returns TRUE or FALSE depending on the probability that we want to switch directions.
+//! \param prob The probability we have for switching directions on our input sequence.
+//! We may not want it to be 50/50 because switching that often can be rough on the servos.
+//! \return TRUE if we should switch directions, else FALSE.
+int sysid_switch(float prob);
 
 #endif /* SYSID_H */

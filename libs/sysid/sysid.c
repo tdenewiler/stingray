@@ -137,3 +137,26 @@ int sysid_check_ss(float state, float target, float range, float tol)
 
 	return 0;
 } /* end sysid_log_init() */
+
+
+/*------------------------------------------------------------------------------
+ * int sysid_switch()
+ * Returns TRUE or FALSE depending on the probability that we want to switch directions.
+ *----------------------------------------------------------------------------*/
+
+int sysid_switch(float prob)
+{
+	/// Declare variables.
+    struct timeb seed;
+
+	/// Get the current system time and use as a seed for the random number generator.
+	ftime(&seed);
+	srand(seed.millitm);
+
+	/// Check if there are any array inputs.
+	if ((rand() / (float)RAND_MAX) > prob) {
+		return TRUE;
+	}
+
+	return FALSE;
+} /* end sysid_switch() */

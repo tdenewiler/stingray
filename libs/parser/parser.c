@@ -241,6 +241,9 @@ void parse_line(CONF_VARS *config)
         else if( strncmp( tokens[1], "type", STRING_SIZE ) == 0 ) {
             sscanf( tokens[2], "%d", &config->input_type );
         }
+        else if( strncmp( tokens[1], "prob", STRING_SIZE ) == 0 ) {
+            sscanf( tokens[2], "%f", &config->input_prob );
+        }
     }
     /// end estimation parameters
 
@@ -422,6 +425,9 @@ void parse_line(CONF_VARS *config)
         }
         else if( strncmp( tokens[1], "log", STRING_SIZE ) == 0 ) {
             sscanf( tokens[2], "%f", &config->period_log );
+        }
+        else if( strncmp( tokens[1], "axis", STRING_SIZE ) == 0 ) {
+            sscanf( tokens[2], "%f", &config->period_axis );
         }
     }
     /// end PID parameters
@@ -810,6 +816,7 @@ void parse_default_config( CONF_VARS *config )
 	config->period_input = 10.;
 	config->input_size = 10;
 	config->input_type = 1;
+	config->input_prob = 0.;
 
     /// pid
     config->kp_yaw = 1;
@@ -1009,6 +1016,7 @@ void parse_print_config(CONF_VARS *config)
     printf("PARSE_PRINT_CONFIG: period_planner = %f\n", config->period_planner);
     printf("PARSE_PRINT_CONFIG: period_input = %f\n", config->period_input);
     printf("PARSE_PRINT_CONFIG: period_log = %f\n", config->period_log);
+    printf("PARSE_PRINT_CONFIG: period_axis = %f\n", config->period_axis);
     printf("PARSE_PRINT_CONFIG: enable_pololu = %d\n", config->enable_pololu);
     printf("PARSE_PRINT_CONFIG: pololu_baud = %d\n", config->pololu_baud);
     printf("PARSE_PRINT_CONFIG: pololu_port[STRING_SIZE] = %s\n", config->pololu_port);
@@ -1082,4 +1090,5 @@ void parse_print_config(CONF_VARS *config)
 	printf("PARSE_PRINT_CONFIG: task_init_yaw = %f\n", config->task_init_yaw);
 	printf("PARSE_PRINT_CONFIG: input_size = %d\n", config->input_size);
 	printf("PARSE_PRINT_CONFIG: input_type = %d\n", config->input_type);
+	printf("PARSE_PRINT_CONFIG: input_prob = %f\n", config->input_prob);
 } /* end parse_default_config() */
