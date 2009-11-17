@@ -1,0 +1,7 @@
+#!/bin/bash
+
+cd ../labjackd; xterm -e ./labjackd &
+sleep 1;
+cd ../nav; xterm -geometry -0+0 -e ./nav &
+sleep 1;
+cd ../estimate/; xterm -geometry +0-0 -e ./estimate &

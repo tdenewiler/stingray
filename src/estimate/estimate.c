@@ -8,6 +8,7 @@
 
 /// Global file descriptors. Only global so that planner_exit() can close them.
 int nav_fd;
+int lj_fd;
 FILE *f_log;
 
 /*------------------------------------------------------------------------------
@@ -37,6 +38,9 @@ void estimate_exit( )
 	if (nav_fd > 0) {
 		close(nav_fd);
 	}
+	if (lj_fd > 0) {
+		close(lj_fd);
+	}
 
 	/// Close the open file pointers.
 	if (f_log) {
@@ -63,18 +67,19 @@ void estimate_exit( )
 int main( int argc, char *argv[] )
 {
 	/// Setup exit function. It is called when SIGINT (ctrl-c) is invoked.
-	void( *exit_ptr )( void );
+	void(*exit_ptr)(void);
 	exit_ptr = estimate_exit;
-	atexit( exit_ptr );
+	atexit(exit_ptr);
 
 	struct sigaction sigint_action;
 	sigint_action.sa_handler = estimate_sigint;
 	sigint_action.sa_flags = 0;
-	sigaction( SIGINT, &sigint_action, NULL );
+	sigaction(SIGINT, &sigint_action, NULL);
 
 	/// Declare variables.
 	int recv_bytes = 0;
 	char nav_buf[MAX_MSG_SIZE];
+	char lj_buf[MAX_MSG_SIZE];
 	CONF_VARS cf;
 	MSG_DATA msg;
 	int ks_closed = FALSE;
@@ -86,12 +91,12 @@ int main( int argc, char *argv[] )
 
 	/// Initialize variables.
 	nav_fd = -1;
-	memset( &msg, 0, sizeof(MSG_DATA) );
-	messages_init( &msg );
+	memset(&msg, 0, sizeof(MSG_DATA));
+	messages_init(&msg);
 
 	/// Parse command line arguments.
-	parse_default_config( &cf );
-	parse_cla( argc, argv, &cf, STINGRAY, (const char *)ESTIMATE_FILENAME );
+	parse_default_config(&cf);
+	parse_cla(argc, argv, &cf, STINGRAY, (const char *)ESTIMATE_FILENAME);
 
 	/// Set up default values for the targets, gains and tasks.
     msg.target.data.pitch   	 = cf.target_pitch;
@@ -119,6 +124,17 @@ int main( int argc, char *argv[] )
 		}
 		else {
 			printf("MAIN: WARNING!!! Nav client setup failed.\n");
+		}
+    }
+
+	/// Connect to the labjack daemon.
+    if (cf.enable_labjack) {
+        lj_fd = net_client_setup(cf.labjackd_IP, cf.labjackd_port);
+		if (lj_fd > 0) {
+			printf("MAIN: Labjack client setup OK.\n");
+		}
+		else {
+			printf("MAIN: WARNING!!! Labjack client setup failed.\n");
 		}
     }
 
@@ -183,13 +199,13 @@ int main( int argc, char *argv[] )
 	/// Main loop.
 	while (1) {
         /// Get nav data.
-		if( nav_fd > 0 ) {
+		if (nav_fd > 0) {
 			msg.target.data.task = msg.task.data.task;
 			msg.target.data.vision_status = msg.vision.data.status;
-			recv_bytes = net_client( nav_fd, nav_buf, &msg, MODE_PLANNER );
+			recv_bytes = net_client(nav_fd, nav_buf, &msg, MODE_PLANNER);
 			nav_buf[recv_bytes] = '\0';
-			if( recv_bytes > 0 ) {
-				messages_decode( nav_fd, nav_buf, &msg, recv_bytes );
+			if (recv_bytes > 0) {
+				messages_decode(nav_fd, nav_buf, &msg, recv_bytes);
 			}
 			/// Check the kill switch state.
 			if (!ks_closed) {
@@ -206,6 +222,16 @@ int main( int argc, char *argv[] )
 				}
 			}
 		}
+
+		/// Get labjack data.
+        if ((cf.enable_labjack) && (lj_fd > 0)) {
+            recv_bytes = net_client(lj_fd, lj_buf, &msg, MODE_OPEN);
+            lj_buf[recv_bytes] = '\0';
+            if (recv_bytes > 0) {
+                messages_decode(lj_fd, lj_buf, &msg, recv_bytes);
+				msg.status.data.depth = msg.lj.data.pressure;
+            }
+        }
 
         /// Log if flag is set.
         if (cf.enable_log && f_log) {
