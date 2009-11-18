@@ -11,6 +11,7 @@ int nav_fd;
 int lj_fd;
 FILE *f_log;
 
+
 /*------------------------------------------------------------------------------
  * int estimate_sigint()
  * Called when SIGINT (ctrl-c) is invoked.
@@ -51,18 +52,10 @@ void estimate_exit()
 } /* end estimate_exit() */
 
 
-/******************************************************************************
- *
- * Title:       int main( int argc, char *argv[] )
- *
- * Description: Initialize data. Open ports. Run main program loop.
- *
- * Input:       argc: Number of command line arguments.
- *              argv: Array of command line arguments.
- *
- * Output:      None.
- *
- *****************************************************************************/
+/*------------------------------------------------------------------------------
+ * int main()
+ * Initialize data. Open ports. Run main program loop.
+ *----------------------------------------------------------------------------*/
 
 int main( int argc, char *argv[] )
 {
@@ -192,10 +185,17 @@ int main( int argc, char *argv[] )
 	else {
 		sysid_get_step_seq(seq_depth, 1., 3.5, cf.input_size);
 	}
-	usleep(10000);
 
 	int seq_num = 0;
+	if (cf.input_type == INPUT_RAMP) {
+		seq_num = floor(cf.input_size / 2);
+	}
 	int seq = 1;
+	int direction = 1;
+
+	for (int i = 0; i < cf.input_size; i++) {
+		printf("MAIN: seq_pitch = %f\n", seq_pitch[i]);
+	}
 
 	printf("MAIN: Estimate running now.\n");
 	printf( "\n" );
@@ -239,7 +239,7 @@ int main( int argc, char *argv[] )
             }
         }
 
-        /// Log if flag is set.
+        /// Log if flag is set and timer has elapsed.
 		if (timing_check_period(&timer_log, cf.period_log) && f_log) {
 			sysid_log(&msg, f_log);
 			timing_set_timer(&timer_log);
@@ -247,8 +247,8 @@ int main( int argc, char *argv[] )
 
 		/// Send new input if input timer has elapsed.
 		// Might still need to wait for input period after setting axis to cf value so two things aren't happening at once.
-		if (timing_check_period(&timer_input, cf.period_input)) {
-			if ((cf.input_type == INPUT_STEP) || (cf.input_type == INPUT_PRB)) {
+		if ((cf.input_type == INPUT_STEP) || (cf.input_type == INPUT_PRB)) {
+			if (timing_check_period(&timer_input, cf.period_input)) {
 				switch (seq) {
 				case 1:
 				printf("MAIN: Hit input timer at %fs using pitch target %f\n", timing_get_dts(&timer_input), seq_pitch[seq_num]);
@@ -302,11 +302,59 @@ int main( int argc, char *argv[] )
 				exit(0);
 				}
 			}
-			/// Use ramp input where switching is done using a probability.
-			else {
-				// Fill this in. May want to re-write all this logic.
+		}
+		/// Use ramp input where switching is done using a probability.
+		// Fill this in. May want to re-write all this logic.
+		else if (cf.input_type == INPUT_RAMP) {
+			if (timing_check_period(&timer_axis, cf.period_axis)) {
+				seq++;
+				seq_num = floor(cf.input_size / 2);
+				timing_set_timer(&timer_axis);
+			}
+			if (timing_check_period(&timer_input, cf.period_input)) {
+				if (sysid_switch(cf.input_prob) == TRUE) {
+					direction *= -1;
+				}
+				seq_num += direction;
+				if (seq_num > cf.input_size - 1) {
+					seq_num = cf.input_size - 1;
+					direction *= -1;
+				}
+				else if (seq_num < 0) {
+					seq_num = 0;
+					direction *= -1;
+				}
+				switch (seq) {
+				case 1:
+				printf("MAIN: Hit input timer at %fs using pitch target %f at seq_num %d\n", timing_get_dts(&timer_input), seq_pitch[seq_num], seq_num);
+				msg.target.data.pitch = seq_pitch[seq_num];
+				timing_set_timer(&timer_input);
+				break;
+
+				case 2:
+				printf("MAIN: Hit input timer at %fs using roll target %f at seq_num %d\n", timing_get_dts(&timer_input), seq_roll[seq_num], seq_num);
+				msg.target.data.roll = seq_roll[seq_num];
+				timing_set_timer(&timer_input);
+				break;
+
+				case 3:
+				printf("MAIN: Hit input timer at %fs using yaw target %f at seq_num %d\n", timing_get_dts(&timer_input), seq_yaw[seq_num], seq_num);
+				msg.target.data.yaw = seq_yaw[seq_num];
+				timing_set_timer(&timer_input);
+				break;
+
+				case 4:
+				printf("MAIN: Hit input timer at %fs using depth target %f at seq_num %d\n", timing_get_dts(&timer_input), seq_depth[seq_num], seq_num);
+				msg.target.data.depth = seq_depth[seq_num];
+				timing_set_timer(&timer_input);
+				break;
+
+				default:
+				exit(0);
+				}
 			}
 		}
+
 	}
 
 	exit(0);
