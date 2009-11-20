@@ -150,40 +150,40 @@ int main( int argc, char *argv[] )
 	float seq_pitch[cf.input_size];
 	memset(&seq_pitch, 0, cf.input_size);
 	if (cf.input_type == INPUT_PRB) {
-		sysid_get_prb_seq(seq_pitch, -50., 50., cf.input_size);
+		sysid_get_prb_seq(seq_pitch, -5., 5., cf.input_size);
 	}
 	else {
-		sysid_get_step_seq(seq_pitch, -50., 50., cf.input_size);
+		sysid_get_step_seq(seq_pitch, -5., 5., cf.input_size);
 	}
 	usleep(10000);
 
 	float seq_roll[cf.input_size];
 	memset(&seq_roll, 0, cf.input_size);
 	if (cf.input_type == INPUT_PRB) {
-		sysid_get_prb_seq(seq_roll, -50., 50., cf.input_size);
+		sysid_get_prb_seq(seq_roll, -5., 5., cf.input_size);
 	}
 	else {
-		sysid_get_step_seq(seq_roll, -50., 50., cf.input_size);
+		sysid_get_step_seq(seq_roll, -5., 5., cf.input_size);
 	}
 	usleep(10000);
 
 	float seq_yaw[cf.input_size];
 	memset(&seq_yaw, 0, cf.input_size);
 	if (cf.input_type == INPUT_PRB) {
-		sysid_get_prb_seq(seq_yaw, -50., 50., cf.input_size);
+		sysid_get_prb_seq(seq_yaw, -5., 5., cf.input_size);
 	}
 	else {
-		sysid_get_step_seq(seq_yaw, -50., 50., cf.input_size);
+		sysid_get_step_seq(seq_yaw, -5., 5., cf.input_size);
 	}
 	usleep(10000);
 
 	float seq_depth[cf.input_size];
 	memset(&seq_depth, 0, cf.input_size);
 	if (cf.input_type == INPUT_PRB) {
-		sysid_get_prb_seq(seq_depth, 1., 3.5, cf.input_size);
+		sysid_get_prb_seq(seq_depth, 0.1, 0.3, cf.input_size);
 	}
 	else {
-		sysid_get_step_seq(seq_depth, 1., 3.5, cf.input_size);
+		sysid_get_step_seq(seq_depth, 0.1, 0.3, cf.input_size);
 	}
 
 	int seq_num = 0;
