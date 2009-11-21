@@ -142,6 +142,9 @@ int sysid_check_ss(float state, float target, float range, float tol)
 /*------------------------------------------------------------------------------
  * int sysid_switch()
  * Returns TRUE or FALSE depending on the probability that we want to switch directions.
+ * Note that this function should _not_ be called at whole number second intervals
+ * because the random number generator is seeded with the fraction of a second from
+ * the system time.
  *----------------------------------------------------------------------------*/
 
 int sysid_switch(float prob)
@@ -154,7 +157,7 @@ int sysid_switch(float prob)
 	srand(seed.millitm);
 
 	/// Check if there are any array inputs.
-	if ((rand() / (float)RAND_MAX) > prob) {
+	if (prob > (rand() / (float)RAND_MAX)) {
 		return TRUE;
 	}
 
