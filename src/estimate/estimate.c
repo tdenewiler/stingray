@@ -304,9 +304,28 @@ int main( int argc, char *argv[] )
 			}
 		}
 		/// Use ramp input where switching is done using a probability.
-		// Fill this in. May want to re-write all this logic.
 		else if (cf.input_type == INPUT_RAMP) {
 			if (timing_check_period(&timer_axis, cf.period_axis)) {
+				/// Reset the current axis back to cf value before moving on to next axis.
+				switch (seq) {
+				case 1:
+				msg.target.data.pitch = cf.target_pitch;
+				break;
+				
+				case 2:
+				msg.target.data.roll = cf.target_roll;
+				break;
+
+				case 3:
+				msg.target.data.yaw = cf.target_yaw;
+				break;
+
+				case 4:
+				msg.target.data.depth = cf.target_depth;
+				break;
+				}
+				
+				/// Move on to next axis.
 				seq++;
 				seq_num = floor(cf.input_size / 2);
 				timing_set_timer(&timer_axis);
