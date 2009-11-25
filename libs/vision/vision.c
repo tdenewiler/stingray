@@ -7,13 +7,18 @@
  *----------------------------------------------------------------------------*/
 
 #include "vision.h"
+#include "buoy.c"
+
+// 0 = DEFAULT (From AUVSI 2009)
+// 1 = Simple Boost off HSV
+#define BUOY_TECHNIQUE 1
 
 /*------------------------------------------------------------------------------
  * int vision_find_dot()
  * Finds a circular object from a camera.
  *----------------------------------------------------------------------------*/
 
-int vision_find_dot(int *dotx, int *doty, int angle, IplImage *srcImg, IplImage *binImg, HSV_HL *hsv)
+int vision_find_dot(int *dotx, int *doty, int angle, IplImage *srcImg, IplImage *binImg, HSV_HL *hsv )
 {
     CvPoint center;
     IplImage *hsvImg = NULL;
@@ -42,14 +47,22 @@ int vision_find_dot(int *dotx, int *doty, int angle, IplImage *srcImg, IplImage 
 	//vision_hist_eq( hsvImg, VISION_CHANNEL3 );
 		//VISION_CHANNEL1 + VISION_CHANNEL2 + VISION_CHANNEL3 );
 
-	/// Threshold all three channels using our own values.
-    cvInRangeS( hsvImg, cvScalar(hsv->hL, hsv->sL, hsv->vL),
-		cvScalar(hsv->hH, hsv->sH, hsv->vH), binImg );
+	if ( BUOY_TECHNIQUE == 1 )
+	{
+		/// Buoy Boost Technique
+		vision_boost_buoy( hsvImg, binImg );
+	}
+	else
+	{
+		/// Threshold all three channels using our own values.
+		cvInRangeS( hsvImg, cvScalar(hsv->hL, hsv->sL, hsv->vL),
+			cvScalar(hsv->hH, hsv->sH, hsv->vH), binImg );
 
-	/// Use a median filter image to remove outliers.
-	cvSmooth( binImg, outImg, CV_MEDIAN, 7, 7, 0. ,0. );
-	cvMorphologyEx( binImg, binImg, wS, NULL, CV_MOP_CLOSE, 1);
-
+		/// Use a median filter image to remove outliers.
+		cvSmooth( binImg, outImg, CV_MEDIAN, 7, 7, 0. ,0. );
+		cvMorphologyEx( binImg, binImg, wS, NULL, CV_MOP_CLOSE, 1);
+	}
+	
     /// Find the centroid.
     center = vision_find_centroid( binImg, 5 );
     *dotx = center.x;
@@ -76,6 +89,57 @@ int vision_find_dot(int *dotx, int *doty, int angle, IplImage *srcImg, IplImage 
     return 1;
 } /* end vision_find_dot() */
 
+/*------------------------------------------------------------------------------
+ * int vision_boost_buoy()
+ * Creates a binary image using the boosting predictor.
+ *----------------------------------------------------------------------------*/
+int vision_boost_buoy( IplImage *srcImg, IplImage *binImg )
+{
+	/// Declare variables.
+	uchar *srcData = ( uchar* )srcImg->imageData;
+	uchar *binData = ( uchar* )binImg->imageData;
+	double dst[2] = {0,0};
+	double thresh = 3.0;
+	int i,j,res = 0;
+	double h, s, v = 0.0;
+	double *hsv[3] = {&h, &s, &v};
+	
+	// Smooth the image first
+	cvSmooth( srcImg, srcImg, CV_GAUSSIAN, 5, 5 );
+	
+	/// Loop through the first image to fill the left part of the new image.
+	for ( i = 0; i < srcImg->height; i++ ) {
+		for ( j = 0; j < srcImg->width; j++ ) {
+			*hsv[0] = (double)(srcData[i * srcImg->widthStep + j * srcImg->nChannels + 0]/255.0);
+			*hsv[1] = (double)(srcData[i * srcImg->widthStep + j * srcImg->nChannels + 1]/255.0);
+        	*hsv[2] = (double)(srcData[i * srcImg->widthStep + j * srcImg->nChannels + 2]/255.0);
+        	
+        	/// Predict on this point
+        	if ( predict( (void**)hsv, dst ) )
+        	{
+        		if ( dst[0] >= thresh )
+        		{
+        			res = 0xff;
+				}
+				else if ( dst[0] > -1*thresh && dst[0] < thresh )
+				{
+					res = 0;
+				}
+				else
+				{
+					res = 0;
+				}
+			}
+        	
+        	binData[i * binImg->widthStep + j * binImg->nChannels + 0] = res;
+        	binData[i * binImg->widthStep + j * binImg->nChannels + 1] = res;
+        	binData[i * binImg->widthStep + j * binImg->nChannels + 2] = res;
+		}
+	}
+	
+    return 1;
+} /* end vision_boost_buoy() */
+	
 
 /*------------------------------------------------------------------------------
  * int vision_find_pipe()
