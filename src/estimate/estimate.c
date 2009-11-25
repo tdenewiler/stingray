@@ -192,10 +192,9 @@ int main( int argc, char *argv[] )
 	}
 	int seq = 1;
 	int direction = 1;
-
-	for (int i = 0; i < cf.input_size; i++) {
-		printf("MAIN: seq_pitch = %f\n", seq_pitch[i]);
-	}
+	
+	/// Turn on the Voith motors.
+	msg.target.data.speed = 70;
 
 	printf("MAIN: Estimate running now.\n");
 	printf( "\n" );
