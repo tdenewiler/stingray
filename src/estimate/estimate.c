@@ -153,7 +153,8 @@ int main( int argc, char *argv[] )
 		sysid_get_prb_seq(seq_pitch, -5., 5., cf.input_size);
 	}
 	else {
-		sysid_get_step_seq(seq_pitch, -5., 5., cf.input_size);
+		//sysid_get_step_seq(seq_pitch, -5., 5., cf.input_size);
+		sysid_get_prb_seq(seq_pitch, 0, 0, cf.input_size);
 	}
 	usleep(10000);
 
@@ -195,6 +196,34 @@ int main( int argc, char *argv[] )
 	
 	/// Turn on the Voith motors.
 	msg.target.data.speed = 70;
+	
+	/// Send target commands.
+	int tmp = 1;
+	while (tmp == 1) {
+        /// Get nav data.
+		if (nav_fd > 0) {
+			recv_bytes = net_client(nav_fd, nav_buf, &msg, MODE_PLANNER);
+			nav_buf[recv_bytes] = '\0';
+			if (recv_bytes > 0) {
+				messages_decode(nav_fd, nav_buf, &msg, recv_bytes);
+			}
+			/// Check the kill switch state.
+			if (!ks_closed) {
+				if (msg.lj.data.battery1 > 5) {
+					ks_closed = TRUE;
+					tmp = 0;
+				}
+				else {
+					ks_closed = FALSE;
+				}
+			}
+			if (ks_closed) {
+				if (msg.lj.data.battery1 < 5) {
+					ks_closed = FALSE;
+				}
+			}
+		}
+	}
 
 	printf("MAIN: Estimate running now.\n");
 	printf( "\n" );

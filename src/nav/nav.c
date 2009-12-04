@@ -330,6 +330,7 @@ int main(int argc, char *argv[])
 
             /// Yaw.
 			if ((dt = timing_check_period(&timer_yaw, cf.period_yaw))) {
+				printf("MAIN: Yaw target = %f\n", msg.target.data.yaw);
                 pid_loop(pololu_fd, &pid, &cf, &msg, dt, PID_YAW, pololu_initialized);
 				timing_set_timer(&timer_yaw);
             }

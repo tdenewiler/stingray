@@ -314,6 +314,7 @@ int messages_decode( int fd, char *buf, MSG_DATA *msg, int bytes )
 
 			bytes -= sizeof(TARGET_MSG);
 			memmove( msg, msg, sizeof(TARGET_MSG) );
+			printf("MSGS_DECODE: targets = %f    %f\n", msg->target.data.yaw, msg->target.data.depth);
 			break;
 
 		case GAIN_MSGID:
