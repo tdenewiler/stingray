@@ -7,11 +7,12 @@
 #include "timing.h"
 
 /*------------------------------------------------------------------------------
- * int timing_check_period()
- * Check if a period (in seconds) has elapsed for a timer.
+ * float timing_check_period()
+ * Check if a period (in seconds) has elapsed for a timer. Return the elapsed
+ * time if period has elapsed.
  *----------------------------------------------------------------------------*/
 
-int timing_check_period(TIMING *timer, float period)
+float timing_check_period(TIMING *timer, float period)
 {
 	/// Declare variables.
 	struct timeval t = {0, 0};
@@ -27,10 +28,10 @@ int timing_check_period(TIMING *timer, float period)
 
 	/// Check to see if period has elapsed.
 	if (t2 - t1 > (period * 1000000)) {
-		return TIMING_SUCCESS;
+		return (float)(t2 - t1) / (1000000.);
 	}
 
-	return TIMING_ERROR;
+	return (float)TIMING_ERROR;
 } /* end timing_check_period() */
 
 

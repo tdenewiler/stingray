@@ -48,8 +48,8 @@ typedef struct _TIMING {
 //! Checks to see if time has elapsed.
 //! \param timer A timer value to check.
 //! \param period The amount of time to check against, in seconds.
-//! \return 1 on success, 0 on failure.
-int timing_check_period(TIMING *timer, float period);
+//! \return dt in seconds if TRUE, 0 if FALSE.
+float timing_check_period(TIMING *timer, float period);
 
 //! Sets a timer to the current system time.
 //! \param timer A timer to set.
