@@ -19,7 +19,7 @@ FILE *f_log;
 
 /******************************************************************************
  *
- * Title:       void planner_sigint( int signal )
+ * Title:       void planner_sigint(int signal)
  *
  * Description: This function is called when SIGINT (ctrl-c) is invoked.
  *
@@ -29,15 +29,15 @@ FILE *f_log;
  *
  *****************************************************************************/
 
-void planner_sigint( int signal )
+void planner_sigint(int signal)
 {
-	exit( 0 );
+	exit(0);
 } /* end planner_sigint() */
 
 
 /******************************************************************************
  *
- * Title:       void planner_exit( )
+ * Title:       void planner_exit()
  *
  * Description: Exit function for main program. Closes all file descriptors.
  *              This function is called when SIGINT (ctrl-c) is invoked.
@@ -48,33 +48,33 @@ void planner_sigint( int signal )
  *
  *****************************************************************************/
 
-void planner_exit( )
+void planner_exit()
 {
 	printf("PLANNER_EXIT: Shutting down planner program ... ");
 	/* Sleep to let things shut down properly. */
-	usleep( 200000 );
+	usleep(200000);
 
 	/* Close the open file descriptors. */
-	if( server_fd > 0 ) {
-		close( server_fd );
+	if (server_fd > 0) {
+		close(server_fd);
 	}
-	if( vision_fd > 0 ) {
-		close( vision_fd );
+	if (vision_fd > 0) {
+		close(vision_fd);
 	}
-	if( lj_fd > 0 ) {
-		close( lj_fd );
+	if (lj_fd > 0) {
+		close(lj_fd);
 	}
-	if( nav_fd > 0 ) {
-		close( nav_fd );
+	if (nav_fd > 0) {
+		close(nav_fd);
 	}
 
 	/* Close the open file pointers. */
-	if( f_log ) {
-		fclose( f_log );
+	if (f_log) {
+		fclose(f_log);
 	}
 
 	/* Close the Kalman filter. */
-	if( bKF > 0 ) {
+	if (bKF > 0) {
 		close_kalman();
 	}
 
@@ -84,7 +84,7 @@ void planner_exit( )
 
 /******************************************************************************
  *
- * Title:       int main( int argc, char *argv[] )
+ * Title:       int main(int argc, char *argv[])
  *
  * Description: Initialize data. Open ports. Run main program loop.
  *
@@ -95,17 +95,17 @@ void planner_exit( )
  *
  *****************************************************************************/
 
-int main( int argc, char *argv[] )
+int main(int argc, char *argv[])
 {
 	/* Setup exit function. It is called when SIGINT (ctrl-c) is invoked. */
-	void( *exit_ptr )( void );
+	void(*exit_ptr)(void);
 	exit_ptr = planner_exit;
-	atexit( exit_ptr );
+	atexit(exit_ptr);
 
 	struct sigaction sigint_action;
 	sigint_action.sa_handler = planner_sigint;
 	sigint_action.sa_flags = 0;
-	sigaction( SIGINT, &sigint_action, NULL );
+	sigaction(SIGINT, &sigint_action, NULL);
 
 	/* Declare variables. */
 	int recv_bytes = 0;
@@ -150,14 +150,14 @@ int main( int argc, char *argv[] )
 	nav_fd = -1;
 	bKF = -1;
 
-	memset( &msg, 0, sizeof(MSG_DATA) );
-	memset( &pid, 0, sizeof(PID) );
-	memset( &lj,  0, sizeof(LABJACK_DATA) );
-	messages_init( &msg );
+	memset(&msg, 0, sizeof(MSG_DATA));
+	memset(&pid, 0, sizeof(PID));
+	memset(&lj,  0, sizeof(LABJACK_DATA));
+	messages_init(&msg);
 
 	/* Parse command line arguments. */
-	parse_default_config( &cf );
-	parse_cla( argc, argv, &cf, STINGRAY, ( const char * )PLANNER_FILENAME );
+	parse_default_config(&cf);
+	parse_cla(argc, argv, &cf, STINGRAY, (const char *)PLANNER_FILENAME);
 
 	/* Set up default values for the targets, gains and tasks. */
     msg.target.data.pitch   	 = cf.target_pitch;
@@ -191,7 +191,7 @@ int main( int argc, char *argv[] )
 
     /* Set up Kalman filter. */
     bKF = init_kalman();
-    if( bKF > 0 ) {
+    if (bKF > 0) {
 		printf("MAIN: Kalman filter setup OK.\n");
 		//kalman_print_test();
 	}
@@ -200,9 +200,9 @@ int main( int argc, char *argv[] )
 	}
 
 	/* Set up server. */
-	if( cf.enable_server ) {
-		server_fd = net_server_setup( cf.server_port );
-		if( server_fd > 0 ) {
+	if (cf.enable_server) {
+		server_fd = net_server_setup(cf.server_port);
+		if (server_fd > 0) {
 			printf("MAIN: Server setup OK.\n");
 		}
 		else {
@@ -211,9 +211,9 @@ int main( int argc, char *argv[] )
 	}
 
 	/* Set up the vision network client. */
-	if( cf.enable_vision ) {
-		vision_fd = net_client_setup( cf.vision_IP, cf.vision_port );
-		if( vision_fd > 0 ) {
+	if (cf.enable_vision) {
+		vision_fd = net_client_setup(cf.vision_IP, cf.vision_port);
+		if (vision_fd > 0) {
 			printf("MAIN: Vision client setup OK.\n");
 		}
 		else {
@@ -222,9 +222,9 @@ int main( int argc, char *argv[] )
 	}
 
 	/* Connect to the labjack daemon. */
-    if( cf.enable_labjack ) {
-        lj_fd = net_client_setup( cf.labjackd_IP, cf.labjackd_port );
-		if( lj_fd > 0 ) {
+    if (cf.enable_labjack) {
+        lj_fd = net_client_setup(cf.labjackd_IP, cf.labjackd_port);
+		if (lj_fd > 0) {
 			printf("MAIN: Labjack client setup OK.\n");
 		}
 		else {
@@ -233,9 +233,9 @@ int main( int argc, char *argv[] )
     }
 
     /* Set up the nav network client. */
-	if( cf.enable_nav ) {
-        nav_fd = net_client_setup( cf.nav_IP, cf.nav_port );
-		if( nav_fd > 0 ) {
+	if (cf.enable_nav) {
+        nav_fd = net_client_setup(cf.nav_IP, cf.nav_port);
+		if (nav_fd > 0) {
 			printf("MAIN: Nav client setup OK.\n");
 		}
 		else {
@@ -244,11 +244,11 @@ int main( int argc, char *argv[] )
     }
 
     /* Open log file if flag set. */
-    if( cf.enable_log ) {
-    	f_log = fopen( "log.csv", "w" );
-    	if( f_log ) {
-   		fprintf( f_log, "time,pitch,roll,yaw,depth,accel1,accel2,accel3,ang1,"
-				"ang2,ang3,fx,fy,tpitch,troll,tyaw,tdepth,tfx,tfy\n" );
+    if (cf.enable_log) {
+    	f_log = fopen("log.csv", "w");
+    	if (f_log) {
+   		fprintf(f_log, "time,pitch,roll,yaw,depth,accel1,accel2,accel3,ang1,"
+				"ang2,ang3,fx,fy,tpitch,troll,tyaw,tdepth,tfx,tfy\n");
 		}
 	}
 
@@ -261,25 +261,25 @@ int main( int argc, char *argv[] )
 	timing_set_timer(&timer_kalman);
 
 	printf("MAIN: Planner running now.\n");
-	printf( "\n" );
+	printf("\n");
 
 	/* Main loop. */
-	while( 1 ) {
+	while (1) {
 		/* Get network data. */
-		if( (cf.enable_server) && (server_fd > 0) ) {
-			recv_bytes = net_server( server_fd, recv_buf, &msg, MODE_PLANNER );
-			if( recv_bytes > 0 ) {
+		if ((cf.enable_server) && (server_fd > 0)) {
+			recv_bytes = net_server(server_fd, recv_buf, &msg, MODE_PLANNER);
+			if (recv_bytes > 0) {
 				recv_buf[recv_bytes] = '\0';
-				messages_decode( server_fd, recv_buf, &msg, recv_bytes );
+				messages_decode(server_fd, recv_buf, &msg, recv_bytes);
 			}
 		}
 
 		/* Get vision data. */
-		if( (cf.enable_vision) && (vision_fd > 0) ) {
-			if(timing_check_period(&timer_vision, cf.period_vision)) {
-				recv_bytes = net_client( vision_fd, vision_buf, &msg, MODE_OPEN );
+		if ((cf.enable_vision) && (vision_fd > 0)) {
+			if (timing_check_period(&timer_vision, cf.period_vision)) {
+				recv_bytes = net_client(vision_fd, vision_buf, &msg, MODE_OPEN);
 				vision_buf[recv_bytes] = '\0';
-				if( recv_bytes > 0 ) {
+				if (recv_bytes > 0) {
 					messages_decode(vision_fd, vision_buf, &msg, recv_bytes);
                     timing_set_timer(&timer_vision);
 					msg.status.data.fps = msg.vision.data.fps;
@@ -290,44 +290,44 @@ int main( int argc, char *argv[] )
 		/* If there is a new task then send to vision. */
 		task = msg.task.data.task;
 		subtask = msg.task.data.subtask;
-		if( old_task != msg.task.data.task ) {
-			if( (cf.enable_vision) && (vision_fd > 0) ) {
-				messages_send( vision_fd, TASK_MSGID, &msg );
+		if (old_task != msg.task.data.task) {
+			if ((cf.enable_vision) && (vision_fd > 0)) {
+				messages_send(vision_fd, TASK_MSGID, &msg);
 			}
 			old_task = msg.task.data.task;
 			/* Reset the task and subtask start timers. */
 			timing_set_timer(&timer_task);
 			timing_set_timer(&timer_subtask);
 		}
-		else if( old_subtask != msg.task.data.subtask ) {
-			if( (cf.enable_vision) && (vision_fd > 0) ) {
-				messages_send( vision_fd, TASK_MSGID, &msg );
+		else if (old_subtask != msg.task.data.subtask) {
+			if ((cf.enable_vision) && (vision_fd > 0)) {
+				messages_send(vision_fd, TASK_MSGID, &msg);
 			}
 			old_subtask = msg.task.data.subtask;
 			timing_set_timer(&timer_subtask);
 		}
 
         /* Get nav data. */
-		if( nav_fd > 0 ) {
+		if (nav_fd > 0) {
 			msg.target.data.task = msg.task.data.task;
 			msg.target.data.vision_status = msg.vision.data.status;
-			recv_bytes = net_client( nav_fd, nav_buf, &msg, MODE_PLANNER );
+			recv_bytes = net_client(nav_fd, nav_buf, &msg, MODE_PLANNER);
 			nav_buf[recv_bytes] = '\0';
-			if( recv_bytes > 0 ) {
-				messages_decode( nav_fd, nav_buf, &msg, recv_bytes );
+			if (recv_bytes > 0) {
+				messages_decode(nav_fd, nav_buf, &msg, recv_bytes);
 			}
 			/* Check to send dropper servo value to nav here. Use old_dropper
 			 * variable to see if new value needs to be sent. */
-			if( msg.client.data.dropper != old_dropper ) {
-				messages_send( nav_fd, CLIENT_MSGID, &msg );
+			if (msg.client.data.dropper != old_dropper) {
+				messages_send(nav_fd, CLIENT_MSGID, &msg);
 				old_dropper = msg.client.data.dropper;
 			}
 			/* Check the kill switch state. */
-			if( !ks_closed ) {
-				if( msg.lj.data.battery1 > 5 ) {
+			if (!ks_closed) {
+				if (msg.lj.data.battery1 > 5) {
 					ks_closed = TRUE;
 					timing_set_timer(&timer_task);
-					if( msg.task.data.course ) {
+					if (msg.task.data.course) {
 						task = TASK_GATE;
 						msg.task.data.task = task;
 						timing_set_timer(&timer_subtask);
@@ -341,8 +341,8 @@ int main( int argc, char *argv[] )
 					ks_closed = FALSE;
 				}
 			}
-			if( ks_closed ) {
-				if( msg.lj.data.battery1 < 5 ) {
+			if (ks_closed) {
+				if (msg.lj.data.battery1 < 5) {
 					ks_closed = FALSE;
 					//task = TASK_NONE;
 					//msg.task.data.task = task;
@@ -351,54 +351,54 @@ int main( int argc, char *argv[] )
 		}
 
 		/* Update Kalman filter. */
-		if( bKF ) {
+		if (bKF) {
 			/* If it has been long enough, update the filter. */
-			if(timing_check_period(&timer_kalman, 0.1)) {
+			if (timing_check_period(&timer_kalman, 0.1)) {
 				STAT cs = msg.status.data;
 				float ang[] = { cs.pitch, cs.roll, cs.yaw };
 				float real_accel[] = { cs.accel[0], cs.accel[1], cs.accel[2] - 9.86326398 };
 
 				/* Update the Kalman filter. */
-				kalman_update( ((float)timing_s2us(&timer_kalman))/1000000, msg.lj.data.pressure, ang,
-						real_accel, cs.ang_rate );
+				kalman_update(((float)timing_s2us(&timer_kalman))/1000000, msg.lj.data.pressure, ang,
+						real_accel, cs.ang_rate);
 				timing_set_timer(&timer_kalman);
 			}
 
 			/* Get current location estimation. */
-			kalman_get_location( loc );
+			kalman_get_location(loc);
 		}
 
 		/* Get labjack data. */
-        if( (cf.enable_labjack) && (lj_fd > 0) ) {
-            recv_bytes = net_client( lj_fd, lj_buf, &msg, MODE_OPEN );
+        if ((cf.enable_labjack) && (lj_fd > 0)) {
+            recv_bytes = net_client(lj_fd, lj_buf, &msg, MODE_OPEN);
             lj_buf[recv_bytes] = '\0';
-            if( recv_bytes > 0 ) {
-                messages_decode( lj_fd, lj_buf, &msg, recv_bytes );
+            if (recv_bytes > 0) {
+                messages_decode(lj_fd, lj_buf, &msg, recv_bytes);
 				msg.status.data.depth = msg.lj.data.pressure;
             }
         }
 
         /* Log if flag is set. */
-        if( cf.enable_log && f_log ) {
+        if (cf.enable_log && f_log) {
 			/* Get a timestamp and use for log. */
-            gettimeofday( &ctime, NULL );
-            ct = *( localtime ((const time_t*) &ctime.tv_sec) );
-			strftime( write_time, sizeof(write_time), "20%y-%m-%d_%H:%M:%S", &ct);
-            snprintf( write_time + strlen(write_time),
-            		strlen(write_time), ".%06ld", ctime.tv_usec );
+            gettimeofday(&ctime, NULL);
+            ct = *(localtime ((const time_t*) &ctime.tv_sec));
+			strftime(write_time, sizeof(write_time), "20%y-%m-%d_%H:%M:%S", &ct);
+            snprintf(write_time + strlen(write_time),
+            		strlen(write_time), ".%06ld", ctime.tv_usec);
 
 			/* Log enable_log times every second. */
-			if(timing_check_period(&timer_log, cf.enable_log)) {
+			if (timing_check_period(&timer_log, cf.enable_log)) {
 				STAT cs = msg.status.data;
 				TARGET target = msg.target.data;
-				fprintf( f_log, "%s, %.06f,%.06f,%.06f,%.06f,%.06f,%.06f,%.06f,"
+				fprintf(f_log, "%s, %.06f,%.06f,%.06f,%.06f,%.06f,%.06f,%.06f,"
 					"%.06f,%.06f,%.06f,%.06f,%.06f,%.06f,%.06f,%.06f,%.06f,"
 					"%.06f,%.06f\n",
 					write_time, cs.pitch, cs.roll, cs.yaw, msg.lj.data.pressure,
 					cs.accel[0], cs.accel[1], cs.accel[2],
 					cs.ang_rate[0], cs.ang_rate[1], cs.ang_rate[2], cs.fx, cs.fy,
 					target.pitch, target.roll, target.yaw, target.depth,
-					target.fx, target.fy );
+					target.fx, target.fy);
 				timing_set_timer(&timer_log);
 			}
 		}
@@ -408,16 +408,16 @@ int main( int argc, char *argv[] )
 		timing_get_dt(&timer_subtask, &timer_subtask);
 
 		/* Run the current task. */
-		status = task_run( &msg, &cf, timer_task.s, timer_subtask.s );
-		if( msg.task.data.course ) {
+		status = task_run(&msg, &cf, timer_task.s, timer_subtask.s);
+		if (msg.task.data.course) {
 			/* Set the subtask in the network message. */
 			msg.task.data.subtask = subtask;
-			if( status == TASK_SUCCESS || status == TASK_FAILURE ) {
-				if( task == TASK_BUOY && buoy_success ) {
-					if( !buoy_touched ) {
+			if (status == TASK_SUCCESS || status == TASK_FAILURE) {
+				if (task == TASK_BUOY && buoy_success) {
+					if (!buoy_touched) {
 						buoy_touched = TRUE;
 					}
-					else if( buoy_touched && timer_subtask.s < TASK_BUOY_WAIT_TIME ) {
+					else if (buoy_touched && timer_subtask.s < TASK_BUOY_WAIT_TIME) {
 						/* Do nothing here. */
 					}
 					else {
@@ -430,7 +430,7 @@ int main( int argc, char *argv[] )
 						timing_set_timer(&timer_subtask);
 					}
 				}
-				else if( task == TASK_BUOY && status == TASK_SUCCESS ) {
+				else if (task == TASK_BUOY && status == TASK_SUCCESS) {
 					buoy_success = TRUE;
 					timing_set_timer(&timer_subtask);
 				}
@@ -445,8 +445,8 @@ int main( int argc, char *argv[] )
 					timing_set_timer(&timer_subtask);
 				}
 			}
-			else if( task == TASK_BUOY && buoy_success ) {
-				if( timer_subtask.s < TASK_BUOY_WAIT_TIME ) {
+			else if (task == TASK_BUOY && buoy_success) {
+				if (timer_subtask.s < TASK_BUOY_WAIT_TIME) {
 					/* Do nothing here. */
 				}
 				else {
@@ -463,12 +463,12 @@ int main( int argc, char *argv[] )
 		else {
 			/* If we are not in course mode and get a status of something other
 			 * than task continue, reset the timers. */
-			if( status == TASK_SUCCESS || status == TASK_FAILURE ) {
+			if (status == TASK_SUCCESS || status == TASK_FAILURE) {
 				timing_set_timer(&timer_task);
 				timing_set_timer(&timer_subtask);
 			}
 		}
 	}
 
-	exit( 0 );
+	exit(0);
 } /* end main() */
