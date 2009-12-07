@@ -193,10 +193,10 @@ int main( int argc, char *argv[] )
 	}
 	int seq = 1;
 	int direction = 1;
-	
+
 	/// Turn on the Voith motors.
 	msg.target.data.speed = 70;
-	
+
 	/// Send target commands.
 	int tmp = 1;
 	while (tmp == 1) {
@@ -339,7 +339,7 @@ int main( int argc, char *argv[] )
 				case 1:
 				msg.target.data.pitch = cf.target_pitch;
 				break;
-				
+
 				case 2:
 				msg.target.data.roll = cf.target_roll;
 				break;
@@ -352,7 +352,7 @@ int main( int argc, char *argv[] )
 				msg.target.data.depth = cf.target_depth;
 				break;
 				}
-				
+
 				/// Move on to next axis.
 				seq++;
 				seq_num = floor(cf.input_size / 2);

@@ -98,11 +98,11 @@ void sysid_log(MSG_DATA *msg, FILE *fd)
 	/// Write the data to file.
 	fprintf(fd, "%s %f %f %f %f %f %f %f %f %f %f %f %f %f %f %f %f %f %f %f %f\n",
 		write_time,
-		msg->mstrain.data.pitch, msg->mstrain.data.roll, msg->mstrain.data.yaw,
-		msg->status.data.depth, msg->mstrain.data.ang_rate[0], msg->mstrain.data.ang_rate[1],
-		msg->mstrain.data.ang_rate[2], msg->mstrain.data.accel[0], msg->mstrain.data.accel[1],
-		msg->mstrain.data.accel[2], msg->mstrain.data.mag[0], msg->mstrain.data.mag[1],
-		msg->mstrain.data.mag[2], msg->target.data.fx, msg->target.data.fy,
+		msg->status.data.pitch, msg->status.data.roll, msg->status.data.yaw,
+		msg->status.data.depth, msg->status.data.ang_rate[0], msg->status.data.ang_rate[1],
+		msg->status.data.ang_rate[2], msg->status.data.accel[0], msg->status.data.accel[1],
+		msg->status.data.accel[2], msg->status.data.mag[0], msg->status.data.mag[1],
+		msg->status.data.mag[2], msg->target.data.fx, msg->target.data.fy,
 		msg->target.data.speed, msg->target.data.pitch, msg->target.data.roll,
 		msg->target.data.yaw, msg->target.data.depth);
 } /* end sysid_log() */
