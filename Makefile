@@ -100,6 +100,12 @@ all:
 	@echo
 	cd src/joydrive; make -f Makefile; cd ../..;
 	@echo
+	@echo //////////////
+	@echo // estimate //
+	@echo //////////////
+	@echo
+	cd src/estimate; make -f Makefile; cd ../..;
+	@echo
 	@echo /////////////
 	@echo // DONE!!! //
 	@echo /////////////
@@ -207,6 +213,12 @@ clean:
 	@echo //////////////
 	@echo
 	cd src/joydrive; make -f Makefile clean; cd ../..;
+	@echo
+	@echo //////////////
+	@echo // estimate //
+	@echo //////////////
+	@echo
+	cd src/estimate; make -f Makefile clean; cd ../..;
 	@echo
 	@echo /////////////
 	@echo // DONE!!! //

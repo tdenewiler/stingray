@@ -317,7 +317,7 @@ int main(int argc, char *argv[])
         if (msg.stop.data.state == FALSE) {
             /// Pitch.
 			if ((dt = timing_check_period(&timer_pitch, cf.period_pitch))) {
-				printf("MAIN: Hit pitch timer at %fs.\n", dt);
+				//printf("MAIN: Hit pitch timer at %fs.\n", dt);
                 pid_loop(pololu_fd, &pid, &cf, &msg, dt, PID_PITCH, pololu_initialized);
 				timing_set_timer(&timer_pitch);
             }

@@ -242,19 +242,19 @@ int main( int argc, char *argv[] )
 				messages_decode(nav_fd, nav_buf, &msg, recv_bytes);
 			}
 			/// Check the kill switch state.
-			if (!ks_closed) {
-				if (msg.lj.data.battery1 > 5) {
-					ks_closed = TRUE;
-				}
-				else {
-					ks_closed = FALSE;
-				}
-			}
-			if (ks_closed) {
-				if (msg.lj.data.battery1 < 5) {
-					ks_closed = FALSE;
-				}
-			}
+			//if (!ks_closed) {
+				//if (msg.lj.data.battery1 > 5) {
+					//ks_closed = TRUE;
+				//}
+				//else {
+					//ks_closed = FALSE;
+				//}
+			//}
+			//if (ks_closed) {
+				//if (msg.lj.data.battery1 < 5) {
+					//ks_closed = FALSE;
+				//}
+			//}
 		}
 
 		/// Get labjack data.
@@ -373,25 +373,25 @@ int main( int argc, char *argv[] )
 				}
 				switch (seq) {
 				case 1:
-				printf("MAIN: Hit input timer at %fs using pitch target %f at seq_num %d\n", timing_get_dts(&timer_input), seq_pitch[seq_num], seq_num);
+				//printf("MAIN: Hit input timer at %fs using pitch target %f at seq_num %d\n", timing_get_dts(&timer_input), seq_pitch[seq_num], seq_num);
 				msg.target.data.pitch = seq_pitch[seq_num];
 				timing_set_timer(&timer_input);
 				break;
 
 				case 2:
-				printf("MAIN: Hit input timer at %fs using roll target %f at seq_num %d\n", timing_get_dts(&timer_input), seq_roll[seq_num], seq_num);
+				//printf("MAIN: Hit input timer at %fs using roll target %f at seq_num %d\n", timing_get_dts(&timer_input), seq_roll[seq_num], seq_num);
 				msg.target.data.roll = seq_roll[seq_num];
 				timing_set_timer(&timer_input);
 				break;
 
 				case 3:
-				printf("MAIN: Hit input timer at %fs using yaw target %f at seq_num %d\n", timing_get_dts(&timer_input), seq_yaw[seq_num], seq_num);
+				//printf("MAIN: Hit input timer at %fs using yaw target %f at seq_num %d\n", timing_get_dts(&timer_input), seq_yaw[seq_num], seq_num);
 				msg.target.data.yaw = seq_yaw[seq_num];
 				timing_set_timer(&timer_input);
 				break;
 
 				case 4:
-				printf("MAIN: Hit input timer at %fs using depth target %f at seq_num %d\n", timing_get_dts(&timer_input), seq_depth[seq_num], seq_num);
+				//printf("MAIN: Hit input timer at %fs using depth target %f at seq_num %d\n", timing_get_dts(&timer_input), seq_depth[seq_num], seq_num);
 				msg.target.data.depth = seq_depth[seq_num];
 				timing_set_timer(&timer_input);
 				break;
