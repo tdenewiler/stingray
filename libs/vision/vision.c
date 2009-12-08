@@ -40,8 +40,8 @@ int vision_find_dot(int *dotx, int *doty, int angle, IplImage *srcImg, IplImage 
 	/// Enhance the red channel of the source image.
 	//vision_white_balance( srcImg );
 
-    /// Segment the flipped image into a binary image.
-    cvCvtColor( srcImg, hsvImg, CV_RGB2HSV );
+    /// Convert the image from RGB to HSV color space.
+    cvCvtColor( srcImg, hsvImg, CV_BGR2HSV );
 
 	/// Equalize the histograms of each channel.
 	//vision_hist_eq( hsvImg, VISION_CHANNEL3 );
@@ -99,31 +99,28 @@ int vision_boost_buoy( IplImage *srcImg, IplImage *binImg )
 	uchar *srcData = ( uchar* )srcImg->imageData;
 	uchar *binData = ( uchar* )binImg->imageData;
 	double dst[2] = {0,0};
-	double thresh = 3.0;
+	double thresh = 1.0;
 	int i,j,res = 0;
 	double h, s, v = 0.0;
 	double *hsv[3] = {&h, &s, &v};
+	IplConvKernel* B;
 	
-	// Smooth the image first
-	cvSmooth( srcImg, srcImg, CV_GAUSSIAN, 5, 5 );
+	/// Smooth the image first
+	//cvSmooth( srcImg, srcImg, CV_GAUSSIAN, 5, 5 );
 	
 	/// Loop through the first image to fill the left part of the new image.
 	for ( i = 0; i < srcImg->height; i++ ) {
 		for ( j = 0; j < srcImg->width; j++ ) {
-			*hsv[0] = (double)(srcData[i * srcImg->widthStep + j * srcImg->nChannels + 0]/255.0);
+			*hsv[0] = (double)(srcData[i * srcImg->widthStep + j * srcImg->nChannels + 0]/180.0);
 			*hsv[1] = (double)(srcData[i * srcImg->widthStep + j * srcImg->nChannels + 1]/255.0);
         	*hsv[2] = (double)(srcData[i * srcImg->widthStep + j * srcImg->nChannels + 2]/255.0);
         	
         	/// Predict on this point
         	if ( predict( (void**)hsv, dst ) )
         	{
-        		if ( dst[0] >= thresh )
+        		if ( dst[1] > thresh )
         		{
         			res = 0xff;
-				}
-				else if ( dst[0] > -1*thresh && dst[0] < thresh )
-				{
-					res = 0;
 				}
 				else
 				{
@@ -136,6 +133,17 @@ int vision_boost_buoy( IplImage *srcImg, IplImage *binImg )
         	binData[i * binImg->widthStep + j * binImg->nChannels + 2] = res;
 		}
 	}
+	
+	/// Create Erosion/Dilation Kernel
+	B = cvCreateStructuringElementEx( 3, 3, 1, 1, CV_SHAPE_RECT );
+	
+	/// First use closing to eliminate noise-driven segments
+	//cvMorphologyEx( binImg, binImg, NULL, B, CV_MOP_CLOSE, 2 );
+	
+	/// Second use opening to clean up remaining regions
+	cvMorphologyEx( binImg, binImg, NULL, B, CV_MOP_OPEN, 1 );
+	
+	cvReleaseStructuringElement( &B );
 	
     return 1;
 } /* end vision_boost_buoy() */
@@ -1397,20 +1405,27 @@ void vision_concat_images(IplImage *img1, IplImage *img2, IplImage *new_img)
  * Saves an image to disk.
  *----------------------------------------------------------------------------*/
 
-void vision_save_frame(IplImage *img, char *dir)
+void vision_save_frame(IplImage *img, char *dir, char *name)
 {
 	/// Declare variables.
     struct timeval ctime;
     struct tm ct;
     char write_time[128] = {0};
 
-	/// Get a timestamp and use for filename.
-	gettimeofday( &ctime, NULL );
-	ct = *( localtime ((const time_t*) &ctime.tv_sec) );
-	strcpy( write_time, dir );
-	strftime( write_time + strlen(write_time), sizeof(write_time), "20%y%m%d_%H%M%S", &ct);
-	snprintf( write_time + strlen(write_time),
-			strlen(write_time), ".%.03ld.jpg", ctime.tv_usec );
+	if ( name == NULL ) {
+		/// Get a timestamp and use for filename.
+		gettimeofday( &ctime, NULL );
+		ct = *( localtime ((const time_t*) &ctime.tv_sec) );
+		strcpy( write_time, dir );
+		strftime( write_time + strlen(write_time), sizeof(write_time), "20%y%m%d_%H%M%S", &ct);
+		snprintf( write_time + strlen(write_time),
+				strlen(write_time), ".%.03ld.jpg", ctime.tv_usec );
+	}
+	else {
+		/// Use the given name - good for comparisons sake
+		sprintf( write_time, "%s%s", dir, name );
+	}
+			
 			
 	cvSaveImage( write_time, img );
 } /* end vision_save_frame() */

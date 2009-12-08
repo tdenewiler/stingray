@@ -233,7 +233,8 @@ void vision_concat_images(IplImage *img1, IplImage *img2, IplImage *new_img);
 //! Saves an image to disk.
 //! \param img The image to save to disk.
 //! \param dir The directory in which to save the image.
-void vision_save_frame( IplImage *img, char *dir );
+//! \param name The name of the file to sive (optional).
+void vision_save_frame( IplImage *img, char *dir, char *name = NULL );
 
 
 #endif /* VISION_H */

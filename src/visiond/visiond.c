@@ -443,7 +443,7 @@ int main( int argc, char *argv[] )
 				if ( cf.save_image_post ) {
 					vision_concat_images( img, bin_img, save_img );
 					strncpy( curr_save_dir, cf.save_image_dir, STRING_SIZE );
-					vision_save_frame( save_img, strncat( curr_save_dir, "post/", 5 ) );
+					vision_save_frame( save_img, strncat( curr_save_dir, "post/", 5 ), dfile->d_name );
 				}
 			}
 
