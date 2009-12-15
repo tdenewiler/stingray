@@ -41,7 +41,7 @@ int vision_find_dot(int *dotx, int *doty, int angle, IplImage *srcImg, IplImage 
 	//vision_white_balance( srcImg );
 
     /// Convert the image from RGB to HSV color space.
-    cvCvtColor( srcImg, hsvImg, CV_BGR2HSV );
+    cvCvtColor( srcImg, hsvImg, CV_RGB2HSV );
 
 	/// Equalize the histograms of each channel.
 	//vision_hist_eq( hsvImg, VISION_CHANNEL3 );
@@ -111,9 +111,9 @@ int vision_boost_buoy( IplImage *srcImg, IplImage *binImg )
 	/// Loop through the first image to fill the left part of the new image.
 	for ( i = 0; i < srcImg->height; i++ ) {
 		for ( j = 0; j < srcImg->width; j++ ) {
-			*hsv[0] = (double)(srcData[i * srcImg->widthStep + j * srcImg->nChannels + 0]/180.0);
-			*hsv[1] = (double)(srcData[i * srcImg->widthStep + j * srcImg->nChannels + 1]/255.0);
-        	*hsv[2] = (double)(srcData[i * srcImg->widthStep + j * srcImg->nChannels + 2]/255.0);
+			*hsv[0] = srcData[i * srcImg->widthStep + j * srcImg->nChannels + 0];
+			*hsv[1] = srcData[i * srcImg->widthStep + j * srcImg->nChannels + 1];
+        	*hsv[2] = srcData[i * srcImg->widthStep + j * srcImg->nChannels + 2];
         	
         	/// Predict on this point
         	if ( predict( (void**)hsv, dst ) )
