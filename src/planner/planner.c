@@ -8,7 +8,7 @@
 
 #include "planner.h"
 
-/* Global file descriptors. Only global so that planner_exit() can close them. */
+/// Global file descriptors. Only global so that planner_exit() can close them.
 int server_fd;
 int vision_fd;
 int lj_fd;
@@ -51,10 +51,10 @@ void planner_sigint(int signal)
 void planner_exit()
 {
 	printf("PLANNER_EXIT: Shutting down planner program ... ");
-	/* Sleep to let things shut down properly. */
+	/// Sleep to let things shut down properly.
 	usleep(200000);
 
-	/* Close the open file descriptors. */
+	/// Close the open file descriptors.
 	if (server_fd > 0) {
 		close(server_fd);
 	}
@@ -68,12 +68,12 @@ void planner_exit()
 		close(nav_fd);
 	}
 
-	/* Close the open file pointers. */
+	/// Close the open file pointers.
 	if (f_log) {
 		fclose(f_log);
 	}
 
-	/* Close the Kalman filter. */
+	/// Close the Kalman filter.
 	if (bKF > 0) {
 		close_kalman();
 	}
@@ -97,7 +97,7 @@ void planner_exit()
 
 int main(int argc, char *argv[])
 {
-	/* Setup exit function. It is called when SIGINT (ctrl-c) is invoked. */
+	/// Setup exit function. It is called when SIGINT (ctrl-c) is invoked.
 	void(*exit_ptr)(void);
 	exit_ptr = planner_exit;
 	atexit(exit_ptr);
@@ -107,7 +107,7 @@ int main(int argc, char *argv[])
 	sigint_action.sa_flags = 0;
 	sigaction(SIGINT, &sigint_action, NULL);
 
-	/* Declare variables. */
+	/// Declare variables.
 	int recv_bytes = 0;
 	char recv_buf[MAX_MSG_SIZE];
 	char vision_buf[MAX_MSG_SIZE];
@@ -136,14 +136,14 @@ int main(int argc, char *argv[])
 	TIMING timer_kalman;
 	TIMING timer_subtask;
 
-	/* Declare timestamp variables. */
+	/// Declare timestamp variables.
 	struct timeval ctime;
     struct tm ct;
     char write_time[80] = {0};
 
 	printf("MAIN: Starting Planner ... \n");
 
-	/* Initialize variables. */
+	/// Initialize variables.
 	server_fd = -1;
 	vision_fd = -1;
 	lj_fd = -1;
@@ -155,11 +155,11 @@ int main(int argc, char *argv[])
 	memset(&lj,  0, sizeof(LABJACK_DATA));
 	messages_init(&msg);
 
-	/* Parse command line arguments. */
+	/// Parse command line arguments.
 	parse_default_config(&cf);
 	parse_cla(argc, argv, &cf, STINGRAY, (const char *)PLANNER_FILENAME);
 
-	/* Set up default values for the targets, gains and tasks. */
+	/// Set up default values for the targets, gains and tasks.
     msg.target.data.pitch   	 = cf.target_pitch;
     msg.target.data.roll    	 = cf.target_roll;
     msg.target.data.yaw     	 = cf.target_yaw;
@@ -179,7 +179,7 @@ int main(int argc, char *argv[])
     msg.gain.data.ki_depth  	 = cf.ki_depth;
     msg.gain.data.kd_depth  	 = cf.kd_depth;
 
-    /* Initialize tasks. */
+    /// Initialize tasks.
     task = cf.task_start;
 	old_task = task;
     subtask = cf.subtask_start;
@@ -189,7 +189,7 @@ int main(int argc, char *argv[])
 	msg.task.data.subtask = subtask;
 	msg.task.data.course = cf.course_start;
 
-    /* Set up Kalman filter. */
+    /// Set up Kalman filter.
     bKF = init_kalman();
     if (bKF > 0) {
 		printf("MAIN: Kalman filter setup OK.\n");
@@ -199,7 +199,7 @@ int main(int argc, char *argv[])
 		printf("MAIN: WARNING!!! Kalman filter setup failed.\n");
 	}
 
-	/* Set up server. */
+	/// Set up server.
 	if (cf.enable_server) {
 		server_fd = net_server_setup(cf.server_port);
 		if (server_fd > 0) {
@@ -210,7 +210,7 @@ int main(int argc, char *argv[])
 		}
 	}
 
-	/* Set up the vision network client. */
+	/// Set up the vision network client.
 	if (cf.enable_vision) {
 		vision_fd = net_client_setup(cf.vision_IP, cf.vision_port);
 		if (vision_fd > 0) {
@@ -221,7 +221,7 @@ int main(int argc, char *argv[])
 		}
 	}
 
-	/* Connect to the labjack daemon. */
+	/// Connect to the labjack daemon.
     if (cf.enable_labjack) {
         lj_fd = net_client_setup(cf.labjackd_IP, cf.labjackd_port);
 		if (lj_fd > 0) {
@@ -232,7 +232,7 @@ int main(int argc, char *argv[])
 		}
     }
 
-    /* Set up the nav network client. */
+    /// Set up the nav network client.
 	if (cf.enable_nav) {
         nav_fd = net_client_setup(cf.nav_IP, cf.nav_port);
 		if (nav_fd > 0) {
@@ -243,7 +243,7 @@ int main(int argc, char *argv[])
 		}
     }
 
-    /* Open log file if flag set. */
+    /// Open log file if flag set.
     if (cf.enable_log) {
     	f_log = fopen("log.csv", "w");
     	if (f_log) {
@@ -252,7 +252,7 @@ int main(int argc, char *argv[])
 		}
 	}
 
-	/* Initialize timers. */
+	/// Initialize timers.
 	timing_set_timer(&timer_vision);
 	timing_set_timer(&timer_plan);
 	timing_set_timer(&timer_task);
@@ -263,9 +263,9 @@ int main(int argc, char *argv[])
 	printf("MAIN: Planner running now.\n");
 	printf("\n");
 
-	/* Main loop. */
+	/// Main loop.
 	while (1) {
-		/* Get network data. */
+		/// Get network data.
 		if ((cf.enable_server) && (server_fd > 0)) {
 			recv_bytes = net_server(server_fd, recv_buf, &msg, MODE_PLANNER);
 			if (recv_bytes > 0) {
@@ -274,7 +274,7 @@ int main(int argc, char *argv[])
 			}
 		}
 
-		/* Get vision data. */
+		/// Get vision data.
 		if ((cf.enable_vision) && (vision_fd > 0)) {
 			if (timing_check_period(&timer_vision, cf.period_vision)) {
 				recv_bytes = net_client(vision_fd, vision_buf, &msg, MODE_OPEN);
@@ -287,7 +287,7 @@ int main(int argc, char *argv[])
 			}
 		}
 
-		/* If there is a new task then send to vision. */
+		/// If there is a new task then send to vision.
 		task = msg.task.data.task;
 		subtask = msg.task.data.subtask;
 		if (old_task != msg.task.data.task) {
@@ -295,7 +295,7 @@ int main(int argc, char *argv[])
 				messages_send(vision_fd, TASK_MSGID, &msg);
 			}
 			old_task = msg.task.data.task;
-			/* Reset the task and subtask start timers. */
+			/// Reset the task and subtask start timers.
 			timing_set_timer(&timer_task);
 			timing_set_timer(&timer_subtask);
 		}
@@ -307,7 +307,7 @@ int main(int argc, char *argv[])
 			timing_set_timer(&timer_subtask);
 		}
 
-        /* Get nav data. */
+        /// Get nav data.
 		if (nav_fd > 0) {
 			msg.target.data.task = msg.task.data.task;
 			msg.target.data.vision_status = msg.vision.data.status;
@@ -316,13 +316,12 @@ int main(int argc, char *argv[])
 			if (recv_bytes > 0) {
 				messages_decode(nav_fd, nav_buf, &msg, recv_bytes);
 			}
-			/* Check to send dropper servo value to nav here. Use old_dropper
-			 * variable to see if new value needs to be sent. */
+			/// Check to send dropper servo value to nav here. Use old_dropper variable to see if new value needs to be sent.
 			if (msg.client.data.dropper != old_dropper) {
 				messages_send(nav_fd, CLIENT_MSGID, &msg);
 				old_dropper = msg.client.data.dropper;
 			}
-			/* Check the kill switch state. */
+			/// Check the kill switch state.
 			if (!ks_closed) {
 				if (msg.lj.data.battery1 > 5) {
 					ks_closed = TRUE;
@@ -350,25 +349,24 @@ int main(int argc, char *argv[])
 			}
 		}
 
-		/* Update Kalman filter. */
+		/// Update Kalman filter.
 		if (bKF) {
-			/* If it has been long enough, update the filter. */
+			/// If it has been long enough, update the filter.
 			if (timing_check_period(&timer_kalman, 0.1)) {
 				STAT cs = msg.status.data;
 				float ang[] = { cs.pitch, cs.roll, cs.yaw };
 				float real_accel[] = { cs.accel[0], cs.accel[1], cs.accel[2] - 9.86326398 };
 
-				/* Update the Kalman filter. */
-				kalman_update(((float)timing_s2us(&timer_kalman))/1000000, msg.lj.data.pressure, ang,
-						real_accel, cs.ang_rate);
+				/// Update the Kalman filter.
+				kalman_update(timing_check_period(&timer_kalman, 0.), msg.lj.data.pressure, ang, real_accel, cs.ang_rate);
 				timing_set_timer(&timer_kalman);
 			}
 
-			/* Get current location estimation. */
+			/// Get current location estimation.
 			kalman_get_location(loc);
 		}
 
-		/* Get labjack data. */
+		/// Get labjack data.
         if ((cf.enable_labjack) && (lj_fd > 0)) {
             recv_bytes = net_client(lj_fd, lj_buf, &msg, MODE_OPEN);
             lj_buf[recv_bytes] = '\0';
@@ -378,16 +376,16 @@ int main(int argc, char *argv[])
             }
         }
 
-        /* Log if flag is set. */
+        /// Log if flag is set.
         if (cf.enable_log && f_log) {
-			/* Get a timestamp and use for log. */
+			/// Get a timestamp and use for log.
             gettimeofday(&ctime, NULL);
             ct = *(localtime ((const time_t*) &ctime.tv_sec));
 			strftime(write_time, sizeof(write_time), "20%y-%m-%d_%H:%M:%S", &ct);
             snprintf(write_time + strlen(write_time),
             		strlen(write_time), ".%06ld", ctime.tv_usec);
 
-			/* Log enable_log times every second. */
+			/// Log enable_log times every second.
 			if (timing_check_period(&timer_log, cf.enable_log)) {
 				STAT cs = msg.status.data;
 				TARGET target = msg.target.data;
@@ -403,14 +401,14 @@ int main(int argc, char *argv[])
 			}
 		}
 
-		/* Update the task and subtask elapsed times. */
+		/// Update the task and subtask elapsed times.
 		timing_get_dt(&timer_task, &timer_task);
 		timing_get_dt(&timer_subtask, &timer_subtask);
 
-		/* Run the current task. */
+		/// Run the current task.
 		status = task_run(&msg, &cf, timer_task.s, timer_subtask.s);
 		if (msg.task.data.course) {
-			/* Set the subtask in the network message. */
+			/// Set the subtask in the network message.
 			msg.task.data.subtask = subtask;
 			if (status == TASK_SUCCESS || status == TASK_FAILURE) {
 				if (task == TASK_BUOY && buoy_success) {
@@ -418,14 +416,14 @@ int main(int argc, char *argv[])
 						buoy_touched = TRUE;
 					}
 					else if (buoy_touched && timer_subtask.s < TASK_BUOY_WAIT_TIME) {
-						/* Do nothing here. */
+						/// Do nothing here.
 					}
 					else {
 						msg.task.data.task++;
 						task++;
 						printf("MAIN: task = %d\n", task);
 						msg.task.data.subtask = SUBTASK_SEARCH_DEPTH;
-						/* Re-initialize the task and subtask timers. */
+						/// Re-initialize the task and subtask timers.
 						timing_set_timer(&timer_task);
 						timing_set_timer(&timer_subtask);
 					}
@@ -435,34 +433,33 @@ int main(int argc, char *argv[])
 					timing_set_timer(&timer_subtask);
 				}
 				else {
-					/* Move on to the next task. Initialize the subtask. */
+					/// Move on to the next task. Initialize the subtask.
 					msg.task.data.task++;
 					task++;
 					printf("MAIN: task = %d\n", task);
 					msg.task.data.subtask = SUBTASK_SEARCH_DEPTH;
-					/* Re-initialize the task and subtask timers. */
+					/// Re-initialize the task and subtask timers.
 					timing_set_timer(&timer_task);
 					timing_set_timer(&timer_subtask);
 				}
 			}
 			else if (task == TASK_BUOY && buoy_success) {
 				if (timer_subtask.s < TASK_BUOY_WAIT_TIME) {
-					/* Do nothing here. */
+					/// Do nothing here.
 				}
 				else {
 					msg.task.data.task++;
 					task++;
 					printf("MAIN: task = %d\n", task);
 					msg.task.data.subtask = SUBTASK_SEARCH_DEPTH;
-					/* Re-initialize the task and subtask timers. */
+					/// Re-initialize the task and subtask timers.
 					timing_set_timer(&timer_task);
 					timing_set_timer(&timer_subtask);
 				}
 			}
 		}
 		else {
-			/* If we are not in course mode and get a status of something other
-			 * than task continue, reset the timers. */
+			/// If we are not in course mode and get a status of something other than task continue, reset the timers.
 			if (status == TASK_SUCCESS || status == TASK_FAILURE) {
 				timing_set_timer(&timer_task);
 				timing_set_timer(&timer_subtask);
