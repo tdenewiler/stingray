@@ -370,8 +370,9 @@ int main( int argc, char *argv[] )
 					/// Finished the directory.
 					printf( "MAIN: Finished loading from source directory.\n\n" );
 					printf( "VISION RESULTS:\n" );
-					printf( "  %d/%d ---> %f%%\n", vision_classified, vision_considered,
+					printf( "  %d/%d ---> %f%% positive\n", vision_classified, vision_considered,
 								((double)vision_classified/vision_considered) * 100 );
+					printf( "  %f ms per frame\n", vision_processing_time() );
 					exit( 0 );
 				}
 

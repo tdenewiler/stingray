@@ -13,6 +13,32 @@
 // 1 = Simple Boost off HSV
 #define BUOY_TECHNIQUE 1
 
+double 	tick_total = 0;
+int 	tick_count = 0;
+
+/*------------------------------------------------------------------------------
+ * int vision_processing_time()
+ * Finds the average processing time in ms per frame.
+ *----------------------------------------------------------------------------*/
+double vision_processing_time()
+{
+	double result = 0.0;
+	
+	/// Fix reduction for variable size
+	result = tick_total * 1000000;
+	
+	/// Find ticks per frame
+	result = result / tick_count;
+	
+	/// Convert to microseconds per frame
+	result = result / cvGetTickFrequency();
+	
+	/// Convert to ms per frame
+	result = result / 1000;
+	
+	return result;
+}
+
 /*------------------------------------------------------------------------------
  * int vision_find_dot()
  * Finds a circular object from a camera.
@@ -20,6 +46,8 @@
 
 int vision_find_dot(int *dotx, int *doty, int angle, IplImage *srcImg, IplImage *binImg, HSV_HL *hsv )
 {
+	int64 ticks = cvGetTickCount();
+	
     CvPoint center;
     IplImage *hsvImg = NULL;
     IplImage *outImg = NULL;
@@ -46,11 +74,11 @@ int vision_find_dot(int *dotx, int *doty, int angle, IplImage *srcImg, IplImage 
 	/// Equalize the histograms of each channel.
 	//vision_hist_eq( hsvImg, VISION_CHANNEL3 );
 		//VISION_CHANNEL1 + VISION_CHANNEL2 + VISION_CHANNEL3 );
-
+	
 	if ( BUOY_TECHNIQUE == 1 )
 	{
 		/// Buoy Boost Technique
-		vision_boost_buoy( hsvImg, binImg );
+		vision_boost_buoy( hsvImg, binImg, &center );
 	}
 	else
 	{
@@ -61,10 +89,12 @@ int vision_find_dot(int *dotx, int *doty, int angle, IplImage *srcImg, IplImage 
 		/// Use a median filter image to remove outliers.
 		cvSmooth( binImg, outImg, CV_MEDIAN, 7, 7, 0. ,0. );
 		cvMorphologyEx( binImg, binImg, wS, NULL, CV_MOP_CLOSE, 1);
+		
+		/// Find the centroid.
+    	center = vision_find_centroid( binImg, 5 );
 	}
 	
-    /// Find the centroid.
-    center = vision_find_centroid( binImg, 5 );
+    /// Set the found center of the dot
     *dotx = center.x;
     *doty = center.y;
 
@@ -72,6 +102,10 @@ int vision_find_dot(int *dotx, int *doty, int angle, IplImage *srcImg, IplImage 
     cvReleaseImage( &hsvImg );
     cvReleaseImage( &outImg );
 
+	ticks = cvGetTickCount() - ticks;
+	tick_total = tick_total + (double)ticks/1000000;
+	tick_count = tick_count + 1;
+	
 	/// Check to see how many pixels of are detected in the image.
 	num_pix = cvCountNonZero( binImg );
 	//printf("VISION_FIND_DOT: num_pix = %d\n" , num_pix);
@@ -93,7 +127,7 @@ int vision_find_dot(int *dotx, int *doty, int angle, IplImage *srcImg, IplImage 
  * int vision_boost_buoy()
  * Creates a binary image using the boosting predictor.
  *----------------------------------------------------------------------------*/
-int vision_boost_buoy( IplImage *srcImg, IplImage *binImg )
+int vision_boost_buoy( IplImage *srcImg, IplImage *binImg, CvPoint *center )
 {
 	/// Declare variables.
 	uchar *srcData = ( uchar* )srcImg->imageData;
@@ -102,11 +136,22 @@ int vision_boost_buoy( IplImage *srcImg, IplImage *binImg )
 	double thresh = 1.0;
 	int i,j,res = 0;
 	double h, s, v = 0.0;
-	double *hsv[3] = {&h, &s, &v};
+	double* hsv[3] = {&h, &s, &v};
 	IplConvKernel* B;
+	static CvMemStorage* mem_storage = NULL;
+	static CvSeq* contours = NULL;
+	CvContourScanner scanner;
+	CvSeq* c = NULL;
+	CvSeq* c_new = NULL;
+	double c_area = 0.0, c_max = 0.0, c_radius = 0.0;
+	CvMoments moments;
+	double M00 = 0.0, M01 = 0.0, M10 = 0.0;
+	CvPoint c_center;
+	CvPoint2D32f min_center;
+	float min_radius;
 	
-	/// Smooth the image first
-	//cvSmooth( srcImg, srcImg, CV_GAUSSIAN, 5, 5 );
+	/// Create Morphological Kernel
+	B = cvCreateStructuringElementEx( 3, 3, 1, 1, CV_SHAPE_RECT );
 	
 	/// Loop through the first image to fill the left part of the new image.
 	for ( i = 0; i < srcImg->height; i++ ) {
@@ -134,14 +179,90 @@ int vision_boost_buoy( IplImage *srcImg, IplImage *binImg )
 		}
 	}
 	
-	/// Create Erosion/Dilation Kernel
-	B = cvCreateStructuringElementEx( 3, 3, 1, 1, CV_SHAPE_RECT );
-	
-	/// First use closing to eliminate noise-driven segments
-	//cvMorphologyEx( binImg, binImg, NULL, B, CV_MOP_CLOSE, 2 );
-	
-	/// Second use opening to clean up remaining regions
+	/// Use Opening to remove noise
 	cvMorphologyEx( binImg, binImg, NULL, B, CV_MOP_OPEN, 1 );
+	
+	/// Use Closing to fill in blobs
+	cvMorphologyEx( binImg, binImg, NULL, B, CV_MOP_CLOSE, 2 );
+	
+	/// Use smooth to smooth the shapes
+	cvSmooth( binImg, binImg, CV_MEDIAN, 7, 7, 0., 0. );
+	
+	/// Find Countours around remaining regions
+	if ( mem_storage == NULL )
+	{
+		mem_storage = cvCreateMemStorage( 0 );
+	}
+	else
+	{
+		cvClearMemStorage( mem_storage );
+	}
+	scanner = cvStartFindContours( binImg, mem_storage, sizeof( CvContour ), CV_RETR_EXTERNAL, CV_CHAIN_APPROX_SIMPLE );
+	while ( (c = cvFindNextContour( scanner )) != NULL )
+	{
+		/// Convex Hull Contour Approximation
+		c_new = cvConvexHull2( c, mem_storage, CV_CLOCKWISE, 1 );
+		cvSubstituteContour( scanner, c_new );
+	}
+	contours = cvEndFindContours( &scanner );
+	
+	/// Draw the resulting contours
+	for ( c = contours; c != NULL; c = c->h_next )
+	{
+		cvDrawContours( binImg, c, CV_RGB(0xff,0xff, 0xff), CV_RGB(0x00, 0x00, 0x00), -1, CV_FILLED, 8 );
+	}
+	
+	/// Dilate because convex hull shrinks the contour
+	cvDilate( binImg, binImg, B, 1 );
+	
+	/// Use smooth to smooth the shapes again
+	cvSmooth( binImg, binImg, CV_MEDIAN, 7, 7, 0., 0. );
+	
+	/// Find Countours around remaining regions
+	if ( mem_storage == NULL )
+	{
+		mem_storage = cvCreateMemStorage( 0 );
+	}
+	else
+	{
+		cvClearMemStorage( mem_storage );
+	}
+	scanner = cvStartFindContours( binImg, mem_storage, sizeof( CvContour ), CV_RETR_EXTERNAL, CV_CHAIN_APPROX_SIMPLE );
+	while ( (c = cvFindNextContour( scanner )) != NULL )
+	{
+		cvDrawContours( binImg, c, CV_RGB(0xff,0xff, 0xff), CV_RGB(0x00, 0x00, 0x00), -1, CV_FILLED, 8 );
+		
+		/// Get this contours area
+		c_area = abs( cvContourArea( c, CV_WHOLE_SEQ ) );
+		
+		/// Get this contours center
+		cvContourMoments( c, &moments );
+		M00 = cvGetSpatialMoment( &moments, 0, 0 );
+		M10 = cvGetSpatialMoment( &moments, 1, 0 );
+		M01 = cvGetSpatialMoment( &moments, 0, 1 );
+		c_center.x = (int)(M10/M00);
+		c_center.y = (int)(M01/M00);
+		
+		/// Calculate radius
+		c_radius = sqrt( c_area / M_PI );
+		
+		//printf( "Area=%f Center=(%d,%d) PI=%f Radius=%f\n", c_area, c_center.x, c_center.y, M_PI, c_radius );
+		
+		if ( c_area > c_max )
+		{
+			c_max = c_area;
+			center->x = c_center.x;
+			center->y = c_center.y;
+		}
+		
+		//cvCircle( binImg, c_center, c_radius, CV_RGB( 0x00, 0x00, 0x00 ), 1, 8 );
+		
+		cvMinEnclosingCircle( c, &min_center, &min_radius );
+		c_center.x = min_center.x;
+		c_center.y = min_center.y;
+		//cvCircle( binImg, c_center, min_radius, CV_RGB( 0x00, 0x00, 0x00 ), 1, 8 );
+	}
+	contours = cvEndFindContours( &scanner );
 	
 	cvReleaseStructuringElement( &B );
 	

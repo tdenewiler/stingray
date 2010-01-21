@@ -87,6 +87,9 @@
 **
 ******************************/
 
+//! Finds the average processing time in ms per frame.
+double vision_processing_time();
+
 //! Finds the centroid of the pixels in an image.
 //! \param binImage The binary image to find the centroid of.
 //! \param thresh The amount of pixels for centroid to be valid.
@@ -109,7 +112,9 @@ int vision_find_dot( int *dotx,
 //! Creates a binary image based on boost buoy predicter.
 //! \param srcImg The image to convert to a binary image.
 //! \param binImg The image to hold the binary result image.
-int vision_boost_buoy( IplImage *srcImg, IplImage *binImg );
+int vision_boost_buoy( 	IplImage *srcImg, 
+						IplImage *binImg,
+						CvPoint *center );
 
 //! Finds a pipe object from a camera.
 //! \param pipex Pointer to variable for x position of pipe.
