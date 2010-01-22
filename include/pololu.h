@@ -43,7 +43,7 @@
 #define POLOLU_CHANNEL_OFF		0
 #define POLOLU_SPEED_INSTANT	0
 #define POLOLU_SPEED_VOITH		10
-#define POLOLU_RESULT_SUM		( 139 + 16 )
+#define POLOLU_RESULT_SUM		(139 + 16)
 
 //@}
 
