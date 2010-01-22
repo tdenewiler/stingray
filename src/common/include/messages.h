@@ -102,7 +102,7 @@
 //! \param fd Socket to send message to.
 //! \param msg_id Message ID.
 //! \param msg Pointer to message data.
-void messages_send( int fd, int msg_id, MSG_DATA *msg );
+void messages_send(int fd, int msg_id, MSG_DATA *msg);
 
 //! Decode received API messages.
 //! \param fd Network file descriptor.
@@ -110,15 +110,15 @@ void messages_send( int fd, int msg_id, MSG_DATA *msg );
 //! \param msg Pointer to message data.
 //! \param bytes Number of bytes in buffer.
 //! \return Number of bytes remaining in buffer.
-int messages_decode( int fd, char *buf, MSG_DATA *msg, int bytes );
+int messages_decode(int fd, char *buf, MSG_DATA *msg, int bytes);
 
 //! Updates status data with current data.
 //! \param msg Pointer to message data.
-void messages_update( MSG_DATA *msg );
+void messages_update(MSG_DATA *msg);
 
 //! Initialize the header and footer variables.
 //! \param msg Pointer to message data.
-void messages_init( MSG_DATA *msg );
+void messages_init(MSG_DATA *msg);
 
 
 #endif /* _MESSAGES_H_ */

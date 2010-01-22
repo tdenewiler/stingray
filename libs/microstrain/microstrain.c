@@ -23,8 +23,8 @@ int mstrain_setup(char *portname, int baud)
 	int fd = -1;
 
 	/// Open serial port.
-	if( portname != NULL ) {
-		fd = setup_serial( portname, baud );
+	if(portname != NULL) {
+		fd = setup_serial(portname, baud);
 	}
 
 	return fd;
@@ -45,18 +45,18 @@ int mstrain_serial_number(int fd, int *serial_number)
 	char cmd = (char)IMU_SERIAL_NUMBER;
 
 	/// Send request to and receive data from IMU.
-	status = send_serial( fd, &cmd, sizeof(cmd) );
+	status = send_serial(fd, &cmd, sizeof(cmd));
 
-	if( status > 0 ) {
-		usleep( SERIAL_EXTRA_DELAY_LENGTH );
-		status = recv_serial( fd, response, response_length );
+	if(status > 0) {
+		usleep(SERIAL_EXTRA_DELAY_LENGTH);
+		status = recv_serial(fd, response, response_length);
 	}
 
-	if( status != response_length ) {
+	if(status != response_length) {
 		return 0;
 	}
 
-	*serial_number = convert2int( &response[1] );
+	*serial_number = convert2int(&response[1]);
 
 	return 1;
 } /* end mstrain_serial_number() */
@@ -76,21 +76,21 @@ int mstrain_temperature(int fd, float *temp)
 	char cmd = (char)IMU_TEMPERATURE;
 
 	/// Send request to and receive data from IMU.
-	status = send_serial( fd, &cmd, sizeof(cmd) );
+	status = send_serial(fd, &cmd, sizeof(cmd));
 
-	if( status > 0 ) {
-		usleep( SERIAL_EXTRA_DELAY_LENGTH );
-		status = recv_serial( fd, response, response_length );
+	if(status > 0) {
+		usleep(SERIAL_EXTRA_DELAY_LENGTH);
+		status = recv_serial(fd, response, response_length);
 	}
 
-	if( status != response_length ) {
+	if(status != response_length) {
 		return 0;
 	}
 
-	*temp = convert2int( &response[1] );
+	*temp = convert2int(&response[1]);
 
 	/// This conversion is from the 3DM-GX1 manual.
-	*temp = ( ( ( *temp * 5.0 / 65536.0 ) - 0.5 ) * 100.0 );
+	*temp = (((*temp * 5.0 / 65536.0) - 0.5) * 100.0);
 
 	return 1;
 } /* end mstrain_temperature() */
@@ -107,7 +107,7 @@ int mstrain_orientation(int fd, int gyro_stab, float *orient[3][3])
 	char cmd = 0;
 	int response_length = 0;
 
-	if( gyro_stab ) {
+	if(gyro_stab) {
 		cmd = IMU_GYRO_STAB_ORIENT_MATRIX;
 		response_length = (int)IMU_LENGTH_0B;
 	}
@@ -126,20 +126,20 @@ int mstrain_orientation(int fd, int gyro_stab, float *orient[3][3])
 	float orient_convert_factor = 8192.0;
 
 	/// Send request to and receive data from IMU.
-	status = send_serial( fd, &cmd, sizeof(cmd) );
+	status = send_serial(fd, &cmd, sizeof(cmd));
 
-	if( status > 0 ) {
-		usleep( SERIAL_EXTRA_DELAY_LENGTH );
-		status = recv_serial( fd, response, response_length );
+	if(status > 0) {
+		usleep(SERIAL_EXTRA_DELAY_LENGTH);
+		status = recv_serial(fd, response, response_length);
 	}
 
-	if( status != response_length ) {
+	if(status != response_length) {
 		return 0;
 	}
 
-	for( ii = 0; ii < 3; ii++ ) {
-		for( jj = 0; jj < 3; jj++ ) {
-			*orient[jj][ii] = (float)convert2short( &response[1 + ii * 2] )
+	for(ii = 0; ii < 3; ii++) {
+		for(jj = 0; jj < 3; jj++) {
+			*orient[jj][ii] = (float)convert2short(&response[1 + ii * 2])
 			                  / orient_convert_factor;
 		}
 	}
@@ -159,7 +159,7 @@ int mstrain_vectors(int fd, int gyro_stab, float *mag, float *accel, float *ang_
 	char cmd = 0;
 	int response_length = 0;
 
-	if( gyro_stab ) {
+	if(gyro_stab) {
 		cmd = IMU_GYRO_STAB_VECTORS;
 		response_length = (int)IMU_LENGTH_02;
 	}
@@ -178,23 +178,23 @@ int mstrain_vectors(int fd, int gyro_stab, float *mag, float *accel, float *ang_
 	float ang_rate_convert_factor = 3855.058823529; //32768000.0 / 8500.0;
 
 	/// Send request to and receive data from IMU.
-	status = send_serial( fd, &cmd, sizeof(cmd) );
+	status = send_serial(fd, &cmd, sizeof(cmd));
 
-	if( status > 0 ) {
-		usleep( MSTRAIN_SERIAL_DELAY );
-		status = recv_serial( fd, response, response_length );
+	if(status > 0) {
+		usleep(MSTRAIN_SERIAL_DELAY);
+		status = recv_serial(fd, response, response_length);
 	}
 
-	if( status != response_length ) {
+	if(status != response_length) {
 		return 0;
 	}
 
-	for( ii = 0; ii < 3; ii++ ) {
-		mag[ii] = (float)convert2short( &response[1 + ii * 2] ) /
+	for(ii = 0; ii < 3; ii++) {
+		mag[ii] = (float)convert2short(&response[1 + ii * 2]) /
 		          mag_convert_factor;
-		accel[ii] = (float)convert2short( &response[7 + ii * 2] ) /
+		accel[ii] = (float)convert2short(&response[7 + ii * 2]) /
 		            accel_convert_factor;
-		ang_rate[ii] = (float)convert2short( &response[13 + ii * 2] ) /
+		ang_rate[ii] = (float)convert2short(&response[13 + ii * 2]) /
 		               ang_rate_convert_factor;
 	}
 
@@ -225,21 +225,21 @@ int mstrain_euler_angles(int fd, float *roll, float *pitch, float *yaw)
 	short int cs_yaw = 0;
 
 	/// Send request to and receive data from IMU.
-	status = send_serial( fd, &cmd, sizeof(cmd) );
+	status = send_serial(fd, &cmd, sizeof(cmd));
 
-	if( status > 0 ) {
-		usleep( MSTRAIN_SERIAL_DELAY );
-		status = recv_serial( fd, response, response_length );
+	if(status > 0) {
+		usleep(MSTRAIN_SERIAL_DELAY);
+		status = recv_serial(fd, response, response_length);
 	}
 
-	if( status != response_length ) {
+	if(status != response_length) {
 		return 0;
 	}
 
 	/// Convert bytes to short ints.
-	cs_roll  = convert2short( &response[1] );
-	cs_pitch = convert2short( &response[3] );
-	cs_yaw   = convert2short( &response[5] );
+	cs_roll  = convert2short(&response[1]);
+	cs_pitch = convert2short(&response[3]);
+	cs_yaw   = convert2short(&response[5]);
 
 	/// Set argument pointers to the temp values.
 	*roll = cs_roll * euler_convert_factor;
@@ -247,13 +247,13 @@ int mstrain_euler_angles(int fd, float *roll, float *pitch, float *yaw)
 	*yaw = cs_yaw * euler_convert_factor;
 
 	/// Convert the Euler angles from (-180,180] to (0,360].
-	if( *roll < 0 ) {
+	if(*roll < 0) {
 		*roll += 360;
 	}
-	if( *pitch < 0 ) {
+	if(*pitch < 0) {
 		*pitch += 360;
 	}
-	if( *yaw < 0 ) {
+	if(*yaw < 0) {
 		*yaw += 360;
 	}
 
@@ -276,7 +276,7 @@ int mstrain_quaternions(int fd, int gyro_stab, float *quat[4])
 	/// Conversion factor from the 3DM-GX1 manual.
 	float convert_factor = 8192.0;
 
-	if( gyro_stab ) {
+	if(gyro_stab) {
 		cmd = IMU_GYRO_STAB_QUAT;
 		response_length = (int)IMU_LENGTH_05;
 	}
@@ -288,18 +288,18 @@ int mstrain_quaternions(int fd, int gyro_stab, float *quat[4])
 	char response[response_length];
 
 	/// Send request to and receive data from IMU.
-	status = send_serial( fd, &cmd, sizeof(cmd) );
-	if( status > 0 ) {
-		usleep( MSTRAIN_SERIAL_DELAY );
-		status = recv_serial( fd, response, response_length );
+	status = send_serial(fd, &cmd, sizeof(cmd));
+	if(status > 0) {
+		usleep(MSTRAIN_SERIAL_DELAY);
+		status = recv_serial(fd, response, response_length);
 	}
 
-	if( status != response_length ) {
+	if(status != response_length) {
 		return 0;
 	}
 
-	for( ii = 0; ii < 4; ii++ ) {
-		*quat[ii] = (float)convert2short( &response[1 + ii * 2] )
+	for(ii = 0; ii < 4; ii++) {
+		*quat[ii] = (float)convert2short(&response[1 + ii * 2])
 		            / convert_factor;
 	}
 
@@ -330,28 +330,28 @@ int mstrain_quaternions_vectors(int fd, float *quat[4], float *mag[3], float *ac
 	cmd = IMU_GYRO_STAB_QUAT_VECTORS;
 
 	/// Send request to and receive data from IMU.
-	status = send_serial( fd, &cmd, sizeof(cmd) );
+	status = send_serial(fd, &cmd, sizeof(cmd));
 
-	if( status > 0 ) {
-		usleep( MSTRAIN_SERIAL_DELAY );
-		status = recv_serial( fd, response, response_length );
+	if(status > 0) {
+		usleep(MSTRAIN_SERIAL_DELAY);
+		status = recv_serial(fd, response, response_length);
 	}
 
-	if( status != response_length ) {
+	if(status != response_length) {
 		return 0;
 	}
 
-	for( ii = 0; ii < 4; ii++ ) {
-		*quat[ii] = (float)convert2short( &response[1 + ii * 2] )
+	for(ii = 0; ii < 4; ii++) {
+		*quat[ii] = (float)convert2short(&response[1 + ii * 2])
 		            / stab_convert_factor;
 	}
 
-	for( ii = 0; ii < 3; ii++ ) {
-		*mag[ii]      = (float)convert2short( &response[9 + ii * 2] )
+	for(ii = 0; ii < 3; ii++) {
+		*mag[ii]      = (float)convert2short(&response[9 + ii * 2])
 		                / mag_convert_factor;
-		*accel[ii]    = (float)convert2short( &response[15 + ii * 2] )
+		*accel[ii]    = (float)convert2short(&response[15 + ii * 2])
 		                / accel_convert_factor;
-		*ang_rate[ii] = (float)convert2short( &response[21 + ii * 2] )
+		*ang_rate[ii] = (float)convert2short(&response[21 + ii * 2])
 		                / ang_rate_convert_factor;
 	}
 
@@ -394,46 +394,46 @@ int mstrain_euler_vectors(int fd, float *roll, float *pitch, float *yaw, float *
 	cmd = IMU_INST_EULER_ANGLES;
 
 	/// Send request to and receive data from IMU.
-	status = send_serial( fd, &cmd, sizeof(cmd) );
+	status = send_serial(fd, &cmd, sizeof(cmd));
 
-	if( status > 0 ) {
-		usleep( MSTRAIN_SERIAL_DELAY );
-		status = recv_serial( fd, response, response_length );
-		//if( response[0] != IMU_GYRO_STAB_EULER_VECTORS ) {
-		if( response[0] != cmd ) {
+	if(status > 0) {
+		usleep(MSTRAIN_SERIAL_DELAY);
+		status = recv_serial(fd, response, response_length);
+		//if(response[0] != IMU_GYRO_STAB_EULER_VECTORS) {
+		if(response[0] != cmd) {
 			printf("MSTRAIN_EULER_VECTORS: ***** HEADER ERROR *****\n");
 			return IMU_ERROR_HEADER;
 		}
 	}
 
-	if( status != response_length ) {
+	if(status != response_length) {
 		printf("MSTRAIN_EULER_VECTORS: ***** LENGTH ERROR *****\n");
 		return IMU_ERROR_LENGTH;
 	}
 
 	/// Convert bytes to short ints.
-	cs_roll  = convert2short( &response[1] );
-	cs_pitch = convert2short( &response[3] );
-	cs_yaw   = convert2short( &response[5] );
+	cs_roll  = convert2short(&response[1]);
+	cs_pitch = convert2short(&response[3]);
+	cs_yaw   = convert2short(&response[5]);
 
-	for( ii = 0; ii < 3; ii++ ) {
-		cs_accel[ii]    = convert2short( &response[7 + ii * 2] );
-		cs_ang_rate[ii] = convert2short( &response[13 + ii * 2] );
+	for(ii = 0; ii < 3; ii++) {
+		cs_accel[ii]    = convert2short(&response[7 + ii * 2]);
+		cs_ang_rate[ii] = convert2short(&response[13 + ii * 2]);
 	}
 
-	cs_timer_ticks =  convert2short( &response[19] );
+	cs_timer_ticks =  convert2short(&response[19]);
 
 	/// Calculate the checksum.
 	cs_total = response[0] + cs_roll + cs_pitch + cs_yaw + cs_accel[0] +
 		cs_accel[1] + cs_accel[2] + cs_ang_rate[0] + cs_ang_rate[1] +
 		cs_ang_rate[2] + cs_timer_ticks;
-	if( cs_total != convert2short(&response[21]) ) {
+	if(cs_total != convert2short(&response[21])) {
 		printf("MSTRAIN_EULER_VECTORS: ***** CHECKSUM ERROR *****\n");
 		return IMU_ERROR_CHECKSUM;
 	}
 
 	/// Try the checksum function.
-	if( !mstrain_calc_checksum( response, response_length ) ) {
+	if(!mstrain_calc_checksum(response, response_length)) {
 		//printf("MSTRAIN_EULER_VECTORS: ***** CHECKSUM FUNCTION *****\n");
 		//return IMU_ERROR_CHECKSUM;
 	}
@@ -443,19 +443,19 @@ int mstrain_euler_vectors(int fd, float *roll, float *pitch, float *yaw, float *
 	*pitch = cs_pitch * euler_convert_factor;
 	*yaw = cs_yaw * euler_convert_factor;
 
-	for( ii = 0; ii < 3; ii++ ) {
+	for(ii = 0; ii < 3; ii++) {
 		accel[ii]    = (float)cs_accel[ii] / accel_convert_factor;
 		ang_rate[ii] = (float)cs_ang_rate[ii] / ang_rate_convert_factor;
 	}
 
 	/// Convert the Euler angles from (-180,180] to (0,360].
-	if( *roll < 0 ) {
+	if(*roll < 0) {
 		*roll += 360;
 	}
-	if( *pitch < 0 ) {
+	if(*pitch < 0) {
 		*pitch += 360;
 	}
-	if( *yaw < 0 ) {
+	if(*yaw < 0) {
 		*yaw += 360;
 	}
 
@@ -485,17 +485,17 @@ int mstrain_set_tare(int fd)
 	cmd[3] = IMU_TARE_BYTE3;
 
 	/// Send request to and receive data from IMU.
-	status = send_serial( fd, &cmd, sizeof(cmd) );
+	status = send_serial(fd, &cmd, sizeof(cmd));
 
-	if( status > 0 ) {
-		status = serial_bytes_available( fd );
-		if( status < response_length ) {
-			usleep( SERIAL_EXTRA_DELAY_LENGTH );
+	if(status > 0) {
+		status = serial_bytes_available(fd);
+		if(status < response_length) {
+			usleep(SERIAL_EXTRA_DELAY_LENGTH);
 		}
-		status = recv_serial( fd, response, response_length );
+		status = recv_serial(fd, response, response_length);
 	}
 
-	if( status != response_length ) {
+	if(status != response_length) {
 		return 0;
 	}
 
@@ -525,17 +525,17 @@ int mstrain_remove_tare(int fd)
 	cmd[3] = IMU_TARE_BYTE3;
 
 	/// Send request to and receive data from IMU.
-	status = send_serial( fd, &cmd, sizeof(cmd) );
+	status = send_serial(fd, &cmd, sizeof(cmd));
 
-	if( status > 0 ) {
-		status = serial_bytes_available( fd );
-		if( status < response_length ) {
-			usleep( SERIAL_EXTRA_DELAY_LENGTH );
+	if(status > 0) {
+		status = serial_bytes_available(fd);
+		if(status < response_length) {
+			usleep(SERIAL_EXTRA_DELAY_LENGTH);
 		}
-		status = recv_serial( fd, response, response_length );
+		status = recv_serial(fd, response, response_length);
 	}
 
-	if( status != response_length ) {
+	if(status != response_length) {
 		return 0;
 	}
 
@@ -559,12 +559,12 @@ int mstrain_calc_checksum(char *buffer, int length)
 
 	/// Calculate the values of the remaining bytes in the buffer excluding the
 	/// checksum byte.
-	for( ii = 1; ii < length - 2; ii++ ) {
-		cs_total += convert2short( &buffer[ii] );
+	for(ii = 1; ii < length - 2; ii++) {
+		cs_total += convert2short(&buffer[ii]);
 		ii++;
 	}
 
-	if( cs_total != convert2short( &buffer[length - 2] ) ) {
+	if(cs_total != convert2short(&buffer[length - 2])) {
 		return IMU_ERROR_CHECKSUM;
 	}
 
@@ -579,7 +579,7 @@ int mstrain_calc_checksum(char *buffer, int length)
 
 int convert2int(char *buffer)
 {
-	int retval = ( buffer[0] & LSB_MASK ) * 256 + ( buffer[1] & LSB_MASK );
+	int retval = (buffer[0] & LSB_MASK) * 256 + (buffer[1] & LSB_MASK);
 
 	return retval;
 } /* end convert2int() */
@@ -592,7 +592,7 @@ int convert2int(char *buffer)
 
 short convert2short(char *buffer)
 {
-	short retval = ( buffer[0] & LSB_MASK ) * 256 + ( buffer[1] & LSB_MASK );
+	short retval = (buffer[0] & LSB_MASK) * 256 + (buffer[1] & LSB_MASK);
 
 	return retval;
 } /* end convert2short() */
@@ -612,25 +612,25 @@ int mstrain_read_system_gains(int fd, short int *accel_gain, short int *mag_gain
 	char cmd = (char)IMU_READ_SYSTEM_GAINS;
 
 	/// Send request to and receive data from IMU.
-	status = send_serial( fd, &cmd, sizeof(cmd) );
+	status = send_serial(fd, &cmd, sizeof(cmd));
 
-	if( status > 0 ) {
-		usleep( MSTRAIN_SERIAL_DELAY );
-		status = recv_serial( fd, response, response_length );
+	if(status > 0) {
+		usleep(MSTRAIN_SERIAL_DELAY);
+		status = recv_serial(fd, response, response_length);
 	}
 
-	if( status != response_length ) {
+	if(status != response_length) {
 		return 0;
 	}
 
 	/// Convert bytes to short ints.
-	*accel_gain  = convert2short( &response[1] );
-	*mag_gain = convert2short( &response[3] );
-	*bias_gain   = convert2short( &response[5] );
+	*accel_gain  = convert2short(&response[1]);
+	*mag_gain = convert2short(&response[3]);
+	*bias_gain   = convert2short(&response[5]);
 
 	/// Leave this print statement. Sometimes we need to write these values down.
-	//printf( "response_1=%d, response_3=%d, response_5=%d, accel_gain=%d, mag_gain=%d, bias_gain=%d\n",
-	//	response[1], response[3], response[5], accel_gain, mag_gain, bias_gain );
+	//printf("response_1=%d, response_3=%d, response_5=%d, accel_gain=%d, mag_gain=%d, bias_gain=%d\n",
+	//	response[1], response[3], response[5], accel_gain, mag_gain, bias_gain);
 
 	return 1;
 } /* end mstrain_read_system_gains() */
@@ -641,7 +641,7 @@ int mstrain_read_system_gains(int fd, short int *accel_gain, short int *mag_gain
  * Asks for Euler angles from IMU.
  *----------------------------------------------------------------------------*/
 
-int mstrain_write_system_gains( int fd, short int accel_gain, short int mag_gain, short int bias_gain)
+int mstrain_write_system_gains(int fd, short int accel_gain, short int mag_gain, short int bias_gain)
 {
 	/// Declare variables.
 	int response_length = (int)IMU_LENGTH_24_CMD;
@@ -655,18 +655,18 @@ int mstrain_write_system_gains( int fd, short int accel_gain, short int mag_gain
 	cmd[5] = (char)bias_gain;
 
 	/// Leave this print statement. Sometimes we need to write these values down.
-	//printf( "accel_gain=%d, mag_gain=%d, bias_gain=%d, cmd_1=%d, cmd_3=%d, cmd_5=%d\n", accel_gain, mag_gain, bias_gain,
-	//		cmd[1], cmd[3], cmd[5] );
+	//printf("accel_gain=%d, mag_gain=%d, bias_gain=%d, cmd_1=%d, cmd_3=%d, cmd_5=%d\n", accel_gain, mag_gain, bias_gain,
+	//		cmd[1], cmd[3], cmd[5]);
 
 	/// Send request to and receive data from IMU.
-	status = send_serial( fd, &cmd, sizeof(cmd) );
+	status = send_serial(fd, &cmd, sizeof(cmd));
 
-	if( status > 0 ) {
-		usleep( MSTRAIN_SERIAL_DELAY );
-		status = recv_serial( fd, response, response_length );
+	if(status > 0) {
+		usleep(MSTRAIN_SERIAL_DELAY);
+		status = recv_serial(fd, response, response_length);
 	}
 
-	if( status != response_length ) {
+	if(status != response_length) {
 		return 0;
 	}
 
@@ -692,14 +692,14 @@ int mstrain_zero_mag_gain(int fd)
 	char cmd_write[7] = {0, 0, 0, 0, 0, 0, 0};
 
 	/// Send request to and receive data from IMU.
-	status = send_serial( fd, &cmd, sizeof(cmd) );
+	status = send_serial(fd, &cmd, sizeof(cmd));
 
-	if( status > 0 ) {
-		usleep( MSTRAIN_SERIAL_DELAY );
-		status = recv_serial( fd, response, response_length );
+	if(status > 0) {
+		usleep(MSTRAIN_SERIAL_DELAY);
+		status = recv_serial(fd, response, response_length);
 	}
 
-	if( status != response_length ) {
+	if(status != response_length) {
 		return 0;
 	}
 
@@ -712,14 +712,14 @@ int mstrain_zero_mag_gain(int fd)
 	cmd_write[6] = response[6];
 
 	/// Send command to set data from IMU.
-	status = send_serial( fd, &cmd_write, sizeof(cmd_write) );
+	status = send_serial(fd, &cmd_write, sizeof(cmd_write));
 
-	if( status > 0 ) {
-		usleep( MSTRAIN_SERIAL_DELAY );
-		status = recv_serial( fd, write_response, write_response_length );
+	if(status > 0) {
+		usleep(MSTRAIN_SERIAL_DELAY);
+		status = recv_serial(fd, write_response, write_response_length);
 	}
 
-	if( status != write_response_length ) {
+	if(status != write_response_length) {
 		return 0;
 	}
 
@@ -741,14 +741,14 @@ int mstrain_capture_gyro_bias(int fd)
 	char cmd = (char)IMU_GYRO_BIAS;
 
 	/// Send request to and receive data from IMU.
-	status = send_serial( fd, &cmd, sizeof(cmd) );
+	status = send_serial(fd, &cmd, sizeof(cmd));
 
-	if( status > 0 ) {
-		usleep( MSTRAIN_SERIAL_DELAY );
-		status = recv_serial( fd, response, response_length );
+	if(status > 0) {
+		usleep(MSTRAIN_SERIAL_DELAY);
+		status = recv_serial(fd, response, response_length);
 	}
 
-	if( status != response_length ) {
+	if(status != response_length) {
 		return 0;
 	}
 

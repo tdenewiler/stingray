@@ -43,7 +43,7 @@
 #define POLOLU_CHANNEL_OFF		0
 #define POLOLU_SPEED_INSTANT	0
 #define POLOLU_SPEED_VOITH		10
-#define POLOLU_RESULT_SUM		( 139 + 16 )
+#define POLOLU_RESULT_SUM		(139 + 16)
 
 //@}
 
@@ -129,9 +129,9 @@
 //!                  into.
 //! \param baud The baud rate to use for the Pololu serial port.
 //! \return A file descriptor for the Pololu.
-int pololuSetup( char *portname,
+int pololuSetup(char *portname,
                  int baud
-               );
+              );
 
 //! Set the parameters for a channel.  By default, at poweron, all channels are off.
 //! \param fd A file descriptor for the Pololu port.
@@ -141,22 +141,22 @@ int pololuSetup( char *portname,
 //!                  (default).
 //! \param range The servo range multiplier (0-15, 15 default).
 //! \return The number of bytes sent to the Pololu.
-int pololuSetParameters( int fd,
+int pololuSetParameters(int fd,
                          int channel,
                          int channelOn,
                          int direction,
                          int range
-                       );
+                      );
 
 //! Sets the speed that the channel changes from one value to another.
 //! \param fd A file descriptor for the Pololu port.
 //! \param channel The servo channel (0-15).
 //! \param speed 0-127 Sets the speed.  (0 is default for instant)
 //! \return The number of bytes sent to the Pololu.
-int pololuSetSpeed( int fd,
+int pololuSetSpeed(int fd,
                     int channel,
                     int speed
-                  );
+                 );
 
 
 //! Sets the relative position or pulse width of a channel using a
@@ -165,10 +165,10 @@ int pololuSetSpeed( int fd,
 //! \param channel The servo channel (0-15).
 //! \param position A 7-bit relative position value. (0-127)
 //! \return The number of bytes sent to the Pololu.
-int pololuSetPosition7Bit( int fd,
+int pololuSetPosition7Bit(int fd,
                            int channel,
                            int position
-                         );
+                        );
 
 //! Sets the relative position or pulse width of a channel using an
 //! 8-bit number.
@@ -176,36 +176,36 @@ int pololuSetPosition7Bit( int fd,
 //! \param channel The servo channel (0-15).
 //! \param position An 8-bit relative position value. (0-255)
 //! \return The number of bytes sent to the Pololu.
-int pololuSetPosition8Bit( int fd,
+int pololuSetPosition8Bit(int fd,
                            int channel,
                            int position
-                         );
+                        );
 
 //! Sets the absolute position or pulse width.
 //! \param fd A file descriptor for the Pololu port.
 //! \param channel The servo channel (0-15).
 //! \param position An absolute postion value. (500-5500)
 //! \return The number of bytes sent to the Pololu.
-int pololuSetPositionAbsolute( int fd,
+int pololuSetPositionAbsolute(int fd,
                                int channel,
                                int position
-                             );
+                            );
 
 //! Sets the absolute neutral position or pulse width.
 //! \param fd A file descriptor for the Pololu port.
 //! \param channel The servo channel (0-15).
 //! \param position An absolute postion value. (500-5500)
 //! \return The number of bytes sent to the Pololu.
-int pololuSetNeutral( int fd,
+int pololuSetNeutral(int fd,
                       int channel,
                       int position
-                    );
+                   );
 
 
 //! This function initializes or resets all of the channels with the Stinray's custom profile.
 //! \param fd A file descriptor for the Pololu port.
 //! \return A value that indicates success or failure.
-int pololuInitializeChannels( int fd );
+int pololuInitializeChannels(int fd);
 
 
 //! This is a higher level function that controls both VSPs together.
@@ -214,12 +214,12 @@ int pololuInitializeChannels( int fd );
 //! \param thrust between -100 and 100
 //! \param yawTorque between -100 and 100
 //! \return A value that indicates success or failure.
-int pololuControlVoiths( int fd,
+int pololuControlVoiths(int fd,
                    int voithThrust,
                    float thrustAngle,
                    int thrust,
                    int yawTorque
-                 );
+                );
 
 //! The is a higher level function that controls the vertical
 //! thrusters together.
@@ -227,11 +227,11 @@ int pololuControlVoiths( int fd,
 //! \param rollTorque between 0 and 100
 //! \param pitchTorque between 0 and 100
 //! \return A value that indicates success or failure.
-int pololuControlVertical( int fd,
+int pololuControlVertical(int fd,
                      int vertForce,
                      int rollTorque,
                      int pitchTorque
-                   );
+                  );
 
 
 #endif /* POLOLU_H */

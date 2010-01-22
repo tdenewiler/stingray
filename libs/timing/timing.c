@@ -119,5 +119,5 @@ float timing_get_dts(TIMING *timer)
 int timing_s2us(TIMING *timer)
 {
 	/// Convert from seconds.microseconds to microseconds.
-	return (timer->s * 1000000 ) + timer->us;
+	return (timer->s * 1000000) + timer->us;
 } /* end timing_s2us() */

@@ -98,20 +98,20 @@
 
 //! This function is called when SIGINT (ctrl-c) is invoked.
 //! \param signal The SIGINT signal.
-void nav_sigint( int signal );
+void nav_sigint(int signal);
 
 //! Exit function for main program. Sets actuators to safe values and closes
 //! all file descriptors. This function is called when SIGINT (ctrl-c) is
 //! invoked.
-void nav_exit( );
+void nav_exit();
 
 //! Main function for the uuv program.
 //! \param argc Number of command line arguments.
 //! \param argv Array of command line arguments.
 //! \return Always returns 0.
-int main( int argc, char *argv[] );
+int main(int argc, char *argv[]);
 
 
-float calc_yaw_avg( float curr_yaw );
+float calc_yaw_avg(float curr_yaw);
 
 #endif /* _NAV_H_ */

@@ -38,9 +38,9 @@ int init_labjack();
 int query_labjack();
 void close_labjack();
 
-float getBatteryVoltage( uint batteryNum );
+float getBatteryVoltage(uint batteryNum);
 float getDepth();
-void setupLabjackLog( char *filePathName );
+void setupLabjackLog(char *filePathName);
 void logLabjack();
 int checkWaterSensor();
 

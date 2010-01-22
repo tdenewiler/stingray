@@ -172,45 +172,45 @@
 //! \param pitch A pointer to store the pitch value.
 //! \param yaw A pointer to store the yaw value.
 //! \return 1 on success, 0 on failure.
-int mstrain_euler_angles( int fd,
+int mstrain_euler_angles(int fd,
                           float *roll,
                           float *pitch,
                           float *yaw
-                        );
+                       );
 
 //! Get the serial number from the IMU.
 //! \param fd A file descriptor for the IMU port.
 //! \param serial_number A pointer to store the serial number value.
 //! \return 1 on success, 0 on failure.
-int mstrain_serial_number( int fd,
+int mstrain_serial_number(int fd,
                            int *serial_number
-                         );
+                        );
 
 //! Establish communications with the IMU.
 //! \param portname The name of the port that the IMU is plugged into.
 //! \param baud The baud rate to use for the IMU serial port.
 //! \return A file descriptor for the Microstrain.
-int mstrain_setup( char *portname,
+int mstrain_setup(char *portname,
                    int baud
-                 );
+                );
 
 //! Get quaternions from the IMU.
 //! \param fd A file descriptor for the IMU port.
 //! \param gyro_stab Whether to use gyro-stabilized values or not.
 //! \param quat A pointer to store the quaternion values.
 //! \return 1 on success, 0 on failure.
-int mstrain_quaternions( int fd,
+int mstrain_quaternions(int fd,
                          int gyro_stab,
                          float *quat[4]
-                       );
+                      );
 
 //! Get the temperature inside the IMU housing.
 //! \param fd A file descriptor for the IMU port.
 //! \param temp A pointer to store the temperature value.
 //! \return 1 on success, 0 on failure.
-int mstrain_temperature( int fd,
+int mstrain_temperature(int fd,
                          float *temp
-                       );
+                      );
 
 //! Get quaternions and accelerations from the IMU.
 //! \param fd A file descriptor for the IMU port.
@@ -219,12 +219,12 @@ int mstrain_temperature( int fd,
 //! \param accel A pointer to store the acceleration values.
 //! \param ang_rate A pointer to store the angular rate values.
 //! \return 1 on success, 0 on failure.
-int mstrain_quaternions_vectors( int fd,
+int mstrain_quaternions_vectors(int fd,
                                  float *quat[4],
                                  float *mag[3],
                                  float *accel[3],
                                  float *ang_rate[3]
-                               );
+                              );
 
 //! Get Euler angles and accelerations from the IMU.
 //! \param fd A file descriptor for the IMU port.
@@ -234,29 +234,29 @@ int mstrain_quaternions_vectors( int fd,
 //! \param accel A pointer to store the acceleration values.
 //! \param ang_rate A pointer to store the angular rate values.
 //! \return 1 on success, 0 on failure.
-int mstrain_euler_vectors( int fd,
+int mstrain_euler_vectors(int fd,
                            float *roll,
                            float *pitch,
                            float *yaw,
                            float *accel,
                            float *ang_rate
-                         );
+                        );
 
 //! Get gyro-stabilized orientation matrix from the IMU.
 //! \param fd A file descriptor for the IMU port.
 //! \param gyro_stab Whether to use gyro-stabilized values or not.
 //! \param orient A pointer to store the orientation values.
 //! \return 1 on success, 0 on failure.
-int mstrain_orientation( int fd,
+int mstrain_orientation(int fd,
                          int gyro_stab,
                          float *orient[3][3]
-                       );
+                      );
 
 //! Sets tare for the Microstrain.
-int mstrain_set_tare( int fd );
+int mstrain_set_tare(int fd);
 
 //! Removes tare for the Microstrain.
-int mstrain_remove_tare( int fd );
+int mstrain_remove_tare(int fd);
 
 //! Gets vectors from IMU.
 //! \param fd A file descriptor for the IMU port.
@@ -265,30 +265,30 @@ int mstrain_remove_tare( int fd );
 //! \param accel A pointer to store the acceleration values.
 //! \param ang_rate A pointer to store the angular rate values.
 //! \return 1 on success, 0 on failure.
-int mstrain_vectors( int fd,
+int mstrain_vectors(int fd,
                      int gyro_stab,
                      float *mag,
                      float *accel,
                      float *ang_rate
-                   );
+                  );
 
 //! Calculate the checksum for a message.
 //! \param buffer The response buffer with the IMU message data.
 //! \param length The size of the message.
 //! \return 1 on success, error code on failure.
-int mstrain_calc_checksum( char *buffer, int length );
+int mstrain_calc_checksum(char *buffer, int length);
 
 //! Convert two adjacent bytes to an integer value.
 //! Returns an integer value.
 //! \param buffer Pointer to first byte.
 //! \return Resulting integer.
-int convert2int( char *buffer );
+int convert2int(char *buffer);
 
 //! Convert two adjacent bytes to a short value.
 //! Returns a short integer value.
 //! \param buffer Pointer to first byte.
 //! \return Resulting short integer.
-short convert2short( char *buffer );
+short convert2short(char *buffer);
 
 //! Get the Euler angles from the IMU.
 //! \param fd A file descriptor for the IMU port.
@@ -296,11 +296,11 @@ short convert2short( char *buffer );
 //! \param pitch A pointer to store the pitch value.
 //! \param yaw A pointer to store the yaw value.
 //! \return 1 on success, 0 on failure.
-int mstrain_read_system_gains( int fd,
+int mstrain_read_system_gains(int fd,
                           short int *accel_gain,
                           short int *mag_gain,
                           short int *bias_gain
-                        );
+                       );
 
 //! Get the Euler angles from the IMU.
 //! \param fd A file descriptor for the IMU port.
@@ -308,21 +308,21 @@ int mstrain_read_system_gains( int fd,
 //! \param pitch A pointer to store the pitch value.
 //! \param yaw A pointer to store the yaw value.
 //! \return 1 on success, 0 on failure.
-int mstrain_write_system_gains( int fd,
+int mstrain_write_system_gains(int fd,
                           short int accel_gain,
                           short int mag_gain,
                           short int bias_gain
-                        );
+                       );
 
 //! Zeroes out the manetometer gains.
 //! \param fd A file descriptor for the IMU port.
 //! \return 1 on success, 0 on failure.
-int mstrain_zero_mag_gain( int fd );
+int mstrain_zero_mag_gain(int fd);
 
 //! Captures the gyro bias.
 //! \param fd A file descriptor for the IMU port.
 //! \return 1 on success, 0 on failure.
-int mstrain_capture_gyro_bias( int fd );
+int mstrain_capture_gyro_bias(int fd);
 
 
 #endif /* MICROSTRAIN_H */

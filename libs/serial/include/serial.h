@@ -64,7 +64,7 @@
 //! \param port_name String containing the name of the physical port.
 //! \param baud Pointer to the desired baud rate.
 //! \return The new file descriptor when successful, else -1.
-int setup_serial( char *port_name, int baud );
+int setup_serial(char *port_name, int baud);
 
 //! Writes commands to serial port. If SERIAL_DEBUG is defined then write
 //! system call errors are printed to screen.
@@ -73,7 +73,7 @@ int setup_serial( char *port_name, int baud );
 //! \param command Pointer to the message to send.
 //! \param length Length of command.
 //! \return Number of bytes written to serial port if successful, else -1.
-int send_serial( int fd, void *command, int length );
+int send_serial(int fd, void *command, int length);
 
 //! Get data from the serial port. If SERIAL_DEBUG is defined then read system
 //! call errors are printed to screen.
@@ -82,7 +82,7 @@ int send_serial( int fd, void *command, int length );
 //! \param response Pointer to a buffer to hold response data.
 //! \param length Expected length of message.
 //! \return Number of bytes received when successful, else -1.
-int recv_serial( int fd, void *response, int length );
+int recv_serial(int fd, void *response, int length);
 
 //! Checks to see how many bytes are available to read on the serial stack. If
 //! SERIAL_DEBUG is defined then the ioctl system call error is printed to the
@@ -90,7 +90,7 @@ int recv_serial( int fd, void *response, int length );
 //! Returns the number of bytes available.
 //! \param fd A file descriptor for the port.
 //! \return The number of bytes available in the serial buffer.
-int serial_bytes_available( int fd );
+int serial_bytes_available(int fd);
 
 
 #endif /* SERIAL_H */

@@ -1,0 +1,1 @@
+geany ../src/estimate/estimate.c ../src/estimate/include/estimate.h ../libs/sysid/sysid.c ../libs/sysid/include/sysid.h ../libs/parser/parser.c ../libs/parser/include/parser.h

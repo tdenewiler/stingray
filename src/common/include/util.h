@@ -51,11 +51,11 @@
 
 //! Prints a help message to the user.
 //!
-void util_print_help( );
+void util_print_help();
 
 //! Prints the valid variables for use in the configuration file.
 //!
-void util_print_config_help( );
+void util_print_config_help();
 
 //! Calculate the difference between two time values.
 //! Returns the time difference in microseconds.
@@ -64,17 +64,17 @@ void util_print_config_help( );
 //! \param time2s Second time [seconds].
 //! \param time2ms Second time [microseconds].
 //!  \return The time difference in microseconds.
-int util_calc_dt( int *time1s, int *time1ms, int *time2s, int *time2ms );
+int util_calc_dt(int *time1s, int *time1ms, int *time2s, int *time2ms);
 
 //! Determines sign of value.
 //! \param value Value to determine sign of.
 //! \return Either 1 or -1 depeding on sign.
-float util_sign_value( float value );
+float util_sign_value(float value);
 
 //! Determines whether or not two floats are equal
 //! \param value1 first value for equality check
 //! \param value2 second value for equality check
 //! \return Either TRUE for equality, FALSE otherwise
-float util_fequals( float value1 , float value2 );
+float util_fequals(float value1 , float value2);
 
 #endif /* _UTIL_H_ */

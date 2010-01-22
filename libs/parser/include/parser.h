@@ -206,14 +206,14 @@ typedef struct _CONF_VARS {
 
 //! Parses a line for configuration values.
 //! \param config An array of initialization variables.
-void parse_line( CONF_VARS *config );
+void parse_line(CONF_VARS *config);
 
 //! Parses a configuration file for variable data.
 //! \param filename File to open for configuration values.
 //! \param config An array of initialization variables.
-void parse_config( const char *filename,
+void parse_config(const char *filename,
                    CONF_VARS *config
-                 );
+                );
 
 //! Parses the command line arguments looking for valid options.
 //! Returns -1 if help is invoked or 0 on success.
@@ -222,22 +222,22 @@ void parse_config( const char *filename,
 //! \param app Indicates which application is calling this function.
 //! \param filename Configuration file to use.
 //! \return 0 on success, else -1 when help is invoked.
-int parse_cla( int argc,
+int parse_cla(int argc,
                char *argv[],
                CONF_VARS *config,
                int app,
                const char *filename
-             );
+            );
 
 //! Sets default values for the initialization variables. This function should
 //! be followed by a call to parse_cla() in order to fill in the variables with
 //! values set in a configuration file.
 //! \param config An array of initialization variables.
-void parse_default_config( CONF_VARS *config );
+void parse_default_config(CONF_VARS *config);
 
 //! Prints out the values of the configuration file variables.
 //! \param config An array of initialization variables.
-void parse_print_config( CONF_VARS *config );
+void parse_print_config(CONF_VARS *config);
 
 
 #endif /* PARSER_H */

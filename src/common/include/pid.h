@@ -110,7 +110,7 @@ typedef struct _PID {
 //! \param pid: Pointer to PID data.
 //! \param cf Pointer to configuration variables.
 //! \return 0 on success, -1 on error.
-int pid_init( PID *pid, CONF_VARS *cf );
+int pid_init(PID *pid, CONF_VARS *cf);
 
 //! Runs through one iteration of a PID controller.
 //! \param pololu_fd Pololu file descriptor.
@@ -120,33 +120,33 @@ int pid_init( PID *pid, CONF_VARS *cf );
 //! \param dt Time difference from last loop in seconds.
 //! \param mode Which PID loop to run.
 //! \param motor_init Boolean for whether motor controller is initialized.
-void pid_loop( int pololu_fd,
+void pid_loop(int pololu_fd,
                PID *pid,
                CONF_VARS *cf,
                MSG_DATA *msg,
                float dt,
                int mode,
 			   int motor_init
-             );
+            );
 
 //! Calculates the difference between two angles.
 //! \param ang1 Angle 1.
 //! \param ang2 Angle 2.
 //! \return The difference between the two angles.
-float pid_subtract_angles( float ang1, float ang2 );
+float pid_subtract_angles(float ang1, float ang2);
 
 //! Checks the bound for an integral.
 //! \param value Value to be checked.
 //! \param gain Gain for controller.
 //! \param bound Bound to check against.
 //! \return Value or the bound limit.
-float pid_bound_integral( float value, float gain, float bound );
+float pid_bound_integral(float value, float gain, float bound);
 
 //! Based on fy & fx, this function computes the subs angle.
 //! \param fx the x-direction (lateral) force.
 //! \param fy the y-direction (forward) force.
 //! \return The correct heading based on force input [radians].
-float pid_compute_sub_angle( float fx, float fy );
+float pid_compute_sub_angle(float fx, float fy);
 
 
 #endif /* _PID_H_ */

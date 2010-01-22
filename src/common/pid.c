@@ -81,7 +81,7 @@ void pid_loop(int pololu_fd,
                float dt,
                int mode,
 			   int motor_init
-            )
+           )
 {
 	/// Check to see if the errors should be reset to zero.
 	if (msg->target.data.mode == ZERO_PID_ERRORS) {

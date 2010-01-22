@@ -8,7 +8,7 @@
 
 #include "visiond.h"
 
-/* Global file descriptors. Only global so that visiond_exit() can close them. */
+/// Global file descriptors. Only global so that visiond_exit() can close them.
 int server_fd;
 CvCapture *f_cam;
 CvCapture *b_cam;

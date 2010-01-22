@@ -17,8 +17,8 @@
 
 /******************************************************************************
  *
- * Title:       int util_calc_dt( int *time1s, int *time1ms,
- *                           		int *time2s, int *time2ms )
+ * Title:       int util_calc_dt(int *time1s, int *time1ms,
+ *                           		int *time2s, int *time2ms)
  *
  * Description: Calculate the difference between two times.
  *
@@ -31,14 +31,14 @@
  *
  *****************************************************************************/
 
-int util_calc_dt( int *time1s, int *time1ms, int *time2s, int *time2ms )
+int util_calc_dt(int *time1s, int *time1ms, int *time2s, int *time2ms)
 {
 	int dt;
 	int time1;
 	int time2;
 
-	time1 = ( *time1s * 1000000 ) + *time1ms;
-	time2 = ( *time2s * 1000000 ) + *time2ms;
+	time1 = (*time1s * 1000000) + *time1ms;
+	time2 = (*time2s * 1000000) + *time2ms;
 	dt = time1 - time2;
 
 	return dt;
@@ -47,7 +47,7 @@ int util_calc_dt( int *time1s, int *time1ms, int *time2s, int *time2ms )
 
 /******************************************************************************
  *
- * Title:       void util_print_help( )
+ * Title:       void util_print_help()
  *
  * Description: Prints instructions on program usage.
  *
@@ -57,33 +57,33 @@ int util_calc_dt( int *time1s, int *time1ms, int *time2s, int *time2ms )
  *
  *****************************************************************************/
 
-void util_print_help( int app )
+void util_print_help(int app)
 {
-	switch ( app ) {
+	switch (app) {
 		case STINGRAY:
-			printf( "PRINT_HELP: To specify a configuration file use the "
+			printf("PRINT_HELP: To specify a configuration file use the "
 			        "command\n'./uuv -c <filename>'.\nUse './uuv -h' for more "
 			        "help.\n"
-			      );
+			     );
 
 			break;
 
 		case GUI:
-			printf( "PRINT_HELP: To specify a configuration file use the "
+			printf("PRINT_HELP: To specify a configuration file use the "
 			        "command\n'./client -c <filename>'.\nUse './client -h' for "
 			        "more help.\n"
-			      );
+			     );
 
 			break;
 	}
 
-	printf( "\n" );
+	printf("\n");
 } /* end print_help() */
 
 
 /******************************************************************************
  *
- * Title:       void util_print_config_help( )
+ * Title:       void util_print_config_help()
  *
  * Description: Prints instructions on configuration options.
  *
@@ -93,9 +93,9 @@ void util_print_help( int app )
  *
  *****************************************************************************/
 
-void util_print_config_help( )
+void util_print_config_help()
 {
-	printf( "PRINT_CONFIG_HELP:\n"
+	printf("PRINT_CONFIG_HELP:\n"
 	        "Conifuration file values can be set for:\n"
 	        "client ip ....... IP address of client computer.\n"
 	        "client port ..... Port of client computer.\n"
@@ -135,15 +135,15 @@ void util_print_config_help( )
 	        "kd yaw .......... Derviative gain term for the yaw PID\n"
 	        "                  controller.\n"
 	        "pid dt .......... Time step for the PID controller.\n"
-	      );
+	     );
 
-	printf( "\n" );
+	printf("\n");
 } /* end util_print_config_help() */
 
 
 /******************************************************************************
  *
- * Title:       float util_sign_value( float value )
+ * Title:       float util_sign_value(float value)
  *
  * Description: Determines sign of value.
  *
@@ -153,9 +153,9 @@ void util_print_config_help( )
  *
  *****************************************************************************/
 
-float util_sign_value( float value )
+float util_sign_value(float value)
 {
-	if( value < 0.0 ) {
+	if(value < 0.0) {
 		return -1.0;
 	}
 	else {
@@ -166,7 +166,7 @@ float util_sign_value( float value )
 
 /******************************************************************************
  *
- * Title:       float util_fequals( float value1 , float value2 )
+ * Title:       float util_fequals(float value1 , float value2)
  *
  * Description: Determines whether or not two floats are equal
  *
@@ -177,11 +177,11 @@ float util_sign_value( float value )
  *
  *****************************************************************************/
 
-float util_fequals( float value1 , float value2 )
+float util_fequals(float value1 , float value2)
 {
-	if( fabsf( value1 - value2 ) < UTIL_FEQUALS_EPSILON )
+	if(fabsf(value1 - value2) < UTIL_FEQUALS_EPSILON)
 		return TRUE;
-		
+
 	return FALSE;
-	
+
 } /* end util_sign_value() */

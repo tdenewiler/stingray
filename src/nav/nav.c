@@ -148,6 +148,8 @@ int main(int argc, char *argv[])
     TIMING timer_yaw;
     TIMING timer_depth;
 	TIMING timer_pololu;
+	TIMING timer_print;
+	int tmp_print = 0;
 
     printf("MAIN: Starting Navigation ... \n");
 
@@ -159,6 +161,7 @@ int main(int argc, char *argv[])
     memset(&msg, 0, sizeof(MSG_DATA));
     memset(&pid, 0, sizeof(PID));
     memset(&recv_buf, 0, MAX_MSG_SIZE);
+    memset(&lj_buf, 0, MAX_MSG_SIZE);
 	messages_init(&msg);
 
     /// Parse command line arguments.
@@ -231,6 +234,7 @@ int main(int argc, char *argv[])
     timing_set_timer(&timer_yaw);
     timing_set_timer(&timer_depth);
     timing_set_timer(&timer_pololu);
+    timing_set_timer(&timer_print);
 
 	printf("MAIN: Nav running now.\n");
 
@@ -323,6 +327,7 @@ int main(int argc, char *argv[])
 				//printf("MAIN: Hit pitch timer at %fs.\n", dt);
                 pid_loop(pololu_fd, &pid, &cf, &msg, dt, PID_PITCH, pololu_initialized);
 				timing_set_timer(&timer_pitch);
+				tmp_print++;
             }
 
             /// Roll.
@@ -343,6 +348,13 @@ int main(int argc, char *argv[])
 				timing_set_timer(&timer_depth);
             }
         }
+
+		// Temporary check to see how fast PID loop is reached.
+		if (timing_check_period(&timer_print, 1.)) {
+			printf("MAIN: %d loops per second.\n", tmp_print);
+			tmp_print = 0;
+			timing_set_timer(&timer_print);
+		}
 
         /// Update status message.
         messages_update(&msg);

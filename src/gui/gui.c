@@ -8,26 +8,26 @@
 
 #include "gui.h"
 
-/* Handlers for timers. */
+/// Handlers for timers.
 //guint timer50ms;
 //guint timer100ms;
 guint timer200ms;
 //guint timer500ms;
 //guint timer1s;
 
-/* Status label. */
+/// Status label.
 extern GtkWidget *label_status;
 
-/* A buffer to store network data. */
+/// A buffer to store network data.
 char planner_buf[MAX_MSG_SIZE];
 char nav_buf[MAX_MSG_SIZE];
 
-/* Network API messages. */
+/// Network API messages and file descriptors.
 extern int planner_fd;
 extern int nav_fd;
 extern MSG_DATA msg;
 
-/* Configuration file variables. */
+/// Configuration file variables.
 extern CONF_VARS cf;
 
 
@@ -144,7 +144,7 @@ gint gui_timer_200ms( gpointer data )
     buttons_update_values( );
     static int bytes_left;
 	int recv_bytes;
-	
+
     /* Get network data from planner. */
     if( planner_fd > 0 ) {
         recv_bytes = net_client( planner_fd, planner_buf, &msg, MODE_OPEN );
@@ -360,7 +360,7 @@ int gui_pack_boxes( GtkWidget *top_level_window )
 
     /* Append another page to the notebook. */
     gtk_notebook_append_page( GTK_NOTEBOOK( notebook ), vbox5,
-                              gtk_label_new( "Vision" ) );                   
+                              gtk_label_new( "Vision" ) );
 
     /* Pack the rest of the boxes into the notebook pages. */
     gtk_box_pack_start( GTK_BOX( vbox3 ), hbox2, TRUE, FALSE, 0 );
