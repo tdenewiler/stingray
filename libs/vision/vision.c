@@ -151,7 +151,7 @@ int vision_boost_buoy( IplImage *srcImg, IplImage *binImg, CvPoint *center )
 	float min_radius;
 	
 	/// Create Morphological Kernel
-	B = cvCreateStructuringElementEx( 3, 3, 1, 1, CV_SHAPE_RECT );
+	//B = cvCreateStructuringElementEx( 3, 3, 1, 1, CV_SHAPE_RECT );
 	
 	/// Loop through the first image to fill the left part of the new image.
 	for ( i = 0; i < srcImg->height; i++ ) {
@@ -178,7 +178,7 @@ int vision_boost_buoy( IplImage *srcImg, IplImage *binImg, CvPoint *center )
         	binData[i * binImg->widthStep + j * binImg->nChannels + 2] = res;
 		}
 	}
-	
+	/*
 	/// Use Opening to remove noise
 	cvMorphologyEx( binImg, binImg, NULL, B, CV_MOP_OPEN, 1 );
 	
@@ -265,7 +265,7 @@ int vision_boost_buoy( IplImage *srcImg, IplImage *binImg, CvPoint *center )
 	contours = cvEndFindContours( &scanner );
 	
 	cvReleaseStructuringElement( &B );
-	
+	*/
     return 1;
 } /* end vision_boost_buoy() */
 	

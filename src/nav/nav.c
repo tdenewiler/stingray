@@ -90,8 +90,8 @@ void nav_exit()
     /// Close the open file descriptors.
     if (pololu_fd > 0) {
         /// Set all the actuators to safe positions.
-        //pololuInitializeChannels(pololu_fd);
-        pololu_initialize_channels(pololu_fd);
+        pololuInitializeChannels(pololu_fd);
+        //pololu_initialize_channels(pololu_fd);
         usleep(200000);
         close(pololu_fd);
     }
@@ -204,12 +204,12 @@ int main(int argc, char *argv[])
 
     /// Set up the Pololu servo controller.
     if (cf.enable_pololu) {
-        //pololu_fd = pololuSetup(cf.pololu_port, cf.pololu_baud);
-        pololu_fd = pololu_setup(cf.pololu_port, cf.pololu_baud);
+        pololu_fd = pololuSetup(cf.pololu_port, cf.pololu_baud);
+        //pololu_fd = pololu_setup(cf.pololu_port, cf.pololu_baud);
 		if (pololu_fd > 0) {
 			/// Initialize the pololu.
-			//pololuInitializeChannels(pololu_fd);
-			pololu_initialize_channels(pololu_fd);
+			pololuInitializeChannels(pololu_fd);
+			//pololu_initialize_channels(pololu_fd);
 			printf("MAIN: Pololu setup OK.\n");
 		}
 		else {
@@ -252,7 +252,8 @@ int main(int argc, char *argv[])
 				/// Get the state of the kill switch.
 				if (msg.lj.data.battery1 > BATT1_THRESH) {
 					if (pololu_starting == FALSE) {
-						pololu_initialize_channels(pololu_fd);
+						//pololu_initialize_channels(pololu_fd);
+            			pololuInitializeChannels(pololu_fd);
 						pololu_starting = TRUE;
 						/// Start the timer.
 						timing_set_timer(&timer_pololu);
@@ -304,8 +305,9 @@ int main(int argc, char *argv[])
 
         /// Get Microstrain data.
         if ((cf.enable_imu) && (imu_fd > 0)) {
-            recv_bytes = mstrain_euler_angles(imu_fd, &msg.mstrain.data.pitch, &msg.mstrain.data.roll, &msg.mstrain.data.yaw);
-			recv_bytes = mstrain_vectors(imu_fd, 0, msg.mstrain.data.mag, msg.mstrain.data.accel, msg.mstrain.data.ang_rate);
+            //recv_bytes = mstrain_euler_angles(imu_fd, &msg.mstrain.data.pitch, &msg.mstrain.data.roll, &msg.mstrain.data.yaw);
+			//recv_bytes = mstrain_vectors(imu_fd, 0, msg.mstrain.data.mag, msg.mstrain.data.accel, msg.mstrain.data.ang_rate);
+			recv_bytes = mstrain_euler_vectors(imu_fd, &msg.mstrain.data.pitch, &msg.mstrain.data.roll, &msg.mstrain.data.yaw, msg.mstrain.data.accel, msg.mstrain.data.ang_rate);
         }
 		else {
 			/// Simulation Mode. This is where the simulated data is generated.

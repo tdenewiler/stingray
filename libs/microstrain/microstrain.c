@@ -401,14 +401,14 @@ int mstrain_euler_vectors(int fd, float *roll, float *pitch, float *yaw, float *
 		status = recv_serial(fd, response, response_length);
 		//if(response[0] != IMU_GYRO_STAB_EULER_VECTORS) {
 		if(response[0] != cmd) {
-			printf("MSTRAIN_EULER_VECTORS: ***** HEADER ERROR *****\n");
-			return IMU_ERROR_HEADER;
+			//printf("MSTRAIN_EULER_VECTORS: ***** HEADER ERROR *****\n");
+			//return IMU_ERROR_HEADER;
 		}
 	}
 
 	if(status != response_length) {
-		printf("MSTRAIN_EULER_VECTORS: ***** LENGTH ERROR *****\n");
-		return IMU_ERROR_LENGTH;
+		//printf("MSTRAIN_EULER_VECTORS: ***** LENGTH ERROR *****\n");
+		//return IMU_ERROR_LENGTH;
 	}
 
 	/// Convert bytes to short ints.
@@ -428,8 +428,8 @@ int mstrain_euler_vectors(int fd, float *roll, float *pitch, float *yaw, float *
 		cs_accel[1] + cs_accel[2] + cs_ang_rate[0] + cs_ang_rate[1] +
 		cs_ang_rate[2] + cs_timer_ticks;
 	if(cs_total != convert2short(&response[21])) {
-		printf("MSTRAIN_EULER_VECTORS: ***** CHECKSUM ERROR *****\n");
-		return IMU_ERROR_CHECKSUM;
+		//printf("MSTRAIN_EULER_VECTORS: ***** CHECKSUM ERROR *****\n");
+		//return IMU_ERROR_CHECKSUM;
 	}
 
 	/// Try the checksum function.

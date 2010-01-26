@@ -6,7 +6,7 @@
 
 #include "estimate.h"
 
-/// Global file descriptors. Only global so that planner_exit() can close them.
+/// Global file descriptors. Only global so that estimate_exit() can close them.
 int nav_fd;
 int lj_fd;
 FILE *f_log;
@@ -138,6 +138,9 @@ int main( int argc, char *argv[] )
     	f_log = fopen("logestimate.csv", "w");
     	if (f_log) {
 			sysid_log_init(f_log);
+		}
+		else {
+			printf("MAIN: WARNING!!! Log file was not opened correctly.\n");
 		}
 	}
 
@@ -271,6 +274,7 @@ int main( int argc, char *argv[] )
 		if (timing_check_period(&timer_log, cf.period_log) && f_log) {
 			sysid_log(&msg, f_log);
 			timing_set_timer(&timer_log);
+			printf("MAIN: Logging.\n");
 		}
 
 		/// Send new input if input timer has elapsed.

@@ -30,6 +30,7 @@ int pololuSetup(char *portname, int baud)
 	}
 
 	if(fd < 0) {
+	    printf("POLOLU_SETUP: fd = %d\n", fd);
 		return POLOLU_FAILURE;
 	}
 
