@@ -2,4 +2,4 @@
 include_directories ("include")
 
 # Build the library.
-add_library (timing src/timing.c)
+add_library (timing src/timing)

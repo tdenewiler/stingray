@@ -2,4 +2,4 @@
 include_directories ("include")
 
 # Build the library.
-add_library (serial src/serial)
+add_library (joy src/joy)

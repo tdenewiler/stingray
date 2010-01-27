@@ -2,4 +2,4 @@
 include_directories ("include")
 
 # Build the library.
-add_library (labjack src/u3.c src/battery_sensor.c src/depth_sensor.c src/labjack.c src/log_labjack.c src/water_sensor.c src/labjackusb.c)
+add_library (labjack src/u3 src/battery_sensor src/depth_sensor src/labjack src/log_labjack src/water_sensor src/labjackusb)

@@ -75,7 +75,7 @@ void planner_exit()
 
 	/// Close the Kalman filter.
 	if (bKF > 0) {
-		close_kalman();
+		//close_kalman();
 	}
 
 	printf("<OK>\n\n");
@@ -190,7 +190,7 @@ int main(int argc, char *argv[])
 	msg.task.data.course = cf.course_start;
 
     /// Set up Kalman filter.
-    bKF = init_kalman();
+    //bKF = init_kalman();
     if (bKF > 0) {
 		printf("MAIN: Kalman filter setup OK.\n");
 		//kalman_print_test();
@@ -358,7 +358,7 @@ int main(int argc, char *argv[])
 				float real_accel[] = { cs.accel[0], cs.accel[1], cs.accel[2] - 9.86326398 };
 
 				/// Update the Kalman filter.
-				kalman_update(timing_check_period(&timer_kalman, 0.), msg.lj.data.pressure, ang, real_accel, cs.ang_rate);
+				//kalman_update(timing_check_period(&timer_kalman, 0.), msg.lj.data.pressure, ang, real_accel, cs.ang_rate);
 				timing_set_timer(&timer_kalman);
 			}
 

@@ -2,9 +2,9 @@
 include_directories (include)
 include_directories (${OPENCV_INCLUDE_DIR})
 
-# Build the library.
-add_library (kalman src/kalman.c)
+# Add compiler flags.
+add_definitions (-Wno-write-strings)
 
-# Link with OpenCV.
-#TARGET_LINK_LIBRARIES (kalman ${OPENCV_LIBRARIES})
+# Build the library.
+add_library (kalman src/kalman)
 

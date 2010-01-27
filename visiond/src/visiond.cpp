@@ -461,14 +461,14 @@ int main( int argc, char *argv[] )
 				/// Save an image from the front camera.
 				img = cvQueryFrame( f_cam );
 				strncpy( curr_save_dir, cf.save_image_dir, STRING_SIZE );
-				vision_save_frame( img, strncat( curr_save_dir, "front/", 6 ) );
+				vision_save_frame( img, strncat( curr_save_dir, "front/", 6 ), dfile->d_name );
 			}
 
 			if ( cf.save_image_bottom && b_cam ) {
 				/// Save an image from the bottom camera.
 				img = cvQueryFrame( b_cam );
 				strncpy( curr_save_dir, cf.save_image_dir, STRING_SIZE );
-				vision_save_frame( img, strncat( curr_save_dir, "bottom/", 7 ) );
+				vision_save_frame( img, strncat( curr_save_dir, "bottom/", 7 ), dfile->d_name );
 			}
 
 			timing_set_timer(&timer_save);
@@ -480,14 +480,14 @@ int main( int argc, char *argv[] )
 			/// Save image to disk.
 			img = cvQueryFrame( f_cam );
 			strncpy( curr_save_dir, cf.save_image_dir, STRING_SIZE );
-			vision_save_frame( img, strncat( curr_save_dir, "front/", 6 ) );
+			vision_save_frame( img, strncat( curr_save_dir, "front/", 6 ), dfile->d_name );
 			msg.vsetting.data.save_fframe = FALSE;
 		}
 		if( msg.vsetting.data.save_bframe && b_cam ) {
 			/// Save image to disk.
 			img = cvQueryFrame( b_cam );
 			strncpy( curr_save_dir, cf.save_image_dir, STRING_SIZE );
-			vision_save_frame( img, strncat( curr_save_dir, "bottom/", 7 ) );
+			vision_save_frame( img, strncat( curr_save_dir, "bottom/", 7 ), dfile->d_name );
 			msg.vsetting.data.save_bframe = FALSE;
 		}
 

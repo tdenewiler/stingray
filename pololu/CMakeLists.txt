@@ -3,7 +3,7 @@ include_directories("include")
 include_directories("../serial/include")
 
 # Build the library.
-add_library(pololu src/pololu.c)
+add_library(pololu src/pololu)
 
 # Link to the serial library.
 target_link_libraries(pololu serial)
