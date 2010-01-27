@@ -1,4 +1,4 @@
-LIB		= kalman
+LIB			= kalman
 LIBPREFIX	= lib
 INCLUDES	= -Iinclude
 INCLUDES	+= -I/usr/include/opencv
@@ -17,7 +17,7 @@ LIBA		= $(LIBPREFIX)$(LIB).a
 LIBDIR		= lib
 SRCDIR		= .
 
-LIBOBJ = $(SRCDIR)/$(LIB).o
+LIBOBJ 		= $(SRCDIR)/$(LIB).o
 
 all: $(LIBSO) $(LIBA)
 

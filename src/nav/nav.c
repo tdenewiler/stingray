@@ -15,55 +15,6 @@ int imu_fd;
 int lj_fd;
 
 
-#ifdef USE_SSA
-/*------------------------------------------------------------------------------
- * void ssa_update_telemetry()
- * Uploads data to the SSA dataserver.
- *----------------------------------------------------------------------------*/
-
-static void ssa_update_telemetry(
-    MSG_DATA *msg)
-{
-    STATUS s;
-    time_t t;
-    struct tm *tmp;
-    s = status_InitStatus();
-
-    /// Engineering data time.
-    t = time(NULL);
-    tmp = localtime(&t);
-    s.nTime = t;
-    status_SetTimeString(s.sTime, sizeof(s.sTime), tmp);
-
-    /// Platform identification.
-    s.nPlatformID = 15;
-    snprintf(s.sPlatformName, sizeof(s.sPlatformName), "UCSD Stingray");
-    s.nPlatformType = PLATFORMTYPE_UUV;
-    snprintf(s.sPlatformTypeName, sizeof(s.sPlatformTypeName), platformtypenames[s.nPlatformType]);
-
-    /// Engineering telemetry.
-    if (msg->stop.data.state == TRUE) {
-        s.nPlatformMode = MODE_PAUSE;
-    }
-    else {
-        s.nPlatformMode = MODE_TRANSIT;
-    }
-
-    snprintf(s.sPlatformModeName, sizeof(s.sPlatformModeName), "%s", modenames[s.nPlatformMode]);
-    s.nCommsLatency = 0;
-    s.dHdgDeg = msg->mstrain.data.yaw;
-    s.dPitchDeg = msg->mstrain.data.pitch;
-    s.dRollDeg = msg->mstrain.data.roll;
-    s.dBattVolts = msg->status.data.battery2;
-    s.dAltMeters = -msg->target.data.depth;
-    telemfile_WriteFileDirect("ssatelemetry.txt", s);
-    telemfile_WriteTelemServer("128.2.181.103", "9015", s);
-
-    return;
-} /* end ssa_update_telemetry() */
-#endif /// USE_SSA
-
-
 /*------------------------------------------------------------------------------
  * void nav_sigint()
  * Callback for when SIGINT (ctrl-c) is invoked.
@@ -360,12 +311,6 @@ int main(int argc, char *argv[])
 
         /// Update status message.
         messages_update(&msg);
-
-        /// Update and send the SSA data.
-        #ifdef USE_SSA
-        ssa_update_telemetry(&msg);
-        usleep(SSA_SLEEP);
-        #endif /// USE_SSA
     }
 
     exit(0);
