@@ -100,7 +100,7 @@ int main(int argc, char *argv[])
     TIMING timer_depth;
 	TIMING timer_pololu;
 	TIMING timer_print;
-	int tmp_print = 0;
+	int tmp_loop_rate = 0;
 
     printf("MAIN: Starting Navigation ... \n");
 
@@ -277,36 +277,35 @@ int main(int argc, char *argv[])
         if (msg.stop.data.state == FALSE) {
             /// Pitch.
 			if ((dt = timing_check_period(&timer_pitch, cf.period_pitch))) {
-				//printf("MAIN: Hit pitch timer at %fs.\n", dt);
-                pid_loop(pololu_fd, &pid, &cf, &msg, dt, PID_PITCH, pololu_initialized);
 				timing_set_timer(&timer_pitch);
-				tmp_print++;
+                pid_loop(pololu_fd, &pid, &cf, &msg, dt, PID_PITCH, pololu_initialized);
+				tmp_loop_rate++;
             }
 
             /// Roll.
 			if ((dt = timing_check_period(&timer_roll, cf.period_roll))) {
-                pid_loop(pololu_fd, &pid, &cf, &msg, dt, PID_ROLL, pololu_initialized);
 				timing_set_timer(&timer_roll);
+                pid_loop(pololu_fd, &pid, &cf, &msg, dt, PID_ROLL, pololu_initialized);
             }
 
             /// Yaw.
 			if ((dt = timing_check_period(&timer_yaw, cf.period_yaw))) {
-                pid_loop(pololu_fd, &pid, &cf, &msg, dt, PID_YAW, pololu_initialized);
 				timing_set_timer(&timer_yaw);
+                pid_loop(pololu_fd, &pid, &cf, &msg, dt, PID_YAW, pololu_initialized);
             }
 
             /// Depth.
 			if ((dt = timing_check_period(&timer_depth, cf.period_depth))) {
-                pid_loop(pololu_fd, &pid, &cf, &msg, dt, PID_DEPTH, pololu_initialized);
 				timing_set_timer(&timer_depth);
+                pid_loop(pololu_fd, &pid, &cf, &msg, dt, PID_DEPTH, pololu_initialized);
             }
         }
 
 		// Temporary check to see how fast PID loop is reached.
 		if (timing_check_period(&timer_print, 1.)) {
-			printf("MAIN: %d loops per second.\n", tmp_print);
-			tmp_print = 0;
 			timing_set_timer(&timer_print);
+			printf("MAIN: %d loops per second.\n", tmp_loop_rate);
+			tmp_loop_rate = 0;
 		}
 
         /// Update status message.

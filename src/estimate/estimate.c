@@ -272,8 +272,8 @@ int main( int argc, char *argv[] )
 
         /// Log if flag is set and timer has elapsed.
 		if (timing_check_period(&timer_log, cf.period_log) && f_log) {
-			sysid_log(&msg, f_log);
 			timing_set_timer(&timer_log);
+			sysid_log(&msg, f_log);
 			printf("MAIN: Logging.\n");
 		}
 
@@ -281,11 +281,11 @@ int main( int argc, char *argv[] )
 		// Might still need to wait for input period after setting axis to cf value so two things aren't happening at once.
 		if ((cf.input_type == INPUT_STEP) || (cf.input_type == INPUT_PRB)) {
 			if (timing_check_period(&timer_input, cf.period_input)) {
+				timing_set_timer(&timer_input);
 				switch (seq) {
 				case 1:
 				printf("MAIN: Hit input timer at %fs using pitch target %f\n", timing_get_dts(&timer_input), seq_pitch[seq_num]);
 				msg.target.data.pitch = seq_pitch[seq_num];
-				timing_set_timer(&timer_input);
 				seq_num++;
 				if (seq_num == cf.input_size) {
 					msg.target.data.pitch = cf.target_pitch;
@@ -297,7 +297,6 @@ int main( int argc, char *argv[] )
 				case 2:
 				printf("MAIN: Hit input timer at %fs using roll target %f\n", timing_get_dts(&timer_input), seq_roll[seq_num]);
 				msg.target.data.roll = seq_roll[seq_num];
-				timing_set_timer(&timer_input);
 				seq_num++;
 				if (seq_num == cf.input_size) {
 					msg.target.data.roll = cf.target_roll;
@@ -309,7 +308,6 @@ int main( int argc, char *argv[] )
 				case 3:
 				printf("MAIN: Hit input timer at %fs using yaw target %f\n", timing_get_dts(&timer_input), seq_yaw[seq_num]);
 				msg.target.data.yaw = seq_yaw[seq_num];
-				timing_set_timer(&timer_input);
 				seq_num++;
 				if (seq_num == cf.input_size) {
 					msg.target.data.yaw = cf.target_yaw;
@@ -321,7 +319,6 @@ int main( int argc, char *argv[] )
 				case 4:
 				printf("MAIN: Hit input timer at %fs using depth target %f\n", timing_get_dts(&timer_input), seq_depth[seq_num]);
 				msg.target.data.depth = seq_depth[seq_num];
-				timing_set_timer(&timer_input);
 				seq_num++;
 				if (seq_num == cf.input_size) {
 					msg.target.data.depth = cf.target_depth;
@@ -338,6 +335,7 @@ int main( int argc, char *argv[] )
 		/// Use ramp input where switching is done using a probability.
 		else if (cf.input_type == INPUT_RAMP) {
 			if (timing_check_period(&timer_axis, cf.period_axis)) {
+				timing_set_timer(&timer_axis);
 				/// Reset the current axis back to cf value before moving on to next axis.
 				switch (seq) {
 				case 1:
@@ -360,9 +358,9 @@ int main( int argc, char *argv[] )
 				/// Move on to next axis.
 				seq++;
 				seq_num = floor(cf.input_size / 2);
-				timing_set_timer(&timer_axis);
 			}
 			if (timing_check_period(&timer_input, cf.period_input)) {
+				timing_set_timer(&timer_input);
 				if (sysid_switch(cf.input_prob) == TRUE) {
 					direction *= -1;
 				}
@@ -379,25 +377,21 @@ int main( int argc, char *argv[] )
 				case 1:
 				//printf("MAIN: Hit input timer at %fs using pitch target %f at seq_num %d\n", timing_get_dts(&timer_input), seq_pitch[seq_num], seq_num);
 				msg.target.data.pitch = seq_pitch[seq_num];
-				timing_set_timer(&timer_input);
 				break;
 
 				case 2:
 				//printf("MAIN: Hit input timer at %fs using roll target %f at seq_num %d\n", timing_get_dts(&timer_input), seq_roll[seq_num], seq_num);
 				msg.target.data.roll = seq_roll[seq_num];
-				timing_set_timer(&timer_input);
 				break;
 
 				case 3:
 				//printf("MAIN: Hit input timer at %fs using yaw target %f at seq_num %d\n", timing_get_dts(&timer_input), seq_yaw[seq_num], seq_num);
 				msg.target.data.yaw = seq_yaw[seq_num];
-				timing_set_timer(&timer_input);
 				break;
 
 				case 4:
 				//printf("MAIN: Hit input timer at %fs using depth target %f at seq_num %d\n", timing_get_dts(&timer_input), seq_depth[seq_num], seq_num);
 				msg.target.data.depth = seq_depth[seq_num];
-				timing_set_timer(&timer_input);
 				break;
 
 				default:

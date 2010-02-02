@@ -173,12 +173,6 @@ clean:
 	cd libs/vision; make -f Makefile clean; cd ../..;
 	@echo
 	@echo /////////
-	@echo // ssa //
-	@echo /////////
-	@echo
-	cd libs/ssa; make -f Makefile clean; cd ../..;
-	@echo
-	@echo /////////
 	@echo // nav //
 	@echo /////////
 	@echo

@@ -35,20 +35,18 @@ int main(int argc, char *argv[])
 	msg.target.data.pitch = 5.0;
 
 	/// Testing step inputs.
-	printf("Testing step inputs.\n");
+	printf("MAIN: Testing step inputs from %f to %f with a step size of %d.\n", min, max, step_size);
 	status = sysid_get_step_seq(step_seq, min, max, step_size);
 	for (int ii = 0; ii < step_size; ii++) {
 		printf("MAIN: Step %d = %f\n", ii, step_seq[ii]);
 	}
-	printf("MAIN: Got %d step inputs.\n", status);
 
 	/// Testing psuedo random binary inputs.
-	printf("Testing pseudo random binary inputs.\n");
+	printf("MAIN: Testing for %d pseudo random binary inputs.\n", prb_size);
 	status = sysid_get_prb_seq(prb_seq, min, max, prb_size);
 	for (int ii = 0; ii < prb_size; ii++) {
 		printf("MAIN: Step %d = %f\n", ii, prb_seq[ii]);
 	}
-	printf("MAIN: Got %d prb inputs.\n", status);
 
 	/// Testing steady-state check.
 	printf("MAIN: Testing steady-state check.\n");

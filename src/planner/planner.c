@@ -280,8 +280,8 @@ int main(int argc, char *argv[])
 				recv_bytes = net_client(vision_fd, vision_buf, &msg, MODE_OPEN);
 				vision_buf[recv_bytes] = '\0';
 				if (recv_bytes > 0) {
-					messages_decode(vision_fd, vision_buf, &msg, recv_bytes);
                     timing_set_timer(&timer_vision);
+					messages_decode(vision_fd, vision_buf, &msg, recv_bytes);
 					msg.status.data.fps = msg.vision.data.fps;
 				}
 			}
@@ -291,20 +291,20 @@ int main(int argc, char *argv[])
 		task = msg.task.data.task;
 		subtask = msg.task.data.subtask;
 		if (old_task != msg.task.data.task) {
+			/// Reset the task and subtask start timers.
+			timing_set_timer(&timer_task);
+			timing_set_timer(&timer_subtask);
 			if ((cf.enable_vision) && (vision_fd > 0)) {
 				messages_send(vision_fd, TASK_MSGID, &msg);
 			}
 			old_task = msg.task.data.task;
-			/// Reset the task and subtask start timers.
-			timing_set_timer(&timer_task);
-			timing_set_timer(&timer_subtask);
 		}
 		else if (old_subtask != msg.task.data.subtask) {
+			timing_set_timer(&timer_subtask);
 			if ((cf.enable_vision) && (vision_fd > 0)) {
 				messages_send(vision_fd, TASK_MSGID, &msg);
 			}
 			old_subtask = msg.task.data.subtask;
-			timing_set_timer(&timer_subtask);
 		}
 
         /// Get nav data.
@@ -353,13 +353,13 @@ int main(int argc, char *argv[])
 		if (bKF) {
 			/// If it has been long enough, update the filter.
 			if (timing_check_period(&timer_kalman, 0.1)) {
+				timing_set_timer(&timer_kalman);
 				STAT cs = msg.status.data;
 				float ang[] = { cs.pitch, cs.roll, cs.yaw };
 				float real_accel[] = { cs.accel[0], cs.accel[1], cs.accel[2] - 9.86326398 };
 
 				/// Update the Kalman filter.
 				kalman_update(timing_check_period(&timer_kalman, 0.), msg.lj.data.pressure, ang, real_accel, cs.ang_rate);
-				timing_set_timer(&timer_kalman);
 			}
 
 			/// Get current location estimation.
@@ -387,6 +387,7 @@ int main(int argc, char *argv[])
 
 			/// Log enable_log times every second.
 			if (timing_check_period(&timer_log, cf.enable_log)) {
+				timing_set_timer(&timer_log);
 				STAT cs = msg.status.data;
 				TARGET target = msg.target.data;
 				fprintf(f_log, "%s, %.06f,%.06f,%.06f,%.06f,%.06f,%.06f,%.06f,"
@@ -397,7 +398,6 @@ int main(int argc, char *argv[])
 					cs.ang_rate[0], cs.ang_rate[1], cs.ang_rate[2], cs.fx, cs.fy,
 					target.pitch, target.roll, target.yaw, target.depth,
 					target.fx, target.fy);
-				timing_set_timer(&timer_log);
 			}
 		}
 

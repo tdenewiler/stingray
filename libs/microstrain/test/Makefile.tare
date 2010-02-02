@@ -1,19 +1,22 @@
 INCLUDES	= -Iinclude
 INCLUDES	+= -I../include
+INCLUDES	+= -I../../serial/include
 CFLAGS		= -Wall
 CFLAGS		+= -O2
 CFLAGS		+= -g
 CC			= g++
-LIB			= parser.a
-LIBDIR		= ../lib
-EXE			= parser_test
+IMULIB		= libmicrostrain.a
+SERLIB		= libserial.a
+IMULIBDIR	= ../lib
+SERLIBDIR	= ../../serial/lib
+EXE			= mstrain_tare
 
-OBJS = parser_test.o
+OBJS = mstrain_tare.o
 
 all: $(EXE)
 
 $(EXE): $(OBJS)
-	$(CC) $(CFLAGS) $(INCLUDES) $(DEFINES) $^ -o $@ $(LIBDIR)/$(LIB)
+	$(CC) $(CFLAGS) $(INCLUDES) $(DEFINES) $^ -o $@ $(IMULIBDIR)/$(IMULIB) $(SERLIBDIR)/$(SERLIB)
 
 %.o: %.cpp
 	$(CC) $(CFLAGS) $(INCLUDES) $(DEFINES) -c $<

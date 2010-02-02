@@ -44,8 +44,7 @@ LIBS		+= $(STDLIBS)
 EXE 		= visiond
 
 # object files
-OBJS		= util.o
-OBJS		+= network.o
+OBJS		= network.o
 OBJS		+= messages.o
 OBJS		+= visiond.o
 

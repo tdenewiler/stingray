@@ -1,14 +1,14 @@
-INCLUDES  = -Iinclude
-INCLUDES 	+= -I../include
-CFLAGS    = -Wall
-CFLAGS    += -O2
-CFLAGS    += -g
-CC        = g++
-LIB		  = joy.a
-LIBDIR    = ../lib
-EXE 	  = joy_test
+INCLUDES	= -Iinclude
+INCLUDES	+= -I../include
+CFLAGS		= -Wall
+CFLAGS		+= -O2
+CFLAGS		+= -g
+CC			= g++
+LIB			= libparser.a
+LIBDIR		= ../lib
+EXE			= parser_test
 
-OBJS = joy_test.o
+OBJS = parser_test.o
 
 all: $(EXE)
 
@@ -23,4 +23,4 @@ $(EXE): $(OBJS)
 
 clean:
 	rm -f *.o $(EXE)
-
+	

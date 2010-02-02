@@ -6,31 +6,36 @@
 
 int main()
 {
-	printf( "Labjack Test Program\n" );
+	printf("MAIN: Labjack Test Program\n");
 
-	// if the labjack was initialized
-
-	if ( init_labjack() ) {
-		printf( "Labjack is initialized.\n" );
-		// output the voltages of the batteries
-
-		while ( 1 ) {
-			// request an update from the labjack
+	/// Initialize the labjack.
+	if (init_labjack()) {
+		printf("MAIN: Labjack is initialized.\n");
+		/// Output the voltages of the batteries.
+		while (1) {
+			/// Request an update from the labjack.
 			query_labjack();
-			printf( "\nAIN 0: %f (V)\n", getBatteryVoltage( AIN_0 ) );
-			printf( "AIN 1: %f (V)\n", getBatteryVoltage( AIN_1 ) );
-			printf( "AIN 3: %f (V)\n", getBatteryVoltage( AIN_2 ) );
-			printf( "AIN 4: %f (V)\n", getBatteryVoltage( AIN_3 ) );
+			printf("MAIN: AIN 0 %f (V)\n", getBatteryVoltage(AIN_0));
+			printf("MAIN: AIN 1 %f (V)\n", getBatteryVoltage(AIN_1));
+			printf("MAIN: AIN 3 %f (V)\n", getBatteryVoltage(AIN_2));
+			printf("MAIN: AIN 4 %f (V)\n", getBatteryVoltage(AIN_3));
 
-			if ( getBatteryVoltage( AIN_3 ) > WATER_THRESHOLD ) {
-				printf( "\nWARNING WATER DETECTED!!!\n" );
+			/// Check for a water leak.
+			if (getBatteryVoltage(AIN_3) > WATER_THRESHOLD) {
+				printf("MAIN: Warning!!! Water IS detected.\n");
+			}
+			else {
+				printf("MAIN: Water not detected.\n");
 			}
 
-			sleep( 1 );
+			sleep(1);
 		}
 	}
+	else {
+		printf("MAIN: WARNING!!! Labjack not initialized.\n");
+	}
 
-	// cleanup the connection
+	/// Cleanup the connection.
 	close_labjack();
 
 	return 0;
