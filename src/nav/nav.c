@@ -100,7 +100,11 @@ int main(int argc, char *argv[])
     TIMING timer_depth;
 	TIMING timer_pololu;
 	TIMING timer_print;
-	int tmp_loop_rate = 0;
+	int count_pitch = 0;
+	int count_roll = 0;
+	int count_yaw = 0;
+	int count_depth = 0;
+	int count_mstrain = 0;
 
     printf("MAIN: Starting Navigation ... \n");
 
@@ -259,6 +263,7 @@ int main(int argc, char *argv[])
             //recv_bytes = mstrain_euler_angles(imu_fd, &msg.mstrain.data.pitch, &msg.mstrain.data.roll, &msg.mstrain.data.yaw);
 			//recv_bytes = mstrain_vectors(imu_fd, 0, msg.mstrain.data.mag, msg.mstrain.data.accel, msg.mstrain.data.ang_rate);
 			recv_bytes = mstrain_euler_vectors(imu_fd, &msg.mstrain.data.pitch, &msg.mstrain.data.roll, &msg.mstrain.data.yaw, msg.mstrain.data.accel, msg.mstrain.data.ang_rate);
+			count_mstrain++;
         }
 		else {
 			/// Simulation Mode. This is where the simulated data is generated.
@@ -277,35 +282,44 @@ int main(int argc, char *argv[])
         if (msg.stop.data.state == FALSE) {
             /// Pitch.
 			if ((dt = timing_check_period(&timer_pitch, cf.period_pitch))) {
+				//printf("MAIN: Hit pitch timer at %fs.\n", dt);
 				timing_set_timer(&timer_pitch);
                 pid_loop(pololu_fd, &pid, &cf, &msg, dt, PID_PITCH, pololu_initialized);
-				tmp_loop_rate++;
+				count_pitch++;
             }
 
             /// Roll.
 			if ((dt = timing_check_period(&timer_roll, cf.period_roll))) {
 				timing_set_timer(&timer_roll);
                 pid_loop(pololu_fd, &pid, &cf, &msg, dt, PID_ROLL, pololu_initialized);
+                count_roll++;
             }
 
             /// Yaw.
 			if ((dt = timing_check_period(&timer_yaw, cf.period_yaw))) {
 				timing_set_timer(&timer_yaw);
                 pid_loop(pololu_fd, &pid, &cf, &msg, dt, PID_YAW, pololu_initialized);
+                count_yaw++;
             }
 
             /// Depth.
 			if ((dt = timing_check_period(&timer_depth, cf.period_depth))) {
 				timing_set_timer(&timer_depth);
                 pid_loop(pololu_fd, &pid, &cf, &msg, dt, PID_DEPTH, pololu_initialized);
+                count_depth++;
             }
         }
 
 		// Temporary check to see how fast PID loop is reached.
 		if (timing_check_period(&timer_print, 1.)) {
+			printf("MAIN: %d %d %d %d PID loops and %d Microstrain reads per second.\n",
+			    count_pitch, count_roll, count_yaw, count_depth, count_mstrain);
+			count_pitch = 0;
+			count_roll = 0;
+			count_yaw = 0;
+			count_depth = 0;
+			count_mstrain = 0;
 			timing_set_timer(&timer_print);
-			printf("MAIN: %d loops per second.\n", tmp_loop_rate);
-			tmp_loop_rate = 0;
 		}
 
         /// Update status message.
