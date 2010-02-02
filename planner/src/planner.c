@@ -353,9 +353,9 @@ int main(int argc, char *argv[])
 		if (bKF) {
 			/// If it has been long enough, update the filter.
 			if (timing_check_period(&timer_kalman, 0.1)) {
-				STAT cs = msg.status.data;
-				float ang[] = { cs.pitch, cs.roll, cs.yaw };
-				float real_accel[] = { cs.accel[0], cs.accel[1], cs.accel[2] - 9.86326398 };
+				//STAT cs = msg.status.data;
+				//float ang[] = { cs.pitch, cs.roll, cs.yaw };
+				//float real_accel[] = { cs.accel[0], cs.accel[1], cs.accel[2] - 9.86326398 };
 
 				/// Update the Kalman filter.
 				//kalman_update(timing_check_period(&timer_kalman, 0.), msg.lj.data.pressure, ang, real_accel, cs.ang_rate);

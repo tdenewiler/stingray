@@ -39,7 +39,7 @@
 /** @name Default filename for the vision configuration file. */
 //@{
 #ifndef JOYDRIVE_FILENAME
-#define JOYDRIVE_FILENAME "../../conf/joydrive.conf"
+#define JOYDRIVE_FILENAME "conf/joydrive.conf"
 #endif /* JOYDRIVE_FILENAME */
 //@}
 

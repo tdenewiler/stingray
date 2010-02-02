@@ -45,7 +45,7 @@
 /** @name Default filename for the uuv configuration file. */
 //@{
 #ifndef PLANNER_FILENAME
-#define PLANNER_FILENAME "../conf/planner.conf"
+#define PLANNER_FILENAME "conf/planner.conf"
 #endif /* PLANNER_FILENAME */
 //@}
 

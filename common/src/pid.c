@@ -81,7 +81,7 @@ void pid_loop(int pololu_fd,
                float dt,
                int mode,
 			   int motor_init
-           )
+          )
 {
 	/// Check to see if the errors should be reset to zero.
 	if (msg->target.data.mode == ZERO_PID_ERRORS) {
@@ -254,7 +254,7 @@ void pid_loop(int pololu_fd,
 
 		/// Control motors.
 		if (motor_init) {
-			r1 = pololuControlVertical(pololu_fd, pid->vertical_thrust, pid->roll_torque, pid->pitch_torque);
+			r1 = pololu_control_vertical(pololu_fd, pid->vertical_thrust, pid->roll_torque, pid->pitch_torque);
 			//r1 = pololu_control_vertical(pololu_fd, pid->vertical_thrust, pid->roll_torque, pid->pitch_torque);
 		}
 
@@ -301,7 +301,7 @@ void pid_loop(int pololu_fd,
 
 		/// Control Voiths.
 		if (motor_init) {
-			r2 = pololuControlVoiths(pololu_fd, pid->voith_speed, pid->voith_angle, pid->voith_thrust, pid->yaw_torque);
+			r2 = pololu_control_voiths(pololu_fd, pid->voith_speed, pid->voith_angle, pid->voith_thrust, pid->yaw_torque);
 			//r2 = pololu_control_voiths(pololu_fd, pid->voith_speed, pid->voith_angle, pid->voith_thrust, pid->yaw_torque);
 		}
 
@@ -339,7 +339,7 @@ void pid_loop(int pololu_fd,
 
 		/// Control depth.
 		if (motor_init) {
-			r1 = pololuControlVertical(pololu_fd, pid->vertical_thrust, pid->roll_torque, pid->pitch_torque);
+			r1 = pololu_control_vertical(pololu_fd, pid->vertical_thrust, pid->roll_torque, pid->pitch_torque);
 			//r1 = pololu_control_vertical(pololu_fd, pid->vertical_thrust, pid->roll_torque, pid->pitch_torque);
 		}
 

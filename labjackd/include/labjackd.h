@@ -38,7 +38,7 @@
 /** @name Default filename for the vision configuration file. */
 //@{
 #ifndef LABJACKD_FILENAME
-#define LABJACKD_FILENAME "../conf/labjackd.conf"
+#define LABJACKD_FILENAME "conf/labjackd.conf"
 #endif /* LABJACKD_FILENAME */
 //@}
 

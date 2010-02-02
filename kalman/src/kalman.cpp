@@ -1,6 +1,6 @@
 /*------------------------------------------------------------------------------
  *
- *  Title:        kalman.c
+ *  Title:        kalman.cpp
  *
  *  Description:  Kalman filter algorithm for position estimation. Check out
  *  http://www.edinburghrobotics.com/docs/tutorial_drivers_virtual.html for

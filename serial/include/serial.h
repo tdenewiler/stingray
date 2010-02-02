@@ -31,7 +31,7 @@
 
 /** @name Timeout in [us] to check for available serial ports. */
 #ifndef SERIAL_TIMEOUT_USECS
-#define SERIAL_TIMEOUT_USECS 1 //20000
+#define SERIAL_TIMEOUT_USECS 1
 #endif /* SERIAL_TIMEOUT_USECS */
 
 /** @name The maximum amount of serial data that can be stored. */

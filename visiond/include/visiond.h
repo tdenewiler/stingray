@@ -45,7 +45,7 @@
 /** @name Default filename for the vision configuration file. */
 //@{
 #ifndef VISIOND_FILENAME
-#define VISIOND_FILENAME "../conf/visiond.conf"
+#define VISIOND_FILENAME "conf/visiond.conf"
 #endif /* VISIOND_FILENAME */
 //@}
 

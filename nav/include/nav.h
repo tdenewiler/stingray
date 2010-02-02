@@ -54,7 +54,7 @@
 /** @name Default filename for the uuv configuration file. */
 //@{
 #ifndef STINGRAY_FILENAME
-#define STINGRAY_FILENAME "../conf/nav.conf"
+#define STINGRAY_FILENAME "conf/nav.conf"
 #endif /* STINGRAY_FILENAME */
 //@}
 

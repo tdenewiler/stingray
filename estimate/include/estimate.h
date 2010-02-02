@@ -37,7 +37,7 @@
 /** @name Default filename for the configuration file. */
 //@{
 #ifndef ESTIMATE_FILENAME
-#define ESTIMATE_FILENAME "../../conf/estimate.conf"
+#define ESTIMATE_FILENAME "conf/estimate.conf"
 #endif /* ESTIMATE_FILENAME */
 //@}
 

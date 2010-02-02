@@ -30,22 +30,22 @@ void waitForKey() {
 }
 
 
-void updateLabjack( labjack_struct *current )
+void updateLabjack(labjack_struct *current)
 {
 	query_labjack();
-	current->battery1 = getBatteryVoltage( AIN_0 );
-	current->battery2 = getBatteryVoltage( AIN_1 );
-	current->pressure = getBatteryVoltage( AIN_2 );
-	current->water = getBatteryVoltage( AIN_3 );
+	current->battery1 = getBatteryVoltage(AIN_0);
+	current->battery2 = getBatteryVoltage(AIN_1);
+	current->pressure = getBatteryVoltage(AIN_2);
+	current->water = getBatteryVoltage(AIN_3);
 }
 
 
-int main( void )
+int main(void)
 {
 	/* Create variables. */
 	int pololu_fd = -1;
 	char pololu_port[25];
-	strncpy( pololu_port, "/dev/ttyUSB0", 25 );
+	strncpy(pololu_port, "/dev/ttyUSB0", 25);
 	labjack_struct lj;
 
 	// this is all divided into steps
@@ -57,10 +57,10 @@ int main( void )
 	waitForKey();
 	*/
 	// Set up the Pololu port.
-	pololu_fd = pololuSetup( pololu_port, 57600 );
+	pololu_fd = pololu_setup(pololu_port, 57600);
 	// Initialize all the channels.
 	//rintf("Initializing all channels.\n");
-	//pololuInitializeChannels( pololu_fd );
+	//pololuInitializeChannels(pololu_fd);
 
 	/*
 	// Send full throttle commands to channels 0 and 3.
@@ -94,7 +94,7 @@ int main( void )
 	waitForKey();
 
 	printf("Initializing all channels.\n");
-	pololuInitializeChannels( pololu_fd );
+	pololuInitializeChannels(pololu_fd);
 
 	printf("Now close the kill switch.\n");
 	waitForKey();
@@ -139,7 +139,7 @@ int main( void )
 
 	/*
 	printf("Initializing all channels.\n");
-	pololuInitializeChannels( pololu_fd );
+	pololuInitializeChannels(pololu_fd);
 
 	printf("Now close the kill switch.\n");
 	waitForKey();
