@@ -553,7 +553,7 @@ int visiond_open_image_init( char *dir, char *filename )
 
 	/// Load an images from disk.
 	//printf( "visiond_open_image_init: Using source images from directory for vision...\n" );
-
+	
 	/// Open directory.
 	if ( (dirp = opendir( dir ) ) ) {
 
@@ -569,7 +569,7 @@ int visiond_open_image_init( char *dir, char *filename )
 				/// Iterate to next file.
 				dfile = readdir( dirp );
 			}
-
+			
 			/// Setup the images.
 			if( dfile != NULL ) {
 				/// This is a file so use it.

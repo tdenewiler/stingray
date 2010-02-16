@@ -9,6 +9,7 @@
 #include "vision.h"
 #include "buoy.c"
 
+
 // 0 = DEFAULT (From AUVSI 2009)
 // 1 = Simple Boost off HSV
 #define BUOY_TECHNIQUE 1
@@ -54,8 +55,8 @@ int vision_find_dot(int *dotx, int *doty, int angle, IplImage *srcImg, IplImage 
     IplConvKernel *wS = cvCreateStructuringElementEx( 3, 3,
             (int)floor( ( 3.0 ) / 2 ), (int)floor( ( 3.0 ) / 2 ), CV_SHAPE_RECT );
 	int num_pix = 0;
-	int touch_thresh = 150000;
-    int detect_thresh = 40;
+	int touch_thresh = 0;
+    int detect_thresh = 0;
 
     /// Initialize to impossible values.
     center.x = -10000;
@@ -77,11 +78,19 @@ int vision_find_dot(int *dotx, int *doty, int angle, IplImage *srcImg, IplImage 
 	
 	if ( BUOY_TECHNIQUE == 1 )
 	{
+		/// Setup thresholds
+		touch_thresh = 150000;
+    	detect_thresh = 0;
+    
 		/// Buoy Boost Technique
 		vision_boost_buoy( hsvImg, binImg, &center );
 	}
 	else
 	{
+		/// Setup thresholds
+		touch_thresh = 150000;
+    	detect_thresh = 40;
+    
 		/// Threshold all three channels using our own values.
 		cvInRangeS( hsvImg, cvScalar(hsv->hL, hsv->sL, hsv->vL),
 			cvScalar(hsv->hH, hsv->sH, hsv->vH), binImg );
@@ -112,7 +121,7 @@ int vision_find_dot(int *dotx, int *doty, int angle, IplImage *srcImg, IplImage 
 	if( num_pix > touch_thresh ) {
 		return 2;
 	}
-    if( num_pix < detect_thresh) {
+    if( num_pix <= detect_thresh ) {
 		return 0;
 	}
 	/// Check that the values of dotx & doty are not negative.
@@ -134,34 +143,36 @@ int vision_boost_buoy( IplImage *srcImg, IplImage *binImg, CvPoint *center )
 	uchar *binData = ( uchar* )binImg->imageData;
 	double dst[2] = {0,0};
 	double thresh = 1.0;
-	int i,j,res = 0;
-	double h, s, v = 0.0;
+	int i = 0, j = 0,res = 0;
+	double h = 0.0, s = 0.0, v = 0.0;
 	double* hsv[3] = {&h, &s, &v};
-	IplConvKernel* B;
+	IplConvKernel* B = NULL;
 	static CvMemStorage* mem_storage = NULL;
 	static CvSeq* contours = NULL;
 	CvContourScanner scanner;
 	CvSeq* c = NULL;
 	CvSeq* c_new = NULL;
-	double c_area = 0.0, c_max = 0.0, c_radius = 0.0;
+	double c_area = 0.0, c_max = 0.0, c_max2 = 0.0;
 	CvMoments moments;
 	double M00 = 0.0, M01 = 0.0, M10 = 0.0;
-	CvPoint c_center;
-	CvPoint2D32f min_center;
-	float min_radius;
-	
+	CvPoint c_center, c_center2;
+	c_center.x = -1, c_center.y = -1;
+	c_center2.x = -1, c_center2.y = -1;
+
 	/// Create Morphological Kernel
 	//B = cvCreateStructuringElementEx( 3, 3, 1, 1, CV_SHAPE_RECT );
-	
+
 	/// Loop through the first image to fill the left part of the new image.
-	for ( i = 0; i < srcImg->height; i++ ) {
-		for ( j = 0; j < srcImg->width; j++ ) {
+	for ( i = 0; i < srcImg->height; i++ ) 
+	{
+		for ( j = 0; j < srcImg->width; j++ )
+		{
 			*hsv[0] = srcData[i * srcImg->widthStep + j * srcImg->nChannels + 0];
 			*hsv[1] = srcData[i * srcImg->widthStep + j * srcImg->nChannels + 1];
         	*hsv[2] = srcData[i * srcImg->widthStep + j * srcImg->nChannels + 2];
         	
         	/// Predict on this point
-        	if ( predict( (void**)hsv, dst ) )
+        	if ( predict_transdec( (void**)hsv, dst ) )
         	{
         		if ( dst[1] > thresh )
         		{
@@ -169,8 +180,27 @@ int vision_boost_buoy( IplImage *srcImg, IplImage *binImg, CvPoint *center )
 				}
 				else
 				{
-					res = 0;
+					/// Secondary Prediction on this point
+					if ( predict_pool( (void**)hsv, dst ) )
+					{
+						if ( dst[1] > thresh )
+						{
+							res = 0xff;
+						}
+						else
+						{
+							res = 0;
+						}
+					}
+					else
+					{
+						printf( "Secondary Prediction Fail.\n" );
+					}
 				}
+			}
+			else
+			{
+				printf( "Prediction Fail.\n" );
 			}
         	
         	binData[i * binImg->widthStep + j * binImg->nChannels + 0] = res;
@@ -178,7 +208,7 @@ int vision_boost_buoy( IplImage *srcImg, IplImage *binImg, CvPoint *center )
         	binData[i * binImg->widthStep + j * binImg->nChannels + 2] = res;
 		}
 	}
-	/*
+	
 	/// Use Opening to remove noise
 	cvMorphologyEx( binImg, binImg, NULL, B, CV_MOP_OPEN, 1 );
 	
@@ -197,6 +227,7 @@ int vision_boost_buoy( IplImage *srcImg, IplImage *binImg, CvPoint *center )
 	{
 		cvClearMemStorage( mem_storage );
 	}
+	
 	scanner = cvStartFindContours( binImg, mem_storage, sizeof( CvContour ), CV_RETR_EXTERNAL, CV_CHAIN_APPROX_SIMPLE );
 	while ( (c = cvFindNextContour( scanner )) != NULL )
 	{
@@ -235,37 +266,57 @@ int vision_boost_buoy( IplImage *srcImg, IplImage *binImg, CvPoint *center )
 		/// Get this contours area
 		c_area = abs( cvContourArea( c, CV_WHOLE_SEQ ) );
 		
-		/// Get this contours center
-		cvContourMoments( c, &moments );
-		M00 = cvGetSpatialMoment( &moments, 0, 0 );
-		M10 = cvGetSpatialMoment( &moments, 1, 0 );
-		M01 = cvGetSpatialMoment( &moments, 0, 1 );
-		c_center.x = (int)(M10/M00);
-		c_center.y = (int)(M01/M00);
-		
-		/// Calculate radius
-		c_radius = sqrt( c_area / M_PI );
-		
-		//printf( "Area=%f Center=(%d,%d) PI=%f Radius=%f\n", c_area, c_center.x, c_center.y, M_PI, c_radius );
-		
 		if ( c_area > c_max )
 		{
+			/// Set old max to be second oldest
+			c_max2 = c_max;
+			c_center2.x = c_center.x;
+			c_center2.y = c_center.y;
+			
+			/// Set max area
 			c_max = c_area;
-			center->x = c_center.x;
-			center->y = c_center.y;
+			
+			/// Get this contours center
+			cvContourMoments( c, &moments );
+			M00 = cvGetSpatialMoment( &moments, 0, 0 );
+			M10 = cvGetSpatialMoment( &moments, 1, 0 );
+			M01 = cvGetSpatialMoment( &moments, 0, 1 );
+			c_center.x = (int)(M10/M00);
+			c_center.y = (int)(M01/M00);
 		}
-		
-		//cvCircle( binImg, c_center, c_radius, CV_RGB( 0x00, 0x00, 0x00 ), 1, 8 );
-		
-		cvMinEnclosingCircle( c, &min_center, &min_radius );
-		c_center.x = min_center.x;
-		c_center.y = min_center.y;
-		//cvCircle( binImg, c_center, min_radius, CV_RGB( 0x00, 0x00, 0x00 ), 1, 8 );
+		else if ( c_area > c_max2 )
+		{
+			/// Set second max area
+			c_max2 = c_area;
+			
+			/// Get this contours center
+			cvContourMoments( c, &moments );
+			M00 = cvGetSpatialMoment( &moments, 0, 0 );
+			M10 = cvGetSpatialMoment( &moments, 1, 0 );
+			M01 = cvGetSpatialMoment( &moments, 0, 1 );
+			c_center2.x = (int)(M10/M00);
+			c_center2.y = (int)(M01/M00);
+		}
 	}
 	contours = cvEndFindContours( &scanner );
 	
+	/// If area is within range and second largest is above then pick the second
+	if ( c_max2 > 0 && c_max - c_max2 < 400 && c_center2.y < c_center.y )
+	{
+		center->x = c_center2.x;
+		center->y = c_center2.y;
+		
+		//printf( "area1=%f area2=%f center1=(%d,%d) center2(%d,%d)\n", c_max, c_max2, c_center.x,
+		//	c_center.y, c_center2.x, c_center2.y );
+	}
+	else if ( c_center.x != -1 && c_center.y != -1 )
+	{
+		center->x = c_center.x;
+		center->y = c_center.y;
+	}
+	
 	cvReleaseStructuringElement( &B );
-	*/
+	
     return 1;
 } /* end vision_boost_buoy() */
 	
