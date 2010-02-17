@@ -110,8 +110,10 @@ int vision_find_dot( int *dotx,
                    );
 
 //! Creates a binary image based on boost buoy predicter.
+//! Calculates the center estimation for the buoy.
 //! \param srcImg The image to convert to a binary image.
 //! \param binImg The image to hold the binary result image.
+//! \param center Place holder for center to be found.
 int vision_boost_buoy( 	IplImage *srcImg, 
 						IplImage *binImg,
 						CvPoint *center );
@@ -128,6 +130,19 @@ int vision_find_pipe( int *pipex,
                       IplImage *binImg,
                       HSV_HL *hsv
                     );
+                    
+//! Creates a binary image based on boost pipe predicter.
+//! Calculates the center estimation for the pipe.
+//! Calculates the heading of the pipe.
+//! \param srcImg The image to convert to a binary image.
+//! \param binImg The image to hold the binary result image.
+//! \param center Place holder for center to be found.
+//! \param bearing Place holder for bearing to be found.
+int vision_boost_pipe( 	IplImage *srcImg, 
+						IplImage *binImg,
+						CvPoint *center,
+						double *bearing
+					 );
 
 //! Finds the centroid of the pixels in an image.
 //! \param img The binary image to find the bearing of.

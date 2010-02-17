@@ -7,12 +7,15 @@
  *----------------------------------------------------------------------------*/
 
 #include "vision.h"
+#include "boost.h"
 #include "buoy.c"
+#include "pipe.c"
 
 
 // 0 = DEFAULT (From AUVSI 2009)
 // 1 = Simple Boost off HSV
 #define BUOY_TECHNIQUE 1
+#define PIPE_TECHNIQUE 1
 
 double 	tick_total = 0;
 int 	tick_count = 0;
@@ -66,15 +69,8 @@ int vision_find_dot(int *dotx, int *doty, int angle, IplImage *srcImg, IplImage 
     hsvImg = cvCreateImage( cvGetSize(srcImg), IPL_DEPTH_8U, 3 );
     outImg = cvCreateImage( cvGetSize(srcImg), IPL_DEPTH_8U, 1 );
 
-	/// Enhance the red channel of the source image.
-	//vision_white_balance( srcImg );
-
     /// Convert the image from RGB to HSV color space.
     cvCvtColor( srcImg, hsvImg, CV_RGB2HSV );
-
-	/// Equalize the histograms of each channel.
-	//vision_hist_eq( hsvImg, VISION_CHANNEL3 );
-		//VISION_CHANNEL1 + VISION_CHANNEL2 + VISION_CHANNEL3 );
 	
 	if ( BUOY_TECHNIQUE == 1 )
 	{
@@ -111,21 +107,27 @@ int vision_find_dot(int *dotx, int *doty, int angle, IplImage *srcImg, IplImage 
     cvReleaseImage( &hsvImg );
     cvReleaseImage( &outImg );
 
+	/// Manage number of ticks taken to process this image
 	ticks = cvGetTickCount() - ticks;
 	tick_total = tick_total + (double)ticks/1000000;
 	tick_count = tick_count + 1;
 	
 	/// Check to see how many pixels of are detected in the image.
 	num_pix = cvCountNonZero( binImg );
-	//printf("VISION_FIND_DOT: num_pix = %d\n" , num_pix);
-	if( num_pix > touch_thresh ) {
+	
+	if( num_pix > touch_thresh )
+	{
 		return 2;
 	}
-    if( num_pix <= detect_thresh ) {
+    
+    if( num_pix <= detect_thresh ) 
+    {
 		return 0;
 	}
+	
 	/// Check that the values of dotx & doty are not negative.
-	if( dotx < 0 || doty < 0 ) {
+	if( dotx < 0 || doty < 0 ) 
+	{
 		return 0;
 	}
 
@@ -160,7 +162,7 @@ int vision_boost_buoy( IplImage *srcImg, IplImage *binImg, CvPoint *center )
 	c_center2.x = -1, c_center2.y = -1;
 
 	/// Create Morphological Kernel
-	//B = cvCreateStructuringElementEx( 3, 3, 1, 1, CV_SHAPE_RECT );
+	B = cvCreateStructuringElementEx( 3, 3, 1, 1, CV_SHAPE_RECT );
 
 	/// Loop through the first image to fill the left part of the new image.
 	for ( i = 0; i < srcImg->height; i++ ) 
@@ -172,7 +174,7 @@ int vision_boost_buoy( IplImage *srcImg, IplImage *binImg, CvPoint *center )
         	*hsv[2] = srcData[i * srcImg->widthStep + j * srcImg->nChannels + 2];
         	
         	/// Predict on this point
-        	if ( predict_transdec( (void**)hsv, dst ) )
+        	if ( predict_buoy_transdec( (void**)hsv, dst ) )
         	{
         		if ( dst[1] > thresh )
         		{
@@ -181,7 +183,7 @@ int vision_boost_buoy( IplImage *srcImg, IplImage *binImg, CvPoint *center )
 				else
 				{
 					/// Secondary Prediction on this point
-					if ( predict_pool( (void**)hsv, dst ) )
+					if ( predict_buoy_pool( (void**)hsv, dst ) )
 					{
 						if ( dst[1] > thresh )
 						{
@@ -320,20 +322,19 @@ int vision_boost_buoy( IplImage *srcImg, IplImage *binImg, CvPoint *center )
     return 1;
 } /* end vision_boost_buoy() */
 	
-
+	
 /*------------------------------------------------------------------------------
  * int vision_find_pipe()
  * Finds a pipe object from a camera.
  *----------------------------------------------------------------------------*/
-
 int vision_find_pipe(int *pipex, int *pipey, double *bearing, IplImage *srcImg, IplImage *binImg, HSV_HL *hsv)
 {
+	int64 ticks = cvGetTickCount();
+	
     CvPoint center;
     IplImage *hsvImg = NULL;
     IplImage *outImg = NULL;
-    //IplConvKernel *wS = cvCreateStructuringElementEx( 2, 2,
-    //        (int)floor( ( 2.0 ) / 2 ), (int)floor( ( 2.0 ) / 2 ), CV_SHAPE_RECT );
-	int detect_thresh = 15000;
+	int detect_thresh = 0;
 	int num_pix = 0;
 
     /// Initialize to impossible values.
@@ -344,32 +345,37 @@ int vision_find_pipe(int *pipex, int *pipey, double *bearing, IplImage *srcImg, 
     hsvImg = cvCreateImage( cvGetSize(srcImg), IPL_DEPTH_8U, 3 );
     outImg = cvCreateImage( cvGetSize(srcImg), IPL_DEPTH_8U, 1 );
 
-	/// Enhance the red channel of the source image.
-	//vision_white_balance( srcImg );
-
     /// Flip the source image.
     cvFlip( srcImg, srcImg );
 
     /// Segment the flipped image into a binary image.
     cvCvtColor( srcImg, hsvImg, CV_RGB2HSV );
 
-	/// Equalize the histograms of each channel.
-	//vision_hist_eq( hsvImg,
-	//	VISION_CHANNEL1 + VISION_CHANNEL2 + VISION_CHANNEL3 );
+	if ( PIPE_TECHNIQUE == 1 )
+	{
+		/// Setup thresholds
+		detect_thresh = 0;
+		
+		/// Pipe Boost Technique
+		vision_boost_pipe( hsvImg, binImg, &center, bearing );
+	}
+	else
+	{
+		/// Setup thresholds
+		detect_thresh = 15000;
+		
+		/// Threshold all three channels using our own values.
+    	cvInRangeS( hsvImg, cvScalar(hsv->hL, hsv->sL, hsv->vL),
+			cvScalar(hsv->hH, hsv->sH, hsv->vH), binImg );
 
-	/// Threshold all three channels using our own values.
-    cvInRangeS( hsvImg, cvScalar(hsv->hL, hsv->sL, hsv->vL),
-		cvScalar(hsv->hH, hsv->sH, hsv->vH), binImg );
+		/// Use a median filter to remove outliers.
+		cvSmooth( binImg, outImg, CV_MEDIAN, 5, 5, 0. ,0. );
 
-	/// Use a median filter to remove outliers.
-	cvSmooth( binImg, outImg, CV_MEDIAN, 5, 5, 0. ,0. );
-	//cvDilate( outImg, binImg, 0, 2 );
-	//cvErode( outImg, binImg, 0, 4 );
-	//cvDilate( outImg, binImg, 0, 2 );
-
-    /// Process the image to get the bearing and centroid.
-    *bearing = vision_get_bearing( outImg );
-    center = vision_find_centroid( outImg, 0 );
+    	/// Process the image to get the bearing and centroid.
+    	*bearing = vision_get_bearing( outImg );
+    	center = vision_find_centroid( outImg, 0 );
+	}
+    	
     *pipex = center.x;
     *pipey = center.y;
 
@@ -377,16 +383,191 @@ int vision_find_pipe(int *pipex, int *pipey, double *bearing, IplImage *srcImg, 
     cvReleaseImage( &hsvImg );
     cvReleaseImage( &outImg );
 
+	/// Manage number of ticks taken to process this image
+	ticks = cvGetTickCount() - ticks;
+	tick_total = tick_total + (double)ticks/1000000;
+	tick_count = tick_count + 1;
+
 	/// Check to see how many pixels are detected in the image.
 	num_pix = cvCountNonZero( binImg );
-	//printf("VISION_FIND_PIPE: num_pix = %d\n" , num_pix);
-	if( num_pix < detect_thresh ) {
+	
+	if ( num_pix <= detect_thresh ) 
+	{
+		return 0;
+	}
+
+	/// Check that the values of pipex & pipey are not negative.
+	if( pipex < 0 || pipey < 0 ) 
+	{
 		return 0;
 	}
 
     return 1;
 } /* end vision_find_pipe() */
 
+/*------------------------------------------------------------------------------
+ * int vision_boost_buoy()
+ * Creates a binary image using the boosting predictor.
+ *----------------------------------------------------------------------------*/
+int vision_boost_pipe( IplImage *srcImg, IplImage *binImg, CvPoint *center, double *bearing )
+{
+	/// Declare variables.
+	uchar *srcData = ( uchar* )srcImg->imageData;
+	uchar *binData = ( uchar* )binImg->imageData;
+	double dst[2] = {0,0};
+	double thresh = 1.0;
+	int i = 0, j = 0,res = 0;
+	double h = 0.0, s = 0.0, v = 0.0;
+	double* hsv[3] = {&h, &s, &v};
+	IplConvKernel* B = NULL;
+	static CvMemStorage* mem_storage = NULL;
+	static CvSeq* contours = NULL;
+	CvContourScanner scanner;
+	CvSeq* c = NULL;
+	CvSeq* c_new = NULL;
+	double c_area = 0.0, c_max = 0.0, c_max2 = 0.0;
+	CvMoments moments;
+	double M00 = 0.0, M01 = 0.0, M10 = 0.0;
+	CvPoint c_center, c_center2;
+	c_center.x = -1, c_center.y = -1;
+	c_center2.x = -1, c_center2.y = -1;
+
+	/// Create Morphological Kernel
+	B = cvCreateStructuringElementEx( 3, 3, 1, 1, CV_SHAPE_RECT );
+
+	/// Loop through the first image to fill the left part of the new image.
+	for ( i = 0; i < srcImg->height; i++ ) 
+	{
+		for ( j = 0; j < srcImg->width; j++ )
+		{
+			*hsv[0] = srcData[i * srcImg->widthStep + j * srcImg->nChannels + 0];
+			*hsv[1] = srcData[i * srcImg->widthStep + j * srcImg->nChannels + 1];
+        	*hsv[2] = srcData[i * srcImg->widthStep + j * srcImg->nChannels + 2];
+        	
+        	/// Predict on this point
+        	if ( predict_pipe( (void**)hsv, dst ) )
+        	{
+        		if ( dst[1] > thresh )
+        		{
+        			res = 0xff;
+				}
+				else
+				{
+					res = 0;
+				}
+			}
+			else
+			{
+				printf( "Prediction Fail.\n" );
+			}
+        	
+        	binData[i * binImg->widthStep + j * binImg->nChannels + 0] = res;
+        	binData[i * binImg->widthStep + j * binImg->nChannels + 1] = res;
+        	binData[i * binImg->widthStep + j * binImg->nChannels + 2] = res;
+		}
+	}
+	
+	/// Use Opening to remove noise
+	cvMorphologyEx( binImg, binImg, NULL, B, CV_MOP_OPEN, 1 );
+	
+	/// Use Closing to fill in blobs
+	cvMorphologyEx( binImg, binImg, NULL, B, CV_MOP_CLOSE, 2 );
+	
+	/// Use smooth to smooth the shapes
+	cvSmooth( binImg, binImg, CV_MEDIAN, 7, 7, 0., 0. );
+	
+	/// Find Countours around remaining regions
+	if ( mem_storage == NULL )
+	{
+		mem_storage = cvCreateMemStorage( 0 );
+	}
+	else
+	{
+		cvClearMemStorage( mem_storage );
+	}
+	
+	scanner = cvStartFindContours( binImg, mem_storage, sizeof( CvContour ), CV_RETR_EXTERNAL, CV_CHAIN_APPROX_SIMPLE );
+	while ( (c = cvFindNextContour( scanner )) != NULL )
+	{
+		/// Convex Hull Contour Approximation
+		c_new = cvConvexHull2( c, mem_storage, CV_CLOCKWISE, 1 );
+		cvSubstituteContour( scanner, c_new );
+	}
+	contours = cvEndFindContours( &scanner );
+	
+	/// Draw the resulting contours
+	for ( c = contours; c != NULL; c = c->h_next )
+	{
+		cvDrawContours( binImg, c, CV_RGB(0xff,0xff, 0xff), CV_RGB(0x00, 0x00, 0x00), -1, CV_FILLED, 8 );
+	}
+	
+	/// Dilate because convex hull shrinks the contour
+	cvDilate( binImg, binImg, B, 1 );
+	
+	/// Use smooth to smooth the shapes again
+	cvSmooth( binImg, binImg, CV_MEDIAN, 7, 7, 0., 0. );
+	
+	/// Find Countours around remaining regions
+	if ( mem_storage == NULL )
+	{
+		mem_storage = cvCreateMemStorage( 0 );
+	}
+	else
+	{
+		cvClearMemStorage( mem_storage );
+	}
+	scanner = cvStartFindContours( binImg, mem_storage, sizeof( CvContour ), CV_RETR_EXTERNAL, CV_CHAIN_APPROX_SIMPLE );
+	while ( (c = cvFindNextContour( scanner )) != NULL )
+	{
+		cvDrawContours( binImg, c, CV_RGB(0xff,0xff, 0xff), CV_RGB(0x00, 0x00, 0x00), -1, CV_FILLED, 8 );
+		
+		/// Get this contours area
+		c_area = abs( cvContourArea( c, CV_WHOLE_SEQ ) );
+		
+		if ( c_area > c_max )
+		{
+			/// Set old max to be second oldest
+			c_max2 = c_max;
+			c_center2.x = c_center.x;
+			c_center2.y = c_center.y;
+			
+			/// Set max area
+			c_max = c_area;
+			
+			/// Get this contours center
+			cvContourMoments( c, &moments );
+			M00 = cvGetSpatialMoment( &moments, 0, 0 );
+			M10 = cvGetSpatialMoment( &moments, 1, 0 );
+			M01 = cvGetSpatialMoment( &moments, 0, 1 );
+			c_center.x = (int)(M10/M00);
+			c_center.y = (int)(M01/M00);
+		}
+		else if ( c_area > c_max2 )
+		{
+			/// Set second max area
+			c_max2 = c_area;
+			
+			/// Get this contours center
+			cvContourMoments( c, &moments );
+			M00 = cvGetSpatialMoment( &moments, 0, 0 );
+			M10 = cvGetSpatialMoment( &moments, 1, 0 );
+			M01 = cvGetSpatialMoment( &moments, 0, 1 );
+			c_center2.x = (int)(M10/M00);
+			c_center2.y = (int)(M01/M00);
+		}
+	}
+	contours = cvEndFindContours( &scanner );
+	
+	if ( c_center.x != -1 && c_center.y != -1 )
+	{
+		center->x = c_center.x;
+		center->y = c_center.y;
+	}
+	
+	cvReleaseStructuringElement( &B );
+	
+	return 1;
+} /* end vision_boost_pipe() */
 
 /*------------------------------------------------------------------------------
  * float vision_get_bearing()
