@@ -1,0 +1,53 @@
+This software has been tested using Ubuntu Linux and has been found to run correctly from verion
+8.04 and newer.
+
+To have the Labjack library build correctly go see the README file in the labjack/ directory.
+
+To build the code the following packages are required:
+	g++
+	cmake
+	libgtk2.0-0
+	libgtk2.0-common
+	libgtk2.0-dev
+	libgtk2.0-0-dbg
+	libglade2-dev
+	libcv1
+	libhighgui1
+	libcvaux1
+	libcv-dev
+	libcvaux-dev
+	libhighgui-dev
+
+And the following packages are recommended:
+	libgtk2.0-doc
+	opencv-doc
+	geany
+	manpages
+	manpages-dev
+	manpages-posix-dev
+
+Here is a single command that can be copied and pasted into a terminal that will make sure all of
+the required and recommended packages are installed:
+
+sudo apt-get install g++ cmake libgtk2.0-0 libgtk2.0-common libgtk2.0-dev libgtk2.0-0-dbg libcv1 libhighgui1 libcvaux1 libcv-dev libcvaux-dev libhighgui-dev libgtk2.0-doc opencv-doc geany manpages manpages-dev manpages-posix-dev libglade2-dev
+
+For CMake to build using the OpenCV libraries it needs to know how to find the OpenCV libraries. It
+is necessary to download the file FindOpenCV.cmake from
+http://opencv.willowgarage.com/wiki/Getting_started
+and copy it into /usr/share/cmake-2.6/Modules/. There is also a copy of the FindOpenCV.cmake file
+included in this repository. Note that depending on your system the version number of cmake may be
+slightly different but cmake-2.6 is the minimum version that is required when building the code in
+this repository (as defined in the CMakeLists.txt file).
+
+Similarly, for Gtk-2.0 it is necessary to download FindGTK2.cmake from
+http://cmake-modules.googlecode.com/svn/trunk/Modules/GTK2/FindGTK2.cmake
+and copied that into the same directory.
+
+To compile all the libraries and the executables run `cmake .' and then `make' in this directory.
+
+To clean all the libraries and the executables run `make clean' in this directory.
+
+All of the libaries are built in the lib/ directory and all of the executables are built in the bin/
+directory. There is a script that will run all of the programs necessary for the Stingray to
+operate which can be started in a terminal using the command `./startStingray'.
+
