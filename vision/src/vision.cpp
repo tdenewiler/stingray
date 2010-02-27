@@ -7,7 +7,7 @@
  *----------------------------------------------------------------------------*/
 
 #include "vision.h"
-#include "buoy.c"
+#include "buoy.cpp"
 
 // 0 = DEFAULT (From AUVSI 2009)
 // 1 = Simple Boost off HSV

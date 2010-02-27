@@ -62,6 +62,6 @@ void kalman_print_state(int p);
 
 //! Function Gets the current location estimation.
 //! \param loc Structure to put the point into.
-void kalman_get_location(CvPoint3D32f *loc);
+void kalman_get_location( CvPoint3D32f &loc );
 
 #endif /* _KALMAN_H_ */

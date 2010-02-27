@@ -51,6 +51,7 @@ set (EXECUTABLE_OUTPUT_PATH ../bin)
 add_executable (${PROJECT_NAME} ${SRCS})
 #set_target_properties (${PROJECT_NAME} PROPERTIES HAS_CXX TRUE)
 #set_target_properties (${PROJECT_NAME} PROPERTIES LINKER_LANGUAGE CXX)
+set_target_properties (${PROJECT_NAME} PROPERTIES LINKER_LANGUAGE CXX)
 
 # Link to libraries.
 target_link_libraries (${PROJECT_NAME} ${LIBS})

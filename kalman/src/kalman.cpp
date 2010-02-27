@@ -311,14 +311,14 @@ void kalman_print_state( int p )
 
 
 /*------------------------------------------------------------------------------
- * kalman_get_location( CvPoint3D32f *loc )
+ * kalman_get_location( CvPoint3D32f &loc )
  * Gets the current location estimation.
  *----------------------------------------------------------------------------*/
 
-void kalman_get_location( CvPoint3D32f *loc )
+void kalman_get_location( CvPoint3D32f &loc )
 {
 	/// Set the current internal state to this point.
-	loc->x = kf->state_post->data.fl[0];	// x
-	loc->y = kf->state_post->data.fl[1];	// y
-	loc->z = kf->state_post->data.fl[2];	// z
+	loc.x = kf->state_post->data.fl[0];	// x
+	loc.y = kf->state_post->data.fl[1];	// y
+	loc.z = kf->state_post->data.fl[2];	// z
 } /* end kalman_get_location() */

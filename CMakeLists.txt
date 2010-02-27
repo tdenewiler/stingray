@@ -2,7 +2,7 @@ cmake_minimum_required (VERSION 2.6)
 
 # Find OpenCV.
 # I downloaded the file FindOpenCV.cmake from http://opencv.willowgarage.com/wiki/Getting_started and copied it into /usr/share/cmake-2.6/Modules/.
-FIND_PACKAGE(OpenCV REQUIRED)
+find_package (OpenCV REQUIRED)
 
 # Recurse through subdirectories to build everything.
 add_subdirectory (estimate)
