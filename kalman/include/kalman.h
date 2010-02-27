@@ -6,19 +6,17 @@
 #ifndef KALMAN_FILTER_H
 #define KALMAN_FILTER_H
 
-#include <stdio.h>
 #include <unistd.h>
 #include <cv.h>
 #include <cvaux.h>
 #include <cxcore.h>
 #include <highgui.h>
-#include <cxtypes.h>
 
 /******************************
- *
- * #defines
- *
- *****************************/
+**
+** #defines
+**
+******************************/
 
 #ifndef TRUE
 #define TRUE 1
@@ -30,10 +28,10 @@
 
 
 /******************************
- *
- * Function prototypes
- *
- *****************************/
+**
+** Function prototypes
+**
+******************************/
 
 //! Function Sets up all variables for a Kalman filter for position estimation.
 //! \return Whether initialization is successful (1=success, 0=failure).
@@ -48,7 +46,7 @@ void close_kalman();
 //! \param ang Angles of rotation about each axis.
 //! \param accel Acceleration along each axis.
 //! \param ang_rate Rate of rotation about each axis.
-void kalman_update(float dt, float depth, float ang[3], float accel[3], float ang_rate[3]);
+void kalman_update( float dt, float depth, float ang[3], float accel[3], float ang_rate[3] );
 
 //! Function Prints some state information as a test.
 void kalman_print_test();
@@ -58,10 +56,11 @@ void kalman_print_transition_matrix();
 
 //! Function Prints out the internal state (PRE/POST).
 //! \param p Specifies which version PRE=0 and POST=1.
-void kalman_print_state(int p);
+void kalman_print_state( int p );
 
 //! Function Gets the current location estimation.
 //! \param loc Structure to put the point into.
 void kalman_get_location( CvPoint3D32f &loc );
+
 
 #endif /* _KALMAN_H_ */

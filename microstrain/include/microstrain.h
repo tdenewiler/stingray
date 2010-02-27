@@ -15,6 +15,7 @@
 #include <unistd.h>
 #include <string.h>
 
+//#include "msgtypes.h"
 #include "serial.h"
 
 
@@ -115,7 +116,7 @@
 //@}
 
 #ifndef MSTRAIN_SERIAL_DELAY
-#define MSTRAIN_SERIAL_DELAY 5000
+#define MSTRAIN_SERIAL_DELAY 7000
 #endif /* MSTRAIN_SERIAL_DELAY */
 
 #ifndef IMU_ERROR_HEADER
@@ -150,9 +151,9 @@ typedef struct _MSTRAIN_DATA {
 	float yaw;                //!< Yaw angle, from Euler angles
 	short eeprom_address;     //!< EEPROM address
 	short eeprom_value;       //!< EEPROM value
-	short int accel_gain;
-	short int mag_gain;
-	short int bias_gain;
+	short int accel_gain;	  //!< Accelerometer gain used by IMU filter
+	short int mag_gain;		  //!< Magnetometer gain used by IMU filter
+	short int bias_gain;	  //!< Bias gain used by IMU filter
 } MSTRAIN_DATA;
 #endif /* _MSTRAIN_DATA_ */
 

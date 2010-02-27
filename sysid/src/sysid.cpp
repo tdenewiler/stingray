@@ -15,24 +15,23 @@ int sysid_get_step_seq(float *step_seq, float min, float max, int size)
 {
 	/// Declare variables.
 	int numinputs = 0;
-	int ii = 0;
 	float input = min;
 
 	/// Set the first array value to the min value.
 	if (size > 0) {
 		*step_seq = min;
-		//*step_seq++;
+		*step_seq++;
 		numinputs++;
 	}
 
 	/// Check if there are any more array inputs.
 	if (size > 1) {
 		/// Add values to the array for everything BUT min and max.
-		for (ii = 1; ii < size - 1; ii++) {
+		for (int ii = 1; ii < size - 1; ii++) {
 			input += (max - min) / (size - 1);
 			*step_seq = input;
 			numinputs++;
-			//*step_seq++;
+			*step_seq++;
 		}
 	}
 
@@ -56,7 +55,6 @@ int sysid_get_prb_seq(float *prb_seq, float min, float max, int size)
 {
 	/// Declare variables.
 	int numinputs = 0;
-	int ii = 0;
 	float range = max - min;
     struct timeb seed;
 
@@ -67,10 +65,10 @@ int sysid_get_prb_seq(float *prb_seq, float min, float max, int size)
 	/// Check if there are any array inputs.
 	if (size > 0) {
 		/// Add random values to the array.
-		for (ii = 0; ii < size; ii++) {
+		for (int ii = 0; ii < size; ii++) {
 			*prb_seq = min + (rand() / (float)RAND_MAX) * range;
 			numinputs++;
-			//*prb_seq++;
+			*prb_seq++;
 		}
 	}
 

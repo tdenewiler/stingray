@@ -5,7 +5,7 @@ cmake_minimum_required (VERSION 2.6)
 project (nav)
 
 # Add compiler flags.
-add_definitions (-Wall -O2 -g)
+add_definitions (-Wall -Wno-write-strings -O2 -g)
 
 # Make sure the compiler can find the include files.
 include_directories (include)

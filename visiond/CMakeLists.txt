@@ -1,13 +1,3 @@
-# NOTE: vision is the only library that visiond does NOT complain about when building.
-# vision.h is also the only file out of messages.h, network.h, parser.h and timing.h
-# that does NOT have a typedef struct{} statement. I don't know if there is a
-# correlation there or not.
-
-# NOTE: visiond is the only executable that is building using C++ (not C) source files.
-# vision.cpp is the only other C++ source file used when building visiond. Maybe
-# that is why the vision_*() functions are being found when trying to build visiond
-# but none of the functions from C source files are being found.
-
 # The name of our project is "VISIOND". CMakeLists files in this project can
 # refer to the root source directory of the project as ${VISIOND_SOURCE_DIR} and
 # to the root binary directory of the project as ${VISIOND_BINARY_DIR}.
@@ -49,9 +39,6 @@ set (EXECUTABLE_OUTPUT_PATH ../bin)
 
 # Build the executable.
 add_executable (${PROJECT_NAME} ${SRCS})
-#set_target_properties (${PROJECT_NAME} PROPERTIES HAS_CXX TRUE)
-#set_target_properties (${PROJECT_NAME} PROPERTIES LINKER_LANGUAGE CXX)
-set_target_properties (${PROJECT_NAME} PROPERTIES LINKER_LANGUAGE CXX)
 
 # Link to libraries.
 target_link_libraries (${PROJECT_NAME} ${LIBS})

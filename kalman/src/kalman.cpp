@@ -1,6 +1,6 @@
 /*------------------------------------------------------------------------------
  *
- *  Title:        kalman.cpp
+ *  Title:        kalman.c
  *
  *  Description:  Kalman filter algorithm for position estimation. Check out
  *  http://www.edinburghrobotics.com/docs/tutorial_drivers_virtual.html for
@@ -260,12 +260,9 @@ void kalman_print_test()
 void kalman_print_transition_matrix()
 {
 	int n = kf->DP;
-	int i = 0;
-	int j = 0;
-
 	printf( "F = [ " );
-	for ( i = 0; i < n; i++ ) {
-		for ( j = 0; j < n; j++ ) {
+	for ( int i = 0; i < n; i++ ) {
+		for ( int j = 0; j < n; j++ ) {
 			printf( "%.2f ", kf->transition_matrix->data.fl[ i*n+j ] );
 		}
 		if ( i < n-1 ) {
@@ -284,12 +281,10 @@ void kalman_print_transition_matrix()
 void kalman_print_state( int p )
 {
 	int n = kf->DP;
-	int i = 0;
-
 	if ( p == 0 ) {
 		/// Print the PRE state data.
 		printf( "PRE  state = [ " );
-		for ( i = 0; i < n; i++ ) {
+		for ( int i = 0; i < n; i++ ) {
 			printf( "%f", kf->state_pre->data.fl[i] );
 			if ( i < n-1 ) {
 				printf( ", " );
@@ -299,7 +294,7 @@ void kalman_print_state( int p )
 	} else if ( p == 1 ) {
 		/// Print the POST state data.
 		printf( "POST state = [ " );
-		for ( i = 0; i < n; i++ ) {
+		for ( int i = 0; i < n; i++ ) {
 			printf( "%f", kf->state_post->data.fl[i] );
 			if ( i < n-1 ) {
 				printf( ", " );

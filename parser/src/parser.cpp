@@ -812,16 +812,6 @@ void parse_default_config(CONF_VARS *config)
 	config->planner_port = 2002;
 	strncpy(config->planner_IP, "127.0.0.1", STRING_SIZE);
 
-	/// vision
-	config->enable_vision = FALSE;
-	config->vision_port = 2001;
-	strncpy(config->vision_IP, "127.0.0.1", STRING_SIZE);
-
-	/// labjackd
-	config->enable_labjack = FALSE;
-	config->vision_port = 2010;
-	strncpy(config->labjackd_IP, "127.0.0.1", STRING_SIZE);
-
 	/// estimate
 	config->period_input = 10.;
 	config->input_size = 10;
