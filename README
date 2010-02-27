@@ -41,7 +41,7 @@ this repository (as defined in the CMakeLists.txt file).
 
 Similarly, for Gtk-2.0 it is necessary to download FindGTK2.cmake from
 http://cmake-modules.googlecode.com/svn/trunk/Modules/GTK2/FindGTK2.cmake
-and copied that into the same directory.
+and copy that into the same directory. A separate copy is included in this repository.
 
 To compile all the libraries and the executables run `cmake .' and then `make' in this directory.
 
@@ -50,4 +50,10 @@ To clean all the libraries and the executables run `make clean' in this director
 All of the libaries are built in the lib/ directory and all of the executables are built in the bin/
 directory. There is a script that will run all of the programs necessary for the Stingray to
 operate which can be started in a terminal using the command `./startStingray'.
+
+Note that all of the executables should be run from the top-level directory and that is where the
+startStingray script is located. The thing to be careful about is that the GUI must be run from this
+same directory using the command `bin/gui' to start it. The reason for this is that the executables
+are set to search for their configuration files relative to the top-level directory and are unable
+to find them if the command to start the programs is invoked from a different directory.
 
