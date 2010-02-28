@@ -1,8 +1,12 @@
+=====================
+= Stingray Software =
+=====================
 This software has been tested using Ubuntu Linux and has been found to run correctly from verion
 8.04 and newer.
 
-To have the Labjack library build correctly go see the README file in the labjack/ directory.
-
+=======================
+= Installing Packages =
+=======================
 To build the code the following packages are required:
 	g++
 	cmake
@@ -31,6 +35,14 @@ the required and recommended packages are installed:
 
 sudo apt-get install g++ cmake libgtk2.0-0 libgtk2.0-common libgtk2.0-dev libgtk2.0-0-dbg libcv1 libhighgui1 libcvaux1 libcv-dev libcvaux-dev libhighgui-dev libgtk2.0-doc opencv-doc geany manpages manpages-dev manpages-posix-dev libglade2-dev
 
+=================
+= Miscellaneous =
+=================
+To have the Labjack library build correctly go see the README file in the labjack/ directory.
+
+=====================
+= CMake/OpenCV/Gtk+ =
+=====================
 For CMake to build using the OpenCV libraries it needs to know how to find the OpenCV libraries. It
 is necessary to download the file FindOpenCV.cmake from
 http://opencv.willowgarage.com/wiki/Getting_started
@@ -43,12 +55,20 @@ Similarly, for Gtk-2.0 it is necessary to download FindGTK2.cmake from
 http://cmake-modules.googlecode.com/svn/trunk/Modules/GTK2/FindGTK2.cmake
 and copy that into the same directory. A separate copy is included in this repository.
 
+=================
+= Building Code =
+=================
 To compile all the libraries and the executables run `cmake .' and then `make' in this directory.
 
 To clean all the libraries and the executables run `make clean' in this directory.
 
 All of the libaries are built in the lib/ directory and all of the executables are built in the bin/
-directory. There is a script that will run all of the programs necessary for the Stingray to
+directory.
+
+================
+= Running Code =
+================
+There is a script that will run all of the programs necessary for the Stingray to
 operate which can be started in a terminal using the command `./startStingray'.
 
 Note that all of the executables should be run from the top-level directory and that is where the
@@ -56,4 +76,21 @@ startStingray script is located. The thing to be careful about is that the GUI m
 same directory using the command `bin/gui' to start it. The reason for this is that the executables
 are set to search for their configuration files relative to the top-level directory and are unable
 to find them if the command to start the programs is invoked from a different directory.
+
+======================================
+= Integrated Development Environment =
+======================================
+To help in setting up a development environment there is a directory for geany/ files. Running the
+command found in geany/geany.txt from a terminal will open all of the files for the Stingray in the
+Geany IDE. Then go to Project->New, use "Stingray" for the Name, use the geany/ directory in this
+repository with stingray.geany appended as the Filename and the top-level directory (where this
+README file is located) as the Base Path and then click Create. After creating the project go to
+Project->Properties and click on the box next to "Make in base path". This will allow you to build
+the entire code base from within Geany using the command set under
+Edit-Preferences->Keybindings->Make all. Any warnings or errors will be underlined and put in a list
+so that you can click to go straight to the warning or error. Also, right-clicking on a variable,
+type or function will let you go to the definition.
+
+Note that CMake has an option to generate a solution that can be used with the Code::Blocks IDE. That
+functionality has not been tested but be aware that it is an option for the developer.
 

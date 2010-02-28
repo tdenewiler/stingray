@@ -24,22 +24,23 @@ int 	tick_count = 0;
  * int vision_processing_time()
  * Finds the average processing time in ms per frame.
  *----------------------------------------------------------------------------*/
+
 double vision_processing_time()
 {
 	double result = 0.0;
-	
+
 	/// Fix reduction for variable size
 	result = tick_total * 1000000;
-	
+
 	/// Find ticks per frame
 	result = result / tick_count;
-	
+
 	/// Convert to microseconds per frame
 	result = result / cvGetTickFrequency();
-	
+
 	/// Convert to ms per frame
 	result = result / 1000;
-	
+
 	return result;
 }
 
@@ -51,7 +52,7 @@ double vision_processing_time()
 int vision_find_dot(int *dotx, int *doty, int angle, IplImage *srcImg, IplImage *binImg, HSV_HL *hsv )
 {
 	int64 ticks = cvGetTickCount();
-	
+
     CvPoint center;
     IplImage *hsvImg = NULL;
     IplImage *outImg = NULL;
@@ -71,13 +72,13 @@ int vision_find_dot(int *dotx, int *doty, int angle, IplImage *srcImg, IplImage 
 
     /// Convert the image from RGB to HSV color space.
     cvCvtColor( srcImg, hsvImg, CV_RGB2HSV );
-	
+
 	if ( BUOY_TECHNIQUE == 1 )
 	{
 		/// Setup thresholds
 		touch_thresh = 150000;
     	detect_thresh = 0;
-    
+
 		/// Buoy Boost Technique
 		vision_boost_buoy( hsvImg, binImg, &center );
 	}
@@ -86,7 +87,7 @@ int vision_find_dot(int *dotx, int *doty, int angle, IplImage *srcImg, IplImage 
 		/// Setup thresholds
 		touch_thresh = 150000;
     	detect_thresh = 40;
-    
+
 		/// Threshold all three channels using our own values.
 		cvInRangeS( hsvImg, cvScalar(hsv->hL, hsv->sL, hsv->vL),
 			cvScalar(hsv->hH, hsv->sH, hsv->vH), binImg );
@@ -94,11 +95,11 @@ int vision_find_dot(int *dotx, int *doty, int angle, IplImage *srcImg, IplImage 
 		/// Use a median filter image to remove outliers.
 		cvSmooth( binImg, outImg, CV_MEDIAN, 7, 7, 0. ,0. );
 		cvMorphologyEx( binImg, binImg, wS, NULL, CV_MOP_CLOSE, 1);
-		
+
 		/// Find the centroid.
     	center = vision_find_centroid( binImg, 5 );
 	}
-	
+
     /// Set the found center of the dot
     *dotx = center.x;
     *doty = center.y;
@@ -111,22 +112,22 @@ int vision_find_dot(int *dotx, int *doty, int angle, IplImage *srcImg, IplImage 
 	ticks = cvGetTickCount() - ticks;
 	tick_total = tick_total + (double)ticks/1000000;
 	tick_count = tick_count + 1;
-	
+
 	/// Check to see how many pixels of are detected in the image.
 	num_pix = cvCountNonZero( binImg );
-	
+
 	if( num_pix > touch_thresh )
 	{
 		return 2;
 	}
-    
-    if( num_pix <= detect_thresh ) 
+
+    if( num_pix <= detect_thresh )
     {
 		return 0;
 	}
-	
+
 	/// Check that the values of dotx & doty are not negative.
-	if( dotx < 0 || doty < 0 ) 
+	if( dotx < 0 || doty < 0 )
 	{
 		return 0;
 	}
@@ -165,14 +166,14 @@ int vision_boost_buoy( IplImage *srcImg, IplImage *binImg, CvPoint *center )
 	B = cvCreateStructuringElementEx( 3, 3, 1, 1, CV_SHAPE_RECT );
 
 	/// Loop through the first image to fill the left part of the new image.
-	for ( i = 0; i < srcImg->height; i++ ) 
+	for ( i = 0; i < srcImg->height; i++ )
 	{
 		for ( j = 0; j < srcImg->width; j++ )
 		{
 			*hsv[0] = srcData[i * srcImg->widthStep + j * srcImg->nChannels + 0];
 			*hsv[1] = srcData[i * srcImg->widthStep + j * srcImg->nChannels + 1];
         	*hsv[2] = srcData[i * srcImg->widthStep + j * srcImg->nChannels + 2];
-        	
+
         	/// Predict on this point
         	if ( predict_buoy_transdec( (void**)hsv, dst ) )
         	{
@@ -204,22 +205,22 @@ int vision_boost_buoy( IplImage *srcImg, IplImage *binImg, CvPoint *center )
 			{
 				printf( "Prediction Fail.\n" );
 			}
-        	
+
         	binData[i * binImg->widthStep + j * binImg->nChannels + 0] = res;
         	binData[i * binImg->widthStep + j * binImg->nChannels + 1] = res;
         	binData[i * binImg->widthStep + j * binImg->nChannels + 2] = res;
 		}
 	}
-	
+
 	/// Use Opening to remove noise
 	cvMorphologyEx( binImg, binImg, NULL, B, CV_MOP_OPEN, 1 );
-	
+
 	/// Use Closing to fill in blobs
 	cvMorphologyEx( binImg, binImg, NULL, B, CV_MOP_CLOSE, 2 );
-	
+
 	/// Use smooth to smooth the shapes
 	cvSmooth( binImg, binImg, CV_MEDIAN, 7, 7, 0., 0. );
-	
+
 	/// Find Countours around remaining regions
 	if ( mem_storage == NULL )
 	{
@@ -229,7 +230,7 @@ int vision_boost_buoy( IplImage *srcImg, IplImage *binImg, CvPoint *center )
 	{
 		cvClearMemStorage( mem_storage );
 	}
-	
+
 	scanner = cvStartFindContours( binImg, mem_storage, sizeof( CvContour ), CV_RETR_EXTERNAL, CV_CHAIN_APPROX_SIMPLE );
 	while ( (c = cvFindNextContour( scanner )) != NULL )
 	{
@@ -238,19 +239,19 @@ int vision_boost_buoy( IplImage *srcImg, IplImage *binImg, CvPoint *center )
 		cvSubstituteContour( scanner, c_new );
 	}
 	contours = cvEndFindContours( &scanner );
-	
+
 	/// Draw the resulting contours
 	for ( c = contours; c != NULL; c = c->h_next )
 	{
 		cvDrawContours( binImg, c, CV_RGB(0xff,0xff, 0xff), CV_RGB(0x00, 0x00, 0x00), -1, CV_FILLED, 8 );
 	}
-	
+
 	/// Dilate because convex hull shrinks the contour
 	cvDilate( binImg, binImg, B, 1 );
-	
+
 	/// Use smooth to smooth the shapes again
 	cvSmooth( binImg, binImg, CV_MEDIAN, 7, 7, 0., 0. );
-	
+
 	/// Find Countours around remaining regions
 	if ( mem_storage == NULL )
 	{
@@ -264,20 +265,20 @@ int vision_boost_buoy( IplImage *srcImg, IplImage *binImg, CvPoint *center )
 	while ( (c = cvFindNextContour( scanner )) != NULL )
 	{
 		cvDrawContours( binImg, c, CV_RGB(0xff,0xff, 0xff), CV_RGB(0x00, 0x00, 0x00), -1, CV_FILLED, 8 );
-		
+
 		/// Get this contours area
 		c_area = abs( cvContourArea( c, CV_WHOLE_SEQ ) );
-		
+
 		if ( c_area > c_max )
 		{
 			/// Set old max to be second oldest
 			c_max2 = c_max;
 			c_center2.x = c_center.x;
 			c_center2.y = c_center.y;
-			
+
 			/// Set max area
 			c_max = c_area;
-			
+
 			/// Get this contours center
 			cvContourMoments( c, &moments );
 			M00 = cvGetSpatialMoment( &moments, 0, 0 );
@@ -290,7 +291,7 @@ int vision_boost_buoy( IplImage *srcImg, IplImage *binImg, CvPoint *center )
 		{
 			/// Set second max area
 			c_max2 = c_area;
-			
+
 			/// Get this contours center
 			cvContourMoments( c, &moments );
 			M00 = cvGetSpatialMoment( &moments, 0, 0 );
@@ -301,13 +302,13 @@ int vision_boost_buoy( IplImage *srcImg, IplImage *binImg, CvPoint *center )
 		}
 	}
 	contours = cvEndFindContours( &scanner );
-	
+
 	/// If area is within range and second largest is above then pick the second
 	if ( c_max2 > 0 && c_max - c_max2 < 400 && c_center2.y < c_center.y )
 	{
 		center->x = c_center2.x;
 		center->y = c_center2.y;
-		
+
 		//printf( "area1=%f area2=%f center1=(%d,%d) center2(%d,%d)\n", c_max, c_max2, c_center.x,
 		//	c_center.y, c_center2.x, c_center2.y );
 	}
@@ -316,13 +317,13 @@ int vision_boost_buoy( IplImage *srcImg, IplImage *binImg, CvPoint *center )
 		center->x = c_center.x;
 		center->y = c_center.y;
 	}
-	
+
 	cvReleaseStructuringElement( &B );
-	
+
     return 1;
 } /* end vision_boost_buoy() */
-	
-	
+
+
 /*------------------------------------------------------------------------------
  * int vision_find_pipe()
  * Finds a pipe object from a camera.
@@ -330,7 +331,7 @@ int vision_boost_buoy( IplImage *srcImg, IplImage *binImg, CvPoint *center )
 int vision_find_pipe(int *pipex, int *pipey, double *bearing, IplImage *srcImg, IplImage *binImg, HSV_HL *hsv)
 {
 	int64 ticks = cvGetTickCount();
-	
+
     CvPoint center;
     IplImage *hsvImg = NULL;
     IplImage *outImg = NULL;
@@ -355,7 +356,7 @@ int vision_find_pipe(int *pipex, int *pipey, double *bearing, IplImage *srcImg, 
 	{
 		/// Setup thresholds
 		detect_thresh = 0;
-		
+
 		/// Pipe Boost Technique
 		vision_boost_pipe( hsvImg, binImg, &center, bearing );
 	}
@@ -363,7 +364,7 @@ int vision_find_pipe(int *pipex, int *pipey, double *bearing, IplImage *srcImg, 
 	{
 		/// Setup thresholds
 		detect_thresh = 15000;
-		
+
 		/// Threshold all three channels using our own values.
     	cvInRangeS( hsvImg, cvScalar(hsv->hL, hsv->sL, hsv->vL),
 			cvScalar(hsv->hH, hsv->sH, hsv->vH), binImg );
@@ -375,7 +376,7 @@ int vision_find_pipe(int *pipex, int *pipey, double *bearing, IplImage *srcImg, 
     	*bearing = vision_get_bearing( outImg );
     	center = vision_find_centroid( outImg, 0 );
 	}
-    	
+
     *pipex = center.x;
     *pipey = center.y;
 
@@ -390,14 +391,14 @@ int vision_find_pipe(int *pipex, int *pipey, double *bearing, IplImage *srcImg, 
 
 	/// Check to see how many pixels are detected in the image.
 	num_pix = cvCountNonZero( binImg );
-	
-	if ( num_pix <= detect_thresh ) 
+
+	if ( num_pix <= detect_thresh )
 	{
 		return 0;
 	}
 
 	/// Check that the values of pipex & pipey are not negative.
-	if( pipex < 0 || pipey < 0 ) 
+	if( pipex < 0 || pipey < 0 )
 	{
 		return 0;
 	}
@@ -436,14 +437,14 @@ int vision_boost_pipe( IplImage *srcImg, IplImage *binImg, CvPoint *center, doub
 	B = cvCreateStructuringElementEx( 3, 3, 1, 1, CV_SHAPE_RECT );
 
 	/// Loop through the first image to fill the left part of the new image.
-	for ( i = 0; i < srcImg->height; i++ ) 
+	for ( i = 0; i < srcImg->height; i++ )
 	{
 		for ( j = 0; j < srcImg->width; j++ )
 		{
 			*hsv[0] = srcData[i * srcImg->widthStep + j * srcImg->nChannels + 0];
 			*hsv[1] = srcData[i * srcImg->widthStep + j * srcImg->nChannels + 1];
         	*hsv[2] = srcData[i * srcImg->widthStep + j * srcImg->nChannels + 2];
-        	
+
         	/// Predict on this point
         	if ( predict_pipe( (void**)hsv, dst ) )
         	{
@@ -460,22 +461,22 @@ int vision_boost_pipe( IplImage *srcImg, IplImage *binImg, CvPoint *center, doub
 			{
 				printf( "Prediction Fail.\n" );
 			}
-        	
+
         	binData[i * binImg->widthStep + j * binImg->nChannels + 0] = res;
         	binData[i * binImg->widthStep + j * binImg->nChannels + 1] = res;
         	binData[i * binImg->widthStep + j * binImg->nChannels + 2] = res;
 		}
 	}
-	
+
 	/// Use Opening to remove noise
 	cvMorphologyEx( binImg, binImg, NULL, B, CV_MOP_OPEN, 1 );
-	
+
 	/// Use Closing to fill in blobs
 	cvMorphologyEx( binImg, binImg, NULL, B, CV_MOP_CLOSE, 2 );
-	
+
 	/// Use smooth to smooth the shapes
 	cvSmooth( binImg, binImg, CV_MEDIAN, 7, 7, 0., 0. );
-	
+
 	/// Find Countours around remaining regions
 	if ( mem_storage == NULL )
 	{
@@ -485,7 +486,7 @@ int vision_boost_pipe( IplImage *srcImg, IplImage *binImg, CvPoint *center, doub
 	{
 		cvClearMemStorage( mem_storage );
 	}
-	
+
 	scanner = cvStartFindContours( binImg, mem_storage, sizeof( CvContour ), CV_RETR_EXTERNAL, CV_CHAIN_APPROX_SIMPLE );
 	while ( (c = cvFindNextContour( scanner )) != NULL )
 	{
@@ -494,19 +495,19 @@ int vision_boost_pipe( IplImage *srcImg, IplImage *binImg, CvPoint *center, doub
 		cvSubstituteContour( scanner, c_new );
 	}
 	contours = cvEndFindContours( &scanner );
-	
+
 	/// Draw the resulting contours
 	for ( c = contours; c != NULL; c = c->h_next )
 	{
 		cvDrawContours( binImg, c, CV_RGB(0xff,0xff, 0xff), CV_RGB(0x00, 0x00, 0x00), -1, CV_FILLED, 8 );
 	}
-	
+
 	/// Dilate because convex hull shrinks the contour
 	cvDilate( binImg, binImg, B, 1 );
-	
+
 	/// Use smooth to smooth the shapes again
 	cvSmooth( binImg, binImg, CV_MEDIAN, 7, 7, 0., 0. );
-	
+
 	/// Find Countours around remaining regions
 	if ( mem_storage == NULL )
 	{
@@ -520,20 +521,20 @@ int vision_boost_pipe( IplImage *srcImg, IplImage *binImg, CvPoint *center, doub
 	while ( (c = cvFindNextContour( scanner )) != NULL )
 	{
 		cvDrawContours( binImg, c, CV_RGB(0xff,0xff, 0xff), CV_RGB(0x00, 0x00, 0x00), -1, CV_FILLED, 8 );
-		
+
 		/// Get this contours area
 		c_area = abs( cvContourArea( c, CV_WHOLE_SEQ ) );
-		
+
 		if ( c_area > c_max )
 		{
 			/// Set old max to be second oldest
 			c_max2 = c_max;
 			c_center2.x = c_center.x;
 			c_center2.y = c_center.y;
-			
+
 			/// Set max area
 			c_max = c_area;
-			
+
 			/// Get this contours center
 			cvContourMoments( c, &moments );
 			M00 = cvGetSpatialMoment( &moments, 0, 0 );
@@ -546,7 +547,7 @@ int vision_boost_pipe( IplImage *srcImg, IplImage *binImg, CvPoint *center, doub
 		{
 			/// Set second max area
 			c_max2 = c_area;
-			
+
 			/// Get this contours center
 			cvContourMoments( c, &moments );
 			M00 = cvGetSpatialMoment( &moments, 0, 0 );
@@ -557,17 +558,18 @@ int vision_boost_pipe( IplImage *srcImg, IplImage *binImg, CvPoint *center, doub
 		}
 	}
 	contours = cvEndFindContours( &scanner );
-	
+
 	if ( c_center.x != -1 && c_center.y != -1 )
 	{
 		center->x = c_center.x;
 		center->y = c_center.y;
 	}
-	
+
 	cvReleaseStructuringElement( &B );
-	
+
 	return 1;
 } /* end vision_boost_pipe() */
+
 
 /*------------------------------------------------------------------------------
  * float vision_get_bearing()
@@ -1724,33 +1726,33 @@ void vision_concat_images(IplImage *img1, IplImage *img2, IplImage *new_img)
 	uchar *data2 = ( uchar* )img2->imageData;
 	uchar *new_data = ( uchar* )new_img->imageData;
 	int i,j,r,g,b;
-	
+
 	/// Loop through the first image to fill the left part of the new image.
 	for ( i = 0; i < img1->height; i++ ) {
 		for ( j = 0; j < img1->width; j++ ) {
 			r = data1[i * img1->widthStep + j * img1->nChannels + 0];
 			g = data1[i * img1->widthStep + j * img1->nChannels + 1];
         	b = data1[i * img1->widthStep + j * img1->nChannels + 2];
-        	
+
         	new_data[i * new_img->widthStep + j * new_img->nChannels + 0] = r;
         	new_data[i * new_img->widthStep + j * new_img->nChannels + 1] = g;
         	new_data[i * new_img->widthStep + j * new_img->nChannels + 2] = b;
 		}
 	}
-	
+
 	/// Loop through the second image to fill the left part of the new image.
 	for ( i = 0; i < img2->height; i++ ) {
 		for ( j = 0; j < img2->width; j++ ) {
 			r = data2[i * img2->widthStep + j * img2->nChannels + 0];
 			g = data2[i * img2->widthStep + j * img2->nChannels + 1];
         	b = data2[i * img2->widthStep + j * img2->nChannels + 2];
-        	
+
         	new_data[i * new_img->widthStep + (j+img1->width) * new_img->nChannels + 0] = r;
         	new_data[i * new_img->widthStep + (j+img1->width) * new_img->nChannels + 1] = g;
         	new_data[i * new_img->widthStep + (j+img1->width) * new_img->nChannels + 2] = b;
 		}
 	}
-	
+
 } /* end vision_concat_images() */
 
 /*------------------------------------------------------------------------------
@@ -1778,7 +1780,7 @@ void vision_save_frame(IplImage *img, char *dir, char *name)
 		/// Use the given name - good for comparisons sake
 		sprintf( write_time, "%s%s", dir, name );
 	}
-			
-			
+
+
 	cvSaveImage( write_time, img );
 } /* end vision_save_frame() */

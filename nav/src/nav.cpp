@@ -14,7 +14,6 @@ int pololu_fd;
 int imu_fd;
 int lj_fd;
 
-
 /*------------------------------------------------------------------------------
  * void nav_sigint()
  * Callback for when SIGINT (ctrl-c) is invoked.

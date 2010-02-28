@@ -17,17 +17,10 @@ IplImage *save_img;
 DIR *dirp;
 FILE *log_file;
 
-/******************************************************************************
- *
- * Title:       void visiond_sigint( int signal )
- *
- * Description: This function is called when SIGINT (ctrl-c) is invoked.
- *
- * Input:       signal: The SIGINT signal.
- *
- * Output:      None.
- *
- *****************************************************************************/
+/*------------------------------------------------------------------------------
+ * void visiond_sigint()
+ * Callback for when SIGINT (ctrl-c) is invoked.
+ *----------------------------------------------------------------------------*/
 
 void visiond_sigint( int signal )
 {
@@ -35,23 +28,16 @@ void visiond_sigint( int signal )
 } /// end visiond_sigint()
 
 
-/******************************************************************************
- *
- * Title:       void visiond_exit( )
- *
- * Description: Exit function for main program. Closes all file descriptors.
- *              This function is called when SIGINT (ctrl-c) is invoked.
- *
- * Input:       None.
- *
- * Output:      None.
- *
- *****************************************************************************/
+/*------------------------------------------------------------------------------
+ * void nav_sigint()
+ * Exit function for main program. Closes all file descriptors. This function is
+ * called when SIGINT (ctrl-c) is invoked.
+ *----------------------------------------------------------------------------*/
 
 void visiond_exit( )
 {
     printf("\nVISIOND_EXIT: Shutting down visiond program ... ");
-    
+
     /// Sleep to let things shut down properly.
     usleep( 200000 );
 
@@ -77,7 +63,7 @@ void visiond_exit( )
     if ( dirp ) {
     	closedir( dirp );
 	}
-	
+
 	if ( log_file ) {
 		fclose( log_file );
 	}
@@ -86,18 +72,10 @@ void visiond_exit( )
 } /// end visiond_exit()
 
 
-/******************************************************************************
- *
- * Title:       int main( int argc, char *argv[] )
- *
- * Description: Initialize data. Open ports. Run main program loop.
- *
- * Input:       argc: Number of command line arguments.
- *              argv: Array of command line arguments.
- *
- * Output:      None.
- *
- *****************************************************************************/
+/*------------------------------------------------------------------------------
+ * int main()
+ * Initialize data. Open ports. Run main program loop.
+ *----------------------------------------------------------------------------*/
 
 int main( int argc, char *argv[] )
 {
@@ -182,43 +160,43 @@ int main( int argc, char *argv[] )
 			printf("MAIN: WARNING!!! Server setup failed.\n");
 		}
     }
-    
+
     /// Make sure open image directory is formatted correctly.
 	if ( cf.open_image_dir[strlen( cf.open_image_dir ) - 1] != '/' ) {
 		cf.open_image_dir[strlen( cf.open_image_dir )] = '/';
 	}
-	
+
 	/// Make sure save image directory is formatted correctly.
 	if ( cf.save_image_dir[strlen( cf.save_image_dir ) - 1] != '/' ) {
 		cf.save_image_dir[strlen( cf.save_image_dir )] = '/';
 	}
-	
+
 	/// Make sure the hardcoded save sub directories exist. Create if not.
 	strncpy( curr_save_dir, cf.save_image_dir, STRING_SIZE );
 	if ( !opendir ( strncat( curr_save_dir, "post/", 5 ) ) ) {
 		if ( mkdir( curr_save_dir, S_IRWXU ) == -1 ) {
 			printf( "MAIN: WARNING!!! Cannot setup save post image directory.\n" );
-			
+
 			/// Turn off saving post processed image.
 			cf.save_image_post = 0;
 		}
 	}
-	
+
 	strncpy( curr_save_dir, cf.save_image_dir, STRING_SIZE );
 	if ( !opendir ( strncat( curr_save_dir, "front/", 6 ) ) ) {
 		if ( mkdir( curr_save_dir, S_IRWXU ) == -1 ) {
 			printf( "MAIN: WARNING!!! Cannot setup front image directory.\n" );
-			
+
 			/// Turn off saving post processed image.
 			cf.save_image_front = 0;
 		}
 	}
-	
+
 	strncpy( curr_save_dir, cf.save_image_dir, STRING_SIZE );
 	if ( !opendir ( strncat( curr_save_dir, "bottom/", 7 ) ) ) {
 		if ( mkdir( curr_save_dir, S_IRWXU ) == -1 ) {
 			printf( "MAIN: WARNING!!! Cannot setup bottom image directory.\n" );
-			
+
 			/// Turn off saving post processed image.
 			cf.save_image_bottom = 0;
 		}
@@ -296,12 +274,12 @@ int main( int argc, char *argv[] )
 		/// OpenCV needs a little pause here.
 		if( cvWaitKey( 500 ) >= 0 );
 	}
-	
+
 	/// Need a way to force task from file.
 	if ( diropen ) {
 		msg.task.data.task = visiond_translate_task( cf.vision_task );
 	}
-	
+
 	/// Open the post log file
 	if ( cf.save_log_post ) {
 		strncpy( filename, cf.save_image_dir, STRING_SIZE );
@@ -394,7 +372,7 @@ int main( int argc, char *argv[] )
 
 		/// Only handle the image if there is a valid one.
 		if ( img != NULL ) {
-			
+
 			if ( cf.save_log_post ) {
 				/// Write the filename
 				fprintf( log_file, "%s,", dfile->d_name );
@@ -405,7 +383,7 @@ int main( int argc, char *argv[] )
 				vision_classified++;
 			}
 			vision_considered++;
-			
+
 			if ( cf.save_log_post ) {
 				/// Write the filename
 				fprintf( log_file, "\n" );
@@ -553,7 +531,7 @@ int visiond_open_image_init( char *dir, char *filename )
 
 	/// Load an images from disk.
 	//printf( "visiond_open_image_init: Using source images from directory for vision...\n" );
-	
+
 	/// Open directory.
 	if ( (dirp = opendir( dir ) ) ) {
 
@@ -569,7 +547,7 @@ int visiond_open_image_init( char *dir, char *filename )
 				/// Iterate to next file.
 				dfile = readdir( dirp );
 			}
-			
+
 			/// Setup the images.
 			if( dfile != NULL ) {
 				/// This is a file so use it.
@@ -714,7 +692,7 @@ int visiond_process_image( IplImage *img, IplImage *bin_img, MSG_DATA *msg )
 			//printf("MAIN: Gate Status = %d\n", status);
 			msg->vision.data.status = TASK_GATE_DETECTED;
 
-			/// The subtractions are opposite of each other on purpose. This is 
+			/// The subtractions are opposite of each other on purpose. This is
 			/// so that they match the way the depth sensor and yaw sensor work.
 			msg->vision.data.front_x = dotx - (img->width / 2);
 			msg->vision.data.front_y = (img->height / 2) - doty;
@@ -750,7 +728,7 @@ int visiond_process_image( IplImage *img, IplImage *bin_img, MSG_DATA *msg )
 			//printf("MAIN: Bouy Status = %d\n", status);
 			msg->vision.data.status = TASK_BUOY_DETECTED;
 
-			/// The subtractions are opposite of each other on purpose. This is 
+			/// The subtractions are opposite of each other on purpose. This is
 			/// so that they match the way the depth sensor and yaw sensor work.
 			msg->vision.data.front_x = dotx - (img->width / 2);
 			msg->vision.data.front_y = (img->height / 2) - doty;
@@ -766,7 +744,7 @@ int visiond_process_image( IplImage *img, IplImage *bin_img, MSG_DATA *msg )
 			/// Draw a circle at the centroid location.
 			cvCircle( img, cvPoint(dotx, doty),
 				10, cvScalar(0, 255, 0), 5, 8 );
-				
+
 			if ( log_file ) {
 				fprintf( log_file, "%d,%d", dotx, doty );
 			}
@@ -836,17 +814,17 @@ int visiond_process_image( IplImage *img, IplImage *bin_img, MSG_DATA *msg )
 		if( status > 0 ) {
 			/// Initialize the centroid sequence reader.
 			cvStartReadSeq( boxes, &reader1, 0 );
-			
+
 			/// Read four sequence elements at a time.
 			for( ii = 0; ii < boxes->total; ii += 2 ) {
 				/// Read centroid x and y coordinates.
 				CV_READ_SEQ_ELEM( box_pt, reader1 );
-				
+
 				/// Draw the centroid as a circle.
 				cvCircle( img, box_pt,
 					10, cvScalar(0, 0, 255), 5, 8 );
 			}
-			
+
 			/// Initialize the vertex sequence reader.
 			cvStartReadSeq( squares, &reader2, 0 );
 			for( ii = 0; ii < squares->total; ii += 4 ) {
@@ -855,12 +833,12 @@ int visiond_process_image( IplImage *img, IplImage *bin_img, MSG_DATA *msg )
 				CV_READ_SEQ_ELEM( pt[1], reader2 );
 				CV_READ_SEQ_ELEM( pt[2], reader2 );
 				CV_READ_SEQ_ELEM( pt[3], reader2 );
-				
+
 				/// Draw the square as a closed polyline.
 				cvPolyLine( img, &rect, &count, 1, 1, CV_RGB(0, 255, 0),
 					3, CV_AA, 0 );
 			}
-			
+
 			/// Set target offsets in network message.
 			if( boxes->total > 0 ) {
 				/// Set the detection status of vision.
@@ -884,7 +862,7 @@ int visiond_process_image( IplImage *img, IplImage *bin_img, MSG_DATA *msg )
 		/// Look for the fence.
 		status = vision_find_fence( &fence_center, &y_max, img,	bin_img,
 			&msg->vsetting.data.fence_hsv );
-			
+
 		if( status == 1 ) {
 			/// Set the detection status of vision.
 			msg->vision.data.status = TASK_FENCE_DETECTED;
@@ -899,7 +877,7 @@ int visiond_process_image( IplImage *img, IplImage *bin_img, MSG_DATA *msg )
 				cvCircle( img, cvPoint(img->width / 2 + ii, y_max),
 					2, cvScalar(100, 255, 20), 2 );
 			}
-			
+
 			/// Set target offsets in network message. The subtractions are
 			/// opposite of each other on purpose. This is so that they
 			/// match the way the depth sensor and yaw sensor work.
@@ -921,20 +899,20 @@ int visiond_process_image( IplImage *img, IplImage *bin_img, MSG_DATA *msg )
 		if( status > 0 ) {
 			/// Initialize the centroid sequence reader.
 			cvStartReadSeq( boxes, &reader1, 0 );
-			
+
 			/// Read two sequence elements at a time.
 			for( ii = 0; ii < boxes->total; ii += 2 ) {
 				/// Read centroid x and y coordinates.
 				CV_READ_SEQ_ELEM( box_pt, reader1 );
-				
+
 				/// Draw the centroid as a circle.
 				cvCircle( img, box_pt,
 					10, cvScalar(0, 0, 255), 5, 8 );
 			}
-			
+
 			/// Initialize the vertex sequence reader.
 			cvStartReadSeq( squares, &reader2, 0 );
-			
+
 			/// Read four sequence elements at a time.
 			for( ii = 0; ii < squares->total; ii += 4 ) {
 				/// Read vertex x and y coordinates.
@@ -942,11 +920,11 @@ int visiond_process_image( IplImage *img, IplImage *bin_img, MSG_DATA *msg )
 				CV_READ_SEQ_ELEM( pt[1], reader2 );
 				CV_READ_SEQ_ELEM( pt[2], reader2 );
 				CV_READ_SEQ_ELEM( pt[3], reader2 );
-				
+
 				/// Draw the square as a closed polyline.
 				cvPolyLine( img, &rect, &count, 1, 1, CV_RGB(0, 255, 0), 3, CV_AA, 0 );
 			}
-			
+
 			/// Set target offsets in network message.
 			if( boxes->total > 0 ) {
 				/// Set the detection status of vision.
@@ -973,17 +951,17 @@ int visiond_process_image( IplImage *img, IplImage *bin_img, MSG_DATA *msg )
 
 			/// Initialize the centroid sequence reader.
 			cvStartReadSeq( boxes, &reader1, 0 );
-			
+
 			/// Read four sequence elements at a time.
 			for( ii = 0; ii < boxes->total; ii += 2 ) {
 				/// Read centroid x and y coordinates.
 				CV_READ_SEQ_ELEM( box_pt, reader1 );
-				
+
 				/// Draw the centroid as a circle.
 				cvCircle( img, box_pt,
 					10, cvScalar(0, 0, 255), 5, 8 );
 			}
-			
+
 			/// Initialize the vertex sequence reader.
 			cvStartReadSeq( squares, &reader2, 0 );
 			for( ii = 0; ii < squares->total; ii += 4 ) {
@@ -992,11 +970,11 @@ int visiond_process_image( IplImage *img, IplImage *bin_img, MSG_DATA *msg )
 				CV_READ_SEQ_ELEM( pt[1], reader2 );
 				CV_READ_SEQ_ELEM( pt[2], reader2 );
 				CV_READ_SEQ_ELEM( pt[3], reader2 );
-				
+
 				/// Draw the square as a closed polyline.
 				cvPolyLine( img, &rect, &count, 1, 1, CV_RGB(0, 255, 0), 3, CV_AA, 0 );
 			}
-			
+
 			/// Set target offsets in network message.
 			if( boxes->total > 0 ) {
 				/// Set the detection status of vision.
@@ -1017,13 +995,13 @@ int visiond_process_image( IplImage *img, IplImage *bin_img, MSG_DATA *msg )
 		msg->vision.data.status = TASK_NOT_DETECTED;
 
 	}
-	
+
 	if ( msg->vision.data.status == TASK_GATE_DETECTED || msg->vision.data.status == TASK_BUOY_DETECTED ||
 			msg->vision.data.status == TASK_PIPE_DETECTED || msg->vision.data.status == TASK_FENCE_DETECTED ||
 			msg->vision.data.status == TASK_BOXES_DETECTED || msg->vision.data.status == TASK_SUITCASE_DETECTED ) {
 		return 1;
 	}
-	
+
 	return 0;
 } /// end visiond_process_image()
 
