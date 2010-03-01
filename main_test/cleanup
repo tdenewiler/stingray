@@ -1,0 +1,4 @@
+rm main_test.log
+rm stderr.txt
+rm pid.csv
+rm pics/*.*

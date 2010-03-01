@@ -1,0 +1,29 @@
+LIB		= kalman
+INCLUDES	= -Iinclude
+INCLUDES	+= -I/usr/include/opencv
+INCLUDES	+= -I../common/include
+CFLAGS		= -Wall
+CFLAGS		+= -O2
+CFLAGS		+= -g
+CC			= g++
+AR			= ar
+ARFLAGS		= rs
+LIBS		= $(LIB).a
+LIBDIR		= lib
+SRCDIR		= .
+
+LIBOBJ = $(SRCDIR)/$(LIB).o
+
+all: $(LIBS)
+
+$(LIBS): $(LIBOBJ)
+	$(AR) $(ARFLAGS) $(LINK) $(LIBDIR)/$@ $(LIBOBJ)
+
+%.o: %.cpp
+	$(CC) $(CFLAGS) $(INCLUDES) $(LINK) $(DEFINES) -c $<
+
+%.o: %.c
+	$(CC) $(CFLAGS) $(INCLUDES) $(LINK) $(DEFINES) -c $<
+
+clean:
+	rm -f *.o $(LIBDIR)/*.a

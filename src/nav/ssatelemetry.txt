@@ -1,0 +1,18 @@
+[general]
+platform=UCSD Stingray
+platformID=15
+mode=3
+modename=In Transit
+
+[engineering]
+time=Thu Feb 26 16:07:56 PST 2009
+time_secs=1235693276
+lat_deg=-255.000000
+lon_deg=-255.000000
+altitude_m=-0.5
+speed_mps=-255.0
+waterspeed_mps=-255.0
+heading_deg=0.0
+pitch_deg=0
+roll_deg=0.0
+battery_volts=0.0

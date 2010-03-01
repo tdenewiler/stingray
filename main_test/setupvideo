@@ -1,0 +1,4 @@
+v4lctl -c /dev/video0 -v 99 setinput "Composite 1"
+v4lctl -c /dev/video1 -v 99 setinput "Composite 1"
+v4lctl -c /dev/video0 -v 99 setnorm NTSC
+v4lctl -c /dev/video1 -v 99 setnorm NTSC

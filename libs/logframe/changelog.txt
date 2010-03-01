@@ -1,0 +1,4 @@
+12/21/2008 v1.0.4
+-----------------
+- Changed timestamp system
+- Only print logging initialization messages when LOGF_STDERR flag is set
