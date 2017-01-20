@@ -1,20 +1,20 @@
-To compile all the libraries and the executables run "make" in this directory.
+=====================
+= Stingray Software =
+=====================
+This software has been tested using Ubuntu Linux and has been found to run correctly from verion
+8.04 and newer.
 
-To clean all the libraries and the executables run "make clean" in this
-directory.
-
-To have the Labjack library build correctly go see the README file in
-libs/labjack/.
-
+=======================
+= Installing Packages =
+=======================
 To build the code the following packages are required:
 	g++
+	cmake
 	libgtk2.0-0
 	libgtk2.0-common
 	libgtk2.0-dev
 	libgtk2.0-0-dbg
-	libgnome2-0
-	libgnome2-common
-	libgnome2-dev
+	libglade2-dev
 	libcv1
 	libhighgui1
 	libcvaux1
@@ -24,23 +24,73 @@ To build the code the following packages are required:
 
 And the following packages are recommended:
 	libgtk2.0-doc
-	libgnome2-doc
 	opencv-doc
+	geany
+	manpages
+	manpages-dev
+	manpages-posix-dev
 
-To install packages you must have apt set up correctly. There is an example
-sources.list file that contains the repositories where packages can be
-downloaded from in this directory. This sources.list file uses repositories for
-the Ubuntu Intrepid (8.10) release. To change it for a different release
-replace all instances of "intrepid" to your release (for example, hardy). To
-make a backup of your current sources and use these instead open a terminal and
-run these commands from the current directory:
-	sudo cp /etc/apt/sources.list /etc/apt/sources.list.bak
-	sudo cp sources.list /etc/apt/sources.list
+Here is a single command that can be copied and pasted into a terminal that will make sure all of
+the required and recommended packages are installed:
 
-To retrieve a list of all available packages and upgrade your system to use the
-most current versions use the command:
-	sudo apt-get update
-	sudo apt-get upgrade
+sudo apt-get install g++ cmake libgtk2.0-0 libgtk2.0-common libgtk2.0-dev libgtk2.0-0-dbg libcv1 libhighgui1 libcvaux1 libcv-dev libcvaux-dev libhighgui-dev libgtk2.0-doc opencv-doc geany manpages manpages-dev manpages-posix-dev libglade2-dev
 
-To install packages use the command:
-	sudo apt-get install <package1> <package2> ... <packageN>
+=================
+= Miscellaneous =
+=================
+To have the Labjack library build correctly go see the README file in the labjack/ directory.
+
+=====================
+= CMake/OpenCV/Gtk+ =
+=====================
+For CMake to build using the OpenCV libraries it needs to know how to find the OpenCV libraries. It
+is necessary to download the file FindOpenCV.cmake from
+http://opencv.willowgarage.com/wiki/Getting_started
+and copy it into /usr/share/cmake-2.6/Modules/. There is also a copy of the FindOpenCV.cmake file
+included in this repository. Note that depending on your system the version number of cmake may be
+slightly different but cmake-2.6 is the minimum version that is required when building the code in
+this repository (as defined in the CMakeLists.txt file).
+
+Similarly, for Gtk-2.0 it is necessary to download FindGTK2.cmake from
+http://cmake-modules.googlecode.com/svn/trunk/Modules/GTK2/FindGTK2.cmake
+and copy that into the same directory. A separate copy is included in this repository.
+
+=================
+= Building Code =
+=================
+To compile all the libraries and the executables run `cmake .' and then `make' in this directory.
+
+To clean all the libraries and the executables run `make clean' in this directory.
+
+All of the libaries are built in the lib/ directory and all of the executables are built in the bin/
+directory.
+
+================
+= Running Code =
+================
+There is a script that will run all of the programs necessary for the Stingray to
+operate which can be started in a terminal using the command `./startStingray'.
+
+Note that all of the executables should be run from the top-level directory and that is where the
+startStingray script is located. The thing to be careful about is that the GUI must be run from this
+same directory using the command `bin/gui' to start it. The reason for this is that the executables
+are set to search for their configuration files relative to the top-level directory and are unable
+to find them if the command to start the programs is invoked from a different directory.
+
+======================================
+= Integrated Development Environment =
+======================================
+To help in setting up a development environment there is a directory for geany/ files. Running the
+command found in geany/geany.txt from a terminal will open all of the files for the Stingray in the
+Geany IDE. Then go to Project->New, use "Stingray" for the Name, use the geany/ directory in this
+repository with stingray.geany appended as the Filename and the top-level directory (where this
+README file is located) as the Base Path and then click Create. After creating the project go to
+Project->Properties and click on the box next to "Make in base path". This will allow you to build
+the entire code base from within Geany using the command set under
+Edit-Preferences->Keybindings->Make all. Any warnings or errors will be underlined and put in a list
+so that you can click to go straight to the warning or error. Also, right-clicking on a variable,
+type or function will let you go to the definition.
+
+Note that CMake has an option to generate a solution that can be used with the Code::Blocks IDE. That
+functionality has not been tested but be aware that it is an option for the developer.
+

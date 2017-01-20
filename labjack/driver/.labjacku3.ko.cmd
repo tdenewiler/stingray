@@ -1,0 +1,1 @@
+cmd_/home/ibotics/svn/libs/labjack/driver/labjacku3.ko := ld -m elf_i386 -r -m elf_i386  --build-id -o /home/ibotics/svn/libs/labjack/driver/labjacku3.ko /home/ibotics/svn/libs/labjack/driver/labjacku3.o /home/ibotics/svn/libs/labjack/driver/labjacku3.mod.o
